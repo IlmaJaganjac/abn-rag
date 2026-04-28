@@ -11,10 +11,11 @@ from pathlib import Path
 import yaml
 
 from backend.app.config import settings
-from backend.app.pipeline import answer as pipeline_answer
-from backend.app.schemas import EvalQuestion, EvalSet, VerbatimAnswer
+from backend.app.pipeline import answer_with_context as pipeline_answer_with_context
+from backend.app.schemas import EvalQuestion, EvalSet, RetrievedChunk, VerbatimAnswer
 
 PREVIEW_CHARS = 80
+RETRIEVAL_PREVIEW_CHARS = 160
 DEFAULT_QUESTIONS = Path("evals/questions.yaml")
 DEFAULT_RUNS_DIR = Path("evals/runs")
 
@@ -23,6 +24,8 @@ DEFAULT_RUNS_DIR = Path("evals/runs")
 class Outcome:
     question: EvalQuestion
     answer: VerbatimAnswer | None
+    retrieved_pages: list[int]
+    retrieved_chunks: list[RetrievedChunk]
     passed: bool
     reasons: list[str]
 
@@ -37,6 +40,11 @@ def _haystack(ans: VerbatimAnswer) -> str:
     return f"{ans.answer} {ans.verbatim or ''}".lower()
 
 
+def _refusal_failure_reason(ans: VerbatimAnswer) -> str:
+    reason = ans.refusal_reason or "unknown refusal reason"
+    return f"no final answer produced: {reason}"
+
+
 def score_one(q: EvalQuestion, ans: VerbatimAnswer) -> tuple[bool, list[str]]:
     reasons: list[str] = []
 
@@ -46,7 +54,7 @@ def score_one(q: EvalQuestion, ans: VerbatimAnswer) -> tuple[bool, list[str]]:
         return (not reasons, reasons)
 
     if ans.refused:
-        reasons.append(f"unexpected refusal: {ans.refusal_reason}")
+        reasons.append(_refusal_failure_reason(ans))
         return (False, reasons)
 
     hay = _haystack(ans)
@@ -85,17 +93,35 @@ def _preview(ans: VerbatimAnswer | None) -> str:
     return text
 
 
+def _chunk_preview(chunk: RetrievedChunk) -> str:
+    text = chunk.text.replace("\n", " ").strip()
+    if len(text) > RETRIEVAL_PREVIEW_CHARS:
+        text = text[:RETRIEVAL_PREVIEW_CHARS] + "…"
+    return text
+
+
 def format_result_line(outcome: Outcome) -> str:
     status = "PASS" if outcome.passed else "FAIL"
     pages = (
         [c.page for c in outcome.answer.citations] if outcome.answer else []
     )
-    return (
+    line = (
         f"{status}  {outcome.question.id:<38} "
         f"{outcome.question.category:<22} "
         f"pages={pages!s:<10} "
         f'"{_preview(outcome.answer)}"'
     )
+    if not outcome.passed:
+        line += (
+            f"\n        retrieved={outcome.retrieved_pages} "
+            f"expected={outcome.question.expected_page}"
+        )
+        for i, chunk in enumerate(outcome.retrieved_chunks, start=1):
+            line += (
+                f"\n        [#{i} page={chunk.page} score={chunk.score:.3f} id={chunk.id}] "
+                f"{_chunk_preview(chunk)}"
+            )
+    return line
 
 
 def _category_breakdown(outcomes: list[Outcome]) -> dict[str, dict[str, int | float]]:
@@ -188,6 +214,21 @@ def _build_run_record(
                 },
                 "passed": o.passed,
                 "reasons": o.reasons,
+                "retrieval": {
+                    "pages": o.retrieved_pages,
+                    "chunks": [
+                        {
+                            "id": chunk.id,
+                            "source": chunk.source,
+                            "company": chunk.company,
+                            "year": chunk.year,
+                            "page": chunk.page,
+                            "score": chunk.score,
+                            "text": chunk.text,
+                        }
+                        for chunk in o.retrieved_chunks
+                    ],
+                },
                 "answer": (
                     json.loads(o.answer.model_dump_json()) if o.answer is not None else None
                 ),
@@ -195,6 +236,33 @@ def _build_run_record(
             for o in outcomes
         ],
     }
+
+
+def _load_run_record(path: Path) -> dict:
+    with path.open() as f:
+        return json.load(f)
+
+
+def _format_comparison(previous_path: Path, outcomes: list[Outcome]) -> str:
+    previous = _load_run_record(previous_path)
+    previous_passed_by_id = {
+        item["id"]: item["passed"] for item in previous.get("outcomes", [])
+    }
+
+    flips: list[str] = []
+    for outcome in outcomes:
+        previous_passed = previous_passed_by_id.get(outcome.question.id)
+        if previous_passed is None or previous_passed == outcome.passed:
+            continue
+        marker = "✅→❌" if previous_passed and not outcome.passed else "❌→✅"
+        flips.append(f"  {marker} {outcome.question.id}")
+
+    lines = ["", f"Changes since {previous_path}:"]
+    if flips:
+        lines.extend(flips)
+    else:
+        lines.append("  (no pass/fail changes)")
+    return "\n".join(lines)
 
 
 def save_run(
@@ -217,6 +285,7 @@ def run_eval(
     year: int | None,
     top_k: int,
     show_failures_only: bool,
+    compare_to: Path | None,
     runs_dir: Path | None,
 ) -> int:
     started = datetime.now(timezone.utc).replace(microsecond=0)
@@ -227,16 +296,28 @@ def run_eval(
     outcomes: list[Outcome] = []
     for q in eval_set.questions:
         try:
-            ans = pipeline_answer(
+            result = pipeline_answer_with_context(
                 q.question, top_k=top_k, company=eff_company, year=eff_year
             )
+            ans = result.answer
+            retrieved_chunks = result.retrieved_chunks
+            retrieved_pages = [chunk.page for chunk in retrieved_chunks]
             passed, reasons = score_one(q, ans)
         except Exception as exc:  # noqa: BLE001
             ans = None
+            retrieved_chunks = []
+            retrieved_pages = []
             passed = False
             reasons = [f"exception: {exc!s}"]
 
-        outcome = Outcome(question=q, answer=ans, passed=passed, reasons=reasons)
+        outcome = Outcome(
+            question=q,
+            answer=ans,
+            retrieved_pages=retrieved_pages,
+            retrieved_chunks=retrieved_chunks,
+            passed=passed,
+            reasons=reasons,
+        )
         outcomes.append(outcome)
 
         if show_failures_only and passed:
@@ -247,6 +328,8 @@ def run_eval(
                 print(f"        - {r}")
 
     print(format_summary(outcomes))
+    if compare_to is not None:
+        print(_format_comparison(compare_to, outcomes))
 
     if runs_dir is not None:
         record = _build_run_record(
@@ -272,6 +355,12 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--top-k", type=int, default=settings.top_k)
     parser.add_argument("--show-failures-only", action="store_true")
     parser.add_argument(
+        "--compare-to",
+        type=Path,
+        default=None,
+        help="path to a previous run JSON to compare pass/fail flips against",
+    )
+    parser.add_argument(
         "--runs-dir",
         type=Path,
         default=DEFAULT_RUNS_DIR,
@@ -291,6 +380,7 @@ def _cli(argv: list[str] | None = None) -> int:
             year=args.year,
             top_k=args.top_k,
             show_failures_only=args.show_failures_only,
+            compare_to=args.compare_to,
             runs_dir=None if args.no_save else args.runs_dir,
         )
     except RuntimeError as exc:

@@ -2,13 +2,20 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 
 from backend.app.answer import answer_question
 from backend.app.config import settings
 from backend.app.retrieval import retrieve
-from backend.app.schemas import RetrievalQuery, VerbatimAnswer
+from backend.app.schemas import RetrievalQuery, RetrievedChunk, VerbatimAnswer
 
 PREVIEW_CHARS = 300
+
+
+@dataclass
+class AnswerResult:
+    answer: VerbatimAnswer
+    retrieved_chunks: list[RetrievedChunk]
 
 
 def _print_context(chunks) -> None:
@@ -25,6 +32,22 @@ def _print_context(chunks) -> None:
     )
 
 
+def answer_with_context(
+    question: str,
+    *,
+    top_k: int,
+    company: str | None,
+    year: int | None,
+) -> AnswerResult:
+    result = retrieve(
+        RetrievalQuery(question=question, top_k=top_k, company=company, year=year)
+    )
+    return AnswerResult(
+        answer=answer_question(question, result.chunks),
+        retrieved_chunks=result.chunks,
+    )
+
+
 def answer(
     question: str,
     *,
@@ -32,10 +55,12 @@ def answer(
     company: str | None,
     year: int | None,
 ) -> VerbatimAnswer:
-    result = retrieve(
-        RetrievalQuery(question=question, top_k=top_k, company=company, year=year)
-    )
-    return answer_question(question, result.chunks)
+    return answer_with_context(
+        question,
+        top_k=top_k,
+        company=company,
+        year=year,
+    ).answer
 
 
 def run(
@@ -46,12 +71,15 @@ def run(
     year: int | None,
     show_context: bool,
 ) -> VerbatimAnswer:
-    result = retrieve(
-        RetrievalQuery(question=question, top_k=top_k, company=company, year=year)
+    result = answer_with_context(
+        question,
+        top_k=top_k,
+        company=company,
+        year=year,
     )
     if show_context:
-        _print_context(result.chunks)
-    ans = answer_question(question, result.chunks)
+        _print_context(result.retrieved_chunks)
+    ans = result.answer
     print(ans.model_dump_json(indent=2))
     return ans
 

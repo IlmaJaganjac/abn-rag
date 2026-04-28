@@ -13,6 +13,7 @@ build/
 .env
 .DS_Store
 
+AGENTS.md
 reports/*.pdf
 backend/data/chroma/
 backend/data/*.db
