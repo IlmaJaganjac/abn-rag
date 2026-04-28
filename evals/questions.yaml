@@ -1,0 +1,235 @@
+# Annual Report RAG eval set
+# Each entry has a verified answer and source page in the PDF.
+# Page numbers are PDF page numbers (1-indexed), not the report's printed page numbers.
+
+source: asml-2025-annual-report-based-on-us-gaap.pdf
+company: ASML
+year: 2025
+
+questions:
+  # ---------- Pre-extracted facts ----------
+  - id: asml_fte_2025_rounded
+    question: "How many total employees (FTEs) did ASML have in 2025?"
+    expected_answer_contains_any:
+      - "44,000"
+      - "more than 44,000"
+      - "> 44,000"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: pre_extracted_fact
+    difficulty: easy
+    notes: "From 'At a glance' summary: '> 44,000 Total employees (FTEs)'"
+
+  - id: asml_fte_2025_payroll_avg
+    question: "What was ASML's average number of payroll employees in FTEs for 2025?"
+    expected_answer_contains_any:
+      - "43,267"
+    expected_page: 131
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: pre_extracted_fact
+    difficulty: medium
+    notes: "From the remuneration / pay-ratio table — exact figure"
+
+  - id: asml_ceo_2025
+    question: "Who is the CEO of ASML?"
+    expected_answer_contains_all:
+      - "Christophe"
+      - "Fouquet"
+    expected_page: 7
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: pre_extracted_fact
+    difficulty: easy
+    notes: "Christophe D. Fouquet, appointed CEO April 24, 2024"
+
+  - id: asml_net_zero_year
+    question: "By what year does ASML aim to be greenhouse gas neutral across its full value chain?"
+    expected_answer_contains_any:
+      - "2040"
+    expected_page: 178
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: sustainability_target
+    difficulty: easy
+
+  - id: asml_scope12_neutral_target
+    question: "By when did ASML aim to be greenhouse gas neutral for scope 1 and 2 emissions?"
+    expected_answer_contains_any:
+      - "2025"
+    expected_page: 145
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: sustainability_target
+    difficulty: easy
+
+  # ---------- Verbatim financial figures ----------
+  - id: asml_total_net_sales_2025
+    question: "What were ASML's total net sales in 2025?"
+    expected_answer_contains_any:
+      - "32.7"
+      - "32,667"
+      - "€32.7 billion"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: verbatim_financial
+    difficulty: easy
+    notes: "€32.7 billion — appears in highlights and detailed statements"
+
+  - id: asml_rd_spend_2025
+    question: "How much did ASML spend on Research and Development in 2025?"
+    expected_answer_contains_any:
+      - "4.7"
+      - "€4.7 billion"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: verbatim_financial
+    difficulty: easy
+
+  - id: asml_gross_margin_2025
+    question: "What was ASML's gross margin in 2025?"
+    expected_answer_contains_any:
+      - "52.8"
+      - "52.8%"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: verbatim_financial
+    difficulty: easy
+
+  - id: asml_net_income_2025
+    question: "What was ASML's net income based on US GAAP in 2025?"
+    expected_answer_contains_any:
+      - "9,609"
+      - "9.6 billion"
+      - "9,609,432"
+    expected_page: 131
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: verbatim_financial
+    difficulty: medium
+    notes: "Detailed table value: 9,609,432 (€ thousands)"
+
+  - id: asml_returned_to_shareholders_2025
+    question: "How much did ASML return to shareholders in 2025?"
+    expected_answer_contains_any:
+      - "8.5"
+      - "€8.5 billion"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: verbatim_financial
+    difficulty: easy
+
+  # ---------- Operational datapoints ----------
+  - id: asml_system_sales_units_2025
+    question: "How many lithography systems did ASML sell in 2025?"
+    expected_answer_contains_any:
+      - "535"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: operational_datapoint
+    difficulty: medium
+
+  - id: asml_suppliers_count
+    question: "How many total suppliers does ASML have?"
+    expected_answer_contains_any:
+      - "5,100"
+      - "5100"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: operational_datapoint
+    difficulty: easy
+
+  - id: asml_customer_satisfaction
+    question: "What was ASML's customer satisfaction survey score in 2025?"
+    expected_answer_contains_any:
+      - "88%"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: operational_datapoint
+    difficulty: easy
+
+  # ---------- Sustainability targets / ESG specifics ----------
+  - id: asml_gross_scope12_2025
+    question: "What were ASML's gross scope 1 and 2 CO2e emissions in 2025?"
+    expected_answer_contains_any:
+      - "26 kt"
+      - "26 kilotonnes"
+      - "26"
+    expected_page: 145
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: esg_datapoint
+    difficulty: medium
+    notes: "Target was 45 kt by 2025, actual 26 kt"
+
+  - id: asml_scope3_2025
+    question: "What were ASML's net scope 3 CO2e emissions in 2025?"
+    expected_answer_contains_any:
+      - "11.5 Mt"
+      - "11.5"
+    expected_page: 6
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: esg_datapoint
+    difficulty: medium
+
+  - id: asml_supplier_target
+    question: "What is ASML's target for supplier commitment to reducing CO2e footprint?"
+    expected_answer_contains_all:
+      - "75%"
+      - "2026"
+    expected_answer_contains_any:
+      - "top 80"
+      - "top-80"
+      - "top 80%"
+      - "top-80%"
+    expected_page: 145
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: sustainability_target
+    difficulty: hard
+    notes: "75% commitment from top-80% suppliers by 2026"
+
+  - id: asml_gender_diversity_target
+    question: "What is ASML's gender diversity target for inflow of women across all job grades?"
+    expected_answer_contains_all:
+      - "24%"
+      - "2025"
+    expected_page: 145
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: sustainability_target
+    difficulty: medium
+
+  # ---------- Workforce ----------
+  - id: asml_women_workforce
+    question: "What percentage of ASML's workforce were women in 2025?"
+    expected_answer_contains_any:
+      - "21%"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: pre_extracted_fact
+    difficulty: easy
+    notes: "21% women in workforce/headcount"
+
+  - id: asml_nationalities
+    question: "How many nationalities are represented in ASML's workforce?"
+    expected_answer_contains_any:
+      - "143"
+    expected_page: 5
+    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    category: pre_extracted_fact
+    difficulty: easy
+
+  # ---------- Hallucination / refusal checks ----------
+  - id: refusal_future_actual_net_sales
+    question: "What were ASML's actual reported net sales in 2028?"
+    expected_behavior: refuse
+    category: hallucination_check
+    difficulty: easy
+    notes: "Future actual result — system should refuse rather than fabricate."
+
+  - id: refusal_out_of_corpus_company
+    question: "How many employees does Tesla have?"
+    expected_behavior: refuse
+    category: hallucination_check
+    difficulty: easy
+    notes: "Tesla is not in the ASML report corpus."
+
+  - id: refusal_unsupported_metric
+    question: "How many company cars did ASML own in 2025?"
+    expected_behavior: refuse
+    category: hallucination_check
+    difficulty: easy
+    notes: "Unsupported metric — system should refuse or say the information is not available in the provided report."
