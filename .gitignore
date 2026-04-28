@@ -17,5 +17,5 @@ reports/*.pdf
 backend/data/chroma/
 backend/data/*.db
 evals/runs/*.json
-
+claude.md
 !**/.gitkeep
