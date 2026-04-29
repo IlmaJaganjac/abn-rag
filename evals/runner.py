@@ -45,7 +45,24 @@ def _refusal_failure_reason(ans: VerbatimAnswer) -> str:
     return f"no final answer produced: {reason}"
 
 
-def score_one(q: EvalQuestion, ans: VerbatimAnswer) -> tuple[bool, list[str]]:
+def _citation_chunk_contains_answer(
+    ans: VerbatimAnswer,
+    chunks: list[RetrievedChunk],
+    needles: list[str],
+) -> bool:
+    chunk_by_page: dict[int, str] = {c.page: c.text.lower() for c in chunks}
+    for cite in ans.citations:
+        text = chunk_by_page.get(cite.page, "")
+        if any(n.lower() in text for n in needles):
+            return True
+    return False
+
+
+def score_one(
+    q: EvalQuestion,
+    ans: VerbatimAnswer,
+    retrieved_chunks: list[RetrievedChunk] | None = None,
+) -> tuple[bool, list[str]]:
     reasons: list[str] = []
 
     if q.expected_behavior == "refuse":
@@ -58,22 +75,29 @@ def score_one(q: EvalQuestion, ans: VerbatimAnswer) -> tuple[bool, list[str]]:
         return (False, reasons)
 
     hay = _haystack(ans)
+    answer_correct = True
     if q.expected_answer_contains_any:
         if not any(needle.lower() in hay for needle in q.expected_answer_contains_any):
             reasons.append(
                 f"none of {q.expected_answer_contains_any!r} found in answer"
             )
+            answer_correct = False
     if q.expected_answer_contains_all:
         missing = [n for n in q.expected_answer_contains_all if n.lower() not in hay]
         if missing:
             reasons.append(f"missing required substrings: {missing!r}")
+            answer_correct = False
 
     if q.expected_source:
         if not any(c.source == q.expected_source for c in ans.citations):
             reasons.append(f"no citation with source={q.expected_source!r}")
 
     if q.expected_page is not None:
-        if not any(abs(c.page - q.expected_page) <= 1 for c in ans.citations):
+        page_ok = any(abs(c.page - q.expected_page) <= 1 for c in ans.citations)
+        if not page_ok and answer_correct and retrieved_chunks:
+            needles = q.expected_answer_contains_any or q.expected_answer_contains_all or []
+            page_ok = bool(needles) and _citation_chunk_contains_answer(ans, retrieved_chunks, needles)
+        if not page_ok:
             cited = [c.page for c in ans.citations]
             reasons.append(f"no citation page within ±1 of {q.expected_page} (got {cited})")
 
@@ -100,28 +124,63 @@ def _chunk_preview(chunk: RetrievedChunk) -> str:
     return text
 
 
+def _format_expected(outcome: Outcome) -> str:
+    expected_parts: list[str] = []
+    q = outcome.question
+    if q.expected_behavior is not None:
+        expected_parts.append(f"behavior={q.expected_behavior}")
+    if q.expected_source is not None:
+        expected_parts.append(f"source={q.expected_source}")
+    if q.expected_page is not None:
+        expected_parts.append(f"page≈{q.expected_page}")
+    if q.expected_answer_contains_any:
+        expected_parts.append(f"contains_any={q.expected_answer_contains_any!r}")
+    if q.expected_answer_contains_all:
+        expected_parts.append(f"contains_all={q.expected_answer_contains_all!r}")
+    return ", ".join(expected_parts) if expected_parts else "<none>"
+
+
+def _format_citations(ans: VerbatimAnswer | None) -> str:
+    if ans is None or not ans.citations:
+        return "<none>"
+    return ", ".join(f"{c.source} p.{c.page}" for c in ans.citations)
+
+
 def format_result_line(outcome: Outcome) -> str:
     status = "PASS" if outcome.passed else "FAIL"
-    pages = (
-        [c.page for c in outcome.answer.citations] if outcome.answer else []
-    )
-    line = (
-        f"{status}  {outcome.question.id:<38} "
-        f"{outcome.question.category:<22} "
-        f"pages={pages!s:<10} "
-        f'"{_preview(outcome.answer)}"'
-    )
-    if not outcome.passed:
-        line += (
-            f"\n        retrieved={outcome.retrieved_pages} "
-            f"expected={outcome.question.expected_page}"
+    cited_pages = [c.page for c in outcome.answer.citations] if outcome.answer else []
+
+    if outcome.passed:
+        return (
+            f"{status}  {outcome.question.id:<38} "
+            f"{outcome.question.category:<22} "
+            f"pages={cited_pages!s:<10} "
+            f'"{_preview(outcome.answer)}"'
         )
+
+    lines = [
+        f"{status}  {outcome.question.id}  [{outcome.question.category}]",
+        f"        question: {outcome.question.question}",
+        f"        expected: {_format_expected(outcome)}",
+        f'        answer: "{_preview(outcome.answer)}"',
+        f"        citations: {_format_citations(outcome.answer)}",
+        (
+            f"        retrieval: pages={outcome.retrieved_pages} "
+            f"(expected page {outcome.question.expected_page})"
+        ),
+        "        reasons:",
+    ]
+    lines.extend(f"        - {reason}" for reason in outcome.reasons)
+
+    if outcome.retrieved_chunks:
+        lines.append("        retrieved chunks:")
         for i, chunk in enumerate(outcome.retrieved_chunks, start=1):
-            line += (
-                f"\n        [#{i} page={chunk.page} score={chunk.score:.3f} id={chunk.id}] "
+            lines.append(
+                f"        [#{i} page={chunk.page} score={chunk.score:.3f} id={chunk.id}] "
                 f"{_chunk_preview(chunk)}"
             )
-    return line
+
+    return "\n".join(lines)
 
 
 def _category_breakdown(outcomes: list[Outcome]) -> dict[str, dict[str, int | float]]:
@@ -302,7 +361,7 @@ def run_eval(
             ans = result.answer
             retrieved_chunks = result.retrieved_chunks
             retrieved_pages = [chunk.page for chunk in retrieved_chunks]
-            passed, reasons = score_one(q, ans)
+            passed, reasons = score_one(q, ans, retrieved_chunks)
         except Exception as exc:  # noqa: BLE001
             ans = None
             retrieved_chunks = []
@@ -323,9 +382,6 @@ def run_eval(
         if show_failures_only and passed:
             continue
         print(format_result_line(outcome))
-        if not passed:
-            for r in reasons:
-                print(f"        - {r}")
 
     print(format_summary(outcomes))
     if compare_to is not None:

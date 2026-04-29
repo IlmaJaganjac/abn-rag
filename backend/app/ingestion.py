@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
 from collections.abc import Iterator
 from pathlib import Path
@@ -33,6 +34,79 @@ def parse_pdf(path: Path) -> Iterator[tuple[int, str]]:
                 yield i + 1, text
     finally:
         doc.close()
+
+
+# Matches standalone metric values: 52.8%, €8.5bn, > 44,000, 5,100, 535
+# Requires a unit/symbol OR ≥3 digits to exclude bare page numbers (1, 5, 14…)
+_KPI_VALUE_RE = re.compile(
+    r"^(?:"
+    r"(?:>|≥|~)\s*(?:€|\$)?\s*[\d,]+(?:\.\d+)?\s*(?:%|bn|m|kt)?"  # > or ≥ prefix
+    r"|(?:€|\$)\s*[\d,]+(?:\.\d+)?\s*(?:bn|m|kt)?"                  # currency prefix
+    r"|[\d,]+(?:\.\d+)?\s*(?:%|bn|m|kt)"                             # number + unit
+    r"|\d{1,3}(?:,\d{3})+(?:\.\d+)?"                                  # comma-thousands: 5,100 / 44,000
+    r"|\d{3,}(?:\.\d+)?"                                              # plain int ≥3 digits: 535
+    r")\s*$",
+    re.IGNORECASE,
+)
+# Lines that are clearly numeric-only (table values, not labels)
+_NUMERIC_LINE_RE = re.compile(r"^\s*-?[\d,]+(?:\.\d+)?\s*%?\s*$")
+
+
+def extract_kpi_facts(
+    pages: list[tuple[int, str]],
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+) -> list[Chunk]:
+    """Detect value\\nlabel KPI pairs and emit one clean chunk per fact."""
+    chunks: list[Chunk] = []
+    for page, text in pages:
+        lines = [ln.strip() for ln in text.splitlines()]
+        i = 0
+        kpi_idx = 0
+        while i < len(lines):
+            line = lines[i]
+            if not _KPI_VALUE_RE.match(line) or not line:
+                i += 1
+                continue
+            value = line.strip()
+            # collect label: next non-empty line(s) that aren't numeric
+            label_parts: list[str] = []
+            j = i + 1
+            while j < len(lines):
+                candidate = lines[j].strip()
+                if not candidate:
+                    j += 1
+                    continue
+                if _NUMERIC_LINE_RE.match(candidate) or _KPI_VALUE_RE.match(candidate):
+                    break
+                if len(candidate) > 80:
+                    break
+                label_parts.append(candidate)
+                j += 1
+                # allow one continuation line (e.g. "(headcount)")
+                if len(label_parts) == 2:
+                    break
+            if not label_parts:
+                i += 1
+                continue
+            label = " ".join(label_parts)
+            fact_text = f"{label}: {value}"
+            chunks.append(
+                Chunk(
+                    id=f"{source}:{page}:kpi:{kpi_idx}",
+                    source=source,
+                    company=company,
+                    year=year,
+                    page=page,
+                    text=fact_text,
+                    token_count=_count_tokens(fact_text),
+                )
+            )
+            kpi_idx += 1
+            i += 1
+    return chunks
 
 
 def _split_oversize(text: str, max_tokens: int, overlap: int) -> list[str]:
@@ -144,7 +218,9 @@ def ingest_pdf(
         max_tokens=settings.chunk_size_tokens,
         overlap=settings.chunk_overlap_tokens,
     )
-    logger.info("built %d chunks", len(chunks))
+    kpi_chunks = extract_kpi_facts(pages, source=source, company=company, year=year)
+    chunks.extend(kpi_chunks)
+    logger.info("built %d chunks (%d kpi facts)", len(chunks), len(kpi_chunks))
 
     embeddings = embed_texts([c.text for c in chunks])
     if len(embeddings) != len(chunks):
