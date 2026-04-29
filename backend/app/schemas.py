@@ -37,6 +37,17 @@ class RetrievedChunk(Chunk):
     score: float
 
 
+class GroundingDrop(BaseModel):
+    source: str
+    page: int
+    quote: str
+    reason: Literal[
+        "source_page_not_in_retrieved_set",
+        "empty_quote",
+        "quote_not_found_verbatim",
+    ]
+
+
 class VerbatimAnswer(BaseModel):
     question: str
     answer: str
@@ -44,6 +55,8 @@ class VerbatimAnswer(BaseModel):
     citations: list[Citation] = Field(default_factory=list)
     refused: bool = False
     refusal_reason: str | None = None
+    raw_citations: list[Citation] = Field(default_factory=list)
+    grounding_drops: list[GroundingDrop] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _check_citations(self) -> VerbatimAnswer:

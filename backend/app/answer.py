@@ -4,7 +4,7 @@ import re
 
 from backend.app._openai import openai_client
 from backend.app.config import settings
-from backend.app.schemas import Citation, LLMAnswer, RetrievedChunk, VerbatimAnswer
+from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
 
 SYSTEM_PROMPT = """\
 You answer questions about annual reports using only the provided context blocks.
@@ -26,36 +26,60 @@ Rules:
 def _format_context(chunks: list[RetrievedChunk]) -> str:
     blocks: list[str] = []
     for i, c in enumerate(chunks, start=1):
-        header = f"[#{i}] source={c.source} page={c.page}"
+        header = f"[Rank {i}] source={c.source} page={c.page}"
         blocks.append(f"{header}\n{c.text}")
     return "\n\n".join(blocks)
 
 
 _WS_RE = re.compile(r"\s+")
+_MD_RE = re.compile(r"\*+|~~|`+|<br\s*/?>|#{1,6}\s*")
 
 
-def _normalize_ws(s: str) -> str:
+def _normalize_for_grounding(s: str) -> str:
+    s = _MD_RE.sub(" ", s)
     return _WS_RE.sub(" ", s).strip()
 
 
 def _ground_citations(
     citations: list[Citation], chunks: list[RetrievedChunk]
-) -> str | None:
+) -> tuple[list[Citation], list[GroundingDrop], str | None]:
+    """Return (grounded_citations, drops, failure_reason).
+
+    Strips ungrounded citations rather than refusing the whole answer.
+    Returns a failure only when no citations survive grounding.
+    """
     if not citations:
-        return "no citations returned"
+        return [], [], "no citations returned"
     by_key: dict[tuple[str, int], str] = {
-        (c.source, c.page): _normalize_ws(c.text) for c in chunks
+        (c.source, c.page): _normalize_for_grounding(c.text) for c in chunks
     }
+    grounded: list[Citation] = []
+    drops: list[GroundingDrop] = []
     for cite in citations:
         haystack = by_key.get((cite.source, cite.page))
         if haystack is None:
-            return f"citation source/page not in retrieved set: {cite.source} p.{cite.page}"
-        needle = _normalize_ws(cite.quote)
+            drops.append(GroundingDrop(
+                source=cite.source, page=cite.page, quote=cite.quote,
+                reason="source_page_not_in_retrieved_set",
+            ))
+            continue
+        needle = _normalize_for_grounding(cite.quote)
         if not needle:
-            return "empty citation quote"
+            drops.append(GroundingDrop(
+                source=cite.source, page=cite.page, quote=cite.quote,
+                reason="empty_quote",
+            ))
+            continue
         if needle not in haystack:
-            return f"citation quote not found verbatim on {cite.source} p.{cite.page}"
-    return None
+            drops.append(GroundingDrop(
+                source=cite.source, page=cite.page, quote=cite.quote,
+                reason="quote_not_found_verbatim",
+            ))
+            continue
+        grounded.append(cite)
+    if not grounded:
+        return [], drops, "no citations could be grounded in the retrieved chunks"
+    return grounded, drops, None
 
 
 def _refuse(question: str, reason: str) -> VerbatimAnswer:
@@ -100,17 +124,29 @@ def answer_question(
             citations=[],
             refused=True,
             refusal_reason=parsed.refusal_reason or "model declined to answer",
+            raw_citations=parsed.citations,
         )
 
-    failure = _ground_citations(parsed.citations, chunks)
+    grounded, drops, failure = _ground_citations(parsed.citations, chunks)
     if failure is not None:
-        return _refuse(question, f"ungrounded citation: {failure}")
+        return VerbatimAnswer(
+            question=question,
+            answer="The answer is not available in the provided reports.",
+            verbatim=None,
+            citations=[],
+            refused=True,
+            refusal_reason=f"ungrounded citation: {failure}",
+            raw_citations=parsed.citations,
+            grounding_drops=drops,
+        )
 
     return VerbatimAnswer(
         question=question,
         answer=parsed.answer,
         verbatim=parsed.verbatim,
-        citations=parsed.citations,
+        citations=grounded,
         refused=False,
         refusal_reason=None,
+        raw_citations=parsed.citations,
+        grounding_drops=drops,
     )
