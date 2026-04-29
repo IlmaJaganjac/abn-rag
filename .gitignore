@@ -16,6 +16,7 @@ build/
 AGENTS.md
 reports/*.pdf
 backend/data/chroma/
+backend/data/processed/
 backend/data/*.db
 evals/runs/*.json
 claude.md

@@ -49,6 +49,9 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
                 page=int(meta.get("page", 1)),
                 text=doc or "",
                 token_count=int(meta.get("token_count", 0)),
+                parser=meta.get("parser"),
+                chunk_kind=meta.get("chunk_kind"),
+                section_path=meta.get("section_path"),
                 score=1.0 - float(dist),
             )
         )

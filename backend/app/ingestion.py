@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import re
 import sys
@@ -8,17 +9,27 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import chromadb
-import fitz  # PyMuPDF
 import tiktoken
 
 from backend.app._openai import openai_client
+from backend.app.chunking import build_semantic_chunks
 from backend.app.config import settings
+from backend.app.parsers import as_page_tuples, parse_pdf_pages
 from backend.app.schemas import Chunk
 
 logger = logging.getLogger(__name__)
 
 EMBEDDING_MAX_TOKENS = 8191
 _ENCODING = tiktoken.get_encoding("cl100k_base")
+_FTE_PATTERNS = [
+    re.compile(r"\bFTEs?\b", re.IGNORECASE),
+    re.compile(r"\bfull[-\s]time equivalents?\b", re.IGNORECASE),
+]
+_SUSTAINABILITY_PATTERNS = [
+    re.compile(r"\b(target|goal|aim|ambition|commit(?:ment|ted)?|plan)\b", re.IGNORECASE),
+    re.compile(r"\b(net[-\s]?zero|greenhouse gas|ghg|co2e|co₂e|scope [123])\b", re.IGNORECASE),
+    re.compile(r"\b20\d{2}\b", re.IGNORECASE),
+]
 
 
 def _count_tokens(text: str) -> int:
@@ -26,87 +37,185 @@ def _count_tokens(text: str) -> int:
 
 
 def parse_pdf(path: Path) -> Iterator[tuple[int, str]]:
-    doc = fitz.open(path)
-    try:
-        for i in range(doc.page_count):
-            text = doc.load_page(i).get_text("text").strip()
-            if text:
-                yield i + 1, text
-    finally:
-        doc.close()
+    parsed = parse_pdf_pages(
+        path,
+        parser=settings.pdf_parser,
+        processed_dir=settings.get_processed_path(),
+        llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+    )
+    return as_page_tuples(parsed.pages)
 
 
-# Matches standalone metric values: 52.8%, €8.5bn, > 44,000, 5,100, 535
-# Requires a unit/symbol OR ≥3 digits to exclude bare page numbers (1, 5, 14…)
-_KPI_VALUE_RE = re.compile(
-    r"^(?:"
-    r"(?:>|≥|~)\s*(?:€|\$)?\s*[\d,]+(?:\.\d+)?\s*(?:%|bn|m|kt)?"  # > or ≥ prefix
-    r"|(?:€|\$)\s*[\d,]+(?:\.\d+)?\s*(?:bn|m|kt)?"                  # currency prefix
-    r"|[\d,]+(?:\.\d+)?\s*(?:%|bn|m|kt)"                             # number + unit
-    r"|\d{1,3}(?:,\d{3})+(?:\.\d+)?"                                  # comma-thousands: 5,100 / 44,000
-    r"|\d{3,}(?:\.\d+)?"                                              # plain int ≥3 digits: 535
-    r")\s*$",
-    re.IGNORECASE,
-)
-# Lines that are clearly numeric-only (table values, not labels)
-_NUMERIC_LINE_RE = re.compile(r"^\s*-?[\d,]+(?:\.\d+)?\s*%?\s*$")
+def _processed_pages_path(source: str, processed_dir: Path | None = None) -> Path:
+    root = processed_dir or settings.get_processed_path()
+    return root / "pages" / f"{Path(source).stem}.jsonl"
 
 
-def extract_kpi_facts(
+def persist_parsed_pages(
     pages: list[tuple[int, str]],
     *,
     source: str,
     company: str | None,
     year: int | None,
-) -> list[Chunk]:
-    """Detect value\\nlabel KPI pairs and emit one clean chunk per fact."""
-    chunks: list[Chunk] = []
+    parser: str,
+    processed_dir: Path | None = None,
+) -> Path:
+    out_path = _processed_pages_path(source, processed_dir)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
+        for page, text in pages:
+            record = {
+                "id": f"{source}:{page}",
+                "source": source,
+                "company": company,
+                "year": year,
+                "page": page,
+                "parser": parser,
+                "text": text,
+                "char_count": len(text),
+                "token_count": _count_tokens(text),
+            }
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return out_path
+
+
+def _processed_datapoints_path(source: str, processed_dir: Path | None = None) -> Path:
+    root = processed_dir or settings.get_processed_path()
+    return root / "datapoints" / f"{Path(source).stem}.json"
+
+
+def _processed_chunks_path(source: str, processed_dir: Path | None = None) -> Path:
+    root = processed_dir or settings.get_processed_path()
+    return root / "chunks" / f"{Path(source).stem}.jsonl"
+
+
+def _fte_verbatim_text(text: str) -> str | None:
+    lines = text.splitlines()
+    matching_indices = [
+        i for i, line in enumerate(lines) if any(pattern.search(line) for pattern in _FTE_PATTERNS)
+    ]
+    if not matching_indices:
+        return None
+
+    selected: list[str] = []
+    seen: set[int] = set()
+    for idx in matching_indices:
+        for context_idx in (idx - 1, idx, idx + 1):
+            if context_idx < 0 or context_idx >= len(lines) or context_idx in seen:
+                continue
+            line = lines[context_idx].strip()
+            if line:
+                selected.append(line)
+                seen.add(context_idx)
+    return "\n".join(selected) if selected else None
+
+
+def extract_fte_candidates(
+    pages: list[tuple[int, str]],
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+    parser: str,
+) -> list[dict[str, str | int | None]]:
+    candidates: list[dict[str, str | int | None]] = []
     for page, text in pages:
-        lines = [ln.strip() for ln in text.splitlines()]
-        i = 0
-        kpi_idx = 0
-        while i < len(lines):
-            line = lines[i]
-            if not _KPI_VALUE_RE.match(line) or not line:
-                i += 1
-                continue
-            value = line.strip()
-            # collect label: next non-empty line(s) that aren't numeric
-            label_parts: list[str] = []
-            j = i + 1
-            while j < len(lines):
-                candidate = lines[j].strip()
-                if not candidate:
-                    j += 1
-                    continue
-                if _NUMERIC_LINE_RE.match(candidate) or _KPI_VALUE_RE.match(candidate):
-                    break
-                if len(candidate) > 80:
-                    break
-                label_parts.append(candidate)
-                j += 1
-                # allow one continuation line (e.g. "(headcount)")
-                if len(label_parts) == 2:
-                    break
-            if not label_parts:
-                i += 1
-                continue
-            label = " ".join(label_parts)
-            fact_text = f"{label}: {value}"
-            chunks.append(
-                Chunk(
-                    id=f"{source}:{page}:kpi:{kpi_idx}",
-                    source=source,
-                    company=company,
-                    year=year,
-                    page=page,
-                    text=fact_text,
-                    token_count=_count_tokens(fact_text),
-                )
-            )
-            kpi_idx += 1
-            i += 1
-    return chunks
+        verbatim_text = _fte_verbatim_text(text)
+        if verbatim_text is None:
+            continue
+        candidates.append(
+            {
+                "source": source,
+                "company": company,
+                "year": year,
+                "datapoint_type": "fte_candidate",
+                "page": page,
+                "verbatim_text": verbatim_text,
+                "parser": parser,
+            }
+        )
+    return candidates
+
+
+def _is_sustainability_goal_text(text: str) -> bool:
+    return all(pattern.search(text) for pattern in _SUSTAINABILITY_PATTERNS)
+
+
+def extract_datapoint_candidates(
+    chunks: list[Chunk],
+    *,
+    parser: str,
+) -> list[dict[str, str | int | None]]:
+    candidates: list[dict[str, str | int | None]] = []
+    seen: set[tuple[str, int, str, str]] = set()
+    for chunk in chunks:
+        if chunk.chunk_kind == "table":
+            continue
+        datapoint_type: str | None = None
+        if any(pattern.search(chunk.text) for pattern in _FTE_PATTERNS):
+            datapoint_type = "fte_candidate"
+        elif _is_sustainability_goal_text(chunk.text):
+            datapoint_type = "sustainability_goal_candidate"
+
+        if datapoint_type is None:
+            continue
+
+        verbatim_text = chunk.text.strip()
+        key = (datapoint_type, chunk.page, chunk.source, verbatim_text)
+        if not verbatim_text or key in seen:
+            continue
+        seen.add(key)
+        candidates.append(
+            {
+                "source": chunk.source,
+                "company": chunk.company,
+                "year": chunk.year,
+                "datapoint_type": datapoint_type,
+                "page": chunk.page,
+                "section_path": chunk.section_path,
+                "verbatim_text": verbatim_text,
+                "parser": parser,
+            }
+        )
+    return candidates
+
+
+def persist_datapoints(
+    datapoints: list[dict[str, str | int | None]],
+    *,
+    source: str,
+    processed_dir: Path | None = None,
+) -> Path:
+    out_path = _processed_datapoints_path(source, processed_dir)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(datapoints, ensure_ascii=False, indent=2), encoding="utf-8")
+    return out_path
+
+
+def persist_chunks(
+    chunks: list[Chunk],
+    *,
+    source: str,
+    processed_dir: Path | None = None,
+) -> Path:
+    out_path = _processed_chunks_path(source, processed_dir)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
+        for chunk in chunks:
+            record = {
+                "id": chunk.id,
+                "source": chunk.source,
+                "company": chunk.company,
+                "year": chunk.year,
+                "page": chunk.page,
+                "chunk_kind": chunk.chunk_kind,
+                "section_path": chunk.section_path,
+                "token_count": chunk.token_count,
+                "text": chunk.text,
+                "embedding_text": chunk.embedding_text,
+            }
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return out_path
 
 
 def _split_oversize(text: str, max_tokens: int, overlap: int) -> list[str]:
@@ -135,24 +244,20 @@ def build_chunks(
     year: int | None,
     max_tokens: int,
     overlap: int,
+    parser: str | None = None,
 ) -> list[Chunk]:
     cap = min(max_tokens, EMBEDDING_MAX_TOKENS)
-    chunks: list[Chunk] = []
-    for page, text in pages:
-        parts = _split_oversize(text, cap, overlap)
-        for idx, part in enumerate(parts):
-            chunks.append(
-                Chunk(
-                    id=f"{source}:{page}:{idx}",
-                    source=source,
-                    company=company,
-                    year=year,
-                    page=page,
-                    text=part,
-                    token_count=_count_tokens(part),
-                )
-            )
-    return chunks
+    return build_semantic_chunks(
+        pages,
+        source=source,
+        company=company,
+        year=year,
+        parser=parser,
+        max_tokens=cap,
+        overlap=overlap,
+        token_counter=_count_tokens,
+        split_oversize=_split_oversize,
+    )
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
@@ -192,7 +297,86 @@ def _chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
         md["company"] = chunk.company
     if chunk.year is not None:
         md["year"] = chunk.year
+    if chunk.parser is not None:
+        md["parser"] = chunk.parser
+    if chunk.chunk_kind is not None:
+        md["chunk_kind"] = chunk.chunk_kind
+    if chunk.section_path is not None:
+        md["section_path"] = chunk.section_path
     return md
+
+
+def _source_where(source: str, company: str | None, year: int | None) -> dict:
+    clauses: list[dict[str, str | int]] = [{"source": source}]
+    if company is not None:
+        clauses.append({"company": company})
+    if year is not None:
+        clauses.append({"year": year})
+    if len(clauses) == 1:
+        return clauses[0]
+    return {"$and": clauses}
+
+
+def delete_existing_source_chunks(
+    collection,
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+) -> None:
+    try:
+        collection.delete(where=_source_where(source, company, year))
+    except Exception as exc:  # noqa: BLE001
+        logger.info("could not delete existing chunks for %s: %s", source, exc)
+
+
+def build_datapoint_chunks(
+    datapoints: list[dict[str, str | int | None]],
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+    parser: str | None,
+    existing_chunks: list[Chunk],
+) -> list[Chunk]:
+    next_idx_by_page: dict[int, int] = {}
+    for chunk in existing_chunks:
+        idx = int(chunk.id.rsplit(":", 1)[-1])
+        next_idx_by_page[chunk.page] = max(next_idx_by_page.get(chunk.page, 0), idx + 1)
+
+    chunks: list[Chunk] = []
+    for datapoint in datapoints:
+        page = int(datapoint["page"] or 1)
+        idx = next_idx_by_page.get(page, 0)
+        next_idx_by_page[page] = idx + 1
+        datapoint_type = str(datapoint["datapoint_type"])
+        text = str(datapoint["verbatim_text"]).strip()
+        section_path = datapoint.get("section_path")
+        embedding_parts = [
+            company,
+            str(year) if year is not None else None,
+            parser,
+            "datapoint",
+            datapoint_type,
+            str(section_path) if section_path else None,
+            text,
+        ]
+        chunks.append(
+            Chunk(
+                id=f"{source}:{page}:{idx}",
+                source=source,
+                company=company,
+                year=year,
+                page=page,
+                text=text,
+                token_count=_count_tokens(text),
+                parser=parser,
+                chunk_kind="datapoint",
+                section_path=str(section_path) if section_path else datapoint_type,
+                embedding_text="\n".join(part for part in embedding_parts if part),
+            )
+        )
+    return chunks
 
 
 def ingest_pdf(
@@ -201,15 +385,35 @@ def ingest_pdf(
     company: str | None,
     year: int | None,
     reset: bool = False,
+    parser: str | None = None,
+    allow_parser_fallback: bool = True,
+    source_name: str | None = None,
 ) -> int:
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
-    source = pdf_path.name
-    logger.info("parsing %s", source)
-    pages = list(parse_pdf(pdf_path))
-    logger.info("parsed %d non-empty pages", len(pages))
-
+    source = source_name or pdf_path.name
+    requested_parser = parser or settings.pdf_parser
+    logger.info("parsing %s with %s", source, requested_parser)
+    processed_dir = settings.get_processed_path()
+    parsed = parse_pdf_pages(
+        pdf_path,
+        parser=requested_parser,
+        allow_fallback=allow_parser_fallback,
+        processed_dir=processed_dir,
+        llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+    )
+    pages = list(as_page_tuples(parsed.pages))
+    logger.info("parsed %d non-empty pages with %s", len(pages), parsed.parser)
+    pages_path = persist_parsed_pages(
+        pages,
+        source=source,
+        company=company,
+        year=year,
+        parser=parsed.parser,
+        processed_dir=processed_dir,
+    )
+    logger.info("wrote parsed pages to %s", pages_path)
     chunks = build_chunks(
         iter(pages),
         source=source,
@@ -217,18 +421,49 @@ def ingest_pdf(
         year=year,
         max_tokens=settings.chunk_size_tokens,
         overlap=settings.chunk_overlap_tokens,
+        parser=parsed.parser,
     )
-    kpi_chunks = extract_kpi_facts(pages, source=source, company=company, year=year)
-    chunks.extend(kpi_chunks)
-    logger.info("built %d chunks (%d kpi facts)", len(chunks), len(kpi_chunks))
+    logger.info("built %d semantic chunks", len(chunks))
 
-    embeddings = embed_texts([c.text for c in chunks])
+    datapoints = extract_datapoint_candidates(chunks, parser=parsed.parser)
+    datapoints_path = persist_datapoints(
+        datapoints,
+        source=source,
+        processed_dir=processed_dir,
+    )
+    logger.info(
+        "wrote %d pre-extracted candidate datapoints to %s",
+        len(datapoints),
+        datapoints_path,
+    )
+
+    datapoint_chunks = build_datapoint_chunks(
+        datapoints,
+        source=source,
+        company=company,
+        year=year,
+        parser=parsed.parser,
+        existing_chunks=chunks,
+    )
+    chunks.extend(datapoint_chunks)
+    logger.info("built %d total chunks including datapoints", len(chunks))
+    chunks_path = persist_chunks(chunks, source=source, processed_dir=processed_dir)
+    logger.info("wrote debug chunks to %s", chunks_path)
+
+    embeddings = embed_texts([c.embedding_text or c.text for c in chunks])
     if len(embeddings) != len(chunks):
         raise RuntimeError(
             f"embedding count {len(embeddings)} != chunk count {len(chunks)}"
         )
 
     collection = get_collection(reset=reset)
+    if not reset:
+        delete_existing_source_chunks(
+            collection,
+            source=source,
+            company=company,
+            year=year,
+        )
     collection.upsert(
         ids=[c.id for c in chunks],
         documents=[c.text for c in chunks],
@@ -249,12 +484,36 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("pdf", type=Path)
     parser.add_argument("--company", default=None)
     parser.add_argument("--year", type=int, default=None)
+    parser.add_argument(
+        "--source-name",
+        default=None,
+        help="stable source name to store in chunks/citations (defaults to PDF filename)",
+    )
     parser.add_argument("--reset", action="store_true", help="drop and recreate the collection")
+    parser.add_argument(
+        "--parser",
+        choices=["docling", "llamaparse", "pymupdf"],
+        default=settings.pdf_parser,
+        help="PDF parser to use before chunking",
+    )
+    parser.add_argument(
+        "--no-parser-fallback",
+        action="store_true",
+        help="fail instead of falling back to PyMuPDF when the selected parser fails",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     try:
-        n = ingest_pdf(args.pdf, company=args.company, year=args.year, reset=args.reset)
+        n = ingest_pdf(
+            args.pdf,
+            company=args.company,
+            year=args.year,
+            reset=args.reset,
+            parser=args.parser,
+            allow_parser_fallback=not args.no_parser_fallback,
+            source_name=args.source_name,
+        )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

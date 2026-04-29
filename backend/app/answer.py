@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import html
 import re
+from collections import defaultdict
 
 from backend.app._openai import openai_client
 from backend.app.config import settings
@@ -50,8 +52,13 @@ def _ground_citations(
     """
     if not citations:
         return [], [], "no citations returned"
+    by_key_parts: dict[tuple[str, int], list[str]] = defaultdict(list)
+    for c in chunks:
+        by_key_parts[(c.source, c.page)].append(
+            _normalize_for_grounding(html.unescape(c.text))
+        )
     by_key: dict[tuple[str, int], str] = {
-        (c.source, c.page): _normalize_for_grounding(c.text) for c in chunks
+        k: " ".join(parts) for k, parts in by_key_parts.items()
     }
     grounded: list[Citation] = []
     drops: list[GroundingDrop] = []
@@ -63,7 +70,7 @@ def _ground_citations(
                 reason="source_page_not_in_retrieved_set",
             ))
             continue
-        needle = _normalize_for_grounding(cite.quote)
+        needle = _normalize_for_grounding(html.unescape(cite.quote))
         if not needle:
             drops.append(GroundingDrop(
                 source=cite.source, page=cite.page, quote=cite.quote,
