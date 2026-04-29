@@ -11,6 +11,8 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.6",
     "pydantic-settings>=2.2",
+    "docling>=2.70",
+    "llama-parse>=0.5",
     "pymupdf>=1.24",
     "chromadb>=0.5",
     "openai>=1.40",

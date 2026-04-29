@@ -7,7 +7,9 @@ Baseline scope: **ASML 2025**. Designed to extend to more companies/years.
 ## Stack
 
 - Python 3.11+
-- PyMuPDF — PDF parsing
+- Docling — primary PDF parsing with layout/table-aware text extraction
+- LlamaParse — optional API parser for comparing difficult PDFs
+- PyMuPDF — fallback PDF parser and utility tool
 - OpenAI `text-embedding-3-small` — embeddings
 - ChromaDB — persistent local vector store
 - Pydantic v2 — schemas and settings
@@ -19,10 +21,13 @@ pip install -e .[dev]
 cp .env.example .env       # add your OPENAI_API_KEY
 # drop the ASML 2025 PDF into reports/
 
-# 1. ingest the PDF (one chunk per page, embeds + persists to ChromaDB)
+# 1. ingest the PDF (Docling parses pages, chunks embed + persist to ChromaDB)
 python -m backend.app.ingestion \
     reports/asml-2025-annual-report-based-on-us-gaap.pdf \
     --company ASML --year 2025
+
+# use --parser pymupdf if you need the faster fallback parser
+# use --parser llamaparse to compare LlamaParse output (requires LLAMA_CLOUD_API_KEY)
 
 # 2. ask a question — prints a structured VerbatimAnswer (JSON)
 python -m backend.app.pipeline \
@@ -46,7 +51,12 @@ Each run writes a JSON record to `evals/runs/` named
 across changes. Run files are gitignored; the directory is kept via
 `.gitkeep`.
 
-`--reset` on ingestion drops and rebuilds the collection. All commands need
+`--reset` on ingestion drops and rebuilds the collection. Parsed page text is
+written to `backend/data/processed/pages/` for inspection and future API/UI use.
+Parser artifacts are written under `backend/data/processed/docling/`,
+`backend/data/processed/llamaparse/`, and `backend/data/processed/markdown/`
+when those parsers are used.
+All commands need
 `OPENAI_API_KEY` in `.env` (retrieval embeds the query, answering calls the
 chat model).
 
@@ -57,7 +67,7 @@ Out-of-corpus questions (e.g. "How many employees does Tesla have?") return
 
 ```
 backend/app/   schemas, config, ingestion/retrieval/answer/pipeline (phase 2)
-backend/data/  ChromaDB persistent store (gitignored)
+backend/data/  ChromaDB + processed parser artifacts (gitignored)
 evals/         questions.yaml + runner (phase 2)
 reports/       PDFs (gitignored)
 ```

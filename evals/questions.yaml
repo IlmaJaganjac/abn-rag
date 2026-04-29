@@ -2,7 +2,7 @@
 # Each entry has a verified answer and source page in the PDF.
 # Page numbers are PDF page numbers (1-indexed), not the report's printed page numbers.
 
-source: asml-2025-annual-report-based-on-us-gaap.pdf
+source: asml.pdf
 company: ASML
 year: 2025
 
@@ -14,18 +14,19 @@ questions:
       - "44,000"
       - "more than 44,000"
       - "> 44,000"
-    expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+      - "44,209"
+    expected_page: 301
+    expected_source: "asml.pdf"
     category: pre_extracted_fact
     difficulty: easy
-    notes: "From 'At a glance' summary: '> 44,000 Total employees (FTEs)'"
+    notes: "From 'At a glance' summary: '> 44,000 Total employees (FTEs)'; exact figure 44,209 from Note 18 (page 301)"
 
   - id: asml_fte_2025_payroll_avg
     question: "What was ASML's average number of payroll employees in FTEs for 2025?"
     expected_answer_contains_any:
       - "43,267"
     expected_page: 131
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: pre_extracted_fact
     difficulty: medium
     notes: "From the remuneration / pay-ratio table — exact figure"
@@ -36,7 +37,7 @@ questions:
       - "Christophe"
       - "Fouquet"
     expected_page: 7
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: pre_extracted_fact
     difficulty: easy
     notes: "Christophe D. Fouquet, appointed CEO April 24, 2024"
@@ -46,7 +47,7 @@ questions:
     expected_answer_contains_any:
       - "2040"
     expected_page: 178
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: sustainability_target
     difficulty: easy
 
@@ -55,7 +56,7 @@ questions:
     expected_answer_contains_any:
       - "2025"
     expected_page: 145
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: sustainability_target
     difficulty: easy
 
@@ -67,7 +68,7 @@ questions:
       - "32,667"
       - "€32.7 billion"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: verbatim_financial
     difficulty: easy
     notes: "€32.7 billion — appears in highlights and detailed statements"
@@ -78,7 +79,7 @@ questions:
       - "4.7"
       - "€4.7 billion"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: verbatim_financial
     difficulty: easy
 
@@ -88,7 +89,7 @@ questions:
       - "52.8"
       - "52.8%"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: verbatim_financial
     difficulty: easy
 
@@ -99,7 +100,7 @@ questions:
       - "9.6 billion"
       - "9,609,432"
     expected_page: 131
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: verbatim_financial
     difficulty: medium
     notes: "Detailed table value: 9,609,432 (€ thousands)"
@@ -110,7 +111,7 @@ questions:
       - "8.5"
       - "€8.5 billion"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: verbatim_financial
     difficulty: easy
 
@@ -120,7 +121,7 @@ questions:
     expected_answer_contains_any:
       - "535"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: operational_datapoint
     difficulty: medium
 
@@ -130,7 +131,7 @@ questions:
       - "5,100"
       - "5100"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: operational_datapoint
     difficulty: easy
 
@@ -139,7 +140,7 @@ questions:
     expected_answer_contains_any:
       - "88%"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: operational_datapoint
     difficulty: easy
 
@@ -151,7 +152,7 @@ questions:
       - "26 kilotonnes"
       - "26"
     expected_page: 145
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: esg_datapoint
     difficulty: medium
     notes: "Target was 45 kt by 2025, actual 26 kt"
@@ -162,7 +163,7 @@ questions:
       - "11.5 Mt"
       - "11.5"
     expected_page: 6
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: esg_datapoint
     difficulty: medium
 
@@ -177,7 +178,7 @@ questions:
       - "top 80%"
       - "top-80%"
     expected_page: 145
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: sustainability_target
     difficulty: hard
     notes: "75% commitment from top-80% suppliers by 2026"
@@ -188,7 +189,7 @@ questions:
       - "24%"
       - "2025"
     expected_page: 145
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: sustainability_target
     difficulty: medium
 
@@ -198,7 +199,7 @@ questions:
     expected_answer_contains_any:
       - "21%"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: pre_extracted_fact
     difficulty: easy
     notes: "21% women in workforce/headcount"
@@ -208,7 +209,7 @@ questions:
     expected_answer_contains_any:
       - "143"
     expected_page: 5
-    expected_source: "asml-2025-annual-report-based-on-us-gaap.pdf"
+    expected_source: "asml.pdf"
     category: pre_extracted_fact
     difficulty: easy
 

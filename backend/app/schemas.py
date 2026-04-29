@@ -31,6 +31,10 @@ class Chunk(BaseModel):
     page: int = Field(ge=1)
     text: str
     token_count: int = Field(ge=0)
+    parser: str | None = None
+    chunk_kind: str | None = None
+    section_path: str | None = None
+    embedding_text: str | None = None
 
 
 class RetrievedChunk(Chunk):
