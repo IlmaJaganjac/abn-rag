@@ -59,6 +59,29 @@ VAGUE_KPI_LABELS: frozenset[str] = frozenset(
     }
 )
 
+TARGET_LABEL_HEADERS: frozenset[str] = frozenset(
+    {"target", "targets", "ambition", "ambitions"}
+)
+
+PERFORMANCE_VALUE_HEADERS: frozenset[str] = frozenset(
+    {"performance", "actual", "actuals", "result", "results", "achievement", "achieved"}
+)
+
+UNIT_PAREN_RE = re.compile(
+    r"^\s*(?:in\s+)?"
+    r"(?:%|mt|kt|gt|bn|m|gw|mw|tco2e?|tonnes?|million|millions|billion|billions|"
+    r"eur(?:\s+(?:million|millions|billion|billions))?|"
+    r"usd(?:\s+(?:million|millions|billion|billions))?|"
+    r"€(?:\s*,?\s*in\s+(?:million|millions|billion|billions))?)"
+    r"\s*$",
+    re.IGNORECASE,
+)
+
+TARGET_FUTURE_PHRASE_RE = re.compile(
+    r"(?:GHG\s+neutral|net[- ]zero|carbon[- ]neutral|net\s+zero|climate\s+neutral)",
+    re.IGNORECASE,
+)
+
 
 @dataclass(frozen=True)
 class ChunkDraft:
@@ -298,11 +321,17 @@ def _table_drafts(
                     extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
-            for metric_text in _financial_metric_texts_from_header_row(
-                headers,
-                cells,
-                section_path=section_path,
-            ):
+            metric_texts = list(
+                _financial_metric_texts_from_header_row(
+                    headers,
+                    cells,
+                    section_path=section_path,
+                )
+            )
+            metric_texts.extend(
+                _target_performance_metric_texts(headers, cells, year=year)
+            )
+            for metric_text in metric_texts:
                 drafts.append(
                     _draft(
                         page=page,
@@ -598,15 +627,21 @@ def _financial_metric_texts_from_header_row(
     if _looks_like_value(metric):
         return []
 
-    unit = _unit_from_text(headers[0]) or _unit_from_text(section_path or "")
+    header_unit = _unit_from_text(headers[label_idx]) or _unit_from_text(section_path or "")
+    label_unit = _normalize_unit_paren(_trailing_paren(metric)) if _trailing_paren(metric) else None
     metrics: list[str] = []
     for header, cell in zip(headers[label_idx + 1 :], cells[label_idx + 1 :], strict=False):
         period = _year_period(header)
         value = cell.strip()
         if period is None or not value or not _looks_like_value(value):
             continue
+        cell_unit = _infer_kpi_unit(value, metric)
+        unit = header_unit or cell_unit or label_unit
+        cleaned_label = _clean_metric_label(metric, unit)
+        if not cleaned_label:
+            continue
         lines = [
-            f"Metric: {metric}",
+            f"Metric: {cleaned_label}",
             f"Period: {period}",
             f"Value: {value}",
         ]
@@ -614,6 +649,118 @@ def _financial_metric_texts_from_header_row(
             lines.append(f"Unit: {unit}")
         metrics.append("\n".join(lines))
     return metrics
+
+
+def _target_performance_metric_texts(
+    headers: list[str] | None,
+    cells: list[str],
+    *,
+    year: int | None,
+) -> list[str]:
+    if headers is None or len(headers) != len(cells) or len(cells) < 2:
+        return []
+    indices = _target_performance_indices(headers)
+    if indices is None:
+        return []
+    target_idx, perf_idx = indices
+    target_cell = cells[target_idx].strip()
+    perf_cell = cells[perf_idx].strip()
+    if not target_cell or not perf_cell:
+        return []
+    if not _looks_like_value(perf_cell):
+        return []
+    unit = _infer_kpi_unit(perf_cell, target_cell)
+    if not unit:
+        trailing = _trailing_paren(target_cell)
+        unit = _normalize_unit_paren(trailing) if trailing else None
+    label = _clean_metric_label(target_cell, unit)
+    if not label or not _is_kpi_label(label):
+        return []
+    period = _year_period(headers[perf_idx]) or (str(year) if year is not None else None)
+    lines = [f"Metric: {label}"]
+    if period:
+        lines.append(f"Period: {period}")
+    lines.append(f"Value: {perf_cell}")
+    if unit:
+        lines.append(f"Unit: {unit}")
+    return ["\n".join(lines)]
+
+
+def _target_performance_indices(headers: list[str]) -> tuple[int, int] | None:
+    target_idx: int | None = None
+    perf_idx: int | None = None
+    for i, header in enumerate(headers):
+        norm = header.strip().casefold()
+        if not norm:
+            continue
+        if target_idx is None and norm in TARGET_LABEL_HEADERS:
+            target_idx = i
+            continue
+        if perf_idx is None and (
+            norm in PERFORMANCE_VALUE_HEADERS
+            or _year_period(header) is not None
+            or any(kw in norm for kw in PERFORMANCE_VALUE_HEADERS)
+        ):
+            perf_idx = i
+    if target_idx is None or perf_idx is None or target_idx == perf_idx:
+        return None
+    return target_idx, perf_idx
+
+
+def _trailing_paren(text: str) -> str | None:
+    match = re.search(r"\(([^()]*)\)\s*$", text.strip())
+    return match.group(1) if match else None
+
+
+def _normalize_unit_paren(content: str | None) -> str | None:
+    if not content:
+        return None
+    inner = content.strip()
+    if not UNIT_PAREN_RE.match(inner):
+        return None
+    lowered = inner.casefold().removeprefix("in ").strip()
+    if lowered == "%":
+        return "%"
+    if lowered in {"mt", "kt", "gt"}:
+        return lowered.capitalize() if lowered != "mt" else "Mt"
+    aliases = {
+        "millions": "millions",
+        "million": "millions",
+        "billions": "billions",
+        "billion": "billions",
+        "bn": "billions",
+        "m": "millions",
+    }
+    if lowered in aliases:
+        return aliases[lowered]
+    return inner
+
+
+def _clean_metric_label(label: str, _value_unit: str | None = None) -> str:
+    s = label.strip()
+    match = re.search(r"\bby\s+20\d{2}\b", s, re.IGNORECASE)
+    if match:
+        prefix = s[: match.start()].rstrip(" ,;:")
+        prefix = re.sub(
+            r"[,;:]?\s*[<>]?\s*\d[\d.,]*\s?"
+            r"(?:%|kt|mt|gt|bn|gw|mw|tco2e?|tonnes?|million|billion)?"
+            r"(?:\s+commitment[^,]*)?\s*$",
+            "",
+            prefix,
+            flags=re.IGNORECASE,
+        ).rstrip(" ,;:")
+        prefix = re.sub(
+            rf"[,;:]?\s*{TARGET_FUTURE_PHRASE_RE.pattern}\s*$",
+            "",
+            prefix,
+            flags=re.IGNORECASE,
+        ).rstrip(" ,;:")
+        if prefix:
+            s = prefix
+    trailing = _trailing_paren(s)
+    if trailing and _normalize_unit_paren(trailing):
+        s = re.sub(r"\s*\([^()]*\)\s*$", "", s).strip()
+    return s.strip()
 
 
 def _year_period(text: str) -> str | None:

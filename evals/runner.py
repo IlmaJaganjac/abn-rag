@@ -152,7 +152,7 @@ def score_one(
             reasons.append(f"missing required substrings: {missing!r}")
             answer_correct = False
 
-    if q.expected_source:
+    if q.expected_source and q.category != "multi_document":
         if not any(c.source == q.expected_source for c in ans.citations):
             reasons.append(f"no citation with source={q.expected_source!r}")
 
@@ -453,8 +453,9 @@ def run_eval(
     outcomes: list[Outcome] = []
     for q in eval_set.questions:
         try:
+            eff_year_for_q = None if q.category == "multi_document" else eff_year
             result = pipeline_answer_with_context(
-                q.question, top_k=top_k, company=eff_company, year=eff_year
+                q.question, top_k=top_k, company=eff_company, year=eff_year_for_q
             )
             ans = result.answer
             retrieved_chunks = result.retrieved_chunks

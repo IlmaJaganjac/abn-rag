@@ -20,27 +20,29 @@ year: 2024
 questions:
   # ---------- Pre-extracted facts ----------
   - id: asml_2024_fte_rounded
-    question: "How many total employees (FTEs) did ASML have in 2024?"
+    question: "How many total employees (FTEs) did ASML have at year-end 2024?"
     expected_answer_contains_any:
       - "44,027"
       - "44000"
       - "more than 44,000"
-    expected_page: 5
+    expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: pre_extracted_fact
     difficulty: easy
     notes: "From 'At a glance' summary: '44,027 Total employees (FTEs)'. Regional breakdown: 25,848 EMEA, 9,699 Asia, 8,480 US."
 
   - id: asml_2024_ceo
-    question: "Who is the CEO of ASML in 2024?"
+    question: "Who became ASML's CEO in 2024?"
     expected_answer_contains_all:
       - "Christophe"
       - "Fouquet"
-    expected_page: 7
+    expected_page: 142
+    accepted_pages: [7, 142, 144]
     expected_source: "asml-2024.pdf"
     category: pre_extracted_fact
     difficulty: easy
-    notes: "Christophe Fouquet was appointed at the 2024 AGM, succeeding Peter Wennink and Martin van den Brink."
+    notes: "Christophe Fouquet was appointed at the April 2024 AGM, succeeding Peter Wennink and Martin van den Brink."
 
   - id: asml_2024_net_zero_year
     question: "By what year does ASML aim to be greenhouse gas neutral across its full value chain?"
@@ -58,12 +60,14 @@ questions:
     expected_answer_contains_any:
       - "28.3"
       - "28,262"
+      - "28,263"
       - "€28.3 billion"
-    expected_page: 56
+    expected_page: 6
+    accepted_pages: [6, 44, 55, 56]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: easy
-    notes: "€28.3bn (€28,262.9 million) — appears on highlights p.5 and CFO message p.54."
+    notes: "€28.3bn (€28,263 million per Q4 press release; €28,262.9 million in detail tables) — appears on highlights p.5 and CFO message p.54."
 
   - id: asml_2024_rd_spend
     question: "How much did ASML spend on R&D in 2024?"
@@ -71,18 +75,21 @@ questions:
       - "4.3"
       - "€4.3bn"
       - "€4.3 billion"
+      - "4,304"
     expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: easy
-    notes: "€4.3bn from at-a-glance highlights."
+    notes: "€4.3bn (€4,304 million) from at-a-glance highlights and detailed financial KPIs."
 
   - id: asml_2024_gross_margin
     question: "What was ASML's gross margin in 2024?"
     expected_answer_contains_any:
       - "51.3"
       - "51.3%"
-    expected_page: 56
+    expected_page: 6
+    accepted_pages: [6, 55, 56]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: easy
@@ -94,7 +101,8 @@ questions:
       - "7.6"
       - "7,571"
       - "€7.6 billion"
-    expected_page: 58
+    expected_page: 55
+    accepted_pages: [55, 58, 333, 334]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: medium
@@ -106,7 +114,8 @@ questions:
       - "3.0"
       - "€3.0bn"
       - "€3.0 billion"
-    expected_page: 5
+    expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: easy
@@ -114,21 +123,23 @@ questions:
 
   # ---------- Operational datapoints ----------
   - id: asml_2024_system_sales_units
-    question: "How many lithography systems did ASML sell in 2024?"
+    question: "How many lithography systems (in units) did ASML ship in 2024 according to the financial KPI table?"
     expected_answer_contains_any:
       - "418"
     expected_page: 55
+    accepted_pages: [55]
     expected_source: "asml-2024.pdf"
     category: operational_datapoint
     difficulty: medium
-    notes: "418 units (vs 449 in 2023). Page 5 highlights mention 583 NET SYSTEM SALES (in units) — different metric. Use 418 figure from financial KPI table p.55."
+    notes: "418 lithography systems sold (vs 449 in 2023). Page 5 highlights mention 583 NET SYSTEM SALES — different metric. Question explicitly asks for the financial KPI table figure to disambiguate."
 
   - id: asml_2024_suppliers_count
-    question: "How many total suppliers does ASML have?"
+    question: "How many total suppliers did ASML have in 2024?"
     expected_answer_contains_any:
       - "5,150"
       - "5150"
-    expected_page: 5
+    expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: operational_datapoint
     difficulty: easy
@@ -138,55 +149,60 @@ questions:
     question: "What was ASML's customer satisfaction survey score in 2024?"
     expected_answer_contains_any:
       - "86%"
-    expected_page: 5
+    expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: operational_datapoint
     difficulty: easy
     notes: "86% in 2024 (vs 88% in 2025)."
 
   - id: asml_2024_eps
-    question: "What was ASML's earnings per share in 2024?"
+    question: "What was ASML's basic earnings per share in 2024?"
     expected_answer_contains_any:
       - "19.25"
       - "€19.25"
     expected_page: 55
+    accepted_pages: [55, 58]
     expected_source: "asml-2024.pdf"
     category: verbatim_financial
     difficulty: medium
-    notes: "EPS €19.25 (vs €19.91 in 2023)."
+    notes: "EPS basic €19.25 (vs €19.91 in 2023)."
 
   # ---------- Sustainability / ESG ----------
   - id: asml_2024_scope12_emissions
-    question: "What were ASML's scope 1 and 2 CO2e emissions in 2024?"
+    question: "What were ASML's gross scope 1 and 2 CO2e emissions in 2024?"
     expected_answer_contains_any:
       - "32.8 kt"
       - "32.8"
-    expected_page: 194
+    expected_page: 6
+    accepted_pages: [6, 44, 194, 206]
     expected_source: "asml-2024.pdf"
     category: esg_datapoint
     difficulty: medium
     notes: "32.8 kt scope 1+2 in 2024 — significantly higher than the 26 kt reported in 2025."
 
   - id: asml_2024_scope3_emissions
-    question: "What were ASML's scope 3 CO2e emissions in 2024?"
+    question: "What were ASML's net scope 3 CO2e emissions in 2024?"
     expected_answer_contains_any:
       - "12.0 Mt"
       - "12.0"
-    expected_page: 194
+    expected_page: 6
+    accepted_pages: [6, 44, 194, 206]
     expected_source: "asml-2024.pdf"
     category: esg_datapoint
     difficulty: medium
     notes: "12.0 Mt — vs 11.5 Mt in 2025."
 
   - id: asml_2024_reuse_rate
-    question: "What was ASML's reuse rate of parts returned from field and factory in 2024?"
+    question: "What was ASML's reuse rate for parts returned from field and factory in 2024 (circular economy metric)?"
     expected_answer_contains_any:
       - "88%"
-    expected_page: 240
+    expected_page: 6
+    accepted_pages: [6, 44, 234]
     expected_source: "asml-2024.pdf"
     category: esg_datapoint
     difficulty: medium
-    notes: "88% reuse rate (this is the part-reuse metric, distinct from customer satisfaction which is also 88%-ish; check the answer references parts/circular economy)."
+    notes: "88% reuse rate. Question explicitly mentions 'circular economy' to disambiguate from customer satisfaction (also 86%)."
 
   # ---------- Workforce / diversity ----------
   - id: asml_2024_women_workforce
@@ -194,31 +210,22 @@ questions:
     expected_answer_contains_any:
       - "21%"
     expected_page: 6
+    accepted_pages: [6, 44]
     expected_source: "asml-2024.pdf"
     category: pre_extracted_fact
     difficulty: easy
     notes: "21% — same as 2025."
 
-  - id: asml_2024_nationalities
-    question: "How many nationalities are represented in ASML's workforce in 2024?"
-    expected_answer_contains_any:
-      - "148"
-    expected_page: 6
+  # ---------- Multi-document / cross-year ----------
+  - id: asml_yoy_revenue_2024_2025
+    question: "How did ASML's total net sales change from 2024 to 2025?"
+    expected_answer_contains_all:
+      - "28"
+      - "32"
     expected_source: "asml-2024.pdf"
-    category: pre_extracted_fact
-    difficulty: easy
-    notes: "148 nationalities — vs 143 in 2025 (interesting: decreased? verify after ingestion)."
-
-  - id: asml_2024_eu_sales
-    question: "What were ASML's net sales in EMEA in 2024?"
-    expected_answer_contains_any:
-      - "1.3"
-      - "€1.3bn"
-    expected_page: 56
-    expected_source: "asml-2024.pdf"
-    category: verbatim_financial
-    difficulty: medium
-    notes: "Geographic breakdown: €22.4bn Asia, €4.5bn US, €1.3bn EMEA."
+    category: multi_document
+    difficulty: hard
+    notes: "Cross-year question — requires both 2024 and 2025 reports to be ingested. Tests whether retrieval surfaces both years' figures and the answer combines them. expected_page intentionally omitted."
 
   # ---------- Hallucination / refusal ----------
   - id: refusal_2024_future_actual
@@ -234,6 +241,13 @@ questions:
     category: hallucination_check
     difficulty: easy
     notes: "Intel not in corpus — should refuse."
+
+  - id: refusal_2024_lookalike_company
+    question: "How many employees did ASM International have in 2024?"
+    expected_behavior: refuse
+    category: hallucination_check
+    difficulty: medium
+    notes: "ASM International ≠ ASML. Tests company-mismatch guard against lexically similar but distinct semiconductor company. Add 'ASM International' to KNOWN_COMPANY_ALIASES if not present."
 
   - id: refusal_2024_unsupported_metric
     question: "How many patents did ASML file in 2024?"

@@ -169,8 +169,8 @@ def test_build_chunks_keeps_header_table_rows_without_metric_extraction() -> Non
     row_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
 
     assert [chunk.text for chunk in metric_chunks] == [
-        "Metric: FTE\nPeriod: 2025\nValue: 82,000",
-        "Metric: FTE\nPeriod: 2024\nValue: 80,000",
+        "Metric: FTE\nPeriod: 2025\nValue: 82,000\nUnit: FTEs",
+        "Metric: FTE\nPeriod: 2024\nValue: 80,000\nUnit: FTEs",
     ]
     assert len(row_chunks) == 1
     assert row_chunks[0].text == "Metric: FTE\n2025: 82,000\n2024: 80,000"
@@ -568,6 +568,119 @@ def test_kpi_pair_skips_hints_when_no_category_matches() -> None:
     assert "Metric: Patents granted" in chunk.text
     embedding = str(chunk.embedding_text)
     assert "Retrieval hints:" not in embedding
+
+
+def _header_metric_chunks(rows: str, *, year: int = 2025):
+    return [
+        chunk
+        for chunk in build_chunks(
+            iter([(53, rows)]),
+            source="report.pdf",
+            company="ASML",
+            year=year,
+            max_tokens=800,
+            overlap=120,
+            parser="llamaparse",
+        )
+        if chunk.chunk_kind == "metric"
+    ]
+
+
+def test_header_table_extracts_gross_margin_with_label_unit_paren() -> None:
+    metrics = _header_metric_chunks(
+        "# Operating results\n\n"
+        "| Metric | 2024 | 2025 |\n"
+        "| ------ | ---- | ---- |\n"
+        "| Gross margin (in %) | 52.7 | 52.8 |"
+    )
+    texts = [chunk.text for chunk in metrics]
+    assert "Metric: Gross margin\nPeriod: 2025\nValue: 52.8\nUnit: %" in texts
+    assert "Metric: Gross margin\nPeriod: 2024\nValue: 52.7\nUnit: %" in texts
+
+
+def test_header_table_extracts_target_performance_scope3_emissions() -> None:
+    metrics = _header_metric_chunks(
+        "# ESG targets\n\n"
+        "| Target | Performance |\n"
+        "| ------ | ----------- |\n"
+        "| Net scope 3 CO₂e emissions (Mt) GHG neutral by 2040 | 11.5 Mt |"
+    )
+    [chunk] = metrics
+    assert chunk.text == (
+        "Metric: Net scope 3 CO₂e emissions\n"
+        "Period: 2025\n"
+        "Value: 11.5 Mt\n"
+        "Unit: Mt"
+    )
+
+
+def test_header_table_extracts_target_performance_scope1_2_emissions() -> None:
+    metrics = _header_metric_chunks(
+        "# ESG targets\n\n"
+        "| Target | Performance |\n"
+        "| ------ | ----------- |\n"
+        "| Gross scope 1 and 2 CO₂e emissions 45 kt by 2025 | 26 kt |"
+    )
+    [chunk] = metrics
+    assert chunk.text == (
+        "Metric: Gross scope 1 and 2 CO₂e emissions\n"
+        "Period: 2025\n"
+        "Value: 26 kt\n"
+        "Unit: kt"
+    )
+
+
+def test_clean_metric_label_strips_target_value_suffix() -> None:
+    from backend.app.chunking import _clean_metric_label
+
+    assert (
+        _clean_metric_label("Gross scope 1 and 2 CO₂e emissions 45 kt by 2025")
+        == "Gross scope 1 and 2 CO₂e emissions"
+    )
+    assert (
+        _clean_metric_label("CO₂e supplier coverage 0.93 kt by 2025")
+        == "CO₂e supplier coverage"
+    )
+
+
+def test_clean_metric_label_strips_unit_only_paren() -> None:
+    from backend.app.chunking import _clean_metric_label
+
+    assert (
+        _clean_metric_label("Net scope 3 CO₂e emissions (Mt)")
+        == "Net scope 3 CO₂e emissions"
+    )
+    assert _clean_metric_label("Gross margin (in %)") == "Gross margin"
+
+
+def test_header_table_skips_guidance_range_for_2025() -> None:
+    metrics = _header_metric_chunks(
+        "# Outlook\n\n"
+        "| Metric | 2025 |\n"
+        "| ------ | ---- |\n"
+        "| Gross margin guidance | between 51% and 53% |"
+    )
+    assert metrics == []
+
+
+def test_header_table_skips_vague_target_row() -> None:
+    metrics = _header_metric_chunks(
+        "# ESG targets\n\n"
+        "| Target | Performance |\n"
+        "| ------ | ----------- |\n"
+        "| Read more | 12% |"
+    )
+    assert metrics == []
+
+
+def test_header_table_skips_target_only_row_without_performance_value() -> None:
+    metrics = _header_metric_chunks(
+        "# ESG targets\n\n"
+        "| Target | Performance |\n"
+        "| ------ | ----------- |\n"
+        "| Net scope 3 CO₂e emissions (Mt) GHG neutral by 2040 |  |"
+    )
+    assert metrics == []
 
 
 def test_extract_fte_candidates_returns_empty_list_when_no_candidate_exists() -> None:

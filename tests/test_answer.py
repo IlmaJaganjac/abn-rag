@@ -457,3 +457,57 @@ def test_spend_question_refuses_when_only_incompatible_unit_available(monkeypatc
     assert answer.refused is True
     assert answer.citations == []
     assert "If label and unit do not clearly match the question" in completions.messages[0]["content"]
+
+
+def test_cross_company_question_is_refused(monkeypatch) -> None:
+    asml_chunk = _chunk(
+        source="asml.pdf",
+        page=5,
+        text="Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion",
+    )
+    parsed = LLMAnswer(
+        answer="The answer is not available in the provided reports.",
+        refused=True,
+        refusal_reason="question is about a different company than the retrieved reports",
+    )
+
+    answer, completions = _answer_with_fake_llm(
+        monkeypatch,
+        question="What was Intel's total net sales in 2025?",
+        chunks=[asml_chunk],
+        parsed=parsed,
+    )
+
+    assert answer.refused is True
+    assert answer.citations == []
+    assert (
+        answer.refusal_reason
+        == "question is about a different company than the retrieved reports"
+    )
+    assert "Active company in context" in completions.messages[1]["content"]
+
+
+def test_active_company_question_is_not_refused(monkeypatch) -> None:
+    chunk = _chunk(
+        source="asml-2024.pdf",
+        page=6,
+        text="| 5,150 | Total suppliers |",
+    )
+    parsed = LLMAnswer(
+        answer="ASML had 5,150 total suppliers in 2024.",
+        verbatim="5,150",
+        citations=[
+            Citation(source="asml-2024.pdf", page=6, quote="| 5,150 | Total suppliers |")
+        ],
+        refused=False,
+    )
+
+    answer, _completions = _answer_with_fake_llm(
+        monkeypatch,
+        question="How many total suppliers does ASML have in 2024?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+
+    assert answer.refused is False
+    assert any(c.source == "asml-2024.pdf" for c in answer.citations)

@@ -18,15 +18,24 @@ You answer questions about annual reports using only the provided context blocks
 Rules:
 1. Use ONLY the context blocks below. Never answer from prior knowledge or memory.
 
-2. Every non-refused answer MUST include at least one citation. Each citation's
+2. Cross-company guard: if the question explicitly names a company by
+   proper noun (e.g. 'Intel', 'Tesla', 'ASM International', 'Samsung') AND
+   that named company does NOT appear in any context block's source filename
+   or company metadata, set refused=true with refusal_reason 'question is
+   about a different company than the retrieved reports'. Do NOT refuse
+   when the question contains no explicit company name, or when the named
+   company matches the source filename. When in doubt, do not refuse on
+   these grounds — fall through to the other rules.
+
+3. Every non-refused answer MUST include at least one citation. Each citation's
    `source` and `page` must come from a context block header, and `quote` must be
    a verbatim span copied from that block's text (no paraphrasing, no edits).
 
-3. The `source` field MUST equal the literal `source=` value in the context
+4. The `source` field MUST equal the literal `source=` value in the context
    block header (e.g. `asml-2024.pdf`). Do NOT use the report's title, footer,
    or any other label. Copy the filename exactly.
 
-4. The `quote` must be copied verbatim from the chunk's text. Do not paraphrase,
+5. The `quote` must be copied verbatim from the chunk's text. Do not paraphrase,
    reorder, restate, remove labels, or join separate lines unless the joined
    text appears exactly in the chunk. You MAY use `...` (three ASCII dots) to
    skip intermediate cells in a multi-year table (e.g. to skip a prior-year
@@ -35,7 +44,7 @@ Rules:
    to skip across unrelated text; if the answer needs two unrelated spans, emit
    two separate citations.
 
-5. Metric chunks may be formatted like this:
+6. Metric chunks may be formatted like this:
    Metric: ...
    Period: ...
    Value: ...
@@ -47,7 +56,7 @@ Rules:
    Do not join separate lines unless the joined text appears exactly in the
    chunk.
 
-6. For numerical, financial, percentage, employee-count, or date answers:
+7. For numerical, financial, percentage, employee-count, or date answers:
    - Set `verbatim` to the exact figure span from the context whenever possible,
      such as "15.4%", "23,126", "32,667.3", "€32.7bn", or "> 44,000".
    - Do not set `verbatim` to the whole metric block unless the figure cannot be
@@ -61,13 +70,13 @@ Rules:
    - If the evidence says "> 44,000", the answer must say "more than 44,000"
      or "> 44,000", not "44,000".
 
-7. If multiple retrieved chunks give different valid definitions for the same
+8. If multiple retrieved chunks give different valid definitions for the same
    question, prefer the definition whose metric name and unit most closely match
    the question. If the question is ambiguous and multiple definitions are
    present in the context, mention the definition used briefly, e.g. "on an FTE
    basis" or "on a headcount basis".
 
-8. Unit and scope matching:
+9. Unit and scope matching:
    - For spend, cost, expense, R&D spend, or capex questions, answer only from
      monetary units such as €, $, EUR, USD, million, or billion. Never answer
      with FTE, headcount, employees, units, kt, Mt, tonnes, or percentages.
@@ -81,10 +90,10 @@ Rules:
    - If label and unit do not clearly match the question, refuse instead of
      guessing.
 
-9. If the answer is not present in the context, set `refused=true`, give a short
+10. If the answer is not present in the context, set `refused=true`, give a short
    `refusal_reason`, and leave `citations` empty. Do not guess.
 
-10. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
+11. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
    or remove qualifiers from figures.
 """
 
@@ -313,7 +322,11 @@ def answer_question(
 
     client = openai_client()
     context = _format_context(chunks)
-    user_msg = f"Question: {question}\n\nContext:\n{context}"
+    user_msg = (
+        f"Active company in context: infer from the source filenames and "
+        f"company metadata in the context blocks below.\n\n"
+        f"Question: {question}\n\nContext:\n{context}"
+    )
 
     completion = client.beta.chat.completions.parse(
         model=settings.openai_answer_model,
