@@ -252,13 +252,17 @@ def test_ingest_pdf_can_store_stable_source_name(
         "backend.app.ingestion.embed_texts",
         lambda texts: embedded_texts.extend(texts) or [[0.1, 0.2] for _ in texts],
     )
+    monkeypatch.setattr("backend.app.ingestion.CHROMA_UPSERT_BATCH_SIZE", 1)
 
     class FakeCollection:
+        def __init__(self) -> None:
+            self.upsert_calls = []
+
         def delete(self, **kwargs) -> None:
             self.delete_kwargs = kwargs
 
         def upsert(self, **kwargs) -> None:
-            self.kwargs = kwargs
+            self.upsert_calls.append(kwargs)
 
     embedded_texts: list[str] = []
     collection = FakeCollection()
@@ -275,11 +279,15 @@ def test_ingest_pdf_can_store_stable_source_name(
     assert collection.delete_kwargs["where"] == {
         "$and": [{"source": "asml.pdf"}, {"company": "ASML"}, {"year": 2025}]
     }
-    assert collection.kwargs["ids"] == ["asml.pdf:5:0", "asml.pdf:5:1"]
-    assert collection.kwargs["metadatas"][0]["source"] == "asml.pdf"
-    assert collection.kwargs["metadatas"][0]["parser"] == "pymupdf"
-    assert collection.kwargs["metadatas"][0]["chunk_kind"] == "section"
-    assert collection.kwargs["metadatas"][1]["chunk_kind"] == "datapoint"
+    assert len(collection.upsert_calls) == 2
+    assert collection.upsert_calls[0]["ids"] == ["asml.pdf:5:0"]
+    assert collection.upsert_calls[0]["documents"] == ["Total employees (FTEs): > 44,000"]
+    assert collection.upsert_calls[0]["embeddings"] == [[0.1, 0.2]]
+    assert collection.upsert_calls[0]["metadatas"][0]["source"] == "asml.pdf"
+    assert collection.upsert_calls[0]["metadatas"][0]["parser"] == "pymupdf"
+    assert collection.upsert_calls[0]["metadatas"][0]["chunk_kind"] == "section"
+    assert collection.upsert_calls[1]["ids"] == ["asml.pdf:5:1"]
+    assert collection.upsert_calls[1]["metadatas"][0]["chunk_kind"] == "datapoint"
     assert any("fte_candidate" in text for text in embedded_texts)
     assert (processed_dir / "pages" / "asml.jsonl").exists()
     assert (processed_dir / "chunks" / "asml.jsonl").exists()
