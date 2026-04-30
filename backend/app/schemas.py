@@ -99,6 +99,7 @@ class EvalQuestion(BaseModel):
     expected_answer_contains_any: list[str] | None = None
     expected_answer_contains_all: list[str] | None = None
     expected_page: int | None = None
+    accepted_pages: list[int] | None = None
     expected_source: str | None = None
     expected_behavior: Literal["refuse"] | None = None
     notes: str | None = None

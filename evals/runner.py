@@ -26,6 +26,9 @@ class Outcome:
     answer: VerbatimAnswer | None
     retrieved_pages: list[int]
     retrieved_chunks: list[RetrievedChunk]
+    retrieval_hit: bool | None
+    answer_correct: bool | None
+    citation_grounded: bool | None
     passed: bool
     reasons: list[str]
 
@@ -50,29 +53,90 @@ def _citation_chunk_contains_answer(
     chunks: list[RetrievedChunk],
     needles: list[str],
 ) -> bool:
-    chunk_by_page: dict[int, str] = {c.page: c.text.lower() for c in chunks}
+    cited_locations = {(cite.source, cite.page) for cite in ans.citations}
     for cite in ans.citations:
-        text = chunk_by_page.get(cite.page, "")
-        if any(n.lower() in text for n in needles):
-            return True
+        for chunk in chunks:
+            if (chunk.source, chunk.page) not in cited_locations:
+                continue
+            if chunk.source != cite.source or chunk.page != cite.page:
+                continue
+            text = chunk.text.lower()
+            if any(n.lower() in text for n in needles):
+                return True
     return False
+
+
+def _expected_pages(q: EvalQuestion) -> list[int]:
+    accepted_pages = getattr(q, "accepted_pages", None)
+    if accepted_pages:
+        return [int(page) for page in accepted_pages]
+    if q.expected_page is not None:
+        return [q.expected_page]
+    return []
+
+
+def _page_matches_expected(page: int, expected_pages: list[int]) -> bool:
+    return any(abs(page - expected_page) <= 1 for expected_page in expected_pages)
+
+
+def _format_expected_pages(expected_pages: list[int]) -> str:
+    if len(expected_pages) == 1:
+        return str(expected_pages[0])
+    return repr(expected_pages)
+
+
+def _retrieval_hit(q: EvalQuestion, retrieved_chunks: list[RetrievedChunk]) -> bool | None:
+    expected_pages = _expected_pages(q)
+    if not expected_pages:
+        return None
+    return any(
+        _page_matches_expected(chunk.page, expected_pages)
+        and (q.expected_source is None or chunk.source == q.expected_source)
+        for chunk in retrieved_chunks
+    )
+
+
+def _citation_grounded(q: EvalQuestion, ans: VerbatimAnswer) -> bool | None:
+    expected_pages = _expected_pages(q)
+    if not expected_pages:
+        return None
+    return any(
+        _page_matches_expected(cite.page, expected_pages)
+        and (q.expected_source is None or cite.source == q.expected_source)
+        for cite in ans.citations
+    )
 
 
 def score_one(
     q: EvalQuestion,
     ans: VerbatimAnswer,
     retrieved_chunks: list[RetrievedChunk] | None = None,
-) -> tuple[bool, list[str]]:
+) -> tuple[bool, list[str], bool | None, bool | None, bool | None]:
     reasons: list[str] = []
+    chunks = retrieved_chunks or []
+    retrieval_hit = _retrieval_hit(q, chunks)
+    answer_correct: bool | None = None
+    citation_grounded: bool | None = _citation_grounded(q, ans)
 
     if q.expected_behavior == "refuse":
-        if not (ans.refused or not ans.citations):
+        if ans.refused is not True:
             reasons.append("expected refusal but answer was given")
-        return (not reasons, reasons)
+        return (not reasons, reasons, retrieval_hit, answer_correct, citation_grounded)
 
     if ans.refused:
         reasons.append(_refusal_failure_reason(ans))
-        return (False, reasons)
+        answer_correct = False
+        return (False, reasons, retrieval_hit, answer_correct, citation_grounded)
+
+    if retrieval_hit is False:
+        source_msg = (
+            f" and source={q.expected_source!r}" if q.expected_source is not None else ""
+        )
+        expected_pages = _expected_pages(q)
+        reasons.append(
+            "no retrieved chunk page within ±1 of "
+            f"{_format_expected_pages(expected_pages)}{source_msg}"
+        )
 
     hay = _haystack(ans)
     answer_correct = True
@@ -92,16 +156,28 @@ def score_one(
         if not any(c.source == q.expected_source for c in ans.citations):
             reasons.append(f"no citation with source={q.expected_source!r}")
 
-    if q.expected_page is not None:
-        page_ok = any(abs(c.page - q.expected_page) <= 1 for c in ans.citations)
-        if not page_ok and answer_correct and retrieved_chunks:
+    expected_pages = _expected_pages(q)
+    if expected_pages:
+        fallback_ok = False
+        if not citation_grounded and answer_correct and retrieved_chunks:
             needles = q.expected_answer_contains_any or q.expected_answer_contains_all or []
-            page_ok = bool(needles) and _citation_chunk_contains_answer(ans, retrieved_chunks, needles)
-        if not page_ok:
+            fallback_ok = bool(needles) and _citation_chunk_contains_answer(
+                ans, retrieved_chunks, needles
+            )
+            if fallback_ok:
+                citation_grounded = True
+        if not citation_grounded:
             cited = [c.page for c in ans.citations]
-            reasons.append(f"no citation page within ±1 of {q.expected_page} (got {cited})")
+            reasons.append(
+                "no citation page within ±1 of "
+                f"{_format_expected_pages(expected_pages)} (got {cited})"
+            )
 
-    return (not reasons, reasons)
+    applicable_flags = [
+        flag for flag in (retrieval_hit, answer_correct, citation_grounded) if flag is not None
+    ]
+    passed = not reasons and all(applicable_flags)
+    return (passed, reasons, retrieval_hit, answer_correct, citation_grounded)
 
 
 def _preview(ans: VerbatimAnswer | None) -> str:
@@ -131,8 +207,9 @@ def _format_expected(outcome: Outcome) -> str:
         expected_parts.append(f"behavior={q.expected_behavior}")
     if q.expected_source is not None:
         expected_parts.append(f"source={q.expected_source}")
-    if q.expected_page is not None:
-        expected_parts.append(f"page≈{q.expected_page}")
+    expected_pages = _expected_pages(q)
+    if expected_pages:
+        expected_parts.append(f"page≈{_format_expected_pages(expected_pages)}")
     if q.expected_answer_contains_any:
         expected_parts.append(f"contains_any={q.expected_answer_contains_any!r}")
     if q.expected_answer_contains_all:
@@ -166,7 +243,7 @@ def format_result_line(outcome: Outcome) -> str:
         f"        citations: {_format_citations(outcome.answer)}",
         (
             f"        retrieval: pages={outcome.retrieved_pages} "
-            f"(expected page {outcome.question.expected_page})"
+            f"(expected page {_format_expected_pages(_expected_pages(outcome.question))})"
         ),
         "        reasons:",
     ]
@@ -199,13 +276,30 @@ def _category_breakdown(outcomes: list[Outcome]) -> dict[str, dict[str, int | fl
     return out
 
 
+def _flag_rate(outcomes: list[Outcome], attr: str) -> tuple[int, int, float]:
+    values = [getattr(o, attr) for o in outcomes if getattr(o, attr) is not None]
+    passed = sum(1 for value in values if value)
+    total = len(values)
+    pct = (passed / total * 100) if total else 0.0
+    return passed, total, pct
+
+
 def format_summary(outcomes: list[Outcome]) -> str:
     total = len(outcomes)
     passed = sum(1 for o in outcomes if o.passed)
     pct = (passed / total * 100) if total else 0.0
+    retrieval_passed, retrieval_total, retrieval_pct = _flag_rate(outcomes, "retrieval_hit")
+    answer_passed, answer_total, answer_pct = _flag_rate(outcomes, "answer_correct")
+    citation_passed, citation_total, citation_pct = _flag_rate(outcomes, "citation_grounded")
     lines = [
         "",
-        f"Overall: {passed}/{total}  {pct:.1f}%",
+        f"Overall:           {passed}/{total}  {pct:.1f}%",
+        f"Retrieval hit:     {retrieval_passed}/{retrieval_total}  {retrieval_pct:.1f}%",
+        (
+            f"Answer correct:    {answer_passed}/{answer_total}  {answer_pct:.1f}%"
+            "   (excludes refusal questions)"
+        ),
+        f"Citation grounded: {citation_passed}/{citation_total}  {citation_pct:.1f}%",
         "By category:",
     ]
     for cat, stats in _category_breakdown(outcomes).items():
@@ -268,10 +362,14 @@ def _build_run_record(
                     "answer_contains_any": o.question.expected_answer_contains_any,
                     "answer_contains_all": o.question.expected_answer_contains_all,
                     "page": o.question.expected_page,
+                    "accepted_pages": o.question.accepted_pages,
                     "source": o.question.expected_source,
                     "behavior": o.question.expected_behavior,
                 },
                 "passed": o.passed,
+                "retrieval_hit": o.retrieval_hit,
+                "answer_correct": o.answer_correct,
+                "citation_grounded": o.citation_grounded,
                 "reasons": o.reasons,
                 "retrieval": {
                     "pages": o.retrieved_pages,
@@ -361,11 +459,20 @@ def run_eval(
             ans = result.answer
             retrieved_chunks = result.retrieved_chunks
             retrieved_pages = [chunk.page for chunk in retrieved_chunks]
-            passed, reasons = score_one(q, ans, retrieved_chunks)
+            (
+                passed,
+                reasons,
+                retrieval_hit,
+                answer_correct,
+                citation_grounded,
+            ) = score_one(q, ans, retrieved_chunks)
         except Exception as exc:  # noqa: BLE001
             ans = None
             retrieved_chunks = []
             retrieved_pages = []
+            retrieval_hit = _retrieval_hit(q, retrieved_chunks)
+            answer_correct = None if q.expected_behavior == "refuse" else False
+            citation_grounded = None if not _expected_pages(q) else False
             passed = False
             reasons = [f"exception: {exc!s}"]
 
@@ -374,6 +481,9 @@ def run_eval(
             answer=ans,
             retrieved_pages=retrieved_pages,
             retrieved_chunks=retrieved_chunks,
+            retrieval_hit=retrieval_hit,
+            answer_correct=answer_correct,
+            citation_grounded=citation_grounded,
             passed=passed,
             reasons=reasons,
         )
