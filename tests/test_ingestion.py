@@ -145,10 +145,45 @@ def test_build_chunks_keeps_header_table_rows_without_metric_extraction() -> Non
     metric_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "metric"]
     row_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
 
-    assert metric_chunks == []
+    assert [chunk.text for chunk in metric_chunks] == [
+        "Metric: FTE\nPeriod: 2025\nValue: 82,000",
+        "Metric: FTE\nPeriod: 2024\nValue: 80,000",
+    ]
     assert len(row_chunks) == 1
     assert row_chunks[0].text == "Metric: FTE\n2025: 82,000\n2024: 80,000"
     assert "Table type: header_table" in str(row_chunks[0].embedding_text)
+
+
+def test_build_chunks_extracts_financial_metrics_from_header_table_year_columns() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    54,
+                    "# Operating results\n\n"
+                    "| Year ended December 31 (€, in millions) | 2024 | 2025 |\n"
+                    "| --------------------------------------- | ---- | ---- |\n"
+                    "| Total net sales | 28,262.9 | 32,667.3 |",
+                )
+            ]
+        ),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    table_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table"]
+    row_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
+    metric_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "metric"]
+
+    assert len(table_chunks) == 1
+    assert len(row_chunks) == 1
+    assert "Metric: Total net sales\nPeriod: 2025\nValue: 32,667.3\nUnit: €, in millions" in [
+        chunk.text for chunk in metric_chunks
+    ]
 
 
 def test_build_chunks_keeps_generic_table_without_extra_chunks() -> None:

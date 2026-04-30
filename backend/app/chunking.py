@@ -254,6 +254,24 @@ def _table_drafts(
                     extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
+            for metric_text in _financial_metric_texts_from_header_row(
+                headers,
+                cells,
+                section_path=section_path,
+            ):
+                drafts.append(
+                    _draft(
+                        page=page,
+                        text=metric_text,
+                        chunk_kind="metric",
+                        section_path=section_path,
+                        company=company,
+                        year=year,
+                        parser=parser,
+                        boilerplate=boilerplate,
+                        extra_embedding_context=_table_context(section_path, rows, table_kind),
+                    )
+                )
 
     return drafts
 
@@ -320,12 +338,28 @@ def _table_context(section_path: str | None, rows: list[str], table_kind: str) -
 
 def _classify_table(rows: list[str]) -> str:
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
-    if any(_metric_pairs(_parse_table_cells(row)) for row in data_rows):
-        return "kpi_pairs"
     headers, body_rows = _table_headers_and_body(data_rows)
+    if headers is not None and body_rows and _looks_like_header_row(headers):
+        return "header_table"
+    if data_rows and _mostly_metric_pairs(_parse_table_cells(data_rows[0])):
+        return "kpi_pairs"
     if headers is not None and body_rows:
         return "header_table"
     return "generic_table"
+
+
+def _looks_like_header_row(cells: list[str]) -> bool:
+    normalized = {_normalize_line(cell) for cell in cells if cell.strip()}
+    if any(_year_period(cell) is not None for cell in cells):
+        return True
+    return bool(normalized & {"notes", "note", "description", "metric", "topic"})
+
+
+def _mostly_metric_pairs(cells: list[str]) -> bool:
+    non_empty = [cell for cell in cells if cell.strip()]
+    if len(non_empty) < 2:
+        return False
+    return len(_metric_pairs(non_empty)) * 2 >= len(non_empty)
 
 
 def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
@@ -373,6 +407,53 @@ def _metric_texts_from_header_row(headers: list[str] | None, cells: list[str]) -
     lines.append(f"{first_header}: {label}" if first_header else label)
     lines.extend(f"{header}: {cell}" for header, cell in value_columns)
     return ["\n".join(lines)]
+
+
+def _financial_metric_texts_from_header_row(
+    headers: list[str] | None,
+    cells: list[str],
+    *,
+    section_path: str | None,
+) -> list[str]:
+    if headers is None or len(headers) != len(cells) or len(cells) < 2:
+        return []
+
+    label_idx = next((i for i, cell in enumerate(cells) if cell.strip()), None)
+    if label_idx is None:
+        return []
+    metric = cells[label_idx].strip()
+    if _looks_like_value(metric):
+        return []
+
+    unit = _unit_from_text(headers[0]) or _unit_from_text(section_path or "")
+    metrics: list[str] = []
+    for header, cell in zip(headers[label_idx + 1 :], cells[label_idx + 1 :], strict=False):
+        period = _year_period(header)
+        value = cell.strip()
+        if period is None or not value or not _looks_like_value(value):
+            continue
+        lines = [
+            f"Metric: {metric}",
+            f"Period: {period}",
+            f"Value: {value}",
+        ]
+        if unit:
+            lines.append(f"Unit: {unit}")
+        metrics.append("\n".join(lines))
+    return metrics
+
+
+def _year_period(text: str) -> str | None:
+    match = re.fullmatch(r"(?:FY\s*|Year\s*)?(20\d{2})", text.strip(), re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def _unit_from_text(text: str) -> str | None:
+    match = re.search(r"\(([^)]*)\)", text)
+    if not match:
+        return None
+    unit = _clean_cell(match.group(1))
+    return unit or None
 
 
 def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:
