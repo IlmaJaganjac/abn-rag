@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from backend.app.answer import (
+    SYSTEM_PROMPT,
     _fragments_in_order,
     _ground_citations,
     _normalize_for_grounding,
     _split_on_ellipsis,
+    answer_question,
 )
-from backend.app.schemas import Citation, RetrievedChunk
+from backend.app.schemas import Citation, LLMAnswer, RetrievedChunk
 
 
 def _chunk(*, source: str, page: int, text: str, idx: int = 0) -> RetrievedChunk:
@@ -20,6 +24,37 @@ def _chunk(*, source: str, page: int, text: str, idx: int = 0) -> RetrievedChunk
         token_count=len(text.split()),
         score=0.9,
     )
+
+
+class _FakeCompletions:
+    def __init__(self, parsed: LLMAnswer) -> None:
+        self.parsed = parsed
+        self.messages = None
+
+    def parse(self, **kwargs):  # noqa: ANN003
+        self.messages = kwargs["messages"]
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(parsed=self.parsed))]
+        )
+
+
+def _answer_with_fake_llm(
+    monkeypatch,
+    *,
+    question: str,
+    chunks: list[RetrievedChunk],
+    parsed: LLMAnswer,
+) -> tuple[SimpleNamespace, object]:
+    completions = _FakeCompletions(parsed)
+    fake_client = SimpleNamespace(
+        beta=SimpleNamespace(
+            chat=SimpleNamespace(
+                completions=completions,
+            )
+        )
+    )
+    monkeypatch.setattr("backend.app.answer.openai_client", lambda: fake_client)
+    return answer_question(question, chunks), completions
 
 
 def test_normalize_collapses_whitespace_and_lowercases() -> None:
@@ -291,3 +326,134 @@ def test_prefers_cited_page_when_quote_appears_on_multiple_pages() -> None:
     grounded, _, failure = _ground_citations([cite], [chunk_a, chunk_b])
     assert failure is None
     assert grounded[0].page == 7  # cited page wins among ties
+
+
+def test_answer_prompt_tells_rd_spend_to_choose_monetary_unit() -> None:
+    assert "For spend, cost, expense, R&D spend, or capex questions" in SYSTEM_PROMPT
+    assert "Never answer" in SYSTEM_PROMPT
+    assert "FTE" in SYSTEM_PROMPT
+
+
+def test_rd_spend_answer_uses_monetary_chunk_over_fte(monkeypatch) -> None:
+    fte = _chunk(
+        source="asml.pdf",
+        page=301,
+        text="Metric: Research and Development\nPeriod: 2025\nValue: 16,448\nUnit: in FTE",
+        idx=1,
+    )
+    money = _chunk(
+        source="asml.pdf",
+        page=30,
+        text="Metric: R&D Investment\nPeriod: 2025\nValue: 4.7\nUnit: in € billions",
+        idx=2,
+    )
+    parsed = LLMAnswer(
+        answer="ASML spent €4.7 billion on R&D in 2025.",
+        verbatim="4.7",
+        citations=[Citation(source="asml.pdf", page=30, quote=money.text)],
+    )
+
+    answer, completions = _answer_with_fake_llm(
+        monkeypatch,
+        question="How much did ASML spend financially on Research and Development in 2025?",
+        chunks=[fte, money],
+        parsed=parsed,
+    )
+
+    assert answer.refused is False
+    assert answer.citations[0].page == 30
+    assert answer.verbatim == "4.7"
+    assert "Never answer" in completions.messages[0]["content"]
+    assert "FTE" in completions.messages[0]["content"]
+
+
+def test_average_payroll_fte_answer_uses_average_payroll_chunk(monkeypatch) -> None:
+    average = _chunk(
+        source="asml.pdf",
+        page=131,
+        text="Metric: Average number of payroll employees in FTEs\nPeriod: 2025\nValue: 43,267",
+        idx=1,
+    )
+    year_end = _chunk(
+        source="asml.pdf",
+        page=301,
+        text="Metric: Payroll employees\nPeriod: 2025\nValue: 43,520\nUnit: in FTE",
+        idx=2,
+    )
+    parsed = LLMAnswer(
+        answer="ASML's average number of payroll employees in FTEs was 43,267.",
+        verbatim="43,267",
+        citations=[Citation(source="asml.pdf", page=131, quote=average.text)],
+    )
+
+    answer, completions = _answer_with_fake_llm(
+        monkeypatch,
+        question=(
+            "In ASML's pay-ratio/remuneration table, what was the average number "
+            "of payroll employees in FTEs for 2025?"
+        ),
+        chunks=[average, year_end],
+        parsed=parsed,
+    )
+
+    assert answer.refused is False
+    assert answer.citations[0].page == 131
+    assert answer.verbatim == "43,267"
+    assert "preserve average vs year-end" in completions.messages[0]["content"]
+
+
+def test_gross_margin_answer_uses_explicit_margin_percentage(monkeypatch) -> None:
+    unrelated = _chunk(
+        source="asml.pdf",
+        page=199,
+        text="Metric: Percentage of non-recycled waste\nPeriod: 2025\nValue: 26.3%",
+        idx=1,
+    )
+    margin = _chunk(
+        source="asml.pdf",
+        page=53,
+        text="Metric: Gross margin\nPeriod: 2025\nValue: 52.8\nUnit: %",
+        idx=2,
+    )
+    parsed = LLMAnswer(
+        answer="ASML's reported gross margin in 2025 was 52.8%.",
+        verbatim="52.8",
+        citations=[Citation(source="asml.pdf", page=53, quote=margin.text)],
+    )
+
+    answer, completions = _answer_with_fake_llm(
+        monkeypatch,
+        question="What reported gross margin percentage did ASML state for 2025?",
+        chunks=[unrelated, margin],
+        parsed=parsed,
+    )
+
+    assert answer.refused is False
+    assert answer.citations[0].page == 53
+    assert answer.verbatim == "52.8"
+    assert "Do not calculate" in completions.messages[0]["content"]
+    assert "unless the user asks to calculate" in completions.messages[0]["content"]
+
+
+def test_spend_question_refuses_when_only_incompatible_unit_available(monkeypatch) -> None:
+    fte = _chunk(
+        source="asml.pdf",
+        page=301,
+        text="Metric: Research and Development\nPeriod: 2025\nValue: 16,448\nUnit: in FTE",
+    )
+    parsed = LLMAnswer(
+        answer="The answer is not available in the provided reports.",
+        refused=True,
+        refusal_reason="Only an FTE metric is available, not monetary spend.",
+    )
+
+    answer, completions = _answer_with_fake_llm(
+        monkeypatch,
+        question="How much did ASML spend financially on Research and Development in 2025?",
+        chunks=[fte],
+        parsed=parsed,
+    )
+
+    assert answer.refused is True
+    assert answer.citations == []
+    assert "If label and unit do not clearly match the question" in completions.messages[0]["content"]
