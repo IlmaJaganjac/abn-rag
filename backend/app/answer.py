@@ -27,13 +27,22 @@ Rules:
    the chunk and the segments must appear in the original order. Do NOT use
    `...` to skip across unrelated text; if the answer needs two unrelated
    spans, emit two separate citations.
-5. For numerical, financial, or date answers, set `verbatim` to the exact span
-   from the context that contains the figure (e.g. "€32.7 billion", "44,027",
-   "9,609,432"). Copy numbers, currency symbols, and surrounding spacing
-   exactly as written.
+5. For numerical, financial, percentage, employee-count, or date answers:
+   - Set `verbatim` to the exact span from the context that contains the figure.
+   - Preserve qualifiers exactly, including symbols/words such as ">", "<",
+     "approximately", "around", "about", "more than", "less than", and "over".
+   - Preserve units exactly, including "FTEs", "employees", "€ million",
+     "€ billion", "%", "kt", "Mt", and "CO₂e".
+   - Do not round, normalize, convert, or simplify figures unless the context
+     itself gives that converted form.
+   - If the evidence says "> 44,000", the answer must say "more than 44,000"
+     or "> 44,000", not "44,000".
+
 6. If the answer is not present in the context, set `refused=true`, give a
    short `refusal_reason`, and leave `citations` empty. Do not guess.
-7. Keep `answer` concise — one or two sentences. Do not invent figures.
+
+7. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
+   or remove qualifiers from figures.
 """
 
 

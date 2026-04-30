@@ -109,7 +109,7 @@ def _page_drafts(
 
     def flush_narrative() -> None:
         nonlocal narrative
-        body = _clean_block("\n".join(narrative))
+        body = _remove_boilerplate("\n".join(narrative), boilerplate)
         narrative = []
         if not body:
             return
@@ -157,8 +157,13 @@ def _page_drafts(
             flush_narrative()
             level = len(heading.group(1))
             title = _clean_heading(heading.group(2))
+            if _normalize_line(title) in boilerplate:
+                continue
             heading_stack[:] = [(lvl, val) for lvl, val in heading_stack if lvl < level]
             heading_stack.append((level, title))
+            continue
+
+        if _normalize_line(stripped) in boilerplate:
             continue
 
         if _is_table_line(stripped):
@@ -173,20 +178,6 @@ def _page_drafts(
     flush_table()
     flush_narrative()
 
-    if not drafts and text.strip():
-        body = _clean_block(text)
-        drafts.append(
-            _draft(
-                page=page,
-                text=body,
-                chunk_kind="section",
-                section_path=section_path(),
-                company=company,
-                year=year,
-                parser=parser,
-                boilerplate=boilerplate,
-            )
-        )
     return drafts
 
 
@@ -205,8 +196,10 @@ def _table_drafts(
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
     drafts: list[ChunkDraft] = []
+    table_kind = _classify_table(rows)
     full_table = _clean_block("\n".join(rows))
     if full_table:
+        table_context = _table_context(section_path, rows, table_kind)
         for part in split_oversize(full_table, max_tokens, overlap):
             drafts.append(
                 _draft(
@@ -218,6 +211,47 @@ def _table_drafts(
                     year=year,
                     parser=parser,
                     boilerplate=boilerplate,
+                    extra_embedding_context=table_context,
+                )
+            )
+
+    data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
+    headers, body_rows = _table_headers_and_body(data_rows)
+
+    if table_kind == "kpi_pairs":
+        for row in data_rows:
+            cells = _parse_table_cells(row)
+            for value, label in _metric_pairs(cells):
+                drafts.append(
+                    _draft(
+                        page=page,
+                        text=_format_table_row([value, label]),
+                        chunk_kind="metric",
+                        section_path=section_path,
+                        company=company,
+                        year=year,
+                        parser=parser,
+                        boilerplate=boilerplate,
+                    )
+                )
+
+    if table_kind == "header_table":
+        for row in body_rows:
+            cells = _parse_table_cells(row)
+            row_text = _format_header_aware_row(headers, cells)
+            if not row_text:
+                continue
+            drafts.append(
+                _draft(
+                    page=page,
+                    text=row_text,
+                    chunk_kind="table_row",
+                    section_path=section_path,
+                    company=company,
+                    year=year,
+                    parser=parser,
+                    boilerplate=boilerplate,
+                    extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
 
@@ -234,15 +268,64 @@ def _draft(
     year: int | None,
     parser: str | None,
     boilerplate: set[str],
+    extra_embedding_context: str | None = None,
 ) -> ChunkDraft:
-    embedding_text = _remove_boilerplate(text, boilerplate).strip() or text.strip()
+    body = _remove_boilerplate(text, boilerplate).strip()
+    context = _embedding_context(
+        company=company,
+        year=year,
+        parser=parser,
+        section_path=section_path,
+        extra=extra_embedding_context,
+    )
+    embedding_text = "\n".join(part for part in (context, body) if part).strip()
     return ChunkDraft(
         page=page,
-        text=text.strip(),
+        text=body,
         chunk_kind=chunk_kind,
         section_path=section_path,
         embedding_text=embedding_text,
     )
+
+
+def _embedding_context(
+    *,
+    company: str | None,
+    year: int | None,
+    parser: str | None,
+    section_path: str | None,
+    extra: str | None = None,
+) -> str:
+    parts = [
+        company,
+        str(year) if year is not None else None,
+        f"Section: {section_path}" if section_path else None,
+        extra,
+    ]
+    return "\n".join(part for part in parts if part)
+
+
+def _table_context(section_path: str | None, rows: list[str], table_kind: str) -> str | None:
+    data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
+    headers, _ = _table_headers_and_body(data_rows)
+    parts: list[str] = [f"Table type: {table_kind}"]
+    if section_path:
+        parts.append(f"Table caption: {section_path}")
+    if headers:
+        columns = [header for header in headers if header.strip()]
+        if columns:
+            parts.append("Columns: " + " | ".join(columns))
+    return "\n".join(parts) if parts else None
+
+
+def _classify_table(rows: list[str]) -> str:
+    data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
+    if any(_metric_pairs(_parse_table_cells(row)) for row in data_rows):
+        return "kpi_pairs"
+    headers, body_rows = _table_headers_and_body(data_rows)
+    if headers is not None and body_rows:
+        return "header_table"
+    return "generic_table"
 
 
 def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
@@ -253,6 +336,15 @@ def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
         label = cells[i + 1].strip()
         if value and label and _looks_like_value(value) and not _looks_like_value(label):
             pairs.append((value, label))
+            i += 2
+        elif (
+            value
+            and label
+            and YEAR_RE.search(value)
+            and _starts_with_value(label)
+            and not _looks_like_value(label)
+        ):
+            pairs.append((label, value))
             i += 2
         else:
             i += 1
@@ -328,6 +420,11 @@ def _format_table_row(cells: list[str]) -> str:
 def _looks_like_value(text: str) -> bool:
     clean = text.replace("&nbsp;", " ").strip()
     return bool(VALUE_RE.match(clean)) or bool(YEAR_RE.fullmatch(clean))
+
+
+def _starts_with_value(text: str) -> bool:
+    clean = text.replace("&nbsp;", " ").strip()
+    return bool(re.match(r"^[€$£]?\s*[<>]?\s*\d", clean))
 
 
 def _is_table_line(line: str) -> bool:
