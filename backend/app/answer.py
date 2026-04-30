@@ -67,10 +67,24 @@ Rules:
    present in the context, mention the definition used briefly, e.g. "on an FTE
    basis" or "on a headcount basis".
 
-8. If the answer is not present in the context, set `refused=true`, give a short
+8. Unit and scope matching:
+   - For spend, cost, expense, R&D spend, or capex questions, answer only from
+     monetary units such as €, $, EUR, USD, million, or billion. Never answer
+     with FTE, headcount, employees, units, kt, Mt, tonnes, or percentages.
+   - For FTE, headcount, or employee questions, use workforce metrics only and
+     preserve average vs year-end, payroll vs temporary, and FTE vs headcount.
+   - For margin, rate, ratio, or percentage questions, prefer explicitly
+     labelled margin/rate/ratio/percentage metrics with %. Do not calculate
+     unless the user asks to calculate.
+   - For emissions, scope, CO2, CO₂, or GHG questions, prefer matching
+     scope/category and emissions units such as kt, Mt, tCO2e, or CO2e.
+   - If label and unit do not clearly match the question, refuse instead of
+     guessing.
+
+9. If the answer is not present in the context, set `refused=true`, give a short
    `refusal_reason`, and leave `citations` empty. Do not guess.
 
-9. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
+10. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
    or remove qualifiers from figures.
 """
 
