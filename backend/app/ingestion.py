@@ -20,6 +20,7 @@ from backend.app.schemas import Chunk
 logger = logging.getLogger(__name__)
 
 EMBEDDING_MAX_TOKENS = 8191
+CHROMA_UPSERT_BATCH_SIZE = 1000
 _ENCODING = tiktoken.get_encoding("cl100k_base")
 _FTE_PATTERNS = [
     re.compile(r"\bFTEs?\b", re.IGNORECASE),
@@ -466,12 +467,21 @@ def ingest_pdf(
             company=company,
             year=year,
         )
-    collection.upsert(
-        ids=[c.id for c in chunks],
-        documents=[c.text for c in chunks],
-        embeddings=embeddings,
-        metadatas=[_chunk_metadata(c) for c in chunks],
-    )
+    for i in range(0, len(chunks), CHROMA_UPSERT_BATCH_SIZE):
+        batch_chunks = chunks[i : i + CHROMA_UPSERT_BATCH_SIZE]
+        batch_embeddings = embeddings[i : i + CHROMA_UPSERT_BATCH_SIZE]
+        collection.upsert(
+            ids=[c.id for c in batch_chunks],
+            documents=[c.text for c in batch_chunks],
+            embeddings=batch_embeddings,
+            metadatas=[_chunk_metadata(c) for c in batch_chunks],
+        )
+        logger.info(
+            "upserted batch %d-%d into '%s'",
+            i,
+            i + len(batch_chunks),
+            settings.chroma_collection,
+        )
     logger.info(
         "upserted %d chunks into '%s' at %s",
         len(chunks),
