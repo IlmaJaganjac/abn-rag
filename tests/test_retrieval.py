@@ -14,109 +14,110 @@ def _kind_in_where(where: dict[str, Any] | None, kind: str) -> bool:
     return any(part.get("chunk_kind") == kind for part in where.get("$and", []))
 
 
-class FakeCollection:
+class FakeHybridCollection:
     def get(self, *, where, include):
-        if _kind_in_where(where, "metric"):
-            return {
-                "ids": ["asml.pdf:5:7"],
-                "documents": ["535\nSystem sales in units"],
-                "metadatas": [
-                    {
-                        "source": "asml.pdf",
-                        "company": "ASML",
-                        "year": 2025,
-                        "page": 5,
-                        "token_count": 5,
-                        "chunk_kind": "metric",
-                        "metric_name": "System sales in units",
-                        "metric_value": "535",
-                        "metric_period": "2025",
-                    }
-                ],
-            }
-        return {"ids": [], "documents": [], "metadatas": []}
-
-    def query(self, **kwargs):
-        return {
-            "ids": [["asml.pdf:191:2"]],
-            "documents": [["27 refurbished lithography systems"]],
-            "metadatas": [[
-                {
-                    "source": "asml.pdf",
-                    "company": "ASML",
-                    "year": 2025,
-                    "page": 191,
-                    "token_count": 4,
-                    "chunk_kind": "section",
-                }
-            ]],
-            "distances": [[0.3]],
-        }
-
-
-class FakeFteCollection:
-    def get(self, *, where, include):
-        if not _kind_in_where(where, "datapoint"):
+        if not _kind_in_where(where, "metric"):
             return {"ids": [], "documents": [], "metadatas": []}
-        text = (
-            "Average number of payroll employees in FTEs\n"
-            "2023\n2024\n2025\nWorldwide (including Netherlands)\n38,805\n41,697\n43,267"
-        )
         return {
-            "ids": ["asml.pdf:301:9", "asml.pdf:131:6"],
-            "documents": [text, text],
+            "ids": ["asml.pdf:54:8", "asml.pdf:5:2"],
+            "documents": [
+                (
+                    "Metric: Total net sales\n"
+                    "Period: 2025\n"
+                    "Value: 32,667.3\n"
+                    "Unit: €, in millions, except per share data"
+                ),
+                "| €32.7bn | Total net sales |",
+            ],
             "metadatas": [
                 {
                     "source": "asml.pdf",
                     "company": "ASML",
                     "year": 2025,
-                    "page": 301,
-                    "token_count": 20,
-                    "chunk_kind": "datapoint",
+                    "page": 54,
+                    "token_count": 18,
+                    "chunk_kind": "metric",
                 },
                 {
                     "source": "asml.pdf",
                     "company": "ASML",
                     "year": 2025,
-                    "page": 131,
-                    "token_count": 20,
-                    "chunk_kind": "datapoint",
+                    "page": 5,
+                    "token_count": 11,
+                    "chunk_kind": "metric",
                 },
             ],
         }
 
     def query(self, **kwargs):
-        return {"ids": [[]], "documents": [[]], "metadatas": [[]], "distances": [[]]}
+        return {
+            "ids": [["asml.pdf:5:2"]],
+            "documents": [["| €32.7bn | Total net sales |"]],
+            "metadatas": [[
+                {
+                    "source": "asml.pdf",
+                    "company": "ASML",
+                    "year": 2025,
+                    "page": 5,
+                    "token_count": 11,
+                    "chunk_kind": "metric",
+                }
+            ]],
+            "distances": [[0.05]],
+        }
 
 
-def test_retrieve_boosts_matching_metric_chunk(monkeypatch) -> None:
-    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeCollection())
+class FakeNonMetricCollection(FakeHybridCollection):
+    def query(self, **kwargs):
+        return {
+            "ids": [["asml.pdf:7:1"]],
+            "documents": [["Christophe Fouquet, President, Chief Executive Officer"]],
+            "metadatas": [[
+                {
+                    "source": "asml.pdf",
+                    "company": "ASML",
+                    "year": 2025,
+                    "page": 7,
+                    "token_count": 8,
+                    "chunk_kind": "section",
+                }
+            ]],
+            "distances": [[0.2]],
+        }
+
+
+def test_retrieve_boosts_exact_financial_metric_chunk(monkeypatch) -> None:
+    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
     monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
 
     result = retrieve(
         RetrievalQuery(
-            question="How many lithography systems did ASML sell in 2025?",
+            question="What were ASML total net sales in million euros in 2025?",
+            company="ASML",
+            year=2025,
+            top_k=12,
+        )
+    )
+
+    assert result.chunks[0].id == "asml.pdf:54:8"
+    assert "Metric: Total net sales" in result.chunks[0].text
+    assert "Period: 2025" in result.chunks[0].text
+    assert "Value: 32,667.3" in result.chunks[0].text
+    assert "Unit: €, in millions, except per share data" in result.chunks[0].text
+    assert [chunk.id for chunk in result.chunks].count("asml.pdf:5:2") == 1
+
+
+def test_retrieve_keeps_vector_ranking_for_non_metric_question(monkeypatch) -> None:
+    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeNonMetricCollection())
+    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
+
+    result = retrieve(
+        RetrievalQuery(
+            question="Who is ASML CEO?",
             company="ASML",
             year=2025,
             top_k=8,
         )
     )
 
-    assert result.chunks[0].id == "asml.pdf:5:7"
-    assert result.chunks[0].metric_name == "System sales in units"
-
-
-def test_retrieve_prefers_earlier_exact_datapoint_page(monkeypatch) -> None:
-    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeFteCollection())
-    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
-
-    result = retrieve(
-        RetrievalQuery(
-            question="What was ASML's average number of payroll employees in FTEs for 2025?",
-            company="ASML",
-            year=2025,
-            top_k=8,
-        )
-    )
-
-    assert result.chunks[0].page == 131
+    assert result.chunks[0].id == "asml.pdf:7:1"
