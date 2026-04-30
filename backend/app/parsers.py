@@ -56,6 +56,10 @@ def _normalized_text(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
+def strip_boilerplate(text: str) -> str:
+    return text.strip()
+
+
 def combine_with_pdf_text_layer(
     parsed_pages: list[ParsedPage],
     pdf_text_pages: list[ParsedPage],
@@ -119,6 +123,7 @@ def parse_pdf_llamaparse(
     *,
     api_key: str | None,
     processed_dir: Path | None = None,
+    use_pdf_text_layer: bool = True,
 ) -> list[ParsedPage]:
     if not api_key:
         raise ParserUnavailableError(
@@ -151,7 +156,10 @@ def parse_pdf_llamaparse(
             processed_dir=processed_dir,
         )
 
-    return _add_pdf_text_layer(path, llamaparse_json_to_pages(results))
+    pages = llamaparse_json_to_pages(results)
+    if use_pdf_text_layer:
+        pages = _add_pdf_text_layer(path, pages)
+    return [ParsedPage(page=p.page, text=strip_boilerplate(p.text)) for p in pages if strip_boilerplate(p.text)]
 
 
 def parse_pdf_pymupdf(path: Path) -> list[ParsedPage]:
@@ -172,13 +180,27 @@ def parse_pdf_pages(
     *,
     processed_dir: Path | None = None,
     llama_cloud_api_key: str | None = None,
+    parser: str = "llamaparse",
+    use_pdf_text_layer: bool = True,
+    allow_fallback: bool = True,
 ) -> ParseResult:
-    pages = parse_pdf_llamaparse(
-        path,
-        api_key=llama_cloud_api_key,
-        processed_dir=processed_dir,
-    )
-    return ParseResult(pages=pages, parser="llamaparse")
+    if parser == "pymupdf":
+        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
+
+    try:
+        llama_pages = parse_pdf_llamaparse(
+            path,
+            api_key=llama_cloud_api_key,
+            processed_dir=processed_dir,
+            use_pdf_text_layer=use_pdf_text_layer,
+        )
+    except Exception as exc:
+        if not allow_fallback:
+            raise
+        logger.warning("%s parser failed; falling back to PyMuPDF for %s: %s", parser, path, exc)
+        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
+
+    return ParseResult(pages=llama_pages, parser="llamaparse")
 
 
 def as_page_tuples(pages: list[ParsedPage]) -> Iterator[tuple[int, str]]:

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     processed_dir: Path = Path("backend/data/processed")
 
     reports_dir: Path = Path("reports")
-    pdf_parser: str = "docling"
+    pdf_parser: str = "llamaparse"  # llamaparse | pymupdf | llamaparse+pymupdf
 
     chunk_size_tokens: int = 800
     chunk_overlap_tokens: int = 120

@@ -58,12 +58,15 @@ def test_build_chunks_splits_kpi_table_into_metric_chunks() -> None:
 
     assert [chunk.chunk_kind for chunk in chunks] == ["table", "metric", "metric", "metric"]
     assert chunks[0].text.startswith("| €32.7bn | Total net sales |")
+    assert "Table type: kpi_pairs" in str(chunks[0].embedding_text)
     assert chunks[1].text == "| €32.7bn | Total net sales |"
     assert chunks[2].text == "| 88% | Customer satisfaction survey score |"
     assert chunks[3].text == "| > 44,000 | Total employees (FTEs) |"
+    assert not [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
     assert chunks[3].section_path == "At a glance"
     assert "ASML" in str(chunks[3].embedding_text)
-    assert "llamaparse" in str(chunks[3].embedding_text)
+    assert "llamaparse" not in str(chunks[3].embedding_text)
+    assert chunks[3].parser == "llamaparse"
 
 
 def test_build_chunks_carries_section_path_across_pages() -> None:
@@ -108,14 +111,17 @@ def test_build_chunks_formats_header_aware_table_rows() -> None:
     )
 
     row_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
+    metric_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "metric"]
 
     assert len(row_chunks) == 1
     assert row_chunks[0].text == (
         "Topic: Training\nStatus: Complete\nNotes: Global rollout"
     )
+    assert "Table type: header_table" in str(row_chunks[0].embedding_text)
+    assert metric_chunks == []
 
 
-def test_build_chunks_extracts_label_first_year_metrics() -> None:
+def test_build_chunks_keeps_header_table_rows_without_metric_extraction() -> None:
     chunks = build_chunks(
         iter(
             [
@@ -139,10 +145,33 @@ def test_build_chunks_extracts_label_first_year_metrics() -> None:
     metric_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "metric"]
     row_chunks = [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
 
-    assert len(metric_chunks) == 1
-    assert metric_chunks[0].text == "Metric: FTE\n2025: 82,000\n2024: 80,000"
+    assert metric_chunks == []
     assert len(row_chunks) == 1
     assert row_chunks[0].text == "Metric: FTE\n2025: 82,000\n2024: 80,000"
+    assert "Table type: header_table" in str(row_chunks[0].embedding_text)
+
+
+def test_build_chunks_keeps_generic_table_without_extra_chunks() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    22,
+                    "# Notes\n\n"
+                    "| Free text | More text |\n",
+                )
+            ]
+        ),
+        source="shell.pdf",
+        company="SHELL",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    assert [chunk.chunk_kind for chunk in chunks] == ["table"]
+    assert "Table type: generic_table" in str(chunks[0].embedding_text)
 
 
 def test_persist_parsed_pages_writes_inspectable_jsonl(tmp_path) -> None:
