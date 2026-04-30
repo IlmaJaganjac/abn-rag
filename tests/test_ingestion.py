@@ -59,13 +59,36 @@ def test_build_chunks_splits_kpi_table_into_metric_chunks() -> None:
     assert [chunk.chunk_kind for chunk in chunks] == ["table", "metric", "metric", "metric"]
     assert chunks[0].text.startswith("| €32.7bn | Total net sales |")
     assert "Table type: kpi_pairs" in str(chunks[0].embedding_text)
-    assert chunks[1].text == "| €32.7bn | Total net sales |"
-    assert chunks[2].text == "| 88% | Customer satisfaction survey score |"
-    assert chunks[3].text == "| > 44,000 | Total employees (FTEs) |"
+    assert chunks[1].text == (
+        "Metric: Total net sales\n"
+        "Period: 2025\n"
+        "Value: €32.7bn\n"
+        "Unit: EUR billion\n"
+        "Presentation: highlight"
+    )
+    assert chunks[2].text == (
+        "Metric: Customer satisfaction survey score\n"
+        "Period: 2025\n"
+        "Value: 88%\n"
+        "Unit: %\n"
+        "Presentation: highlight"
+    )
+    assert chunks[3].text == (
+        "Metric: Total employees (FTEs)\n"
+        "Period: 2025\n"
+        "Value: > 44,000\n"
+        "Unit: FTEs\n"
+        "Presentation: highlight"
+    )
     assert not [chunk for chunk in chunks if chunk.chunk_kind == "table_row"]
     assert chunks[3].section_path == "At a glance"
-    assert "ASML" in str(chunks[3].embedding_text)
-    assert "llamaparse" not in str(chunks[3].embedding_text)
+    embedding = str(chunks[3].embedding_text)
+    assert "ASML" in embedding
+    assert "Type: KPI highlight" in embedding
+    assert "Metric: Total employees (FTEs)" in embedding
+    assert "Retrieval hints:" in embedding
+    assert "headcount" in embedding
+    assert "llamaparse" not in embedding
     assert chunks[3].parser == "llamaparse"
 
 
@@ -418,6 +441,133 @@ def test_build_datapoint_chunks_continue_page_indexes() -> None:
     assert chunks[0].id == "asml.pdf:5:1"
     assert chunks[0].chunk_kind == "datapoint"
     assert "fte_candidate" in str(chunks[0].embedding_text)
+
+
+def _kpi_metric_chunks(rows: str, *, year: int = 2025):
+    return [
+        chunk
+        for chunk in build_chunks(
+            iter([(7, "# At a glance\n\n" + rows)]),
+            source="report.pdf",
+            company="ASML",
+            year=year,
+            max_tokens=800,
+            overlap=120,
+            parser="llamaparse",
+        )
+        if chunk.chunk_kind == "metric"
+    ]
+
+
+def test_kpi_pair_rd_investment_normalized() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| €4.7bn | R&D investment |\n| ------ | -------------- |"
+    )
+    assert chunk.text == (
+        "Metric: R&D investment\n"
+        "Period: 2025\n"
+        "Value: €4.7bn\n"
+        "Unit: EUR billion\n"
+        "Presentation: highlight"
+    )
+    embedding = str(chunk.embedding_text)
+    assert "Type: KPI highlight" in embedding
+    assert "research and development spend" in embedding
+
+
+def test_kpi_pair_gross_margin_normalized() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| 52.8% | Gross margin |\n| ----- | ------------ |"
+    )
+    assert "Metric: Gross margin" in chunk.text
+    assert "Value: 52.8%" in chunk.text
+    assert "Unit: %" in chunk.text
+    embedding = str(chunk.embedding_text)
+    assert "margin" in embedding
+    assert "percentage" in embedding
+
+
+def test_kpi_pair_returned_to_shareholders_has_hints() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| €8.5bn | Returned to shareholders |\n| ------ | ----------------------- |"
+    )
+    assert "Metric: Returned to shareholders" in chunk.text
+    assert "Value: €8.5bn" in chunk.text
+    assert "Unit: EUR billion" in chunk.text
+    embedding = str(chunk.embedding_text)
+    assert "shareholder distributions" in embedding
+    assert "dividends" in embedding
+
+
+def test_kpi_pair_total_net_sales_has_revenue_hints() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| €32.7bn | Total net sales |\n| ------- | --------------- |"
+    )
+    embedding = str(chunk.embedding_text)
+    assert "net sales" in embedding
+    assert "revenue" in embedding
+
+
+def test_kpi_pair_system_sales_units() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| 535 | System sales in units |\n| --- | -------------------- |"
+    )
+    assert "Metric: System sales in units" in chunk.text
+    assert "Value: 535" in chunk.text
+    embedding = str(chunk.embedding_text)
+    assert "net sales" not in embedding
+    assert "revenue" not in embedding
+
+
+def test_kpi_pair_scope3_emissions_unit_mt() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| 11.5 Mt | Scope 3 emissions |\n| ------- | ----------------- |"
+    )
+    assert "Unit: Mt" in chunk.text
+    assert "Metric: Scope 3 emissions" in chunk.text
+    embedding = str(chunk.embedding_text)
+    assert "greenhouse gas" in embedding
+    assert "GHG" in embedding
+
+
+def test_kpi_pair_scope1_2_emissions_unit_kt() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| 26 kt | Scope 1 and 2 emissions |\n| ----- | ----------------------- |"
+    )
+    assert "Unit: kt" in chunk.text
+    assert "Metric: Scope 1 and 2 emissions" in chunk.text
+
+
+def test_kpi_pair_two_values_does_not_create_metric() -> None:
+    metrics = _kpi_metric_chunks(
+        "| 12.3% | 4.5% |\n| ----- | ---- |"
+    )
+    assert metrics == []
+
+
+def test_kpi_pair_two_labels_does_not_create_metric() -> None:
+    metrics = _kpi_metric_chunks(
+        "| Strategic priorities | Stakeholder engagement |\n"
+        "| -------------------- | ---------------------- |"
+    )
+    assert metrics == []
+
+
+def test_kpi_pair_vague_label_does_not_create_metric() -> None:
+    metrics = _kpi_metric_chunks(
+        "| €1.2bn | Read more |\n| ------ | --------- |\n"
+        "| 99% | continued |"
+    )
+    assert metrics == []
+
+
+def test_kpi_pair_skips_hints_when_no_category_matches() -> None:
+    [chunk] = _kpi_metric_chunks(
+        "| 17 | Patents granted |\n| -- | --------------- |"
+    )
+    assert "Metric: Patents granted" in chunk.text
+    embedding = str(chunk.embedding_text)
+    assert "Retrieval hints:" not in embedding
 
 
 def test_extract_fte_candidates_returns_empty_list_when_no_candidate_exists() -> None:

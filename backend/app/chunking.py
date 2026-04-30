@@ -15,6 +15,50 @@ VALUE_RE = re.compile(
     re.IGNORECASE,
 )
 
+KPI_RETRIEVAL_HINTS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (
+        ("shareholder", "shareholders", "returned", "dividend", "dividends", "buyback", "buybacks"),
+        ("dividends", "buybacks", "shareholder distributions"),
+    ),
+    (
+        ("r&d", "research", "development", "investment", "spend", "spending"),
+        ("research and development spend", "monetary R&D investment", "financial expense"),
+    ),
+    (
+        ("margin", "rate", "ratio", "percentage"),
+        ("percentage", "margin", "rate", "ratio"),
+    ),
+    (
+        ("employee", "employees", "fte", "ftes", "headcount", "workforce"),
+        ("workforce", "employees", "headcount", "full-time equivalents"),
+    ),
+    (
+        ("emission", "emissions", "scope", "co2", "co₂", "ghg"),
+        ("greenhouse gas", "GHG", "CO2e", "emissions"),
+    ),
+    (
+        ("sales", "revenue", "turnover"),
+        ("revenue", "net sales", "turnover"),
+    ),
+)
+
+VAGUE_KPI_LABELS: frozenset[str] = frozenset(
+    {
+        "read more",
+        "continued",
+        "cont.",
+        "cont",
+        "key",
+        "on track",
+        "more",
+        "see more",
+        "tbd",
+        "n/a",
+        "note",
+        "notes",
+    }
+)
+
 
 @dataclass(frozen=True)
 class ChunkDraft:
@@ -144,7 +188,6 @@ def _page_drafts(
                 boilerplate=boilerplate,
                 max_tokens=max_tokens,
                 overlap=overlap,
-                token_counter=token_counter,
                 split_oversize=split_oversize,
             )
         )
@@ -192,7 +235,6 @@ def _table_drafts(
     boilerplate: set[str],
     max_tokens: int,
     overlap: int,
-    token_counter: Callable[[str], int],
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
     drafts: list[ChunkDraft] = []
@@ -222,11 +264,13 @@ def _table_drafts(
         for row in data_rows:
             cells = _parse_table_cells(row)
             for value, label in _metric_pairs(cells):
+                if not _is_kpi_label(label):
+                    continue
                 drafts.append(
-                    _draft(
+                    _kpi_metric_draft(
                         page=page,
-                        text=_format_table_row([value, label]),
-                        chunk_kind="metric",
+                        value=value,
+                        label=label,
                         section_path=section_path,
                         company=company,
                         year=year,
@@ -383,6 +427,135 @@ def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
         else:
             i += 1
     return pairs
+
+
+def _is_kpi_label(label: str) -> bool:
+    clean = label.strip()
+    if len(clean) < 3 or len(clean) > 80:
+        return False
+    if _looks_like_value(clean):
+        return False
+    norm = _normalize_line(clean)
+    if norm in VAGUE_KPI_LABELS:
+        return False
+    if not re.search(r"[A-Za-z]", clean):
+        return False
+    return True
+
+
+def _infer_kpi_unit(value: str, label: str) -> str | None:
+    raw = value.strip()
+    if not raw:
+        return None
+    has_eur = "€" in raw
+    has_usd = "$" in raw
+    has_gbp = "£" in raw
+    has_billion = bool(re.search(r"(?<![A-Za-z])bn(?![A-Za-z])|billion", raw, re.IGNORECASE))
+    has_million = bool(re.search(r"(?<![A-Za-z])m(?![A-Za-z])|million", raw, re.IGNORECASE))
+    if "%" in raw:
+        return "%"
+    if re.search(r"\bMt\b", raw):
+        return "Mt"
+    if re.search(r"\bkt\b", raw):
+        return "kt"
+    if re.search(r"\bGt\b", raw):
+        return "Gt"
+    if has_eur and has_billion:
+        return "EUR billion"
+    if has_eur and has_million:
+        return "EUR million"
+    if has_usd and has_billion:
+        return "USD billion"
+    if has_usd and has_million:
+        return "USD million"
+    if has_gbp and has_billion:
+        return "GBP billion"
+    if has_gbp and has_million:
+        return "GBP million"
+    if has_billion:
+        return "billion"
+    if has_million:
+        return "million"
+    if has_eur:
+        return "EUR"
+    if has_usd:
+        return "USD"
+    if has_gbp:
+        return "GBP"
+    if re.search(r"\bFTEs?\b", label):
+        return "FTEs"
+    return None
+
+
+def _kpi_retrieval_hints(label: str) -> list[str]:
+    norm = label.casefold()
+    tokens = set(re.findall(r"[a-z0-9&₂]+", norm))
+    has_unit_token = "unit" in tokens or "units" in tokens
+    hints: list[str] = []
+    seen: set[str] = set()
+    for keywords, category_hints in KPI_RETRIEVAL_HINTS:
+        if not any(_matches_keyword(keyword, tokens, norm) for keyword in keywords):
+            continue
+        if has_unit_token and any(
+            kw in {"sales", "revenue", "turnover"} for kw in keywords
+        ):
+            continue
+        for hint in category_hints:
+            if hint not in seen:
+                seen.add(hint)
+                hints.append(hint)
+    return hints
+
+
+def _matches_keyword(keyword: str, tokens: set[str], norm: str) -> bool:
+    if keyword in tokens:
+        return True
+    if "&" in keyword or " " in keyword:
+        return keyword in norm
+    return False
+
+
+def _kpi_metric_draft(
+    *,
+    page: int,
+    value: str,
+    label: str,
+    section_path: str | None,
+    company: str | None,
+    year: int | None,
+    parser: str | None,
+    boilerplate: set[str],
+) -> ChunkDraft:
+    unit = _infer_kpi_unit(value, label)
+    period = str(year) if year is not None else None
+    text_lines = [f"Metric: {label}"]
+    if period:
+        text_lines.append(f"Period: {period}")
+    text_lines.append(f"Value: {value}")
+    if unit:
+        text_lines.append(f"Unit: {unit}")
+    text_lines.append("Presentation: highlight")
+    text = "\n".join(text_lines)
+
+    extra_lines = ["Type: KPI highlight", f"Metric: {label}", f"Value: {value}"]
+    if unit:
+        extra_lines.append(f"Unit: {unit}")
+    hints = _kpi_retrieval_hints(label)
+    if hints:
+        extra_lines.append("Retrieval hints: " + ", ".join(hints))
+    extra = "\n".join(extra_lines)
+
+    return _draft(
+        page=page,
+        text=text,
+        chunk_kind="metric",
+        section_path=section_path,
+        company=company,
+        year=year,
+        parser=parser,
+        boilerplate=boilerplate,
+        extra_embedding_context=extra,
+    )
 
 
 def _metric_texts_from_header_row(headers: list[str] | None, cells: list[str]) -> list[str]:
