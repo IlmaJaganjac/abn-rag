@@ -1,0 +1,642 @@
+[
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 8,
+    "section_path": "Q Looking back at the year, what were the most significant milestones and challenges?",
+    "verbatim_text": "In 2025, the far-reaching impact of artificial intelligence (AI) on society and our industry became clear. At first, we believed that AI would drive demand from only a limited portion of our customer base. At the end of the year, we saw that new and significant demand for AI was starting to fuel capacity build-up across our broad customer base – a powerful trend that we believe will continue in 2026 and beyond.\n\nFurthermore, in line with our commitment to support customers in the 3D integration space, we were pleased to ship ASML’s first advanced packaging product, the TWINSCAN XT:260, which delivers up to four times the productivity of existing solutions, and we will continue exploring further opportunities in this growing field. The outcome of our endeavors is clear to see in the performance of the business, which is explained in full elsewhere in this annual report. Sales grew to €32.7 billion, up by 15.6% over 2024. The gross margin was 52.8%, up by 1.5 percentage points from 2024, and we returned €8.5 billion to shareholders. Our backlog currently stands at a healthy level of €38.8 billion.\n\nThese results have been achieved in the context of a high degree of geopolitical and market uncertainty, which our team has navigated with care and expertise. None of this would have been possible without our great team of committed colleagues around the world.\n\nThe year was also characterized by ongoing work to make sure that our extensive environmental, social and governance (ESG) plans underpin our commitments to customers, employees, suppliers, shareholders and society. We have met our target to be greenhouse gas neutral for scope 1 and 2, and our engagement in the community has more than quadrupled in the last two years. I am also pleased to see the strong involvement of our colleagues in these efforts.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 38,
+    "section_path": null,
+    "verbatim_text": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers. We are reducing the energy use and emissions of the systems we design and sell and those we have already installed at our customer sites. Each of our product families has a long-term energy saving roadmap – from enabling hydrogen reuse, to sleep modes, to high-temperature cooling water. These solutions have the potential to make a meaningful difference when scaled by customer adoption.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 56,
+    "section_path": "Financial performance KPIs (continued)",
+    "verbatim_text": "Selling, general and administrative (SG&#x26;A) costs increased by 7.9% year-over-year, primarily due to higher average wages and salaries per FTE, and continued investments in our Community Partnership Program.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 105,
+    "section_path": "ESG Committee meetings",
+    "verbatim_text": "The ESG Committee meets at least twice a year and more frequently when deemed necessary. Each meeting covered updates on the latest developments in the area of ESG and feedback from the relevant ESG benchmarks. Furthermore, the performance on the ESG KPIs and ESG-related targets in the long-term incentive (LTI) of the Board of Management and ASML’s senior management were discussed. Finally, ESG compliance remains a key focus area for every meeting.\n\nIn each of the ESG Committee meetings, a deep dive review was performed of one of the topics included in ASML’s ESG sustainability strategy. One of the deep dive sessions centered around collaboration in the semiconductor industry. It covered why collaboration is needed on ESG sustainability and reviewed current initiatives, including the Semiconductor Climate Consortium and its 2025 priorities. Another deep dive review was performed on supply chain emissions in light of ASML’s ambition to become greenhouse gas neutral in the supply chain by 2030. Finally, a deep dive review was performed on I&#x26;D. In this deep dive, the ESG Committee was updated on the progress of the three-year I&#x26;D program that started in 2024. The deep dive further touched on key focus areas and steps toward the further execution of the I&#x26;D strategy.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 132,
+    "section_path": "The internal pay ratio (CEO versus employee remuneration)",
+    "verbatim_text": "The foregoing table aims to provide insight into our performance over the past five years and the development of the remuneration. The metrics net sales, net income and share price are used to measure performance, as they are key metrics serving as a good proxy for our general performance, as well as in view of comparability with other companies. Actual remuneration may fluctuate year on year depending on actual STI pay-out in any year, as well as the vesting of performance shares (LTI) in any year and the share price at that moment.\n\nWe have grown significantly over recent years, which is not only reflected in the number of employees but also in terms of performance. Over the last five years, total net sales increased by 76%, net income increased by 63% based on US GAAP (66% based on EU-IFRS) and ASML’s share price increased by more than 30%. This shows that our performance has improved significantly, leading to several revisions of the Remuneration Policy for the Board of Management in past years (last update in 2025), resulting in higher base salaries as well as higher target levels of STI and LTI.\n\nThe internal pay ratio consists of the CEO’s total remuneration (including all remuneration components) during 2025 of €7,021 thousand, compared to the average remuneration of all employees. The average remuneration of all employees was calculated taking into account the total employee personnel expenses (wages and salaries + social security expenses + pension and retirement expenses + share-based payments), divided by the average number of payroll employees in FTE = €6,612.8 million divided by 43,267 = €153 thousand. This ratio has neither been prepared to comply with the Pay Ratio Disclosure requirements under SEC regulations nor with the ESRS requirements1. The ratio is based on the highest-paid individual according to accounting values consisting of fixed and variable remuneration elements compared to the average remuneration of all employees that are in service with the company, which excludes all other Board of Management members. This calculation approach brings the ratio in line with the requirements of the Corporate Governance Code.\n\nThe Supervisory Board considers the current build-up and the overall pay ratio to be equitable, considering our current performance.\n\n1. Read more in Sustainability statements — Attractive workplace for all – Metrics table – Annual total remuneration ratio",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 148,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated four FTEs to teams working on the environmental and human rights due diligence, including our Human Rights program. Additionally, we plan to improve communication about our grievance channels – especially for vulnerable groups like site external workers and local communities – and enhance our processes for managing human-rights-related cases.\n\nTo better identify and address risks to employees, we expect to conduct further evaluation of human rights risks within our operations and implement targeted actions to remedy any identified gaps. We also seek to align our environmental due diligence practices with evolving regulatory requirements and stakeholder expectations, with a focus on risk assessment and mitigation.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 152,
+    "section_path": "Energy efficiency and climate action",
+    "verbatim_text": "We aim to reduce our climate impacts, working closely with our partners and peers in the entire semiconductor value chain – in our own operations, together with our suppliers, in our customers’ production processes and through reducing the energy used by semiconductors in operation by enabling scaling.\n\n- Manufacturing and buildings\n- Purchased goods and services\n- Logistics\n- Business travel\n- Employee commuting\n- Product use\n\nWe aim to be greenhouse gas neutral across our value chain by 2040. Read more on page 153 >\n\nOur Climate Transition Plan is our strategic roadmap that underpins our ambition to align with the goals of the Paris Agreement. With our SBTi-validated emission reduction targets, we commit to taking ambitious action by driving our Climate Transition Plan in each of the emission categories.\n\nWe also report on our resilience analysis of our strategy and business model in relation to climate change, using a climate scenario analysis. Read more on page 182 >",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 153,
+    "section_path": "Energy efficiency and climate action",
+    "verbatim_text": "We aim to be greenhouse gas neutral across our value chain by 2040\n\nKey On track / achieved\n\nOff track / not achieved",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 153,
+    "section_path": "Our sub-topics",
+    "verbatim_text": "Commitment from top-80% suppliers to reduce their CO₂e footprint by 2030\n\n32% 5.5 kWh\n\n2024: 17% 75% 2024: 5.9 kWh\n\n2026 target: 2025 target: 5.1 kWh",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 155,
+    "section_path": "How we are managing energy efficiency and climate action: Our Climate Transition Plan",
+    "verbatim_text": "Climate change is a global challenge requiring urgent action from all stakeholders. We have been developing and enhancing our climate strategy for many years, both internally in our operations and externally with our value chain partners. Following three consecutive successful energy savings master plans, we are implementing our fourth five-year energy savings master plan to further reduce emissions from our own facilities and increase our use of renewable electricity. We are also collaborating with suppliers to reduce our supply chain’s carbon footprint, and are making our products more energy-efficient through R&#x26;D.\n\nTo deliver on our ambitions, our Climate Transition Plan is embedded in our business strategy – responsibility for its execution lies with the business. The concrete actions executed in the past and toward the future, as described in this plan, are determined in collaboration between our ESG Sustainability team and the business. To ensure sufficient resources are allocated in a timely manner throughout the business, the actions of our Climate Transition Plan are also embedded in our financial planning cycles – with implementation strengthened by an internal carbon price.\n\nThe BoM has adopted the Climate Transition Plan, which was also discussed with the ESG Committee and reported on to the Supervisory Board. Our Climate Transition Plan is our strategic roadmap underpinning our ambition to align with the goals of the Paris Agreement – which states that, to keep global warming below 1.5°C, GHG emissions need to be reduced by 45% by 2030 and reach net zero by 2050. However, according to the latest climate science, the 1.5°C target is slowly getting out of reach. Recognizing this urgency, we continue to aim for GHG neutrality across our value chain by 2040.\n\nAccording to SBTi, the aim is to roughly halve absolute scope 1 and 2 emissions by 2030, while in the longer term companies must cut all possible emissions before 2050. For scope 3 emissions, either an absolute path to -90% or an emission intensity path to -97% can be chosen. We have opted for an emission intensity pathway toward -97% by 2040 compared to base year 2019, and have defined our emission intensity as CO2e emissions per €m gross profit (in accordance with US GAAP).",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 156,
+    "section_path": "Aiming for GHG neutrality by 2040",
+    "verbatim_text": "In 2021, we presented our roadmap to GHG neutrality across the value chain by 2040. We defined targets for each of the material categories related to energy efficiency and climate action. Definitions have been updated in line with the European Sustainability Reporting Standards (ESRS), and gross reduction targets will be presented in the following sections to explain how we aim to maximize our emission reduction activities to achieve our ambitions by 2040.\n\nThe diagram to the left illustrates our journey to GHG neutrality across our value chain by 2040 for our most material emission categories.\n\nWe define GHG neutrality as having our remaining emissions – following efforts to reach our gross GHG emission reduction targets – compensated for by the same amount of tonnes (metric tons) of carbon credits, verified against recognized quality standards.\n\nWe acknowledge that, to successfully achieve our targets, we need to work closely together with our customers, suppliers and other partners in our ecosystem. We have already intensified collaboration across the industry value chain and will continue on this path to drive ambitious climate action in our industry.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 156,
+    "section_path": "Targets",
+    "verbatim_text": "- Become GHG neutral for scope 1 and 2 emissions, and scope 3 emissions from business travel and commuting by 2025.\n- Become GHG neutral for scope 3 emissions from supply chain by 2030.\n- Become GHG neutral for scope 3 emissions from product use by 2040.\n\nSince 2019, we have reduced our scope 1 and 2 emissions from our manufacturing and buildings from 60 kt to 26 kt, and we have reduced our emissions from business travel and commuting (scope 3 categories 6 and 7) from 139 kt to 78 kt. The residual emissions for each of these categories in scope 1, 2 and 3 have been compensated for, meaning we have achieved our 2025 GHG neutrality target.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 157,
+    "section_path": "Levers for action",
+    "verbatim_text": "We aim to achieve our emission targets by working on three improvement levers:\n\n1. Reducing energy use\nThrough our energy efficiency strategy, we aim to minimize energy demand across our value chain by taking the following steps:\n\n- Analyze: Understand energy use and GHG emissions to identify focus areas and opportunities to improve (as an enabler for other steps).\n- Minimize: Minimize the amount of energy consumed across our value chain. We do this by:\n- Improving processes to require less energy.\n- Improving energy efficiency of equipment, both by selecting efficient equipment for our own facility installations and by designing our products for improved energy efficiency.\n- Reusing energy, for example by reusing heat from machinery for office heating.\n2. Using renewable energy\nAs of the end of 2025 we used 100% renewable electricity. We remain committed to maximizing renewable electricity generation on our own premises. For purchased electricity, we aim to source 100% credible renewable electricity with the following attributes:\n\n- Sustainable sources: Wind, solar, hydro or geothermal.\n- Local: As close as possible to where electricity is used, and on the same grid.\n- Additional capacity: Commercial operation date (when delivery of electricity to the grid began) of newly contracted projects maximally one year ago.\n- Bundled: Renewable electricity certificates and electricity bundled in long-term contracts.\n- Minimal risk: Screening for material environmental or social negative impacts or risks, and/or elements that turn the environmental business case negative.\n- Fair price: In the context of the markets where we operate, when compared to similar electricity sources over time.\n\nIn 2024, we explored the reduction of scope 1 emissions through the purchase of renewable gas. This alternative is being further developed and will be included in our GHG emission reduction strategy for 2030.\n3. Compensating for residual emission\nWhere minimizing GHG emissions is not feasible, we aim to compensate for emissions from our own operations, business travel and commuting by retiring the same volume of voluntary emission reduction certificates (VERs, also called ‘offsets’ or ‘carbon credits’) or equivalent.\n\nAs part of our Climate Transition Plan, we have defined separate (gross) emission reduction targets pursued independently of any offsetting. Offsetting for residual emissions started in 2025.\n\nWe expect these actions to deliver roughly half of our scope 1 and 2 emission reduction target of 90% by 2040. We also expect them to contribute roughly half of the scope 3 emission reductions in our Climate Transition Plan.\n\nIn the upstream and downstream parts of our value chain, we closely cooperate with both suppliers and customers to increase their share of renewable energy usage, with an initial focus on electricity.\n\nWe strive to assemble a cost-effective offset portfolio from projects that fulfill practice quality criteria and are validated by leading third-party standards. In our offset portfolio, only ‘removal’ offsets (nature- and/or tech-based) are considered eligible.\n\nIn 2025, we compensated for 104 kt of CO2e through the GreenTrees Reforestation Project in the US, which accounted for 100% of the total remaining emissions from own activities.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 158,
+    "section_path": "GHG neutrality target: Scope 1 and 2 emissions (manufacturing and buildings)",
+    "verbatim_text": "1. Historic values shown in the visual reflect the current reporting scope and calculation methodology, and may deviate from reported values in previous Annual Reports that were based on the reporting scopes and calculation methodologies used in the respective years.\n\n2. In addition to our SBTi-validated target from 2021, the SB has applied an LTI performance measure on scope 1 and 2 emissions for the 2023-2025 period. Read more in Corporate governance – Remuneration report.\n\n3. The description of avoided and reduced emissions is on ASML’s company (being consolidated group) level. This differs from the guidance by the GHG Protocol on estimating and reporting avoided emissions, which is on product level.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 160,
+    "section_path": "Scope 1 and 2",
+    "verbatim_text": "The graph on page 158 visualizes our SBTi scope 1 and 2 targets (against a 2019 baseline value of 60 kt), namely:\n\n- Reduce absolute gross scope 1 and 2 GHG emissions by 25.2% by 2025: In 2025, with emissions of 26 kt CO2e, we have already reduced absolute gross scope 1 and 2 emissions from 2019 by 56%, exceeding the SBTi target.\n- Reduce absolute gross scope 1 and 2 GHG emissions by 75% by 2030: This translates to lowering our CO2 emissions below 15 kt by 2030.\n- Reduce absolute gross scope 1 and 2 GHG emissions by 90% by 2040: This translates to lowering our CO2 emissions to below 6 kt by 2040.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 160,
+    "section_path": "Scope 3",
+    "verbatim_text": "For scope 3, (as shown on page 159) we have the following SBTi-validated and approved intensity targets (against the 2019 absolute baseline value of 7.6 Mt):\n\n- Reduce scope 3 GHG emissions per €m gross profit by 35.3% by 2025: This target represents an intensity reduction from our baseline value of 1.44 kt CO2e per €m gross profit to a target level of 0.93 kt CO2e per €m gross profit.\n- Reduce scope 3 GHG emissions per €m gross profit by 55% by 2030: This translates to lowering our CO2 emissions to below 19.5 Mt by 2030.\n- Reduce scope 3 GHG emissions per €m gross profit by 97% by 2040: This translates to lowering our emissions to below 2.3 Mt by 2040.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 161,
+    "section_path": "How we are managing energy efficiency and climate action: Our Climate Transition Plan (continued)",
+    "verbatim_text": "- Employee commuting: Including our initiatives to switch to low-carbon travel modes.\n- Product use: Including actions to realize our energy-efficiency roadmaps for our different product categories, to ensure less energy is required to produce a chip – providing an opportunity for our customers to reduce their scope 2 emissions. The biggest impact can be achieved by customers purchasing renewable energy for their manufacturing locations, which we are further stimulating through active participation in the SCC.\n\nTo guide decision-making in internal business cases without creating direct monetary flows, we introduced a price for carbon emissions. Our internal carbon price enables us to consistently factor externalities from GHG emissions into business cases, creating increased internal awareness and supporting capital expenditure (capex) investments aimed at reducing carbon emissions and improving energy efficiency.\n\nWe considered reference points such as carbon credits based on EU European Trading System (ETS) historical prices and forecasts, peer benchmark based on a group analysis of more than 30 ICT industry peers, and cost-to-society benchmark studies in the Intergovernmental Panel on Climate Change (IPCC) report and in US Environmental Protection Agency (EPA) guidance. Our internal carbon price will be reviewed structurally on an annual basis, and on an ad hoc basis when circumstances arise, to align with our ESG ambition level.\n\nIn the reporting year, we used the CO2 shadow price for investment decisions covering 0.8 kt, which corresponds to a share of total gross scope 1 and 2 GHG emissions. The R&#x26;D shadow price is considered in R&#x26;D investment decisions that are relevant to achieving our scope 3 category 11 energy-reduction targets.\n\nThere are several cooling systems at the site that generate residual heat, which would typically go to waste. However, through a heating and cooling network on our campus – a ring-pipe system that uses water to distribute thermal energy – this residual heat is now transported to nearby buildings. Local heat pumps installed in each building are at the heart of the system. These units make use of the difference between the water loop’s temperature and each building’s required temperature to provide heating or cooling while minimizing energy consumption.\n\nBy providing both heating and cooling, this system offers continuous comfort throughout the year and lowers dependence on conventional gas boilers. It is part of our energy savings master plan, which started in 2021, and aims to improve energy efficiency, reduce scope 1 and 2 greenhouse gas emissions, and decrease our dependency on natural gas in the Netherlands.\n\nWe already achieved total energy savings of 148 TJ as a result of infrastructural projects executed between 2021 and 2025, exceeding our target of saving 100 TJ.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 161,
+    "section_path": "Innovation gap",
+    "verbatim_text": "The innovation gap for scope 3 shows the additional emission reductions needed after the current key actions (as described in the next section) in order to reach the 2040 target. We aim to close this gap in collaboration with our supply chain partners and customers based on additional actions to be taken and agreed upon in the (near) future.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 162,
+    "section_path": "How we are managing energy efficiency and climate action: Our Climate Transition Plan (continued)",
+    "verbatim_text": "Dependencies, challenges and locked-in emissions\n\nWe are dependent on the actions taken by our customers (uptake of renewable energy) and suppliers (for example compensating for residual emissions from products to ASML) – and on the complexity of our supply chain, with a long tail existing of many different tiers. We are also dependent on the accessibility of affordable low-carbon energy, which is not available in all regions where we, our suppliers and customers operate. In addition, we are aware that the availability of carbon credits might be impacted by an increasing market demand toward 2030 and 2040.\n\nWe also foresee a challenge in our supply chain regarding hard-to-abate emissions, for example in purchasing low-carbon raw materials such as steel and aluminum – both used in our products and accounting for most of the weight of our machines. Currently there are no viable low-carbon alternatives and the production industries of these materials are not aligned with the Net Zero Emissions by 2050 Scenario provided by the International Energy Agency (IEA).\n\nTo determine the emission-reduction trajectory for our Climate Transition Plan, we calculate different pathways using an internal modeling tool. The development over time of our sales for product mix (EUV and DUV lithography systems, metrology and inspection systems, computational lithography) is modeled in line with our public guidance, as disclosed during our most recent Investor Day – which indicates that, toward 2030, we expect a gradual shift to larger percentages of EUV systems sold.\n\nWe have not included any scenarios in which the future developments of new product families have been modeled, as we do not yet have a sufficiently clear view on the potential increases or reductions in energy consumption of those products. We will keep monitoring these innovative developments and incorporating them in our plans where needed.\n\nPotential impact of changes in our product portfolio\n\n- Operating expenditure – for example investing in innovation, research and development to further improve the energy efficiency of our product portfolio.\n\nEU Paris-aligned benchmarks are indices where the total GHG emission levels of all underlying assets are aligned with the Paris Agreement – which aims to limit the rise in global temperatures to well below 2°C above pre-industrial levels, and to pursue efforts to keep the rise to 1.5°C. Companies can be excluded from these benchmarks if they significantly harm one or more of the environmental objectives of the EU, however ASML is not excluded.\n\nThere, we also assess if our key economic activity (CE 1.2 Manufacture of electrical and electronic equipment) is – according to the Environmental Delegated Act – substantially contributing to the transition to a circular economy. Due to the nature and complexity of lithography systems, we are currently unable – and expect in the near future to remain unable – to meet all the technical screening criteria from the EU Taxonomy, as explained in our Circular economy section.\n\nWe support the transition to a sustainable economy by means of our key actions and related investments made as part of our circular strategy and for our climate action pathway to reach GHG neutrality by 2040. In order to achieve our energy efficiency and climate action ambitions toward 2030 and 2040, we need to make significant investments. These include:\n\n- Capital expenditure – for example purchasing equipment to make our factories and other facilities more energy efficient, as well as lease contracts for new and/or renovated buildings.\n\nRead more in Sustainability statements – Environmental – EU Taxonomy",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 163,
+    "section_path": "Targets and performance",
+    "verbatim_text": "Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025. We have reduced our scope 1 and 2 emissions from 60 kt to 26 kt between 2019 and 2025 by deploying our energy savings master plans and purchasing more renewable electricity. The residual emissions (26 kt) have been compensated for to reach our GHG neutrality target.\n\nWe have defined two additional targets related to manufacturing and buildings:\n\n- Achieve energy savings of 100 TJ from energy-saving projects in our own operations worldwide by 2025.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 163,
+    "section_path": "Targets and performance",
+    "verbatim_text": "In 2025, as part of our energy savings master plan, we executed key projects in the Netherlands, Germany, the US and Taiwan, resulting in 48 TJ of annual energy savings. Total energy savings amounted to 148 TJ as a result of infrastructural projects executed between 2021 and 2025, exceeding our target of 100 TJ and the equivalent of 26 kt CO2e using location-based emission factors.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 164,
+    "section_path": "Manufacturing and buildings GHG neutrality pathway",
+    "verbatim_text": "In 2026, execution of the energy savings master plan for the 2026–2030 time frame will commence. This includes over 60 projects covering each of our five largest industrial sites, with the goal of achieving a reduction of another 130 TJ.\n\nIn the coming years, we also plan to expand the use of solar panels at our sites in Europe, the US and Asia – we intend to have more than 20,000 solar panels on our roofs by 2030. This should lead to a total saving in purchased energy of around 30 TJ per year, and a total CO2e emission reduction of around 2 kt per year.\n\nPreparations are also underway to begin integrating green gas into our energy strategy, starting in 2028.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 165,
+    "section_path": "Targets and performance",
+    "verbatim_text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 165,
+    "section_path": "Re-affirming supplier commitments to ESG",
+    "verbatim_text": "We asked suppliers to sign our letter of commitment (LOC) to commit to and collaborate with us to achieve our ESG ambitions. By signing, they agree to:\n\n- Measure and share their CO2e emission data with ecosystem partners;\n- Set ambitious targets to reduce or compensate for CO2e emissions;\n- Collaborate with ASML and ecosystem partners to remanufacture used system parts, tools, packaging and other materials, to maximize reuse.\n\nFor the estimated emission reduction of this action, we refer to our Climate Transition Plan. Since 2024, we continuously focus on suppliers’ data quality and informing and training them on calculation methodologies for their scope 1, 2 and 3 emissions. In 2025, we focused on strategies to reduce the.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 166,
+    "section_path": "Energy efficiency and climate action: Purchased goods and services (continued)",
+    "verbatim_text": "The carbon footprint of materials throughout their lifecycle. We also discussed options for reducing carbon emissions in their upstream supply chain and own operations, including sustainable sourcing, more environmentally friendly transportation modes and increased use of renewable energy in their facilities. Additionally, we identified a supplier need for specific ‘green design’ requirements from their customers, such as ASML. Internally, we see growing focus and support for reducing our upstream carbon footprint. We have contracted a service provider to help us improve suppliers’ emissions data quality. The number of FTEs in the SS&#x26;P ESG sustainability program remained at five in 2025.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 167,
+    "section_path": "Targets and performance",
+    "verbatim_text": "We have one target for our scope 3 emissions related to logistics (category 4): Become GHG neutral for scope 3 emissions related to logistics by 2030.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 168,
+    "section_path": "Energy efficiency and climate action: Logistics (continued)",
+    "verbatim_text": "For transporting DUV and metrology and inspection systems by ocean freight, within the current transport tool pool we were able to support air-to-ocean projects. Furthermore, because of our elevated ambitions and the increasing lead time due to returns of containers via ocean freight, we agreed with our forwarders to increase the number of our leased ocean containers by 63 – leading to higher yearly expenditure of €1.0 million.\n\nFor SAF use in logistics, we have agreements in place with all our forwarders whereby one or both parties spend a small percentage of the annual air-freight cost or revenue attributable to ASML in SAF. In 2025, we contributed €0.4 million on SAF programs from our forwarders, while €1.2 million worth of SAF is used for our air freight. For next year, we intend to continue optimizing our SAF strategy.\n\nIn 2026, we aim to absorb the step up to high-volume ocean freight of our mature systems in our current transport tool pool by optimizing utilization of these tools. To facilitate the transition from air to ocean freight for the common platform (EUV), we have started developing special containers for safe transportation by sea in 2030. In 2025, the investment in this development focused mainly on manpower and D&#x26;E capability.\n\nWe dedicated 20 FTEs to the air-to-ocean project. Investments in more sustainable transportation modes are also motivated by considerations of future cost-effectiveness.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 168,
+    "section_path": "Looking ahead",
+    "verbatim_text": "We are progressing toward our target of achieving GHG neutral scope 3 emissions for logistics by 2030. In 2026, we plan to keep working on obtaining more accurate emissions data from our logistics partners as well as our collaborative reduction actions.\n\n- Aiming in 2026 to reach the full product project phase to ship mature DUV and metrology and inspection systems in high volume via ocean freight.\n- Progressing our pilot project to ship EUV modules via ocean freight in the future.\n- To further reduce emissions, in the coming years we will be focusing on:\n- Investigating the possibilities to reduce the emissions of the outsourced warehouses we use worldwide and the trucks used for the last mile.\n\nTo reach our GHG neutrality target by 2030, we are dependent on compensation for the residual emissions by our logistics partners.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 169,
+    "section_path": "Achieved",
+    "verbatim_text": "In the base year 2019, our business travel emissions were 97 kt CO2e. In 2025, taking into account our continuous critical focus on travel budgets and SAF purchases, total emissions were 32 kt. The residual emissions (32 kt) have been compensated for to reach our GHG neutrality target.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 169,
+    "section_path": "Footnote",
+    "verbatim_text": "1. In the Dutch Business Sustainable Mobility coalition, around 70 organizations representing more than 550,000 employees in the Netherlands have signed up for the Dutch Business Sustainability Mobility Pledge, which sets out the ambition of the front-runners of the Dutch business community to explore the potential of a sustainable shift in business mobility. The main, shared ambition is to reduce CO₂e emissions from business travel by 50% per FTE in 2030 against the base year 2016. Due to data availability, we use the (updated) base year of 2019 rather than 2016.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 170,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated two FTEs to the commuting decarbonization project. In 2025, we invested €0.1 million in EV chargers and additional campus e-bikes. We also spent €1.3 million to compensate for 45 kt CO2e of our commuting emissions.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 170,
+    "section_path": "Our scope",
+    "verbatim_text": "In scope are scope 3 category 7 emissions, related to the transportation of (fixed-contract) employees between their homes and worksites. Our commuting emissions (predominantly relating to commuting by car) increased from 36 kt to 45 kt CO2e in 2025, mainly because of our methodology update this year, where we transitioned from estimating office presence to more direct data through a more consistent global rollout of badge-swipe tracking. Furthermore, we had a slight increase in total FTEs. The residual emissions (45 kt) have been compensated for to reach our GHG neutrality target.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 171,
+    "section_path": "Targets and performance",
+    "verbatim_text": "Despite not reaching our target, this is an improvement from the 5.9 kWh/wafer. In collaboration with our customers, we aim to reduce emissions from product use when designing new lithography, metrology and inspection systems or parts, increasingly focusing on reducing their energy consumption, supporting progress toward GHG neutrality by 2040.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 171,
+    "section_path": "Scope 3 emissions from product use",
+    "verbatim_text": "The largest portion of our (indirect) GHG emissions arises during use of our systems at our customers’ factories. Our scope 3 emissions from the use of sold products relate to scope 3 category 11. In scope are expected lifetime emissions from the use of goods and services we sell: EUV and DUV lithography systems, metrology and inspection systems and computational lithography.\n\nRecent energy savings were mainly achieved by the first sleep mode deliverable, called RF Sleep Mode, released in 2024 and instant saving in system power consumption when the system is in sleep mode. This feature, combined with additional enhancements, results in exceeding our target of a 10% reduction by 2025.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 174,
+    "section_path": "Energy efficiency and climate action: Product use (continued)",
+    "verbatim_text": "Looking ahead\n\nWe will continue to work on the energy efficiency of our systems and other product families. In 2026, we plan to introduce new energy-reducing features for our EUV systems: the release a new Productivity Enhancement Package, and the roll out the hydrogen reuse solution to the market.\n\nFor DUV, we actively engage with our customers, on our product roadmaps for both ASML’s and our customers’ GHG neutrality ambitions.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 174,
+    "section_path": "Semiconductor Climate Consortium (SCC)",
+    "verbatim_text": "We are a founding member of the SCC. Established in November 2022, the SCC aims to address the challenges of climate change and speed up the industry’s efforts to reduce GHG emissions throughout the value chain. We are co-leading the BAR (Baselining, Ambition-Setting and Roadmapping) consortium working group and are actively participating in other working groups by sharing data and information, and by facilitating sessions.\n\nASML is an active contributor to the SCC. The technology pioneered by our R&#x26;D teams and partners sits at the heart of global digitalization – and has the potential to transform how we all live and work.\n\nWe enable our customers to innovate the semiconductor technologies that can help humanity manage its challenges and seize opportunities by facilitating sustainable living and e-mobility, accessible healthcare, food security and the transition to renewable energy.\n\nOur customers’ products are used in a wide variety of applications, impacting society’s GHG emissions both positively and negatively – particularly when taking into account the rapid adoption and increasing integration of generative AI capabilities.\n\nIn collaboration with the industry, we aim to have a better understanding of the GHG emissions caused by the use of our customers’ products. We do this, for example, by being a member of the SCC, where we actively engage with our customers on climate-related matters. We do not measure emissions downstream beyond our customers and have no targets on these, because this is outside the scope of our GHG reporting boundary.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 178,
+    "section_path": "Methodology on targets",
+    "verbatim_text": "GHG neutrality targets\n\n- Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025.\n- Become GHG neutral for scope 3 emissions related to purchased goods and services including capital goods (categories 1 &#x26; 2) and related to logistics (category 4) by 2030.\n\nIn this section, we elaborate on the methodology and assumptions used in formulating our targets and indicators related to our ESG theme Energy efficiency and climate action.\n\nAs part of our climate ambitions, we have developed net and gross emissions-reduction targets. Net targets may include carbon offsets or credits, and align with our ambitions to become GHG neutral by 2025, 2030 and 2040 for different emission categories. Gross emissions reduction targets do not include carbon offsets or credits and provide insight into emissions reductions achieved by reducing energy usage and switching to renewables.\n\nAs of 2024, we report on all buildings owned or leased by ASML. The baseline value has been updated accordingly. To calculate scope 2 GHG emissions we use the market-based method. This target is measured in kilotonnes (kt) CO₂e.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 179,
+    "section_path": "Energy efficiency and climate action: Additional disclosures (continued)",
+    "verbatim_text": "Purchase 100% renewable electricity for our own operations worldwide by 2025. This target is measured as the percentage of renewable electricity purchased (including energy attribute certificates) versus our total electricity consumption. It pertains exclusively to scope 2 emissions, for which we use market-based emission factors.\n\nGet commitment from our top 80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030. This target is calculated as the percentage of our suppliers (based on CO₂e emissions) who signed a letter of commitment or made a public statement to reduce their CO₂e footprint by 2030. Our top 80% suppliers are those who, according to spend-based emission calculations, together account for 80% of our total supplier emissions and is updated on a yearly basis. Progress is monitored as of 2024, when the program started. In 2025, we updated our calculation methodology to introduce greater granularity in categorizing the different types of GHG reduction commitments set by our suppliers.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 192,
+    "section_path": "Resources",
+    "verbatim_text": "We have a dedicated Reuse &#x26; Repair organization, established with a view to bringing greater visibility to the holistic benefits of a circular supply chain – including cost reduction of waste, increase of output through parts availability, overcoming material shortages and improving our designs by establishing learning loops on part failure.\n\nOperational expenditure related to the Reuse &#x26; Repair organization was approximately €50 million in 2025, including for around 270 FTEs at year end. The amount of future financial resources is expected to be comparable to 2025 and is likely to evolve depending on, among other things, the general business development as well as systems and parts we are able to buy-back.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 192,
+    "section_path": "Circular supplier collaboration",
+    "verbatim_text": "We’re collaborating with suppliers to incentivize reuse over new purchases. In 2025, we continued to transfer used parts back to our suppliers to repair, refurbish or harvest for reuse in their new buying process, giving them greater flexibility in how they can reuse parts.\n\nWhen repair centers are acquired, the EU Taxonomy assessment is performed under economic activity CCM 7.7 Acquisition and ownership of buildings.\n\nIn order to enable further scaling of reuse through processes and organizational changes, we invest on average about 70 FTEs in our improvement program.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 193,
+    "section_path": "Circular economy: Parts and tools (continued)",
+    "verbatim_text": "Resources allocated to the Reuse &#x26; Repair Activity 5.1 is not aligned because we lack a waste management plan ensuring our products’ materials – particularly critical raw materials and components that have not been reused in the same product – are reused elsewhere, or, where reuse is not possible (due to damage, degradation or hazardous substances), are recycled, or, only where reuse and recycling are not viable, are disposed of in accordance with applicable EU and national legislation.\n\nWhen conducting the EU Taxonomy assessment, we assessed our contribution to the transition to a circular economy by checking the alignment of our economic activities with the technical screening criteria provided for activities 1.2 Manufacture of electrical and electronic equipment and 5.1 Repair, refurbishment and remanufacturing. Our conclusion was that our activities cannot be considered aligned with the EU Taxonomy for these specific activities.\n\nFor activity 1.2, the following reasons explain the lack of alignment:\n\n- We track information on substances of concern and very high concern. However, these are not yet publicly available in the SCIP (Substances of Concern in articles as such or in complex objects (Products)) database and/or IEC62474.\n- Currently, we do not meet the design for recyclability criteria, which rely on EN 45555:2019 or any product-specific EN standard relying on EN 45555:2019.\n- In total, 95% of our systems are still active in the field and we have longstanding relationships with our customers. Each buyback, sell-back or take-back is an individual negotiation and we cannot therefore evidence standard information to customers regarding EoL options for our products.\n\nLooking ahead, in 2025, we made notable progress on an innovative, collaborative approach to creating a more circular supply chain. Working closely with suppliers, we began a program to buy-back return products for remanufacture, repair or harvesting – giving them greater autonomy in reusing parts, optimizing their processes and reducing waste. A dedicated circular supplier collaboration (CSC) team – comprising members from development and engineering, customer support, IT, quality, finance and more – has developed a compliant scalable order flow. This has led to successful buyback implementations with six major suppliers.\n\nOur focus will remain on embedding reuse principles into future system design and improving return and repair rates. We will continue to optimize our worldwide footprint based on parts demand, CO2e emissions and cost, to increase circularity via our own repair centers and in collaboration with our suppliers.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 194,
+    "section_path": "Looking ahead",
+    "verbatim_text": "In 2025, we added 3 FTEs in the context of our focus on reuse of transport materials. Our reuse centers also play an important role. We will continue to strengthen our transport materials reuse strategy by scaling pilot programs, defining KPIs, and embedding circular design principles into packaging development. Our focus will be on expanding data-driven insights, optimizing logistics, and reducing reliance on single-use materials across the supply chain. Our plans for increasing reuse of our transport materials will continue in 2026 and beyond – our new packaging program will run until 2030.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 196,
+    "section_path": "Resources",
+    "verbatim_text": "There are six FTEs working on our actions as part of our waste master plan.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 217,
+    "section_path": "Creating a strong employer value proposition",
+    "verbatim_text": "We aim to create a meaningful employer brand experience from the inside out, by:\n\n- Offering a unique experience for current and prospective employees through focused programs around learning and development, well-being, and I&#x26;D.\n- Inviting employees – as part of our Digital Ambassador program – to share why they choose to join and stay with ASML, and supporting them in sharing their stories within their personal networks. Today, over 2,300 (2024: 2,000) employees worldwide are sharing curated content through their local social media channels, generating millions of impressions and meaningful interactions – and strengthening our presence in earned media, helping us connect with talent and drive awareness and high-quality referrals.\n- Running an integrated campaign around a semiconductor trade show in South Korea, to spark interest with students and professionals.\n- Dedicated two FTEs to the global coordination of the annual employee survey. This excludes the external costs (survey and consultants) and hours spent by teams, managers and HR business partners on executing the survey, deep dives and action plans.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 217,
+    "section_path": "Resources",
+    "verbatim_text": "Resources mainly comprise FTEs within structured teams:\n\n- We dedicated 146 FTEs to engaging with potential employees and recruitment activities.\n\n1. Our calculation of the attrition rate target differs from the ‘employee turnover rate’ metric in accordance with the ESRS. Read more in Sustainability statements – Social – Attractive workplace for all – Additional disclosures – Methodology on targets",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 223,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated 294 FTEs to our global EHS team.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 224,
+    "section_path": "Our actions and resources",
+    "verbatim_text": "Further to annual competitive wage and adequate wage assessments, we are preparing to comply with the reporting and other pay transparency requirements in line with the EU Pay Transparency Directive and relevant local legislations, including engaging with our works councils on this topic. Furthermore, we have conducted pay equity assessments across all our employees globally, including the US and Asian countries to ensure we are paying men and women equally for equal work – irrespective of the presence of local legislation on the matter.\n\nWe dedicated 34 FTEs to our Rewards team.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 225,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated four FTEs to coordinating and tracking our well-being program. This does not include partially allocated FTE resources required to execute well-being activities.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 233,
+    "section_path": "Have an attrition rate of &#x3C;7% by 2025",
+    "verbatim_text": "Our annual attrition rate is calculated as a monthly average across the reporting period. The monthly attrition rate is calculated as a percentage of the number of FTEs that left ASML during each month, compared to the total number of FTEs at the end of that month, multiplied by 100.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 233,
+    "section_path": "Inclusion and diversity",
+    "verbatim_text": "Actual performance is determined by the percentage of female FTEs in job grade 13+, compared to the total FTEs in job grade 13+ on the last day of the reporting period. Our US employees are excluded from our 2025 reporting to comply with the US EO that took effect in 2025. Comparatives remain unadjusted.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 234,
+    "section_path": "Change in preparation",
+    "verbatim_text": "In 2025, we converted our unit of measure from incident cases per 200,000 hours worked (2,000 standard annual hours worked per FTE for every 100 FTEs) per OSHA guidelines to the estimate of annual hours worked per FTE for every 500 FTEs.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 235,
+    "section_path": "S1-16 Remuneration metrics (pay gap and annual total remuneration)",
+    "verbatim_text": "Annual remuneration: Annual remuneration comprises all four components of ASML’s Remuneration Policy: base salary; STI (cash bonus); LTI (share-based incentive), and pension and other benefits.\n\nAnnual remuneration represents FTE basis, in local currency translated to the reporting currency using the average exchange rates for the period. This is not adjusted for purchasing-power differences between countries.\n\nBase salary comprises basic wage for 12 months and guaranteed fixed payments.\n\nSTI (cash bonus) in the form of related plans is based on the employee’s job grade, the type of bonus plan and the company/individual performance. STI data used for ESRS reporting is consistent with the Consolidated financial statements accrual for the period without applying a pro-rata for part of the year, in order to reflect the annualized value.\n\nRead more in Financial statements – Consolidated financial statements – Notes to the Consolidated financial statements – 20. Share-based compensation.\n\nPension and other benefits: Consists of both cash and in-kind benefits including cash allowances, such as shift and car allowances, and in-kind benefits such as use of a company car and ASML-funded health insurance.\n\nThis metric differs to the Internal pay ratio disclosed in our remuneration report in accordance with the Dutch Corporate Governance Code. The denominator used in calculation of the Internal pay ratio is based on the average personnel expenses per FTE, whereas the median annual remuneration and headcount unit of measure is applied for reporting under ESRS.\n\nThe annual remuneration of the highest-paid individual is disclosed in our Remuneration report and is used as the numerator in this calculation.\n\nRead more in Corporate governance – Remuneration report.\n\nMedian annual total remuneration: The median annual total remuneration for the period is determined by taking the mid-point annual remuneration of all active employees at the end of the reporting period, excluding the paid employee and those that have been with the company for three months or less at the end of the reporting period.\n\nFor the purpose of calculating the gender pay gap we exclude employees falling within the ‘Other’ and ‘Non-disclosed’ gender categories.\n\nThe gross hourly pay level is determined by dividing an employee’s annual remuneration by the number of full-time scheduled hours of work per ASML location.\n\nThe average gross hourly pay level of female and male employees is determined separately.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 244,
+    "section_path": "Resources",
+    "verbatim_text": "The resources needed for this include our annual RBA membership fee and FTEs dedicated to the Strategic Sourcing and Procurement and Risk and Business Assurance &#x26; Security teams executing these activities.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 256,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated 25 FTEs to our S&#x26;CE team to coordinating and tracking our CCP activities. This excludes hours spent by supporting teams such as investments, legal, accounting, tax and treasury required to execute on these activities. Financial resources committed to attractive community projects are tracked and reported under Targets and performance.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 258,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated 25 FTEs to our S&#x26;CE team to coordinating and tracking our CCP activities. This excludes hours spent by supporting teams such as investments, legal, accounting, tax and treasury required to execute on these activities. Financial resources committed to inclusive community projects are tracked and reported under Targets and performance.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 259,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated 25 FTEs to our S&#x26;CE team to coordinating and tracking our CCP activities. This excludes hours spent by supporting teams needed to execute on these activities. Financial resources committed to STEM education projects are tracked and reported under Targets and performance.\n\n259",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "sustainability_goal_candidate",
+    "page": 265,
+    "section_path": "Supplier selection is informed by a range of factors, including capabilities that contribute to supplier risk profiles.",
+    "verbatim_text": "While environmental and social criteria are not yet formal selection requirements, we do ask suppliers to assess each year on key capabilities, including a commitment to GHG neutrality by 2030. Our Supplier Handbook sets out our sustainability expectations, reflecting the growing importance of ESG legislation. It outlines how suppliers are expected to manage risks related to environmental impact and human rights, and encourages them to actively build their ESG capabilities. Supplier contracts that we enter into include a clause requiring adherence to the RBA Code of Conduct, and we provide education to suppliers to support understanding and implementation of this.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 266,
+    "section_path": "Resources",
+    "verbatim_text": "We dedicated 13 FTEs to teams executing these activities.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 282,
+    "section_path": "1. General information / summary of general accounting policies",
+    "verbatim_text": "ASML is a leading supplier to the semiconductor industry. We provide chipmakers with hardware, software and services to mass produce the patterns of integrated circuits (microchips). Together with our partners, we drive the advancement of more affordable, more powerful and more energy-efficient microchips. We enable groundbreaking technology to solve some of humanity’s toughest challenges in healthcare, energy use and conservation, mobility and agriculture. Headquartered in Europe’s top tech hub, the Brainport Eindhoven region in the Netherlands, we are a global team of more than 44,000 employees (FTEs). Our principal operations are in EMEA, North America and Asia. Our shares are listed for trading in the form of registered shares on Euronext Amsterdam and Nasdaq. The principal trading market of our ordinary shares is Euronext Amsterdam.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 297,
+    "section_path": "Accrued and other liabilities consist of the following:",
+    "verbatim_text": "Personnel-related items primarily consist of accrued short-term incentive (STI) bonus plans, vacation days, pension premiums, wage tax, and vacation allowances. The year-over-year increase in these accruals was mainly driven by an increase in the average salary per FTE, reflecting our ongoing investment in talent to support the growth and expansion of our business.\n\nThe refund liability represents the amount of consideration received from customers to which ASML does not expect to be entitled. Refund liabilities do not meet the definition of a contract liability.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 301,
+    "section_path": "18. Personnel expenses and employee information",
+    "verbatim_text": "The average number of payroll employees in FTEs was:",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 301,
+    "section_path": "18. Personnel expenses and employee information",
+    "verbatim_text": "The total number of payroll and temporary employees as of December 31 in FTE per sector was:",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 301,
+    "section_path": "18. Personnel expenses and employee information",
+    "verbatim_text": "The continued increase in personnel expenses is primarily attributable to higher average wages and salaries per FTE, reflecting our ongoing investment in talent to support the growth and expansion of our business.",
+    "parser": "llamaparse"
+  },
+  {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "datapoint_type": "fte_candidate",
+    "page": 302,
+    "section_path": "Multi-employer union plan",
+    "verbatim_text": "In accordance with the collective bargaining agreements effective for the industry in which we operate, which have no expiration date, there are 23,711 eligible payroll employees in the Netherlands (54.5% of our total payroll FTEs) that participate in a multi-employer union plan. Our net periodic pension cost for this multi-employer union plan for any period is the amount of the required employer contribution for that period.\n\nThis multi-employer union plan is managed by PME (Stichting Pensioenfonds van de Metalektro) and this plan covers approximately 1,618 companies and approximately 184,847 contributing members. Every participating company contributes a premium that is based on the same contribution rate. This contribution rate can fluctuate yearly based on the coverage ratio of the multi-employer union plan. For 2025, the contribution rate was 28.0% (2024: 28.0%; 2023: 28.0%). For 2025, our contribution to this multi-employer union plan (including the premiums paid by employees) was 19.5% (2024: 18.2%; 2023: 18.3%) of the total contribution to this plan. For 2026, we expect to contribute around €437.0 million to this plan (including the premiums paid by employees). The pension rights of each employee are based upon the employee’s average salary during employment.\n\nThe PME multi-employer union plan monitors its risks on a global basis and is subject to regulation by Dutch governmental authorities. By Dutch law (the Dutch Pension Act), a multi-employer union plan must be monitored against specific criteria, including the coverage ratio of the plan’s assets to its obligations. The coverage ratio is calculated by dividing the fund’s capital by the total sum of pension liabilities and is based on actual market interest rates. The legally required minimal coverage ratio is 104.3% (2024: 104.3%). Compared to the previous year, the coverage ratio of PME increased to 125.3% as per December 31, 2025 (December 31, 2024: 113.1%), which is higher than the intended minimum coverage ratio of 118.1%. ASML has no obligation to pay any deficits the pension fund may incur, nor does it have any claim to any potential surpluses.",
+    "parser": "llamaparse"
+  }
+]
