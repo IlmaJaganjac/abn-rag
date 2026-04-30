@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import logging
 import re
 import unicodedata
 from collections import defaultdict
@@ -8,6 +9,8 @@ from collections import defaultdict
 from backend.app._openai import openai_client
 from backend.app.config import settings
 from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """\
 You answer questions about annual reports using only the provided context blocks.
@@ -88,7 +91,29 @@ _QUOTE_TRANS = str.maketrans({
     "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"',
     "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",
 })
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
 _MIN_FRAGMENT_LEN = 3
+_MIN_REPAIR_TOKENS = 8
+_MAX_REPAIR_TOKEN_WINDOW = 50
+_PROTECTED_REPAIR_TOKENS = {
+    "about",
+    "above",
+    "approximately",
+    "around",
+    "at",
+    "below",
+    "excluding",
+    "fewer",
+    "greater",
+    "least",
+    "less",
+    "more",
+    "not",
+    "over",
+    "than",
+    "under",
+}
+_PROTECTED_REPAIR_SYMBOLS = {"<", ">", "%"}
 
 
 def _normalize_for_grounding(s: str) -> str:
@@ -113,6 +138,52 @@ def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
             return False
         cursor = idx + len(frag)
     return True
+
+
+def _protected_symbols(s: str) -> set[str]:
+    return {symbol for symbol in _PROTECTED_REPAIR_SYMBOLS if symbol in s}
+
+
+def _safe_token_subsequence_match(needle: str, haystack: str) -> bool:
+    needle_tokens = _TOKEN_RE.findall(needle)
+    haystack_matches = list(_TOKEN_RE.finditer(haystack))
+    haystack_tokens = [match.group(0) for match in haystack_matches]
+    if len(needle_tokens) < _MIN_REPAIR_TOKENS:
+        return False
+
+    needle_protected = set(needle_tokens) & _PROTECTED_REPAIR_TOKENS
+    needle_symbols = _protected_symbols(needle)
+    first_token = needle_tokens[0]
+
+    for start in [i for i, token in enumerate(haystack_tokens) if token == first_token]:
+        positions = [start]
+        cursor = start + 1
+        for token in needle_tokens[1:]:
+            try:
+                idx = haystack_tokens.index(token, cursor)
+            except ValueError:
+                break
+            positions.append(idx)
+            cursor = idx + 1
+        if len(positions) != len(needle_tokens):
+            continue
+
+        token_window = positions[-1] - positions[0] + 1
+        if token_window > _MAX_REPAIR_TOKEN_WINDOW:
+            continue
+
+        char_start = haystack_matches[positions[0]].start()
+        char_end = haystack_matches[positions[-1]].end()
+        window = haystack[char_start:char_end]
+        window_tokens = set(_TOKEN_RE.findall(window))
+        window_protected = window_tokens & _PROTECTED_REPAIR_TOKENS
+        if not window_protected.issubset(needle_protected):
+            continue
+        if not _protected_symbols(window).issubset(needle_symbols):
+            continue
+
+        return True
+    return False
 
 
 def _ground_citations(
@@ -164,6 +235,15 @@ def _ground_citations(
             chunk for chunk, hay in indexed
             if _fragments_in_order(fragments, hay)
         ]
+        repair_quote = False
+
+        if not matches:
+            matches = [
+                chunk for chunk, hay in indexed
+                if _safe_token_subsequence_match(needle, hay)
+            ]
+            if matches:
+                repair_quote = True
 
         if not matches:
             page_in_set = any(chunk.page == cite.page for chunk, _ in indexed)
@@ -183,7 +263,17 @@ def _ground_citations(
             (m for m in matches if m.page == cite.page), None,
         ) or matches[0]
 
-        grounded.append(Citation(source=best.source, page=best.page, quote=cite.quote))
+        grounded.append(Citation(
+            source=best.source,
+            page=best.page,
+            quote=best.text if repair_quote else cite.quote,
+        ))
+        if repair_quote:
+            logger.info(
+                "repaired citation via token subsequence: source=%s page=%s",
+                best.source,
+                best.page,
+            )
 
     if not grounded:
         return [], drops, "no citations could be grounded in the retrieved chunks"

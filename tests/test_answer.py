@@ -169,6 +169,75 @@ def test_fabricated_quote_is_dropped() -> None:
     assert drops[0].reason == "quote_not_found_verbatim"
 
 
+def test_non_verbatim_quote_can_repair_to_exact_chunk_text_when_tokens_match() -> None:
+    chunk = _chunk(
+        source="asml.pdf",
+        page=145,
+        text=(
+            "Target: Commitment from our top-80% suppliers (based on CO₂e emissions) "
+            "to reduce their CO₂e footprint by 2030 75% commitment from top 80% "
+            "suppliers by 2026\nPerformance: 32%"
+        ),
+    )
+    cite = Citation(
+        source="asml.pdf",
+        page=166,
+        quote=(
+            "Commitment from top-80% suppliers (based on CO₂e emissions) "
+            "to reduce their CO₂e footprint by 2030 75% commitment from top 80% "
+            "suppliers by 2026"
+        ),
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+    assert grounded[0].source == "asml.pdf"
+    assert grounded[0].page == 145
+    assert grounded[0].quote == chunk.text
+
+
+def test_token_repair_does_not_ground_across_long_unrelated_span() -> None:
+    filler = " ".join(f"filler{i}" for i in range(60))
+    chunk = _chunk(
+        source="asml.pdf",
+        page=10,
+        text=f"alpha {filler} beta gamma delta epsilon zeta eta theta",
+    )
+    cite = Citation(
+        source="asml.pdf",
+        page=10,
+        quote="alpha beta gamma delta epsilon zeta eta theta",
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
+    assert drops[0].reason == "quote_not_found_verbatim"
+
+
+def test_token_repair_does_not_drop_meaningful_qualifier() -> None:
+    chunk = _chunk(
+        source="asml.pdf",
+        page=5,
+        text="Metric: Total employees\nPeriod: 2025\nValue: more than 44,000\nUnit: FTEs",
+    )
+    cite = Citation(
+        source="asml.pdf",
+        page=5,
+        quote="Metric: Total employees\nPeriod: 2025\nValue: 44,000\nUnit: FTEs",
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
+    assert drops[0].reason == "quote_not_found_verbatim"
+
+
 def test_no_citations_returned_yields_failure() -> None:
     grounded, drops, failure = _ground_citations([], [])
     assert grounded == []
