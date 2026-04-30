@@ -23,6 +23,43 @@ class Citation(BaseModel):
     quote: str
 
 
+EvidenceType = Literal["exact_quote", "table_value", "datapoint"]
+
+
+class EvidenceItem(BaseModel):
+    evidence_type: EvidenceType
+    source: str
+    page: int = Field(ge=1)
+    quote: str | None = None
+    table_title: str | None = None
+    metric: str | None = None
+    period: str | None = None
+    value: str | None = None
+    datapoint_type: str | None = None
+
+    @model_validator(mode="after")
+    def _check_required_fields(self) -> EvidenceItem:
+        if self.evidence_type == "exact_quote":
+            if not self.quote:
+                raise ValueError("exact_quote evidence requires quote")
+            return self
+        if self.evidence_type == "table_value":
+            if not self.value:
+                raise ValueError("table_value evidence requires value")
+            if not (self.metric or self.period or self.table_title):
+                raise ValueError(
+                    "table_value evidence requires metric, period, or table_title"
+                )
+            return self
+        if self.evidence_type == "datapoint":
+            if not self.value:
+                raise ValueError("datapoint evidence requires value")
+            if not (self.metric or self.datapoint_type):
+                raise ValueError("datapoint evidence requires metric or datapoint_type")
+            return self
+        return self
+
+
 class Chunk(BaseModel):
     id: str
     source: str
@@ -56,9 +93,11 @@ class VerbatimAnswer(BaseModel):
     question: str
     answer: str
     verbatim: str | None = None
+    evidence: list[EvidenceItem] = Field(default_factory=list)
     citations: list[Citation] = Field(default_factory=list)
     refused: bool = False
     refusal_reason: str | None = None
+    raw_evidence: list[EvidenceItem] = Field(default_factory=list)
     raw_citations: list[Citation] = Field(default_factory=list)
     grounding_drops: list[GroundingDrop] = Field(default_factory=list)
 
@@ -74,6 +113,7 @@ class VerbatimAnswer(BaseModel):
 class LLMAnswer(BaseModel):
     answer: str
     verbatim: str | None = None
+    evidence: list[EvidenceItem] = Field(default_factory=list)
     citations: list[Citation] = Field(default_factory=list)
     refused: bool = False
     refusal_reason: str | None = None

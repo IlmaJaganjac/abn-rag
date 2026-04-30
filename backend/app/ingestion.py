@@ -12,7 +12,7 @@ import chromadb
 import tiktoken
 
 from backend.app._openai import openai_client
-from backend.app.chunking import build_semantic_chunks
+from backend.app.chunking import VALUE_RE, build_semantic_chunks
 from backend.app.config import settings
 from backend.app.parsers import as_page_tuples, parse_pdf_pages
 from backend.app.schemas import Chunk
@@ -134,6 +134,112 @@ def extract_fte_candidates(
                 "parser": parser,
             }
         )
+    return candidates
+
+
+_BARE_RATIO_RE = re.compile(r"^-?\(?\d{1,2}\.\d{1,2}\)?$")
+
+
+def _is_bare_ratio(value: str) -> bool:
+    """True if value is a bare decimal (e.g. 15.6, 3.8) without units — likely a % change."""
+    return bool(_BARE_RATIO_RE.match(value.strip()))
+
+
+def _has_dense_values(lines: list[str], min_consecutive: int = 3) -> bool:
+    """True if 3+ consecutive VALUE_RE lines exist (indicates a multi-column financial table)."""
+    count = 0
+    for line in lines:
+        if VALUE_RE.match(line):
+            count += 1
+            if count >= min_consecutive:
+                return True
+        else:
+            count = 0
+    return False
+
+
+def _extract_kpi_pairs_from_text(text: str) -> list[tuple[str, str]]:
+    """Extract (value, label) pairs supporting two table layouts:
+
+    Pattern 2 (primary): label → target-desc → value  (ESG/performance tables, page 145)
+    Pattern 1 (fallback): value → label               (at-a-glance cards, page 5)
+
+    Pages with 3+ consecutive value lines (multi-year financial tables) are skipped.
+    """
+    pymupdf_text = text.split("--- Parsed markdown ---")[0]
+    lines = [ln.strip() for ln in pymupdf_text.splitlines() if ln.strip()]
+
+    if _has_dense_values(lines):
+        return []
+
+    pairs: list[tuple[str, str]] = []
+    for i, value_line in enumerate(lines):
+        if not VALUE_RE.match(value_line):
+            continue
+
+        # Pattern 2: line[i-2]=label, line[i-1]=target/description (both non-value)
+        if i >= 2:
+            two_back = lines[i - 2]
+            one_back = lines[i - 1]
+            if (
+                not VALUE_RE.match(two_back)
+                and not VALUE_RE.match(one_back)
+                and len(two_back) >= 10
+                and not two_back.startswith("#")
+            ):
+                pairs.append((value_line, two_back))
+                continue
+
+        # Pattern 1: line[i+1]=label (value directly before label)
+        if i + 1 < len(lines):
+            label_line = lines[i + 1]
+            if (
+                not VALUE_RE.match(label_line)
+                and len(label_line) >= 10
+                and not label_line.startswith("#")
+                and not _is_bare_ratio(value_line)
+            ):
+                pairs.append((value_line, label_line))
+
+    return pairs
+
+
+def extract_kpi_candidates(
+    pages: list[tuple[int, str]],
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+    parser: str,
+) -> list[dict[str, str | int | None]]:
+    """Extract individual KPI value-label pairs from at-a-glance summary pages.
+
+    Only processes pages that have 3+ KPI pairs (dense KPI-card layout).
+    Creates micro-chunks with focused embedding text for precise retrieval.
+    """
+    candidates: list[dict[str, str | int | None]] = []
+    seen: set[tuple[str, str]] = set()
+    for page, text in pages:
+        pairs = _extract_kpi_pairs_from_text(text)
+        if len(pairs) < 3:
+            continue
+        for value, label in pairs:
+            key = (value.strip(), label.strip())
+            if key in seen:
+                continue
+            seen.add(key)
+            candidates.append({
+                "source": source,
+                "company": company,
+                "year": year,
+                "datapoint_type": "kpi_card",
+                "page": page,
+                "verbatim_text": f"{label}: {value}",
+                "section_path": "kpi_card",
+                "kpi_label": label,
+                "kpi_value": value,
+                "parser": parser,
+            })
     return candidates
 
 
@@ -352,15 +458,25 @@ def build_datapoint_chunks(
         datapoint_type = str(datapoint["datapoint_type"])
         text = str(datapoint["verbatim_text"]).strip()
         section_path = datapoint.get("section_path")
-        embedding_parts = [
-            company,
-            str(year) if year is not None else None,
-            parser,
-            "datapoint",
-            datapoint_type,
-            str(section_path) if section_path else None,
-            text,
-        ]
+        if datapoint_type == "kpi_card":
+            # Focused embedding: "Company\nYear\nLabel: Value" for precise KPI retrieval
+            kpi_label = str(datapoint.get("kpi_label", ""))
+            kpi_value = str(datapoint.get("kpi_value", ""))
+            embedding_parts = [
+                company,
+                str(year) if year is not None else None,
+                f"{kpi_label}: {kpi_value}",
+            ]
+        else:
+            embedding_parts = [
+                company,
+                str(year) if year is not None else None,
+                parser,
+                "datapoint",
+                datapoint_type,
+                str(section_path) if section_path else None,
+                text,
+            ]
         chunks.append(
             Chunk(
                 id=f"{source}:{page}:{idx}",
@@ -426,19 +542,36 @@ def ingest_pdf(
     logger.info("built %d semantic chunks", len(chunks))
 
     datapoints = extract_datapoint_candidates(chunks, parser=parsed.parser)
+    kpi_candidates = extract_kpi_candidates(
+        pages,
+        source=source,
+        company=company,
+        year=year,
+        parser=parsed.parser,
+    )
+    fte_page_candidates = extract_fte_candidates(
+        pages,
+        source=source,
+        company=company,
+        year=year,
+        parser=parsed.parser,
+    )
+    all_datapoints = datapoints + kpi_candidates + fte_page_candidates
     datapoints_path = persist_datapoints(
-        datapoints,
+        all_datapoints,
         source=source,
         processed_dir=processed_dir,
     )
     logger.info(
-        "wrote %d pre-extracted candidate datapoints to %s",
-        len(datapoints),
+        "wrote %d pre-extracted candidate datapoints (%d kpi_card, %d fte_page) to %s",
+        len(all_datapoints),
+        len(kpi_candidates),
+        len(fte_page_candidates),
         datapoints_path,
     )
 
     datapoint_chunks = build_datapoint_chunks(
-        datapoints,
+        all_datapoints,
         source=source,
         company=company,
         year=year,

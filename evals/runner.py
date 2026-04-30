@@ -4,9 +4,10 @@ import argparse
 import json
 import sys
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Literal
 
 import yaml
 
@@ -19,6 +20,43 @@ RETRIEVAL_PREVIEW_CHARS = 160
 DEFAULT_QUESTIONS = Path("evals/questions.yaml")
 DEFAULT_RUNS_DIR = Path("evals/runs")
 
+DiagnosisCode = Literal[
+    "pass",
+    "expected_refusal_pass",
+    "retrieval_miss",
+    "answer_refused_unexpectedly",
+    "answer_value_wrong",
+    "grounding_failed",
+    "citation_source_wrong",
+    "citation_page_wrong",
+    "eval_expected_page_maybe_stale",
+    "unknown_failure",
+]
+
+
+@dataclass
+class Diagnostics:
+    # retrieval
+    expected_page_retrieved: bool
+    expected_value_in_chunks: bool
+    retrieved_pages: list[int]
+    # answer
+    answer_refused: bool
+    expected_refusal: bool
+    value_correct: bool
+    # grounding
+    has_final_citation: bool
+    raw_evidence_count: int
+    final_evidence_count: int
+    raw_citation_count: int
+    final_citation_count: int
+    grounding_failure_reasons: list[str]
+    # source / page
+    citation_source_correct: bool | None
+    citation_page_correct: bool | None
+    # classification
+    diagnosis: DiagnosisCode
+
 
 @dataclass
 class Outcome:
@@ -28,6 +66,7 @@ class Outcome:
     retrieved_chunks: list[RetrievedChunk]
     passed: bool
     reasons: list[str]
+    diagnostics: Diagnostics
 
 
 def load_eval_set(path: Path) -> EvalSet:
@@ -104,6 +143,140 @@ def score_one(
     return (not reasons, reasons)
 
 
+def _value_in_cited_chunks(
+    ans: VerbatimAnswer,
+    chunks: list[RetrievedChunk],
+    needles: list[str],
+) -> bool:
+    """Return True if any needle appears in the text of a cited chunk."""
+    if not needles or not ans.citations or not chunks:
+        return False
+    cited_pages = {cite.page for cite in ans.citations}
+    chunk_texts = [c.text.lower() for c in chunks if c.page in cited_pages]
+    combined = " ".join(chunk_texts)
+    return any(n.lower() in combined for n in needles)
+
+
+def build_diagnostics(
+    q: EvalQuestion,
+    ans: VerbatimAnswer | None,
+    chunks: list[RetrievedChunk],
+    passed: bool,
+) -> Diagnostics:
+    any_needles = list(q.expected_answer_contains_any or [])
+    all_needles = list(q.expected_answer_contains_all or [])
+    combined_needles = any_needles + all_needles
+
+    # --- Retrieval signals ---
+    retrieved_pages = [c.page for c in chunks]
+    expected_page_retrieved = (
+        q.expected_page is not None
+        and any(abs(p - q.expected_page) <= 1 for p in retrieved_pages)
+    )
+    if combined_needles and chunks:
+        chunk_text_lower = " ".join(c.text.lower() for c in chunks)
+        expected_value_in_chunks = any(n.lower() in chunk_text_lower for n in combined_needles)
+    else:
+        expected_value_in_chunks = False
+
+    # --- Answer signals ---
+    answer_refused = ans is not None and ans.refused
+    expected_refusal = q.expected_behavior == "refuse"
+
+    if ans is None or ans.refused:
+        value_correct = False
+    else:
+        hay = f"{ans.answer} {ans.verbatim or ''}".lower()
+        if not any_needles and not all_needles:
+            value_correct = True
+        else:
+            any_ok = (not any_needles) or any(n.lower() in hay for n in any_needles)
+            all_ok = (not all_needles) or all(n.lower() in hay for n in all_needles)
+            value_correct = any_ok and all_ok
+
+    # --- Grounding signals ---
+    if ans is not None:
+        has_final_citation = bool(ans.citations)
+        raw_evidence_count = len(ans.raw_evidence)
+        final_evidence_count = len(ans.evidence)
+        raw_citation_count = len(ans.raw_citations)
+        final_citation_count = len(ans.citations)
+        grounding_failure_reasons = [d.reason for d in ans.grounding_drops]
+    else:
+        has_final_citation = False
+        raw_evidence_count = 0
+        final_evidence_count = 0
+        raw_citation_count = 0
+        final_citation_count = 0
+        grounding_failure_reasons = []
+
+    # --- Source / page signals ---
+    if ans is not None and not ans.refused and q.expected_source:
+        citation_source_correct: bool | None = any(
+            c.source == q.expected_source for c in ans.citations
+        )
+    else:
+        citation_source_correct = None
+
+    if ans is not None and not ans.refused and q.expected_page is not None:
+        citation_page_correct: bool | None = any(
+            abs(c.page - q.expected_page) <= 1 for c in ans.citations
+        )
+    else:
+        citation_page_correct = None
+
+    # --- Classify ---
+    code: DiagnosisCode
+    if passed:
+        code = "expected_refusal_pass" if expected_refusal else "pass"
+    elif ans is None:
+        code = "unknown_failure"
+    elif expected_refusal:
+        # Expected refuse, got an answer — no dedicated code in spec
+        code = "unknown_failure"
+    elif answer_refused:
+        refusal_reason = ans.refusal_reason or ""
+        if "ungrounded" in refusal_reason:
+            code = "grounding_failed"
+        else:
+            code = "answer_refused_unexpectedly"
+    elif not value_correct:
+        if not expected_value_in_chunks:
+            code = "retrieval_miss"
+        else:
+            code = "answer_value_wrong"
+    elif citation_source_correct is False:
+        code = "citation_source_wrong"
+    elif citation_page_correct is False:
+        # Value is correct but the cited page doesn't match expected_page.
+        # If the cited chunk actually contains the value, the YAML page may be stale.
+        # Otherwise the LLM cited the wrong page.
+        if ans is not None and _value_in_cited_chunks(ans, chunks, combined_needles):
+            code = "eval_expected_page_maybe_stale"
+        else:
+            code = "citation_page_wrong"
+    else:
+        code = "unknown_failure"
+
+    return Diagnostics(
+        expected_page_retrieved=expected_page_retrieved,
+        expected_value_in_chunks=expected_value_in_chunks,
+        retrieved_pages=retrieved_pages,
+        answer_refused=answer_refused,
+        expected_refusal=expected_refusal,
+        value_correct=value_correct,
+        has_final_citation=has_final_citation,
+        raw_evidence_count=raw_evidence_count,
+        final_evidence_count=final_evidence_count,
+        raw_citation_count=raw_citation_count,
+        final_citation_count=final_citation_count,
+        grounding_failure_reasons=grounding_failure_reasons,
+        citation_source_correct=citation_source_correct,
+        citation_page_correct=citation_page_correct,
+        diagnosis=code,
+    )
+
+
 def _preview(ans: VerbatimAnswer | None) -> str:
     if ans is None:
         return "<no answer>"
@@ -158,6 +331,12 @@ def format_result_line(outcome: Outcome) -> str:
             f'"{_preview(outcome.answer)}"'
         )
 
+    d = outcome.diagnostics
+    grounding_note = ""
+    if d.grounding_failure_reasons:
+        unique = list(dict.fromkeys(d.grounding_failure_reasons))
+        grounding_note = f" drops={unique}"
+
     lines = [
         f"{status}  {outcome.question.id}  [{outcome.question.category}]",
         f"        question: {outcome.question.question}",
@@ -167,7 +346,17 @@ def format_result_line(outcome: Outcome) -> str:
         (
             f"        retrieval: pages={outcome.retrieved_pages} "
             f"(expected page {outcome.question.expected_page})"
+            f"  page_retrieved={d.expected_page_retrieved}"
+            f"  value_in_chunks={d.expected_value_in_chunks}"
         ),
+        (
+            f"        grounding: raw_evidence={d.raw_evidence_count}"
+            f"  final_evidence={d.final_evidence_count}"
+            f"  raw_citations={d.raw_citation_count}"
+            f"  final_citations={d.final_citation_count}"
+            + grounding_note
+        ),
+        f"        diagnosis: {d.diagnosis}",
         "        reasons:",
     ]
     lines.extend(f"        - {reason}" for reason in outcome.reasons)
@@ -199,6 +388,13 @@ def _category_breakdown(outcomes: list[Outcome]) -> dict[str, dict[str, int | fl
     return out
 
 
+def _diagnosis_breakdown(outcomes: list[Outcome]) -> dict[str, int]:
+    counts: dict[str, int] = defaultdict(int)
+    for o in outcomes:
+        counts[o.diagnostics.diagnosis] += 1
+    return dict(sorted(counts.items()))
+
+
 def format_summary(outcomes: list[Outcome]) -> str:
     total = len(outcomes)
     passed = sum(1 for o in outcomes if o.passed)
@@ -212,6 +408,16 @@ def format_summary(outcomes: list[Outcome]) -> str:
         lines.append(
             f"  {cat:<24} {stats['passed']}/{stats['total']}  {stats['pct']:.0f}%"
         )
+
+    by_diag = _diagnosis_breakdown(outcomes)
+    failure_diag = {
+        k: v for k, v in by_diag.items() if k not in ("pass", "expected_refusal_pass")
+    }
+    if failure_diag:
+        lines.append("By diagnosis (failed):")
+        for code, count in failure_diag.items():
+            lines.append(f"  {code:<36} {count}")
+
     return "\n".join(lines)
 
 
@@ -257,6 +463,7 @@ def _build_run_record(
             "passed": passed,
             "pct": pct,
             "by_category": _category_breakdown(outcomes),
+            "by_diagnosis": _diagnosis_breakdown(outcomes),
         },
         "outcomes": [
             {
@@ -273,6 +480,7 @@ def _build_run_record(
                 },
                 "passed": o.passed,
                 "reasons": o.reasons,
+                "diagnostics": asdict(o.diagnostics),
                 "retrieval": {
                     "pages": o.retrieved_pages,
                     "chunks": [
@@ -369,6 +577,7 @@ def run_eval(
             passed = False
             reasons = [f"exception: {exc!s}"]
 
+        diagnostics = build_diagnostics(q, ans, retrieved_chunks, passed)
         outcome = Outcome(
             question=q,
             answer=ans,
@@ -376,6 +585,7 @@ def run_eval(
             retrieved_chunks=retrieved_chunks,
             passed=passed,
             reasons=reasons,
+            diagnostics=diagnostics,
         )
         outcomes.append(outcome)
 

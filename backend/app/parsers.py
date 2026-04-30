@@ -29,6 +29,22 @@ class ParserUnavailableError(RuntimeError):
     pass
 
 
+def persist_docling_artifacts(
+    document: Any,
+    *,
+    source_path: Path,
+    processed_dir: Path,
+) -> tuple[Path, Path]:
+    json_path = processed_dir / "docling" / f"{source_path.stem}.json"
+    markdown_path = processed_dir / "markdown" / f"{source_path.stem}.md"
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    markdown_path.parent.mkdir(parents=True, exist_ok=True)
+
+    document.save_as_json(json_path)
+    markdown_path.write_text(document.export_to_markdown(), encoding="utf-8")
+    return json_path, markdown_path
+
+
 def _llamaparse_page_text(page: dict[str, Any]) -> str:
     for key in ("md", "markdown", "text", "content"):
         value = page.get(key)
@@ -62,9 +78,9 @@ def combine_with_pdf_text_layer(
 ) -> list[ParsedPage]:
     """Prefer the PDF text layer for verbatim reading, keep parser text too.
 
-    LlamaParse markdown is useful for structure, but annual-report highlight
-    pages sometimes lose visual reading order in dense KPI layouts. PyMuPDF's
-    native text layer often preserves those verbatim datapoints.
+    LlamaParse/Docling markdown is useful for structure, but annual-report
+    highlight pages sometimes lose visual reading order in dense KPI layouts.
+    PyMuPDF's native text layer often preserves those verbatim datapoints.
     """
     pdf_text_by_page = {page.page: page.text for page in pdf_text_pages}
     combined: list[ParsedPage] = []
@@ -114,6 +130,47 @@ def persist_llamaparse_artifacts(
     return json_path, markdown_path
 
 
+def parse_pdf_docling(
+    path: Path,
+    *,
+    processed_dir: Path | None = None,
+) -> list[ParsedPage]:
+    try:
+        from docling.datamodel.base_models import InputFormat
+        from docling.datamodel.pipeline_options import PdfPipelineOptions
+        from docling.document_converter import DocumentConverter, PdfFormatOption
+    except ModuleNotFoundError as exc:
+        raise ParserUnavailableError(
+            "Docling is not installed. Run `pip install -e .[dev]` or use "
+            "`--parser pymupdf`."
+        ) from exc
+
+    pipeline_options = PdfPipelineOptions()
+    pipeline_options.do_ocr = False
+    pipeline_options.do_table_structure = True
+    converter = DocumentConverter(
+        format_options={
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options),
+        }
+    )
+    result = converter.convert(path)
+    document = result.document
+
+    if processed_dir is not None:
+        persist_docling_artifacts(
+            document,
+            source_path=path,
+            processed_dir=processed_dir,
+        )
+
+    pages: list[ParsedPage] = []
+    for page_no in sorted(document.pages):
+        text = document.export_to_text(page_no=page_no, traverse_pictures=True).strip()
+        if text:
+            pages.append(ParsedPage(page=page_no, text=text))
+    return _add_pdf_text_layer(path, pages)
+
+
 def parse_pdf_llamaparse(
     path: Path,
     *,
@@ -122,7 +179,7 @@ def parse_pdf_llamaparse(
 ) -> list[ParsedPage]:
     if not api_key:
         raise ParserUnavailableError(
-            "LLAMA_CLOUD_API_KEY is not set. Add it to .env."
+            "LLAMA_CLOUD_API_KEY is not set. Add it to .env or use another parser."
         )
 
     try:
@@ -131,7 +188,8 @@ def parse_pdf_llamaparse(
             from llama_parse import LlamaParse
     except ModuleNotFoundError as exc:
         raise ParserUnavailableError(
-            "LlamaParse is not installed. Run `pip install -e .[dev]`."
+            "LlamaParse is not installed. Run `pip install -e .[dev]` or use "
+            "`--parser docling`."
         ) from exc
 
     parser = LlamaParse(
@@ -170,15 +228,41 @@ def parse_pdf_pymupdf(path: Path) -> list[ParsedPage]:
 def parse_pdf_pages(
     path: Path,
     *,
+    parser: str,
+    allow_fallback: bool = True,
     processed_dir: Path | None = None,
     llama_cloud_api_key: str | None = None,
 ) -> ParseResult:
-    pages = parse_pdf_llamaparse(
-        path,
-        api_key=llama_cloud_api_key,
-        processed_dir=processed_dir,
-    )
-    return ParseResult(pages=pages, parser="llamaparse")
+    normalized = parser.lower()
+    if normalized == "pymupdf":
+        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
+    if normalized not in {"docling", "llamaparse"}:
+        raise ValueError(f"unsupported PDF parser: {parser}")
+
+    try:
+        if normalized == "llamaparse":
+            return ParseResult(
+                pages=parse_pdf_llamaparse(
+                    path,
+                    api_key=llama_cloud_api_key,
+                    processed_dir=processed_dir,
+                ),
+                parser="llamaparse",
+            )
+        return ParseResult(
+            pages=parse_pdf_docling(path, processed_dir=processed_dir),
+            parser="docling",
+        )
+    except Exception as exc:
+        if not allow_fallback:
+            raise
+        logger.warning(
+            "%s parser failed; falling back to PyMuPDF for %s: %s",
+            normalized,
+            path,
+            exc,
+        )
+        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
 
 
 def as_page_tuples(pages: list[ParsedPage]) -> Iterator[tuple[int, str]]:

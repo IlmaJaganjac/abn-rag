@@ -3,10 +3,11 @@ from __future__ import annotations
 from backend.app.answer import (
     _fragments_in_order,
     _ground_citations,
+    _ground_evidence,
     _normalize_for_grounding,
     _split_on_ellipsis,
 )
-from backend.app.schemas import Citation, RetrievedChunk
+from backend.app.schemas import Citation, EvidenceItem, RetrievedChunk
 
 
 def _chunk(*, source: str, page: int, text: str, idx: int = 0) -> RetrievedChunk:
@@ -222,3 +223,48 @@ def test_prefers_cited_page_when_quote_appears_on_multiple_pages() -> None:
     grounded, _, failure = _ground_citations([cite], [chunk_a, chunk_b])
     assert failure is None
     assert grounded[0].page == 7  # cited page wins among ties
+
+
+def test_table_value_evidence_grounds_and_creates_legacy_citation() -> None:
+    chunk = _chunk(
+        source="asml-2024.pdf",
+        page=6,
+        text="€28.3bn\nTotal net sales\n51.3%\nGross margin",
+    )
+    ev = EvidenceItem(
+        evidence_type="table_value",
+        source="asml-2024.pdf",
+        page=6,
+        metric="Total net sales",
+        value="€28.3bn",
+    )
+
+    evidence, citations, drops, failure = _ground_evidence([ev], [chunk])
+
+    assert failure is None
+    assert drops == []
+    assert evidence == [ev]
+    assert citations == [Citation(source="asml-2024.pdf", page=6, quote="€28.3bn")]
+
+
+def test_datapoint_evidence_rewrites_source_and_page_from_matching_chunk() -> None:
+    chunk = _chunk(
+        source="asml.pdf",
+        page=301,
+        text="Total\n\n42,416\n44,027\n44,209",
+    )
+    ev = EvidenceItem(
+        evidence_type="datapoint",
+        source="ASML Annual Report 2025",
+        page=999,
+        datapoint_type="fte_candidate",
+        value="44,209",
+    )
+
+    evidence, citations, drops, failure = _ground_evidence([ev], [chunk])
+
+    assert failure is None
+    assert drops == []
+    assert evidence[0].source == "asml.pdf"
+    assert evidence[0].page == 301
+    assert citations == [Citation(source="asml.pdf", page=301, quote="44,209")]

@@ -7,33 +7,50 @@ from collections import defaultdict
 
 from backend.app._openai import openai_client
 from backend.app.config import settings
-from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
+from backend.app.schemas import (
+    Citation,
+    EvidenceItem,
+    GroundingDrop,
+    LLMAnswer,
+    RetrievedChunk,
+    VerbatimAnswer,
+)
 
 SYSTEM_PROMPT = """\
 You answer questions about annual reports using only the provided context blocks.
 
 Rules:
-1. Use ONLY the context blocks below. Never answer from prior knowledge or memory.
-2. Every non-refused answer MUST include at least one citation. Each citation's
-   `source` and `page` must come from a context block header, and `quote` must be
-   a verbatim span copied from that block's text (no paraphrasing, no edits).
-3. The `source` field MUST equal the literal `source=` value in the context
-   block header (e.g. `asml-2024.pdf`). Do NOT use the report's title, footer,
-   or any other label. Copy the filename exactly.
-4. The `quote` must be copied verbatim from the chunk's text. Do not
-   paraphrase, reorder, or restate. You MAY use `...` (three ASCII dots) to
-   skip intermediate cells in a multi-year table (e.g. to skip a prior-year
-   column), but each segment around the `...` must appear word-for-word in
-   the chunk and the segments must appear in the original order. Do NOT use
-   `...` to skip across unrelated text; if the answer needs two unrelated
-   spans, emit two separate citations.
-5. For numerical, financial, or date answers, set `verbatim` to the exact span
-   from the context that contains the figure (e.g. "€32.7 billion", "44,027",
-   "9,609,432"). Copy numbers, currency symbols, and surrounding spacing
-   exactly as written.
-6. If the answer is not present in the context, set `refused=true`, give a
-   short `refusal_reason`, and leave `citations` empty. Do not guess.
-7. Keep `answer` concise — one or two sentences. Do not invent figures.
+1. Use ONLY the context blocks below. Never answer from prior knowledge.
+2. If the answer is not present in the context, set refused=true and leave evidence empty.
+3. Every non-refused answer MUST include at least one evidence item.
+4. Keep answer concise: one or two sentences.
+5. For numerical, financial, date, FTE, ESG, or sustainability-target answers,
+   set verbatim to the exact value copied from the context.
+
+Evidence rules:
+A. Use evidence_type="exact_quote" for normal prose.
+   - quote MUST be copied verbatim from one context block.
+   - source and page MUST come from that same context block header.
+
+B. Use evidence_type="table_value" for tables, KPI cards, or values split across lines.
+   - Do NOT invent a prose quote from a table.
+   - Fill table_title, metric, period, and value using exact strings from the context when available.
+   - value MUST be copied verbatim.
+   - source and page MUST come from the context block containing the table/KPI value.
+
+C. Use evidence_type="datapoint" when the context already contains a pre-extracted datapoint.
+   - value MUST be copied verbatim.
+   - metric/datapoint_type should match the context.
+   - source and page MUST come from the context block.
+
+Output requirements:
+- Put evidence items in the `evidence` field.
+- Leave `citations` empty; it is kept only for backward compatibility.
+- If evidence_type="exact_quote", include quote.
+- If evidence_type="table_value", include value and at least one of metric, period, or table_title.
+- If evidence_type="datapoint", include value and metric or datapoint_type.
+- Do not paraphrase evidence quotes.
+- Do not use exact_quote for table-derived answers unless the exact sentence exists in the context.
 """
 
 
@@ -54,6 +71,12 @@ _QUOTE_TRANS = str.maketrans({
     "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",
 })
 _MIN_FRAGMENT_LEN = 3
+_TRAILING_ARTIFACT_RE = re.compile(r"[.!?,;}\]\s]+$")
+
+
+def _clean_needle(needle: str) -> str:
+    """Strip trailing punctuation and JSON artifacts the LLM appends to verbatim quotes."""
+    return _TRAILING_ARTIFACT_RE.sub("", needle)
 
 
 def _normalize_for_grounding(s: str) -> str:
@@ -109,7 +132,7 @@ def _ground_citations(
     grounded: list[Citation] = []
     drops: list[GroundingDrop] = []
     for cite in citations:
-        needle = _normalize_for_grounding(html.unescape(cite.quote))
+        needle = _clean_needle(_normalize_for_grounding(html.unescape(cite.quote)))
         if not needle:
             drops.append(GroundingDrop(
                 source=cite.source, page=cite.page, quote=cite.quote,
@@ -155,6 +178,81 @@ def _ground_citations(
     return grounded, drops, None
 
 
+def _evidence_text(ev: EvidenceItem) -> str:
+    return ev.quote if ev.evidence_type == "exact_quote" else (ev.value or "")
+
+
+def _evidence_to_citation(ev: EvidenceItem, chunk: RetrievedChunk) -> Citation:
+    return Citation(source=chunk.source, page=chunk.page, quote=_evidence_text(ev))
+
+
+def _evidence_with_chunk_metadata(ev: EvidenceItem, chunk: RetrievedChunk) -> EvidenceItem:
+    return ev.model_copy(update={"source": chunk.source, "page": chunk.page})
+
+
+def _ground_evidence(
+    evidence: list[EvidenceItem], chunks: list[RetrievedChunk]
+) -> tuple[list[EvidenceItem], list[Citation], list[GroundingDrop], str | None]:
+    """Ground model evidence and convert it to legacy citations for evals.
+
+    exact_quote evidence is grounded like old citations. table_value/datapoint
+    evidence is grounded by requiring the copied value to appear in a retrieved
+    chunk, preferring the model's cited source/page when possible.
+    """
+    if not evidence:
+        return [], [], [], "no evidence returned"
+
+    indexed: list[tuple[RetrievedChunk, str]] = [
+        (c, _normalize_for_grounding(html.unescape(c.text))) for c in chunks
+    ]
+
+    grounded_evidence: list[EvidenceItem] = []
+    citations: list[Citation] = []
+    drops: list[GroundingDrop] = []
+    for ev in evidence:
+        raw_text = _evidence_text(ev)
+        needle = _clean_needle(_normalize_for_grounding(html.unescape(raw_text)))
+        if not needle:
+            drops.append(GroundingDrop(
+                source=ev.source, page=ev.page, quote=raw_text,
+                reason="empty_quote",
+            ))
+            continue
+
+        if ev.evidence_type == "exact_quote":
+            matches = [chunk for chunk, hay in indexed if needle in hay]
+        else:
+            matches = [chunk for chunk, hay in indexed if needle in hay]
+
+        if not matches:
+            page_in_set = any(chunk.page == ev.page for chunk, _ in indexed)
+            drops.append(GroundingDrop(
+                source=ev.source,
+                page=ev.page,
+                quote=raw_text,
+                reason=(
+                    "quote_not_found_verbatim" if page_in_set
+                    else "source_page_not_in_retrieved_set"
+                ),
+            ))
+            continue
+
+        best = next(
+            (m for m in matches if m.page == ev.page and m.source == ev.source),
+            None,
+        ) or next(
+            (m for m in matches if m.page == ev.page), None,
+        ) or matches[0]
+
+        fixed = _evidence_with_chunk_metadata(ev, best)
+        grounded_evidence.append(fixed)
+        citations.append(_evidence_to_citation(fixed, best))
+
+    if not grounded_evidence:
+        return [], [], drops, "no evidence could be grounded in the retrieved chunks"
+    return grounded_evidence, citations, drops, None
+
+
 def _refuse(question: str, reason: str) -> VerbatimAnswer:
     return VerbatimAnswer(
         question=question,
@@ -194,21 +292,34 @@ def answer_question(
             question=question,
             answer=parsed.answer or "The answer is not available in the provided reports.",
             verbatim=None,
+            evidence=[],
             citations=[],
             refused=True,
             refusal_reason=parsed.refusal_reason or "model declined to answer",
+            raw_evidence=parsed.evidence,
             raw_citations=parsed.citations,
         )
 
-    grounded, drops, failure = _ground_citations(parsed.citations, chunks)
+    if parsed.evidence:
+        grounded_evidence, grounded, drops, failure = _ground_evidence(
+            parsed.evidence, chunks
+        )
+        failure_label = "evidence"
+    else:
+        grounded_evidence = []
+        grounded, drops, failure = _ground_citations(parsed.citations, chunks)
+        failure_label = "citation"
+
     if failure is not None:
         return VerbatimAnswer(
             question=question,
             answer="The answer is not available in the provided reports.",
             verbatim=None,
+            evidence=[],
             citations=[],
             refused=True,
-            refusal_reason=f"ungrounded citation: {failure}",
+            refusal_reason=f"ungrounded {failure_label}: {failure}",
+            raw_evidence=parsed.evidence,
             raw_citations=parsed.citations,
             grounding_drops=drops,
         )
@@ -217,9 +328,11 @@ def answer_question(
         question=question,
         answer=parsed.answer,
         verbatim=parsed.verbatim,
+        evidence=grounded_evidence,
         citations=grounded,
         refused=False,
         refusal_reason=None,
+        raw_evidence=parsed.evidence,
         raw_citations=parsed.citations,
         grounding_drops=drops,
     )

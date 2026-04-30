@@ -78,6 +78,7 @@ questions:
     expected_answer_contains_any:
       - "4.7"
       - "€4.7 billion"
+      - "4,698"
     expected_page: 5
     expected_source: "asml.pdf"
     category: verbatim_financial
