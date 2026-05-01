@@ -248,6 +248,39 @@ def test_reranker_fallback_on_exception(monkeypatch):
     assert [c.id for c in result] == ["id:a", "id:b"]
 
 
+def test_rerank_candidate_k_env_var(monkeypatch):
+    captured = {}
+    def fake_rerank(question, chunks, top_k, text_chars=3000):
+        captured["n_chunks"] = len(chunks)
+        return chunks[:top_k]
+    monkeypatch.setenv("ENABLE_RERANKER", "1")
+    monkeypatch.setenv("RERANK_CANDIDATE_K", "15")
+    monkeypatch.setattr("backend.app.retrieval.rerank_chunks_cross_encoder", fake_rerank)
+    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
+    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
+    monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
+    retrieve(RetrievalQuery(question="How many FTEs?", company="ABN AMRO", year=2025, top_k=12))
+    assert captured.get("n_chunks", 999) <= 15
+
+
+def test_rerank_text_chars_env_var(monkeypatch):
+    captured = {}
+    original_predict = lambda self, pairs: [0.5] * len(pairs)
+
+    def fake_get_reranker():
+        class FakeModel:
+            def predict(self, pairs):
+                captured["max_len"] = max(len(p[1]) for p in pairs) if pairs else 0
+                return [0.5] * len(pairs)
+        return FakeModel()
+
+    monkeypatch.setattr("backend.app.retrieval._get_reranker", fake_get_reranker)
+    long_text = "x" * 5000
+    chunks = [_chunk("id:1", long_text, 1), _chunk("id:2", long_text, 2)]
+    rerank_chunks_cross_encoder("question", chunks, top_k=2, text_chars=1200)
+    assert captured["max_len"] <= 1200
+
+
 def test_reranker_not_called_without_flag(monkeypatch):
     called = []
     monkeypatch.setattr("backend.app.retrieval.rerank_chunks_cross_encoder",

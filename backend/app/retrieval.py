@@ -45,10 +45,11 @@ def rerank_chunks_cross_encoder(
     question: str,
     chunks: list[RetrievedChunk],
     top_k: int,
+    text_chars: int = 3000,
 ) -> list[RetrievedChunk]:
     try:
         model = _get_reranker()
-        pairs = [(question, chunk.text[:3000]) for chunk in chunks]
+        pairs = [(question, chunk.text[:text_chars]) for chunk in chunks]
         scores = model.predict(pairs)
         ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
         return [chunk.model_copy(update={"score": float(score)}) for score, chunk in ranked[:top_k]]
@@ -321,7 +322,11 @@ def _rrf_merge(
 def retrieve(query: RetrievalQuery) -> RetrievalResult:
     collection = get_collection()
     reranker_enabled = os.environ.get("ENABLE_RERANKER") == "1"
-    candidate_k = max(query.top_k * 3, 30) if reranker_enabled else query.top_k
+    if reranker_enabled:
+        _ck = os.environ.get("RERANK_CANDIDATE_K")
+        candidate_k = int(_ck) if _ck else max(query.top_k * 3, 30)
+    else:
+        candidate_k = query.top_k
 
     if os.environ.get("ENABLE_QUERY_EXPANSION") == "1":
         retrieval_text = expand_query_for_retrieval(query.question)
@@ -364,7 +369,9 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     )
 
     if reranker_enabled:
-        chunks = rerank_chunks_cross_encoder(query.question, chunks, query.top_k)
+        _tc = os.environ.get("RERANK_TEXT_CHARS")
+        text_chars = int(_tc) if _tc else 3000
+        chunks = rerank_chunks_cross_encoder(query.question, chunks, query.top_k, text_chars=text_chars)
 
     return RetrievalResult(query=query, chunks=chunks)
 
