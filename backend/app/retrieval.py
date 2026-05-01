@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
 from collections import Counter
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from backend.app.config import settings
 from backend.app.ingestion import embed_texts, get_collection
@@ -24,6 +27,34 @@ _SUST_EXPANSION = "sustainability climate targets goals ambition commitment GHG 
 
 _FIN_TERMS = frozenset({"revenue", "sales", "margin", "profit", "income", "dividend", "cash flow", "r&d", "research and development"})
 _FIN_EXPANSION = "financial performance revenue net sales gross margin operating income net income dividend cash flow R&D research and development"
+
+
+_RERANKER_MODEL_NAME = "BAAI/bge-reranker-base"
+_reranker_model = None
+
+
+def _get_reranker():
+    global _reranker_model
+    if _reranker_model is None:
+        from sentence_transformers import CrossEncoder
+        _reranker_model = CrossEncoder(_RERANKER_MODEL_NAME)
+    return _reranker_model
+
+
+def rerank_chunks_cross_encoder(
+    question: str,
+    chunks: list[RetrievedChunk],
+    top_k: int,
+) -> list[RetrievedChunk]:
+    try:
+        model = _get_reranker()
+        pairs = [(question, chunk.text[:3000]) for chunk in chunks]
+        scores = model.predict(pairs)
+        ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
+        return [chunk.model_copy(update={"score": float(score)}) for score, chunk in ranked[:top_k]]
+    except Exception as exc:
+        logger.warning("reranker failed, falling back to original order: %s", exc)
+        return chunks[:top_k]
 
 
 def expand_query_for_retrieval(question: str) -> str:
@@ -289,6 +320,8 @@ def _rrf_merge(
 
 def retrieve(query: RetrievalQuery) -> RetrievalResult:
     collection = get_collection()
+    reranker_enabled = os.environ.get("ENABLE_RERANKER") == "1"
+    candidate_k = max(query.top_k * 3, 30) if reranker_enabled else query.top_k
 
     if os.environ.get("ENABLE_QUERY_EXPANSION") == "1":
         retrieval_text = expand_query_for_retrieval(query.question)
@@ -300,7 +333,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     where = _build_where(query.company, query.year)
     raw = collection.query(
         query_embeddings=[embedding],
-        n_results=max(query.top_k, DENSE_TOP_N),
+        n_results=max(candidate_k, DENSE_TOP_N),
         where=where,
         include=["documents", "metadatas", "distances"],
     )
@@ -327,8 +360,12 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
         bm25_chunks=_bm25_candidates(retrieval_query),
         metric_chunks=metric_chunks,
         metric_weight=metric_weight,
-        top_k=query.top_k,
+        top_k=candidate_k,
     )
+
+    if reranker_enabled:
+        chunks = rerank_chunks_cross_encoder(query.question, chunks, query.top_k)
+
     return RetrievalResult(query=query, chunks=chunks)
 
 

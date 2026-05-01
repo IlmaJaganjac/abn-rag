@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from backend.app.answer import _ground_citations
-from backend.app.retrieval import expand_query_for_retrieval, retrieve
+from backend.app.retrieval import expand_query_for_retrieval, rerank_chunks_cross_encoder, retrieve
 from backend.app.schemas import Citation, RetrievalQuery, RetrievedChunk
 
 
@@ -210,3 +210,51 @@ def test_retrieve_net_profit_metric_for_numeric_query(monkeypatch) -> None:
     assert result.chunks[0].id == "abn-amro-2025.pdf:metric:profit"
     assert "Metric: Profit/(loss) for the period" in result.chunks[0].text
     assert "Value: 2,252" in result.chunks[0].text
+
+
+# ---------------------------------------------------------------------------
+# Cross-encoder reranker
+# ---------------------------------------------------------------------------
+
+def test_reranker_reorders_by_mock_scores(monkeypatch):
+    chunks = [
+        _chunk("id:low", "low relevance text", 1),
+        _chunk("id:mid", "medium relevance text", 2),
+        _chunk("id:high", "most relevant text", 3),
+    ]
+    monkeypatch.setattr("backend.app.retrieval._get_reranker", lambda: type("M", (), {"predict": lambda self, pairs: [0.1, 0.5, 0.9]})())
+    result = rerank_chunks_cross_encoder("test question", chunks, top_k=3)
+    assert result[0].id == "id:high"
+    assert result[1].id == "id:mid"
+    assert result[2].id == "id:low"
+    assert result[0].score == 0.9
+
+
+def test_reranker_returns_top_k(monkeypatch):
+    chunks = [_chunk(f"id:{i}", f"text {i}", i + 1) for i in range(10)]
+    scores = list(range(10))
+    monkeypatch.setattr("backend.app.retrieval._get_reranker", lambda: type("M", (), {"predict": lambda self, pairs: scores})())
+    result = rerank_chunks_cross_encoder("question", chunks, top_k=3)
+    assert len(result) == 3
+    assert result[0].id == "id:9"
+
+
+def test_reranker_fallback_on_exception(monkeypatch):
+    def bad_predict(pairs):
+        raise RuntimeError("model failed")
+    monkeypatch.setattr("backend.app.retrieval._get_reranker", lambda: type("M", (), {"predict": bad_predict})())
+    chunks = [_chunk("id:a", "text a", 1), _chunk("id:b", "text b", 2)]
+    result = rerank_chunks_cross_encoder("question", chunks, top_k=2)
+    assert [c.id for c in result] == ["id:a", "id:b"]
+
+
+def test_reranker_not_called_without_flag(monkeypatch):
+    called = []
+    monkeypatch.setattr("backend.app.retrieval.rerank_chunks_cross_encoder",
+        lambda q, chunks, top_k: called.append(True) or chunks[:top_k])
+    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
+    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
+    monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
+    monkeypatch.delenv("ENABLE_RERANKER", raising=False)
+    retrieve(RetrievalQuery(question="What was ABN AMRO's net profit?", company="ABN AMRO", year=2025, top_k=5))
+    assert called == []
