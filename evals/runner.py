@@ -7,17 +7,57 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import yaml
 
 from backend.app.config import settings
 from backend.app.pipeline import answer_with_context as pipeline_answer_with_context
-from backend.app.schemas import EvalQuestion, EvalSet, RetrievedChunk, VerbatimAnswer
+from backend.app.schemas import EvalQuestion, RetrievedChunk, VerbatimAnswer
 
 PREVIEW_CHARS = 80
 RETRIEVAL_PREVIEW_CHARS = 160
 DEFAULT_QUESTIONS = Path("evals/questions.yaml")
 DEFAULT_RUNS_DIR = Path("evals/runs")
+DEFAULT_PAGE_TOLERANCE = 1
+ALLOWED_CATEGORIES = frozenset(
+    {
+        "business_performance",
+        "esg_datapoint",
+        "financial_highlight",
+        "fte",
+        "general_report_question",
+        "hallucination_check",
+        "shareholder_return",
+        "sustainability_goal",
+    }
+)
+
+
+@dataclass
+class RunnerEvalQuestion:
+    id: str
+    question: str
+    category: str
+    difficulty: str
+    expected_answer_contains_any: list[str] | None = None
+    expected_answer_contains_all: list[str] | None = None
+    expected_page: int | list[int] | None = None
+    expected_pages: list[int] | None = None
+    accepted_pages: list[int] | None = None
+    expected_source: str | None = None
+    expected_behavior: str | None = None
+    company: str | None = None
+    year: int | None = None
+    notes: str | None = None
+
+
+@dataclass
+class RunnerEvalSet:
+    source: str | None
+    company: str | None
+    year: int | None
+    questions: list[RunnerEvalQuestion]
 
 
 @dataclass
@@ -33,10 +73,60 @@ class Outcome:
     reasons: list[str]
 
 
-def load_eval_set(path: Path) -> EvalSet:
+def _as_str_list(value: Any) -> list[str] | None:
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        return None
+    return [str(item) for item in value]
+
+
+def _as_int_list(value: Any) -> list[int] | None:
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        return None
+    return [int(item) for item in value]
+
+
+def _load_raw_eval_data(path: Path) -> dict[str, Any]:
     with path.open() as f:
         data = yaml.safe_load(f)
-    return EvalSet(**data)
+    if not isinstance(data, dict):
+        raise RuntimeError("eval YAML must be a mapping")
+    return data
+
+
+def _coerce_eval_question(raw: dict[str, Any]) -> RunnerEvalQuestion:
+    return RunnerEvalQuestion(
+        id=str(raw.get("id")),
+        question=str(raw.get("question")),
+        category=str(raw.get("category")),
+        difficulty=str(raw.get("difficulty")),
+        expected_answer_contains_any=_as_str_list(raw.get("expected_answer_contains_any")),
+        expected_answer_contains_all=_as_str_list(raw.get("expected_answer_contains_all")),
+        expected_page=raw.get("expected_page"),
+        expected_pages=_as_int_list(raw.get("expected_pages")),
+        accepted_pages=_as_int_list(raw.get("accepted_pages")),
+        expected_source=raw.get("expected_source"),
+        expected_behavior=raw.get("expected_behavior"),
+        company=raw.get("company"),
+        year=int(raw["year"]) if raw.get("year") is not None else None,
+        notes=raw.get("notes"),
+    )
+
+
+def load_eval_set(path: Path) -> RunnerEvalSet:
+    data = _load_raw_eval_data(path)
+    questions = data.get("questions")
+    if not isinstance(questions, list):
+        raise RuntimeError("eval YAML must contain a questions list")
+    return RunnerEvalSet(
+        source=data.get("source"),
+        company=data.get("company"),
+        year=int(data["year"]) if data.get("year") is not None else None,
+        questions=[_coerce_eval_question(q) for q in questions if isinstance(q, dict)],
+    )
 
 
 def _haystack(ans: VerbatimAnswer) -> str:
@@ -67,16 +157,22 @@ def _citation_chunk_contains_answer(
 
 
 def _expected_pages(q: EvalQuestion) -> list[int]:
+    expected_pages = getattr(q, "expected_pages", None)
+    if expected_pages:
+        return [int(page) for page in expected_pages]
     accepted_pages = getattr(q, "accepted_pages", None)
     if accepted_pages:
         return [int(page) for page in accepted_pages]
-    if q.expected_page is not None:
-        return [q.expected_page]
+    expected_page = getattr(q, "expected_page", None)
+    if isinstance(expected_page, list):
+        return [int(page) for page in expected_page]
+    if expected_page is not None:
+        return [int(expected_page)]
     return []
 
 
 def _page_matches_expected(page: int, expected_pages: list[int]) -> bool:
-    return any(abs(page - expected_page) <= 1 for expected_page in expected_pages)
+    return any(abs(page - expected_page) <= DEFAULT_PAGE_TOLERANCE for expected_page in expected_pages)
 
 
 def _format_expected_pages(expected_pages: list[int]) -> str:
@@ -318,9 +414,9 @@ def _build_run_record(
     *,
     timestamp: datetime,
     questions_path: Path,
-    eval_set: EvalSet,
-    company: str,
-    year: int,
+    eval_set: RunnerEvalSet,
+    company: str | None,
+    year: int | None,
     top_k: int,
     outcomes: list[Outcome],
 ) -> dict:
@@ -356,12 +452,15 @@ def _build_run_record(
             {
                 "id": o.question.id,
                 "question": o.question.question,
+                "company": getattr(o.question, "company", None),
+                "year": getattr(o.question, "year", None),
                 "category": o.question.category,
                 "difficulty": o.question.difficulty,
                 "expected": {
                     "answer_contains_any": o.question.expected_answer_contains_any,
                     "answer_contains_all": o.question.expected_answer_contains_all,
                     "page": o.question.expected_page,
+                    "pages": getattr(o.question, "expected_pages", None),
                     "accepted_pages": o.question.accepted_pages,
                     "source": o.question.expected_source,
                     "behavior": o.question.expected_behavior,
@@ -435,23 +534,127 @@ def save_run(
     return path
 
 
+def validate_eval_file(path: Path) -> tuple[bool, list[str]]:
+    try:
+        data = _load_raw_eval_data(path)
+    except Exception as exc:  # noqa: BLE001
+        return False, [f"could not parse YAML: {exc!s}"]
+
+    errors: list[str] = []
+    questions = data.get("questions")
+    if not isinstance(questions, list):
+        return False, ["missing required questions list"]
+
+    seen: set[str] = set()
+    for idx, raw in enumerate(questions, start=1):
+        prefix = f"questions[{idx}]"
+        if not isinstance(raw, dict):
+            errors.append(f"{prefix}: must be a mapping")
+            continue
+
+        qid = raw.get("id")
+        if not qid:
+            errors.append(f"{prefix}: missing required field id")
+        elif qid in seen:
+            errors.append(f"{prefix}: duplicate id {qid!r}")
+        else:
+            seen.add(str(qid))
+
+        for field in ("company", "year", "category", "question", "difficulty"):
+            if raw.get(field) is None:
+                errors.append(f"{prefix} {qid!r}: missing required field {field}")
+
+        category = raw.get("category")
+        if category is not None and category not in ALLOWED_CATEGORIES:
+            errors.append(f"{prefix} {qid!r}: unsupported category {category!r}")
+
+        expected_behavior = raw.get("expected_behavior")
+        if expected_behavior is not None and expected_behavior != "refuse":
+            errors.append(f"{prefix} {qid!r}: unsupported expected_behavior {expected_behavior!r}")
+
+        is_refusal = expected_behavior == "refuse"
+        if is_refusal:
+            continue
+
+        if not raw.get("expected_source"):
+            errors.append(f"{prefix} {qid!r}: normal question missing expected_source")
+
+        has_expected_page = any(
+            raw.get(field) is not None
+            for field in ("expected_page", "expected_pages", "accepted_pages")
+        )
+        if not has_expected_page:
+            errors.append(
+                f"{prefix} {qid!r}: normal question missing expected_page or expected_pages"
+            )
+
+        has_answer_expectation = bool(raw.get("expected_answer_contains_any")) or bool(
+            raw.get("expected_answer_contains_all")
+        )
+        if not has_answer_expectation:
+            errors.append(
+                f"{prefix} {qid!r}: normal question missing expected_answer_contains_any or expected_answer_contains_all"
+            )
+
+    return not errors, errors
+
+
+def _question_matches_filters(
+    q: RunnerEvalQuestion,
+    *,
+    eval_set: RunnerEvalSet,
+    company: str | None,
+    year: int | None,
+    categories: set[str] | None,
+    ids: set[str] | None,
+) -> bool:
+    q_company = q.company if q.company is not None else eval_set.company
+    q_year = q.year if q.year is not None else eval_set.year
+    if company is not None and q_company != company:
+        return False
+    if year is not None and q_year != year:
+        return False
+    if categories is not None and q.category not in categories:
+        return False
+    if ids is not None and q.id not in ids:
+        return False
+    return True
+
+
 def run_eval(
     path: Path,
     *,
     company: str | None,
     year: int | None,
     top_k: int,
+    categories: set[str] | None,
+    ids: set[str] | None,
+    limit: int | None,
     show_failures_only: bool,
     compare_to: Path | None,
     runs_dir: Path | None,
 ) -> int:
     started = datetime.now(timezone.utc).replace(microsecond=0)
     eval_set = load_eval_set(path)
-    eff_company = company if company is not None else eval_set.company
-    eff_year = year if year is not None else eval_set.year
+    selected_questions = [
+        q
+        for q in eval_set.questions
+        if _question_matches_filters(
+            q,
+            eval_set=eval_set,
+            company=company,
+            year=year,
+            categories=categories,
+            ids=ids,
+        )
+    ]
+    if limit is not None:
+        selected_questions = selected_questions[:limit]
 
     outcomes: list[Outcome] = []
-    for q in eval_set.questions:
+    for q in selected_questions:
+        eff_company = q.company if q.company is not None else (company if company is not None else eval_set.company)
+        eff_year = q.year if q.year is not None else (year if year is not None else eval_set.year)
         try:
             result = pipeline_answer_with_context(
                 q.question, top_k=top_k, company=eff_company, year=eff_year
@@ -502,8 +705,8 @@ def run_eval(
             timestamp=started,
             questions_path=path,
             eval_set=eval_set,
-            company=eff_company,
-            year=eff_year,
+            company=company if company is not None else eval_set.company,
+            year=year if year is not None else eval_set.year,
             top_k=top_k,
             outcomes=outcomes,
         )
@@ -518,7 +721,26 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS)
     parser.add_argument("--company", default=None)
     parser.add_argument("--year", type=int, default=None)
+    parser.add_argument(
+        "--category",
+        action="append",
+        default=None,
+        help="only run questions in this category; may be passed multiple times",
+    )
+    parser.add_argument(
+        "--id",
+        dest="ids",
+        action="append",
+        default=None,
+        help="only run this question id; may be passed multiple times",
+    )
+    parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--top-k", type=int, default=settings.top_k)
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="validate question YAML and exit without running the pipeline",
+    )
     parser.add_argument("--show-failures-only", action="store_true")
     parser.add_argument(
         "--compare-to",
@@ -539,12 +761,26 @@ def _cli(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.validate_only:
+        ok, errors = validate_eval_file(args.questions)
+        if ok:
+            eval_set = load_eval_set(args.questions)
+            print(f"valid: {args.questions} ({len(eval_set.questions)} questions)")
+            return 0
+        print(f"invalid: {args.questions}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+
     try:
         return run_eval(
             args.questions,
             company=args.company,
             year=args.year,
             top_k=args.top_k,
+            categories=set(args.category) if args.category else None,
+            ids=set(args.ids) if args.ids else None,
+            limit=args.limit,
             show_failures_only=args.show_failures_only,
             compare_to=args.compare_to,
             runs_dir=None if args.no_save else args.runs_dir,
