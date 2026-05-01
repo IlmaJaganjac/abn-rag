@@ -179,15 +179,18 @@ questions:
     company: ASML
     year: 2025
     category: esg_datapoint
-    question: "What actual scope 1 and 2 greenhouse gas emissions did ASML report for 2025?"
+    question: "What 2025 performance value did ASML report for gross scope 1 and 2 CO₂e emissions?"
     expected_source: "asml.pdf"
-    expected_page: [218, 225]
+    expected_page:
+      - 145
+      - 158
+      - 163
     expected_answer_contains_any:
-      - "scope 1 and 2"
-      - "kt"
-      - "CO2e"
+      - "26 kt"
+      - "26 kt CO₂e"
+      - "gross scope 1 and 2"
     difficulty: hard
-    notes: "Actual reported ESG datapoint; answer should not be a future target."
+    notes: "Actual gross scope 1 and 2 emissions datapoint for 2025; do not answer with the net 0 kt figure or future targets."
 
   - id: asml_2025_esg_datapoint_reuse_returned_parts
     company: ASML
@@ -195,40 +198,49 @@ questions:
     category: esg_datapoint
     question: "What reuse rate of returned parts did ASML report in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [230, 240]
+    expected_page:
+      - 42
+      - 145
+      - 187
+      - 192
+      - 201
     expected_answer_contains_any:
       - "90%"
-      - "reuse rate"
-      - "returned parts"
+      - "90% reuse rate"
+      - "reuse rate of parts returned from the field and factory"
     difficulty: easy
-    notes: "Reported circularity/reuse performance value."
+    notes: "Reported circularity performance value for parts returned from the field and factory in 2025."
 
   - id: asml_2025_esg_datapoint_training_hours
     company: ASML
     year: 2025
     category: esg_datapoint
-    question: "What average number of training hours per employee did ASML report?"
+    question: "What average number of training hours per employee headcount did ASML report for 2025?"
     expected_source: "asml.pdf"
-    expected_page: [278, 282]
+    expected_page:
+      - 230
     expected_answer_contains_any:
-      - "41"
-      - "training hours"
-      - "per employee"
+      - "40"
+      - "40 training hours"
+      - "average number of training hours per employee"
     difficulty: medium
-    notes: "Employee ESG datapoint."
+    notes: "Employee ESG datapoint; 2025 average training hours per employee is 40, while 2024 was 41."
 
   - id: asml_2025_esg_datapoint_performance_review_completion
     company: ASML
     year: 2025
     category: esg_datapoint
-    question: "What percentage of ASML employees completed an annual performance and career development review?"
+    question: "What percentage of ASML employees eligible for an annual performance and career development review completed one in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [278, 282]
+    expected_page:
+      - 230
+      - 234
     expected_answer_contains_any:
-      - "94%"
-      - "performance and career development review"
+      - "96%"
+      - "eligible for a review"
+      - "annual performance and career development review"
     difficulty: medium
-    notes: "Actual workforce ESG metric."
+    notes: "Actual workforce ESG metric; eligible-employee completion was 96% in 2025."
 
   - id: asml_2025_esg_datapoint_lithography_systems_active
     company: ASML
@@ -236,12 +248,15 @@ questions:
     category: esg_datapoint
     question: "What percentage of lithography systems sold in the past 30 years did ASML report were still active in the field?"
     expected_source: "asml.pdf"
-    expected_page: [235, 240]
+    expected_page:
+      - 18
+      - 191
     expected_answer_contains_any:
       - "95%"
+      - "95% of all"
       - "still active in the field"
     difficulty: medium
-    notes: "Product/circularity-related reported datapoint."
+    notes: "Product/circularity-related reported datapoint; ASML says 95% of systems sold in the past 30 years were still active in the field."
 
   - id: asml_2025_financial_total_net_sales
     company: ASML
@@ -249,13 +264,14 @@ questions:
     category: financial_highlight
     question: "What total net sales did ASML report in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [50, 56, 273]
+    expected_page: [5, 53, 54, 276]
     expected_answer_contains_any:
       - "€32.7bn"
+      - "€32.7 billion"
       - "EUR 32.7 billion"
       - "32,667.3 million"
     difficulty: easy
-    notes: "Main financial highlight."
+    notes: "Main financial highlight; also appears in the consolidated statement of operations."
 
   - id: asml_2025_financial_gross_margin
     company: ASML
@@ -303,42 +319,46 @@ questions:
     company: ASML
     year: 2025
     category: business_performance
-    question: "How many system sales in units did ASML report in 2025?"
+    question: "What value did ASML report for the 'System sales in units' metric in its 2025 business model/customer overview?"
     expected_source: "asml.pdf"
-    expected_page: [45, 55]
+    expected_page: [5, 42]
     expected_answer_contains_any:
       - "535"
-      - "system sales in units"
+      - "System sales in units"
+      - "2024: 583"
     difficulty: easy
-    notes: "Operational/business performance highlight."
+    notes: "Operational/business performance highlight. Manual PDF check recommended because the parsed page 5 table has conflicting column alignment, while page 42 reports 535."
 
   - id: asml_2025_business_sales_by_region_asia
     company: ASML
     year: 2025
     category: business_performance
-    question: "How much of ASML's 2025 total net sales came from Asia?"
+    question: "Adding the Japan, South Korea, Singapore, Taiwan, China and Rest of Asia rows in the geographic sales table, approximately how much of ASML's 2025 total net sales came from Asian regions?"
     expected_source: "asml.pdf"
-    expected_page: [45, 55]
+    expected_page: [287]
     expected_answer_contains_any:
-      - "€28.1bn"
-      - "28.1"
-      - "Asia"
+      - "€28.0bn"
+      - "€28.05bn"
+      - "€28.05 billion"
+      - "28,049.2"
+      - "Japan, South Korea, Singapore, Taiwan, China and Rest of Asia"
     difficulty: medium
-    notes: "Geographic sales highlight."
+    notes: "Computed from the 2025 geographic sales rows for Japan, South Korea, Singapore, Taiwan, China and Rest of Asia; manual PDF check recommended because the report does not provide an explicit Asia subtotal."
 
   - id: asml_2025_business_sales_by_region_us
     company: ASML
     year: 2025
     category: business_performance
-    question: "How much of ASML's 2025 total net sales came from the United States?"
+    question: "What 2025 total net sales value did ASML report for the United States in the geographic sales table?"
     expected_source: "asml.pdf"
-    expected_page: [45, 55]
+    expected_page: [287]
     expected_answer_contains_any:
       - "€4.1bn"
       - "4.1"
+      - "4,089.1"
       - "United States"
     difficulty: medium
-    notes: "Geographic sales highlight."
+    notes: "Geographic sales table row for the United States; value is reported in € millions."
 
   - id: asml_2025_business_ai_demand
     company: ASML
@@ -346,11 +366,12 @@ questions:
     category: business_performance
     question: "What demand driver did ASML cite for Logic net sales in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [50, 60]
+    expected_page: [54, 55, 288]
     expected_answer_contains_any:
       - "AI demand"
       - "leading-edge foundry growth"
       - "next nodes"
+      - "positive momentum in AI-related demand"
     difficulty: medium
     notes: "Business performance narrative."
 
@@ -360,9 +381,10 @@ questions:
     category: shareholder_return
     question: "How much did ASML return to shareholders through dividends and share buybacks in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [45, 60]
+    expected_page: [5, 47]
     expected_answer_contains_any:
       - "€8.5bn"
+      - "€8.5 billion"
       - "EUR 8.5 billion"
       - "dividends and share buybacks"
     difficulty: easy
@@ -374,12 +396,13 @@ questions:
     category: shareholder_return
     question: "What basic earnings per share did ASML report in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [45, 60]
+    expected_page: [53, 276, 316]
     expected_answer_contains_any:
       - "€24.73"
       - "24.73"
       - "EPS"
       - "earnings per share"
+      - "basic net income per ordinary share"
     difficulty: easy
     notes: "Shareholder return / per-share financial highlight."
 
@@ -389,12 +412,12 @@ questions:
     category: shareholder_return
     question: "What mechanisms did ASML use to return capital to shareholders in 2025?"
     expected_source: "asml.pdf"
-    expected_page: [45, 60]
+    expected_page: [47, 315, 333, 334]
     expected_answer_contains_all:
-      - "dividends"
-      - "share buybacks"
+      - "dividend"
+      - "share buyback"
     difficulty: easy
-    notes: "Expected answer should name both mechanisms."
+    notes: "Expected answer should name both dividend payments and share buybacks; capital repayment may also be mentioned in the financing policy."
 
   - id: asml_2025_general_strategy
     company: ASML
@@ -402,15 +425,15 @@ questions:
     category: general_report_question
     question: "What were ASML's main strategic themes in the 2025 annual report?"
     expected_source: "asml.pdf"
-    expected_page: [20, 35, 90, 95]
+    expected_page: [93]
     expected_answer_contains_any:
-      - "AI"
-      - "lithography"
-      - "innovation"
-      - "EUV"
-      - "customers"
+      - "Deepen customer trust"
+      - "holistic product roadmap"
+      - "Strengthen ecosystem relationships"
+      - "Drive operational excellence"
+      - "Deliver on ESG sustainability"
     difficulty: medium
-    notes: "General strategy question; answer can be a short list."
+    notes: "ASML 2025 describes six strategic priorities/pillars in the Supervisory Board strategy review."
 
   - id: asml_2025_general_risks
     company: ASML
@@ -434,14 +457,15 @@ questions:
     category: general_report_question
     question: "What is ASML's business model focused on?"
     expected_source: "asml.pdf"
-    expected_page: [20, 35]
+    expected_page: [42, 146]
     expected_answer_contains_any:
-      - "lithography"
-      - "semiconductor"
-      - "systems"
-      - "installed base"
+      - "world-leading lithography systems"
+      - "powerful and energy-efficient chips"
+      - "reduce their costs"
+      - "environmental footprint"
+      - "business model"
     difficulty: easy
-    notes: "Broad business model question."
+    notes: "Broad business model question; valid evidence appears in the customer value discussion and business model overview."
 
   - id: asml_2025_general_ceo_message
     company: ASML
