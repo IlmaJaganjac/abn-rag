@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from backend.app.answer import _ground_citations
-from backend.app.retrieval import retrieve
+from backend.app.retrieval import expand_query_for_retrieval, retrieve
 from backend.app.schemas import Citation, RetrievalQuery, RetrievedChunk
 
 
@@ -88,6 +88,37 @@ def _chunk(cid: str, text: str, page: int, kind: str = "section") -> RetrievedCh
         chunk_kind=kind,
         score=1.0,
     )
+
+
+def test_expand_fte_question():
+    expanded = expand_query_for_retrieval("How many FTEs did ASML have in 2025?")
+    assert expanded.startswith("How many FTEs did ASML have in 2025?")
+    assert "employees" in expanded
+    assert "headcount" in expanded
+    assert "workforce" in expanded
+    assert "full-time equivalents" in expanded
+
+
+def test_expand_sustainability_question():
+    expanded = expand_query_for_retrieval("What are ASML's sustainability goals for 2030?")
+    assert expanded.startswith("What are ASML's sustainability goals for 2030?")
+    assert "climate" in expanded
+    assert "emissions" in expanded
+    assert "scope" in expanded
+    assert "net zero" in expanded
+
+
+def test_expand_financial_question():
+    expanded = expand_query_for_retrieval("What was ASML's revenue in 2025?")
+    assert expanded.startswith("What was ASML's revenue in 2025?")
+    assert "net sales" in expanded
+    assert "gross margin" in expanded
+
+
+def test_expand_unrelated_question_unchanged():
+    q = "Who was the CEO of ASML in 2025?"
+    expanded = expand_query_for_retrieval(q)
+    assert expanded == q
 
 
 def test_retrieve_uses_bm25_for_ceo_text_question(monkeypatch) -> None:
