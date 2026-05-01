@@ -13,26 +13,75 @@ from backend.app.config import settings
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """\
-You extract structured datapoints from annual reports.
+_BASE_INSTRUCTIONS = """\
 Only extract information explicitly present in the document.
 Do not infer, calculate, convert, round, or normalize values.
 Preserve exact values and qualifiers, including >, <, approximately, more than, %, €, kt, Mt, CO₂e, FTEs.
-
-For FTE, extract workforce datapoints only. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated.
-
-For sustainability goals (sustainability_goals): extract explicit targets, ambitions, commitments, or goals related to climate, GHG, emissions, energy, net-zero, scope 1/2/3, circularity, or sustainability. These are future-oriented and often contain words like "target", "aim", "ambition", "commitment", "by 2030", "by 2040", "we will", "we plan to".
-
-For ESG datapoints (esg_datapoints): extract actual reported performance values for the reporting year. These are historical, measured values — not targets. Examples: actual GHG emissions (scope 1, 2, 3), renewable electricity percentage, energy consumption, water use, waste, recycling rate, supplier sustainability metrics, social/workforce ESG metrics. Extract the actual reported value, unit, period/year, scope if present, page, and quote.
-
-Do not confuse targets (sustainability_goals) with actuals (esg_datapoints). A goal says what will happen; an ESG datapoint says what was measured.
-
-Also extract visually prominent KPI highlights from dashboard, tile, overview, or "at a glance" pages.
-Preserve exact value-label relationships. Do not swap labels between nearby tiles or columns.
-Only extract values explicitly shown. Do not infer, calculate, convert, round, or normalize.
-For every KPI, include metric, value, unit if explicit, period, page, and quote if available.
 For every extracted item, include page and a short verbatim quote if available.
+Preserve exact value-label relationships. Do not swap labels between nearby tiles or columns.
 If not present, leave the list empty. Do not guess.\
+"""
+
+_CATEGORY_PROMPTS: dict[str, str] = {
+    "fte": f"""\
+You extract workforce and headcount datapoints from annual reports. Only populate fte_datapoints. Leave all other lists empty.
+
+Extract workforce/headcount datapoints: total employees (FTEs or headcount), average number of payroll employees, number of internal employees, permanent employees, temporary employees, part-time employees, full-time employees, non-guaranteed hours employees, external employees, contractors, year-end employee count, average employee count, employees by gender, employees by region or country, employee turnover or attrition rate. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated. Include label, value, unit (FTEs or headcount), basis (FTE/headcount/payroll/etc.), period (year or date), page, and verbatim quote.
+
+Do not extract: dedicated FTEs for a specific project, program, or team. Do not extract financial, sustainability, operational, or shareholder data.
+
+{_BASE_INSTRUCTIONS}""",
+
+    "sustainability": f"""\
+You extract sustainability goals, targets, ambitions, and commitments from annual reports. Only populate sustainability_goals. Leave all other lists empty.
+
+Extract explicit forward-looking targets, ambitions, commitments, or goals related to: climate change mitigation, greenhouse gas (GHG) emission reductions, net zero, gross Scope 1 / Scope 2 / Scope 3 emissions reduction, carbon intensity, renewable electricity or energy, energy efficiency, circularity, waste, recycling, water, biodiversity, supplier sustainability. Look for language such as: "target", "goal", "ambition", "commitment", "aim", "we will", "we plan to", "reduce by [X%] by [year]", "achieve net zero by [year]", "transition plan", "SBTi", "Science Based Targets", "1.5°C". Include target_year, scope (Scope 1/2/3 or value chain), value_or_target (the reduction percentage or absolute target), and a verbatim quote.
+
+Do not extract: actual historical ESG performance values (e.g., reported GHG emissions for last year). Do not extract FTE, financial, business performance, or shareholder data.
+
+{_BASE_INSTRUCTIONS}""",
+
+    "esg": f"""\
+You extract actual ESG performance values from annual reports. Only populate esg_datapoints. Leave all other lists empty.
+
+Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results, social/workforce ESG metrics. Include value, unit, period/year, scope if present, page, and verbatim quote.
+
+Do not extract forward-looking targets or commitments. Do not extract FTE headcount, financial KPIs, business performance, or shareholder data.
+
+{_BASE_INSTRUCTIONS}""",
+
+    "financial_highlight": f"""\
+You extract financial KPI values from annual reports. Only populate financial_highlights. Leave all other lists empty.
+
+Extract financial performance values from summaries, income statements, tables, or "at a glance" / highlights pages. Target metrics: total net sales / revenue / total income, gross profit, gross margin (%), operating income / operating profit / EBIT / EBITDA / adjusted EBITDA, net income / net profit / profit for the period, earnings per share (EPS) / diluted EPS, R&D spend / research and development expense, free cash flow, operating cash flow / cash flow from operating activities, cash and cash equivalents, capex / capital expenditure, return on equity (ROE), return on invested capital (ROIC), CET1 ratio, capital ratio, liquidity coverage ratio, net interest margin (NIM). Include metric, value, unit (€m / €bn / %), period (year), page, and a short verbatim quote.
+
+Do not extract: workforce/FTE data, sustainability targets, operational KPIs (systems sold, suppliers, satisfaction), or shareholder return amounts.
+
+{_BASE_INSTRUCTIONS}""",
+
+    "business_performance": f"""\
+You extract business and operational performance KPI values from annual reports. Only populate business_performance. Leave all other lists empty.
+
+Extract operational/business performance values from summaries, segment tables, or "at a glance" pages. Target metrics: systems sold / lithography systems / net system sales in units, new systems sold, used systems sold, installed base / active systems, order intake / bookings, order book / backlog, number of customers or clients, customer satisfaction score / NPS, number of suppliers, reuse rate (operational/circularity KPI), market share, production volume, delivery volume, loans / deposits / mortgages (banking), LNG sales / barrels per day / refining throughput (energy), beer volume / hectoliters (consumer goods), number of stores / branches / locations (retail), assets under management (AUM), transaction volume. Include metric, value, unit, period, page, and a short verbatim quote.
+
+Do not extract: FTE/headcount, financial statement lines (net sales, net income, gross margin), sustainability targets, or shareholder distributions.
+
+{_BASE_INSTRUCTIONS}""",
+
+    "shareholder_return": f"""\
+You extract shareholder return and capital distribution values from annual reports. Only populate shareholder_returns. Leave all other lists empty.
+
+Extract: total returned to shareholders, total shareholder distributions, capital return, dividends paid, ordinary dividend, special dividend, final dividend, interim dividend, dividend per share, proposed dividend, payout ratio, share buybacks, share repurchases, treasury shares purchased, shares cancelled, number of shares repurchased, total cash returned. Include metric, value, unit (€ per share / €bn / €m / %), period (year), page, and a short verbatim quote.
+
+Do not extract: financial performance KPIs (net income, gross margin), workforce data, sustainability targets, or business operational KPIs.
+
+{_BASE_INSTRUCTIONS}""",
+}
+
+# Fallback for unknown categories
+_DEFAULT_PROMPT = f"""\
+You extract structured datapoints from annual reports.
+{_BASE_INSTRUCTIONS}
 """
 
 _POLL_INTERVAL = 5
@@ -62,16 +111,6 @@ class ExtractedSustainabilityGoal(BaseModel):
     confidence: float | None = None
 
 
-class ExtractedKPIHighlight(BaseModel):
-    metric: str
-    value: str
-    unit: str | None = None
-    period: str | None = None
-    page: int | None = None
-    quote: str | None = None
-    confidence: float | None = None
-
-
 class ExtractedESGDatapoint(BaseModel):
     metric: str
     value: str
@@ -83,13 +122,48 @@ class ExtractedESGDatapoint(BaseModel):
     confidence: float | None = None
 
 
+class ExtractedFinancialHighlight(BaseModel):
+    metric: str
+    value: str
+    unit: str | None = None
+    period: str | None = None
+    page: int | None = None
+    quote: str | None = None
+    confidence: float | None = None
+    basis: str | None = None
+
+
+class ExtractedBusinessPerformance(BaseModel):
+    metric: str
+    value: str
+    unit: str | None = None
+    period: str | None = None
+    page: int | None = None
+    quote: str | None = None
+    confidence: float | None = None
+    basis: str | None = None
+
+
+class ExtractedShareholderReturn(BaseModel):
+    metric: str
+    value: str
+    unit: str | None = None
+    period: str | None = None
+    page: int | None = None
+    quote: str | None = None
+    confidence: float | None = None
+    basis: str | None = None
+
+
 class AnnualReportDatapoints(BaseModel):
     company: str | None = None
     year: int | None = None
     fte_datapoints: list[ExtractedFTEDatapoint] = []
     sustainability_goals: list[ExtractedSustainabilityGoal] = []
     esg_datapoints: list[ExtractedESGDatapoint] = []
-    kpi_highlights: list[ExtractedKPIHighlight] = []
+    financial_highlights: list[ExtractedFinancialHighlight] = []
+    business_performance: list[ExtractedBusinessPerformance] = []
+    shareholder_returns: list[ExtractedShareholderReturn] = []
 
 
 def _json_schema() -> dict[str, Any]:
@@ -118,6 +192,7 @@ def extract_annual_report_datapoints(
     company: str | None,
     year: int | None,
     page_range: str | None = None,
+    category: str | None = None,
 ) -> AnnualReportDatapoints:
     api_key = settings.llama_cloud_api_key.get_secret_value()
     if not api_key:
@@ -139,11 +214,12 @@ def extract_annual_report_datapoints(
     client = LlamaCloud(token=api_key)
     le = client.llama_extract
 
+    system_prompt = _CATEGORY_PROMPTS.get(category, _DEFAULT_PROMPT) if category else _DEFAULT_PROMPT
     schema = _json_schema()
     config = ExtractConfig(
         cite_sources=True,
         confidence_scores=True,
-        system_prompt=_SYSTEM_PROMPT,
+        system_prompt=system_prompt,
         page_range=page_range,
     )
 
@@ -181,6 +257,8 @@ def extract_annual_report_datapoints(
         fte_datapoints=result.fte_datapoints,
         sustainability_goals=result.sustainability_goals,
         esg_datapoints=result.esg_datapoints,
-        kpi_highlights=result.kpi_highlights,
+        financial_highlights=result.financial_highlights,
+        business_performance=result.business_performance,
+        shareholder_returns=result.shareholder_returns,
     )
     return result

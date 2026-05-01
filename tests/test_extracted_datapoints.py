@@ -11,9 +11,11 @@ from backend.app.extracted_datapoints import (
 )
 from backend.app.llama_extract_datapoints import (
     AnnualReportDatapoints,
+    ExtractedBusinessPerformance,
     ExtractedESGDatapoint,
+    ExtractedFinancialHighlight,
     ExtractedFTEDatapoint,
-    ExtractedKPIHighlight,
+    ExtractedShareholderReturn,
     ExtractedSustainabilityGoal,
 )
 
@@ -31,7 +33,7 @@ def _norm(datapoints: list[NormalizedDatapoint], dtype: str) -> list[NormalizedD
 
 
 # ---------------------------------------------------------------------------
-# Priority rules
+# Priority rules — FTE
 # ---------------------------------------------------------------------------
 
 def test_total_employees_fte_gets_priority_100():
@@ -82,6 +84,10 @@ def test_company_wide_outprioritizes_program_specific():
     assert fte[1].priority == 30
 
 
+# ---------------------------------------------------------------------------
+# Priority rules — sustainability_goal
+# ---------------------------------------------------------------------------
+
 def test_sustainability_goal_with_year_and_quote_priority_95():
     result = _make_result(sustainability_goals=[
         ExtractedSustainabilityGoal(
@@ -105,22 +111,53 @@ def test_sustainability_goal_no_quote_priority_70():
     assert sg[0].priority == 70
 
 
-def test_kpi_with_page_and_quote_priority_90():
-    result = _make_result(kpi_highlights=[
-        ExtractedKPIHighlight(metric="System sales in units", value="535", page=5, quote="535 System sales in units"),
+# ---------------------------------------------------------------------------
+# Priority rules — financial_highlight, business_performance, shareholder_return
+# ---------------------------------------------------------------------------
+
+def test_financial_highlight_with_page_and_quote_priority_90():
+    result = _make_result(financial_highlights=[
+        ExtractedFinancialHighlight(metric="Total net sales", value="28.3", page=5, quote="€28.3bn Total net sales"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    kpi = _norm(dps, "kpi_highlight")
-    assert kpi[0].priority == 90
+    fh = _norm(dps, "financial_highlight")
+    assert fh[0].priority == 90
 
 
-def test_kpi_without_quote_priority_60():
-    result = _make_result(kpi_highlights=[
-        ExtractedKPIHighlight(metric="System sales in units", value="535"),
+def test_financial_highlight_without_quote_priority_75():
+    result = _make_result(financial_highlights=[
+        ExtractedFinancialHighlight(metric="Gross margin", value="51.3%", page=56),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    kpi = _norm(dps, "kpi_highlight")
-    assert kpi[0].priority == 60
+    fh = _norm(dps, "financial_highlight")
+    assert fh[0].priority == 75
+
+
+def test_business_performance_with_page_and_quote_priority_90():
+    result = _make_result(business_performance=[
+        ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems sold in 2024"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    bp = _norm(dps, "business_performance")
+    assert bp[0].priority == 90
+
+
+def test_shareholder_return_with_page_and_quote_priority_90():
+    result = _make_result(shareholder_returns=[
+        ExtractedShareholderReturn(metric="Total returned to shareholders", value="3.0", page=5, quote="€3.0bn returned"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    sr = _norm(dps, "shareholder_return")
+    assert sr[0].priority == 90
+
+
+def test_shareholder_return_no_page_no_quote_priority_60():
+    result = _make_result(shareholder_returns=[
+        ExtractedShareholderReturn(metric="Dividends paid", value="1.2"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    sr = _norm(dps, "shareholder_return")
+    assert sr[0].priority == 60
 
 
 # ---------------------------------------------------------------------------
@@ -132,7 +169,7 @@ def _dp(metric: str, value: str, priority: int, confidence: float | None = None,
         source="test.pdf",
         company="ACME",
         year=2025,
-        datapoint_type="kpi_highlight",
+        datapoint_type="financial_highlight",
         metric=metric,
         value=value,
         page=page,
@@ -144,8 +181,8 @@ def _dp(metric: str, value: str, priority: int, confidence: float | None = None,
 
 def test_dedup_keeps_higher_priority():
     dps = [
-        _dp("System sales in units", "535", priority=60),
-        _dp("System sales in units", "535", priority=90, quote="535 System sales"),
+        _dp("Total net sales", "28.3", priority=75),
+        _dp("Total net sales", "28.3", priority=90, quote="€28.3bn"),
     ]
     result = deduplicate_datapoints(dps)
     assert len(result) == 1
@@ -175,7 +212,7 @@ def test_dedup_prefers_quote_on_tie():
 def test_dedup_different_values_not_deduped():
     dps = [
         _dp("Net sales", "32.7", priority=90),
-        _dp("Net sales", "28.3", priority=90),  # different value (prior year)
+        _dp("Net sales", "28.3", priority=90),
     ]
     result = deduplicate_datapoints(dps)
     assert len(result) == 2
@@ -183,8 +220,8 @@ def test_dedup_different_values_not_deduped():
 
 def test_dedup_different_pages_not_deduped():
     dps = [
-        _dp("Total employees (FTEs)", "> 44,000", priority=100, page=5),
-        _dp("Total employees (FTEs)", "> 44,000", priority=100, page=227),
+        _dp("Total net sales", "28.3", priority=90, page=5),
+        _dp("Total net sales", "28.3", priority=90, page=56),
     ]
     result = deduplicate_datapoints(dps)
     assert len(result) == 2
@@ -192,8 +229,8 @@ def test_dedup_different_pages_not_deduped():
 
 def test_dedup_normalizes_metric_case():
     dps = [
-        _dp("System Sales In Units", "535", priority=60),
-        _dp("system sales in units", "535", priority=90),
+        _dp("Total Net Sales", "28.3", priority=75),
+        _dp("total net sales", "28.3", priority=90),
     ]
     result = deduplicate_datapoints(dps)
     assert len(result) == 1
@@ -225,7 +262,7 @@ def test_normalize_preserves_fields():
 
 
 # ---------------------------------------------------------------------------
-# datapoints_to_chunks
+# datapoints_to_chunks — helpers
 # ---------------------------------------------------------------------------
 
 def _make_ds(datapoints: list[NormalizedDatapoint]) -> NormalizedDatapointSet:
@@ -258,6 +295,46 @@ def _sust_dp(**kwargs) -> NormalizedDatapoint:
     return NormalizedDatapoint(**defaults)
 
 
+def _fin_dp(**kwargs) -> NormalizedDatapoint:
+    defaults = dict(
+        source="test.pdf", company="ACME", year=2025,
+        datapoint_type="financial_highlight",
+        metric="Total net sales",
+        value="28.3", unit="€bn", period="2024",
+        page=56, quote="Total net sales €28.3bn", priority=90,
+    )
+    defaults.update(kwargs)
+    return NormalizedDatapoint(**defaults)
+
+
+def _biz_dp(**kwargs) -> NormalizedDatapoint:
+    defaults = dict(
+        source="test.pdf", company="ACME", year=2025,
+        datapoint_type="business_performance",
+        metric="Lithography systems sold",
+        value="418", unit="units", period="2024",
+        page=55, quote="418 systems sold in 2024", priority=90,
+    )
+    defaults.update(kwargs)
+    return NormalizedDatapoint(**defaults)
+
+
+def _sh_dp(**kwargs) -> NormalizedDatapoint:
+    defaults = dict(
+        source="test.pdf", company="ACME", year=2025,
+        datapoint_type="shareholder_return",
+        metric="Total returned to shareholders",
+        value="3.0", unit="€bn", period="2024",
+        page=5, quote="€3.0bn returned to shareholders", priority=90,
+    )
+    defaults.update(kwargs)
+    return NormalizedDatapoint(**defaults)
+
+
+# ---------------------------------------------------------------------------
+# Chunk kind and section_path
+# ---------------------------------------------------------------------------
+
 def test_fte_chunk_kind():
     chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
     assert len(chunks) == 1
@@ -269,6 +346,31 @@ def test_sustainability_chunk_kind():
     chunks = datapoints_to_chunks(_make_ds([_sust_dp()]))
     assert chunks[0].chunk_kind == "extracted_datapoint"
 
+
+def test_financial_highlight_chunk_kind_and_section_path():
+    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
+    assert chunks[0].chunk_kind == "extracted_datapoint"
+    assert chunks[0].parser == "llamaextract"
+    assert "Financial highlights" in chunks[0].section_path
+
+
+def test_business_performance_chunk_kind_and_section_path():
+    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
+    assert chunks[0].chunk_kind == "extracted_datapoint"
+    assert chunks[0].parser == "llamaextract"
+    assert "Business performance" in chunks[0].section_path
+
+
+def test_shareholder_return_chunk_kind_and_section_path():
+    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
+    assert chunks[0].chunk_kind == "extracted_datapoint"
+    assert chunks[0].parser == "llamaextract"
+    assert "Shareholder returns" in chunks[0].section_path
+
+
+# ---------------------------------------------------------------------------
+# Text format
+# ---------------------------------------------------------------------------
 
 def test_fte_text_contains_required_fields():
     chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
@@ -288,6 +390,36 @@ def test_sustainability_text_contains_target_year():
     assert "Value/target:" in text
 
 
+def test_financial_highlight_text_format():
+    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
+    text = chunks[0].text
+    assert "Datapoint type: financial_highlight" in text
+    assert "Metric:" in text
+    assert "Value:" in text
+    assert "Period:" in text
+    assert "Quote:" in text
+
+
+def test_business_performance_text_format():
+    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
+    text = chunks[0].text
+    assert "Datapoint type: business_performance" in text
+    assert "Metric:" in text
+    assert "Value:" in text
+
+
+def test_shareholder_return_text_format():
+    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
+    text = chunks[0].text
+    assert "Datapoint type: shareholder_return" in text
+    assert "Metric:" in text
+    assert "Value:" in text
+
+
+# ---------------------------------------------------------------------------
+# Embedding text synonyms
+# ---------------------------------------------------------------------------
+
 def test_fte_embedding_text_has_synonyms():
     chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
     emb = chunks[0].embedding_text or ""
@@ -303,6 +435,106 @@ def test_sustainability_embedding_text_has_synonyms():
     assert "emissions" in emb
     assert "net zero" in emb
 
+
+def test_financial_highlight_embedding_synonyms():
+    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
+    emb = chunks[0].embedding_text or ""
+    assert "revenue" in emb
+    assert "gross margin" in emb
+    assert "net income" in emb
+    assert "free cash flow" in emb
+
+
+def test_business_performance_embedding_synonyms():
+    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
+    emb = chunks[0].embedding_text or ""
+    assert "systems sold" in emb
+    assert "suppliers" in emb
+    assert "customer satisfaction" in emb
+
+
+def test_shareholder_return_embedding_synonyms():
+    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
+    emb = chunks[0].embedding_text or ""
+    assert "dividend" in emb
+    assert "buyback" in emb
+    assert "returned to shareholders" in emb
+
+
+# ---------------------------------------------------------------------------
+# Normalization — new categories
+# ---------------------------------------------------------------------------
+
+def test_financial_highlight_normalize():
+    result = _make_result(financial_highlights=[
+        ExtractedFinancialHighlight(
+            metric="Total net sales", value="28.3", unit="€bn",
+            period="2024", page=56, quote="€28.3bn net sales",
+        ),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert len(dps) == 1
+    assert dps[0].datapoint_type == "financial_highlight"
+    assert dps[0].priority == 90
+
+
+def test_business_performance_normalize():
+    result = _make_result(business_performance=[
+        ExtractedBusinessPerformance(
+            metric="Lithography systems sold", value="418", unit="units",
+            period="2024", page=55, quote="418 systems sold",
+        ),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert len(dps) == 1
+    assert dps[0].datapoint_type == "business_performance"
+    assert dps[0].priority == 90
+
+
+def test_shareholder_return_normalize():
+    result = _make_result(shareholder_returns=[
+        ExtractedShareholderReturn(
+            metric="Total returned to shareholders", value="3.0", unit="€bn",
+            period="2024", page=5, quote="€3.0bn returned to shareholders",
+        ),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert len(dps) == 1
+    assert dps[0].datapoint_type == "shareholder_return"
+    assert dps[0].priority == 90
+
+
+def test_new_categories_do_not_bleed_into_each_other():
+    result = _make_result(
+        financial_highlights=[
+            ExtractedFinancialHighlight(metric="Net income", value="7.6", page=58, quote="net income 7.6"),
+        ],
+        business_performance=[
+            ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems"),
+        ],
+        shareholder_returns=[
+            ExtractedShareholderReturn(metric="Dividends paid", value="1.2", page=5, quote="dividends 1.2"),
+        ],
+    )
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    types = {d.datapoint_type for d in dps}
+    assert types == {"financial_highlight", "business_performance", "shareholder_return"}
+
+
+def test_category_order_preserved_in_combined_list():
+    fin = _fin_dp()
+    biz = _biz_dp()
+    sh = _sh_dp()
+    ds = _make_ds([fin, biz, sh])
+    chunks = datapoints_to_chunks(ds)
+    assert chunks[0].section_path == "Pre-extracted > Financial highlights"
+    assert chunks[1].section_path == "Pre-extracted > Business performance"
+    assert chunks[2].section_path == "Pre-extracted > Shareholder returns"
+
+
+# ---------------------------------------------------------------------------
+# Chunk IDs
+# ---------------------------------------------------------------------------
 
 def test_chunk_ids_are_unique_and_stable():
     dps = [_fte_dp(), _sust_dp()]
@@ -420,7 +652,7 @@ def test_esg_embedding_text_has_synonyms():
     assert "recycling" in emb
 
 
-def test_sustainability_category_keeps_both_goals_and_esg():
+def test_sustainability_category_keeps_goals_and_esg():
     result = AnnualReportDatapoints(
         company="ACME", year=2025,
         sustainability_goals=[

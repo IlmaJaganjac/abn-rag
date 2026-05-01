@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from backend.app.llama_extract_datapoints import AnnualReportDatapoints, ExtractedESGDatapoint
+from backend.app.llama_extract_datapoints import AnnualReportDatapoints
 from backend.app.schemas import Chunk
 
 _PUNCT_RE = re.compile(r"[^\w\s]")
@@ -18,11 +18,11 @@ _SYMBOL_SPACE_RE = re.compile(r"\s*([€$£%><=,.])\s*")
 # FTE priority helpers
 _FTE_COMPANY_WIDE = re.compile(
     r"total\s+employees?|total\s+workforce|all\s+employees?|"
-    r"total\s+number\s+of\s+payroll|total\s+number\s+of\s+employees",
+    r"total\s+number\s+of\s+(?:payroll\s+)?employees|internal\s+employees?",
     re.IGNORECASE,
 )
 _FTE_AVG_PAYROLL = re.compile(
-    r"\baverage\b|\bpayroll\b|\btemporary\b",
+    r"\baverage\b|\bpayroll\b|\btemporary\b|\bpermanent\b",
     re.IGNORECASE,
 )
 _FTE_HEADCOUNT = re.compile(r"\bheadcount\b", re.IGNORECASE)
@@ -90,7 +90,6 @@ def _fte_priority(metric: str, basis: str | None) -> int:
         return 85
     if _FTE_COMPANY_WIDE.search(combined):
         return 100
-    # generic FTE mention
     return 60
 
 
@@ -104,7 +103,7 @@ def _sustainability_priority(goal: str, quote: str | None, target_year: str | No
     return 70
 
 
-def _kpi_priority(page: int | None, quote: str | None) -> int:
+def _highlight_priority(page: int | None, quote: str | None) -> int:
     if page is not None and quote:
         return 90
     if page is not None or quote:
@@ -188,21 +187,58 @@ def normalize_llamaextract_result(
             confidence=esg.confidence,
         ))
 
-    for kpi in result.kpi_highlights:
-        priority = _kpi_priority(kpi.page, kpi.quote)
+    for fh in result.financial_highlights:
+        priority = _highlight_priority(fh.page, fh.quote)
         out.append(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
-            datapoint_type="kpi_highlight",
-            metric=kpi.metric,
-            value=kpi.value,
-            unit=kpi.unit,
-            period=kpi.period,
-            page=kpi.page,
-            quote=kpi.quote,
+            datapoint_type="financial_highlight",
+            metric=fh.metric,
+            value=fh.value,
+            unit=fh.unit,
+            period=fh.period,
+            page=fh.page,
+            quote=fh.quote,
+            basis=fh.basis,
             priority=priority,
-            confidence=kpi.confidence,
+            confidence=fh.confidence,
+        ))
+
+    for bp in result.business_performance:
+        priority = _highlight_priority(bp.page, bp.quote)
+        out.append(NormalizedDatapoint(
+            source=source,
+            company=company,
+            year=year,
+            datapoint_type="business_performance",
+            metric=bp.metric,
+            value=bp.value,
+            unit=bp.unit,
+            period=bp.period,
+            page=bp.page,
+            quote=bp.quote,
+            basis=bp.basis,
+            priority=priority,
+            confidence=bp.confidence,
+        ))
+
+    for sr in result.shareholder_returns:
+        priority = _highlight_priority(sr.page, sr.quote)
+        out.append(NormalizedDatapoint(
+            source=source,
+            company=company,
+            year=year,
+            datapoint_type="shareholder_return",
+            metric=sr.metric,
+            value=sr.value,
+            unit=sr.unit,
+            period=sr.period,
+            page=sr.page,
+            quote=sr.quote,
+            basis=sr.basis,
+            priority=priority,
+            confidence=sr.confidence,
         ))
 
     return out
@@ -242,12 +278,41 @@ _SECTION_PATH = {
     "fte": "Pre-extracted > FTE",
     "sustainability_goal": "Pre-extracted > Sustainability goals",
     "esg_datapoint": "Pre-extracted > ESG datapoints",
-    "kpi_highlight": "Pre-extracted > KPI highlights",
+    "financial_highlight": "Pre-extracted > Financial highlights",
+    "business_performance": "Pre-extracted > Business performance",
+    "shareholder_return": "Pre-extracted > Shareholder returns",
 }
 
-_FTE_SYNONYMS = "employees workforce FTE full-time equivalents headcount payroll"
-_SUST_SYNONYMS = "sustainability target goal climate GHG CO2 CO₂ emissions scope net zero"
-_ESG_SYNONYMS = "ESG sustainability performance actual reported emissions GHG CO2 CO₂ scope energy waste recycling renewable water circularity"
+_FTE_SYNONYMS = (
+    "employees workforce FTE FTEs full-time equivalents headcount payroll "
+    "personnel staff contractors permanent temporary internal external"
+)
+_SUST_SYNONYMS = (
+    "sustainability target goal ambition commitment climate GHG greenhouse gas "
+    "CO2 CO₂ CO2e CO₂e emissions scope net zero carbon intensity renewable energy "
+    "decarbonisation decarbonization SBTi science based targets 1.5C"
+)
+_ESG_SYNONYMS = (
+    "ESG sustainability performance actual reported emissions GHG CO2 CO₂ scope "
+    "energy waste recycling renewable water circularity"
+)
+_FIN_HIGHLIGHT_SYNONYMS = (
+    "financial performance revenue net sales total income operating income EBIT EBITDA "
+    "gross profit gross margin net income net profit EPS earnings per share diluted EPS "
+    "R&D research and development free cash flow operating cash flow capex capital expenditure "
+    "ROE return on equity ROIC CET1 capital ratio"
+)
+_BIZ_PERF_SYNONYMS = (
+    "business performance operational systems sold lithography systems units installed base "
+    "order intake backlog bookings customer satisfaction suppliers reuse rate market share "
+    "volume deliveries loans deposits mortgages AUM assets under management"
+)
+_SH_RETURN_SYNONYMS = (
+    "shareholder return dividend dividends paid ordinary dividend special dividend "
+    "final dividend interim dividend dividend per share proposed dividend payout ratio "
+    "share buyback share repurchase repurchases returned to shareholders capital return "
+    "treasury shares distributions"
+)
 
 
 def _build_text(dp: NormalizedDatapoint) -> str:
@@ -277,6 +342,8 @@ def _build_text(dp: NormalizedDatapoint) -> str:
         lines.append(f"Value: {dp.value or ''}")
         if dp.unit:
             lines.append(f"Unit: {dp.unit}")
+        if dp.basis:
+            lines.append(f"Basis: {dp.basis}")
     if dp.quote:
         lines.append(f"Quote: {dp.quote}")
     lines.append(f"Extractor: llamaextract")
@@ -299,6 +366,12 @@ def _build_embedding_text(dp: NormalizedDatapoint) -> str:
         parts += [dp.scope or "", dp.target_year or "", _SUST_SYNONYMS]
     elif dp.datapoint_type == "esg_datapoint":
         parts += [dp.scope or "", dp.period or "", _ESG_SYNONYMS]
+    elif dp.datapoint_type == "financial_highlight":
+        parts += [dp.basis or "", dp.period or "", _FIN_HIGHLIGHT_SYNONYMS]
+    elif dp.datapoint_type == "business_performance":
+        parts += [dp.basis or "", dp.period or "", _BIZ_PERF_SYNONYMS]
+    elif dp.datapoint_type == "shareholder_return":
+        parts += [dp.basis or "", dp.period or "", _SH_RETURN_SYNONYMS]
     else:
         parts += [dp.period or ""]
     if dp.quote:

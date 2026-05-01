@@ -5,6 +5,7 @@ import argparse
 import json
 import logging
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -31,6 +32,68 @@ def _preview(text: str | None, n: int = 70) -> str:
     return text[:n] + ("…" if len(text) > n else "")
 
 
+def _filter_category(cat: str, result: AnnualReportDatapoints) -> AnnualReportDatapoints:
+    if cat == "fte":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            fte_datapoints=result.fte_datapoints,
+        )
+    if cat == "sustainability":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            sustainability_goals=result.sustainability_goals,
+        )
+    if cat == "esg":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            esg_datapoints=result.esg_datapoints,
+        )
+    if cat == "financial_highlight":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            financial_highlights=result.financial_highlights,
+        )
+    if cat == "business_performance":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            business_performance=result.business_performance,
+        )
+    if cat == "shareholder_return":
+        return AnnualReportDatapoints(
+            company=result.company, year=result.year,
+            shareholder_returns=result.shareholder_returns,
+        )
+    return result
+
+
+def _run_category(
+    cat: str,
+    pdf: Path,
+    company: str | None,
+    year: int | None,
+    source: str,
+    page_range: str,
+) -> tuple[str, list]:
+    log = logging.getLogger(__name__)
+    log.info("running category=%s pages=%s", cat, page_range)
+    result = extract_annual_report_datapoints(
+        pdf,
+        company=company,
+        year=year,
+        page_range=page_range,
+        category=cat,
+    )
+    filtered = _filter_category(cat, result)
+    normalized = normalize_llamaextract_result(
+        filtered,
+        source=source,
+        company=company,
+        year=year,
+    )
+    log.info("category=%s: %d datapoints extracted", cat, len(normalized))
+    return cat, normalized
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run LlamaExtract pre-extraction pipeline.")
     parser.add_argument("pdf", type=Path)
@@ -43,8 +106,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-pages-per-category", type=int, default=20)
     parser.add_argument(
         "--categories",
-        default="fte,sustainability,kpi_highlights",
+        default="fte,sustainability",
         help="comma-separated list of categories to extract",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=None,
+        help="max parallel LlamaExtract jobs (default: min(4, num_categories))",
     )
     args = parser.parse_args(argv)
 
@@ -54,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
     source = args.source_name or args.pdf.name
     stem = Path(source).stem
     categories = [c.strip() for c in args.categories.split(",") if c.strip()]
+    max_workers = args.max_workers if args.max_workers is not None else min(4, len(categories))
 
     # 1. Load parsed pages
     log.info("loading pages from %s", args.pages_jsonl)
@@ -77,68 +147,56 @@ def main(argv: list[str] | None = None) -> int:
         if cat in categories:
             print(f"  {cat}: {rng or '(none)'}")
 
-    # 3. Extract per category
-    all_datapoints = []
-
+    # Determine which categories have page ranges
+    active: list[tuple[str, str]] = []
     for cat in categories:
         rng = page_ranges.get(cat, "")
         if not rng:
             log.warning("no candidate pages for category %s, skipping", cat)
-            continue
-
-        log.info("running LlamaExtract for category=%s pages=%s", cat, rng)
-        try:
-            result = extract_annual_report_datapoints(
-                args.pdf,
-                company=args.company,
-                year=args.year,
-                page_range=rng,
-            )
-        except Exception as exc:
-            log.error("LlamaExtract failed for category=%s: %s", cat, exc)
-            result = AnnualReportDatapoints(company=args.company, year=args.year)
-
-        # Keep only relevant output per category
-        if cat == "fte":
-            filtered = AnnualReportDatapoints(
-                company=result.company,
-                year=result.year,
-                fte_datapoints=result.fte_datapoints,
-            )
-        elif cat == "sustainability":
-            filtered = AnnualReportDatapoints(
-                company=result.company,
-                year=result.year,
-                sustainability_goals=result.sustainability_goals,
-            )
-        elif cat == "esg":
-            filtered = AnnualReportDatapoints(
-                company=result.company,
-                year=result.year,
-                esg_datapoints=result.esg_datapoints,
-            )
-        elif cat == "kpi_highlights":
-            filtered = AnnualReportDatapoints(
-                company=result.company,
-                year=result.year,
-                kpi_highlights=result.kpi_highlights,
-            )
         else:
-            filtered = result
+            active.append((cat, rng))
 
-        normalized = normalize_llamaextract_result(
-            filtered,
-            source=source,
-            company=args.company,
-            year=args.year,
-        )
-        log.info("category=%s: %d datapoints extracted", cat, len(normalized))
-        all_datapoints.extend(normalized)
+    # 3. Extract categories in parallel
+    results_by_cat: dict[str, list] = {}
+    errors: list[str] = []
 
-    # 4. Dedup and prioritize
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(
+                _run_category,
+                cat,
+                args.pdf,
+                args.company,
+                args.year,
+                source,
+                rng,
+            ): cat
+            for cat, rng in active
+        }
+        for future in as_completed(futures):
+            cat = futures[future]
+            try:
+                cat_name, dps = future.result()
+                results_by_cat[cat_name] = dps
+            except Exception as exc:
+                errors.append(f"category={cat}: {exc}")
+
+    if errors:
+        for e in errors:
+            log.error("extraction failed — %s", e)
+        return 1
+
+    log.info("all categories complete")
+
+    # 4. Combine in deterministic category order
+    all_datapoints = []
+    for cat in categories:
+        all_datapoints.extend(results_by_cat.get(cat, []))
+
+    # 5. Dedup and prioritize
     deduped = deduplicate_datapoints(all_datapoints)
 
-    # 5. Save
+    # 6. Save
     out_path = args.out or (_PRE_EXTRACTED_ROOT / f"{stem}.json")
     save_datapoint_set(
         deduped,
@@ -149,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"\nOutput saved → {out_path}")
 
-    # 6. Summary
+    # 7. Summary
     by_type: dict[str, list] = {}
     for dp in deduped:
         by_type.setdefault(dp.datapoint_type, []).append(dp)

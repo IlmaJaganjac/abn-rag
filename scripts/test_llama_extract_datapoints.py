@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
 from pathlib import Path
@@ -26,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("pdf", type=Path)
     parser.add_argument("--company", default=None)
     parser.add_argument("--year", type=int, default=None)
+    parser.add_argument("--category", default=None, help="category-specific prompt (e.g. fte, sustainability, financial_highlight)")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument(
         "--target-pages",
@@ -41,6 +41,7 @@ def main(argv: list[str] | None = None) -> int:
         company=args.company,
         year=args.year,
         page_range=args.target_pages,
+        category=args.category,
     )
 
     out_path = args.out or (_OUT_ROOT / f"{args.pdf.stem}.json")
@@ -75,18 +76,44 @@ def main(argv: list[str] | None = None) -> int:
         if g.quote:
             print(f"    quote: {_preview(g.quote)}")
 
-    print(f"\n=== KPI highlights ({len(result.kpi_highlights)}) ===")
-    for k in result.kpi_highlights:
+    print(f"\n=== Financial highlights ({len(result.financial_highlights)}) ===")
+    for fh in result.financial_highlights:
         parts = [
-            f"value={k.value}",
-            f"metric={k.metric}",
-            f"unit={k.unit or '-'}",
-            f"period={k.period or '-'}",
-            f"page={k.page or '-'}",
+            f"value={fh.value}",
+            f"metric={fh.metric}",
+            f"unit={fh.unit or '-'}",
+            f"period={fh.period or '-'}",
+            f"page={fh.page or '-'}",
         ]
         print("  " + " | ".join(parts))
-        if k.quote:
-            print(f"    quote: {_preview(k.quote)}")
+        if fh.quote:
+            print(f"    quote: {_preview(fh.quote)}")
+
+    print(f"\n=== Business performance ({len(result.business_performance)}) ===")
+    for bp in result.business_performance:
+        parts = [
+            f"value={bp.value}",
+            f"metric={bp.metric}",
+            f"unit={bp.unit or '-'}",
+            f"period={bp.period or '-'}",
+            f"page={bp.page or '-'}",
+        ]
+        print("  " + " | ".join(parts))
+        if bp.quote:
+            print(f"    quote: {_preview(bp.quote)}")
+
+    print(f"\n=== Shareholder returns ({len(result.shareholder_returns)}) ===")
+    for sr in result.shareholder_returns:
+        parts = [
+            f"value={sr.value}",
+            f"metric={sr.metric}",
+            f"unit={sr.unit or '-'}",
+            f"period={sr.period or '-'}",
+            f"page={sr.page or '-'}",
+        ]
+        print("  " + " | ".join(parts))
+        if sr.quote:
+            print(f"    quote: {_preview(sr.quote)}")
 
     return 0
 
