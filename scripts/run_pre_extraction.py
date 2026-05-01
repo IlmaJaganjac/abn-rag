@@ -111,6 +111,12 @@ def main(argv: list[str] | None = None) -> int:
                 year=result.year,
                 sustainability_goals=result.sustainability_goals,
             )
+        elif cat == "esg":
+            filtered = AnnualReportDatapoints(
+                company=result.company,
+                year=result.year,
+                esg_datapoints=result.esg_datapoints,
+            )
         elif cat == "kpi_highlights":
             filtered = AnnualReportDatapoints(
                 company=result.company,

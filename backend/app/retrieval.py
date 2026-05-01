@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 from collections import Counter
 from typing import Any
@@ -293,10 +294,14 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
         )
 
     metric_weight = 1.5 if _is_numeric_query(query.question) else 0.5
+    if os.environ.get("DISABLE_METRIC_CANDIDATES") == "1":
+        metric_chunks: list[RetrievedChunk] = []
+    else:
+        metric_chunks = _metric_candidates(collection, query)
     chunks = _rrf_merge(
         dense_chunks=dense_chunks,
         bm25_chunks=_bm25_candidates(query),
-        metric_chunks=_metric_candidates(collection, query),
+        metric_chunks=metric_chunks,
         metric_weight=metric_weight,
         top_k=query.top_k,
     )

@@ -18,8 +18,15 @@ You extract structured datapoints from annual reports.
 Only extract information explicitly present in the document.
 Do not infer, calculate, convert, round, or normalize values.
 Preserve exact values and qualifiers, including >, <, approximately, more than, %, €, kt, Mt, CO₂e, FTEs.
+
 For FTE, extract workforce datapoints only. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated.
-For sustainability goals, extract explicit targets/goals/ambitions related to climate, GHG, CO₂/CO2, emissions, energy, net-zero, scope 1/2/3, circularity, or sustainability.
+
+For sustainability goals (sustainability_goals): extract explicit targets, ambitions, commitments, or goals related to climate, GHG, emissions, energy, net-zero, scope 1/2/3, circularity, or sustainability. These are future-oriented and often contain words like "target", "aim", "ambition", "commitment", "by 2030", "by 2040", "we will", "we plan to".
+
+For ESG datapoints (esg_datapoints): extract actual reported performance values for the reporting year. These are historical, measured values — not targets. Examples: actual GHG emissions (scope 1, 2, 3), renewable electricity percentage, energy consumption, water use, waste, recycling rate, supplier sustainability metrics, social/workforce ESG metrics. Extract the actual reported value, unit, period/year, scope if present, page, and quote.
+
+Do not confuse targets (sustainability_goals) with actuals (esg_datapoints). A goal says what will happen; an ESG datapoint says what was measured.
+
 Also extract visually prominent KPI highlights from dashboard, tile, overview, or "at a glance" pages.
 Preserve exact value-label relationships. Do not swap labels between nearby tiles or columns.
 Only extract values explicitly shown. Do not infer, calculate, convert, round, or normalize.
@@ -65,11 +72,23 @@ class ExtractedKPIHighlight(BaseModel):
     confidence: float | None = None
 
 
+class ExtractedESGDatapoint(BaseModel):
+    metric: str
+    value: str
+    unit: str | None = None
+    period: str | None = None
+    scope: str | None = None
+    page: int | None = None
+    quote: str | None = None
+    confidence: float | None = None
+
+
 class AnnualReportDatapoints(BaseModel):
     company: str | None = None
     year: int | None = None
     fte_datapoints: list[ExtractedFTEDatapoint] = []
     sustainability_goals: list[ExtractedSustainabilityGoal] = []
+    esg_datapoints: list[ExtractedESGDatapoint] = []
     kpi_highlights: list[ExtractedKPIHighlight] = []
 
 
@@ -161,6 +180,7 @@ def extract_annual_report_datapoints(
         year=year or result.year,
         fte_datapoints=result.fte_datapoints,
         sustainability_goals=result.sustainability_goals,
+        esg_datapoints=result.esg_datapoints,
         kpi_highlights=result.kpi_highlights,
     )
     return result
