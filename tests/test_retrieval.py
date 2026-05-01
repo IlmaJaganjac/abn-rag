@@ -1,18 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
-from backend.app.answer import _ground_citations
 from backend.app.retrieval import expand_query_for_retrieval, rerank_chunks_cross_encoder, retrieve
-from backend.app.schemas import Citation, RetrievalQuery, RetrievedChunk
-
-
-def _kind_in_where(where: dict[str, Any] | None, kind: str) -> bool:
-    if where is None:
-        return False
-    if where.get("chunk_kind") == kind:
-        return True
-    return any(part.get("chunk_kind") == kind for part in where.get("$and", []))
+from backend.app.schemas import RetrievalQuery, RetrievedChunk
 
 
 class FakeHybridCollection:
@@ -40,23 +29,7 @@ class FakeHybridCollection:
     ]
 
     def get(self, *, where, include):
-        if not _kind_in_where(where, "metric"):
-            return {"ids": [], "documents": [], "metadatas": []}
-        return {
-            "ids": [item[0] for item in self.metric_docs],
-            "documents": [item[1] for item in self.metric_docs],
-            "metadatas": [
-                {
-                    "source": "abn-amro-2025.pdf",
-                    "company": "ABN AMRO",
-                    "year": 2025,
-                    "page": item[2],
-                    "token_count": 12,
-                    "chunk_kind": "metric",
-                }
-                for item in self.metric_docs
-            ],
-        }
+        raise AssertionError("retrieve() should not fetch metric candidates")
 
     def query(self, **kwargs):
         return {
@@ -148,7 +121,7 @@ def test_retrieve_uses_bm25_for_ceo_text_question(monkeypatch) -> None:
     assert "Chief Executive Officer" in result.chunks[0].text
 
 
-def test_retrieve_cet1_metric_for_numeric_query(monkeypatch) -> None:
+def test_retrieve_does_not_inject_metric_candidates(monkeypatch) -> None:
     monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
     monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
     monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
@@ -162,54 +135,45 @@ def test_retrieve_cet1_metric_for_numeric_query(monkeypatch) -> None:
         )
     )
 
-    assert result.chunks[0].id == "abn-amro-2025.pdf:metric:cet1"
-    assert "Metric: Common Equity Tier 1 (CET1) ratio" in result.chunks[0].text
+    assert [chunk.id for chunk in result.chunks] == ["abn-amro-2025.pdf:dense:generic"]
+    assert all(not chunk.id.startswith("abn-amro-2025.pdf:metric:") for chunk in result.chunks)
+
+
+def test_retrieve_keeps_dense_extracted_datapoint_chunks(monkeypatch) -> None:
+    class FakeDatapointCollection(FakeHybridCollection):
+        def query(self, **kwargs):
+            return {
+                "ids": [["abn-amro-2025.pdf:datapoint:cet1"]],
+                "documents": [["Metric: Common Equity Tier 1 (CET1) ratio\nPeriod: 2025\nValue: 15.4%\nUnit: %"]],
+                "metadatas": [[
+                    {
+                        "source": "abn-amro-2025.pdf",
+                        "company": "ABN AMRO",
+                        "year": 2025,
+                        "page": 120,
+                        "token_count": 12,
+                        "chunk_kind": "extracted_datapoint",
+                    }
+                ]],
+                "distances": [[0.1]],
+            }
+
+    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeDatapointCollection())
+    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
+    monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
+
+    result = retrieve(
+        RetrievalQuery(
+            question="What was ABN AMRO's CET1 ratio in 2025?",
+            company="ABN AMRO",
+            year=2025,
+            top_k=12,
+        )
+    )
+
+    assert result.chunks[0].id == "abn-amro-2025.pdf:datapoint:cet1"
+    assert result.chunks[0].chunk_kind == "extracted_datapoint"
     assert "Value: 15.4%" in result.chunks[0].text
-
-
-def test_retrieve_fte_metric_and_metric_quote_grounds(monkeypatch) -> None:
-    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
-    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
-    monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
-
-    result = retrieve(
-        RetrievalQuery(
-            question="How many internal employees in FTEs did ABN AMRO have in 2025?",
-            company="ABN AMRO",
-            year=2025,
-            top_k=12,
-        )
-    )
-
-    quote = "Metric: Number of internal employees\nPeriod: 2025\nValue: 23,126\nUnit: FTEs"
-    assert result.chunks[0].id == "abn-amro-2025.pdf:metric:fte"
-    assert quote in result.chunks[0].text
-    grounded, drops, failure = _ground_citations(
-        [Citation(source="abn-amro-2025.pdf", page=result.chunks[0].page, quote=quote)],
-        result.chunks,
-    )
-    assert len(grounded) == 1
-    assert drops == []
-    assert failure is None
-
-
-def test_retrieve_net_profit_metric_for_numeric_query(monkeypatch) -> None:
-    monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
-    monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
-    monkeypatch.setattr("backend.app.retrieval._bm25_candidates", lambda query: [])
-
-    result = retrieve(
-        RetrievalQuery(
-            question="What was ABN AMRO's net profit in 2025?",
-            company="ABN AMRO",
-            year=2025,
-            top_k=12,
-        )
-    )
-
-    assert result.chunks[0].id == "abn-amro-2025.pdf:metric:profit"
-    assert "Metric: Profit/(loss) for the period" in result.chunks[0].text
-    assert "Value: 2,252" in result.chunks[0].text
 
 
 # ---------------------------------------------------------------------------

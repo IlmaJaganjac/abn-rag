@@ -17,7 +17,6 @@ from backend.app.schemas import RetrievalQuery, RetrievalResult, RetrievedChunk
 RRF_K = 60
 DENSE_TOP_N = 30
 BM25_TOP_N = 30
-METRIC_TOP_N = 30
 
 _FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
 _FTE_EXPANSION = "employees workforce headcount staff personnel FTE full-time equivalents payroll temporary internal external year-end average"
@@ -85,17 +84,6 @@ def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None
     return {"$and": clauses}
 
 
-def _build_metric_where(company: str | None, year: int | None) -> dict[str, Any]:
-    clauses: list[dict[str, Any]] = [{"chunk_kind": "metric"}]
-    if company is not None:
-        clauses.append({"company": company})
-    if year is not None:
-        clauses.append({"year": year})
-    if len(clauses) == 1:
-        return clauses[0]
-    return {"$and": clauses}
-
-
 def _retrieved_chunk(
     *,
     cid: str,
@@ -124,93 +112,6 @@ def _tokenize(text: str) -> list[str]:
         for token in re.findall(r"[a-z0-9]+", text.casefold())
         if len(token) > 1
     ]
-
-
-def _is_numeric_query(question: str) -> bool:
-    query = question.casefold()
-    query_without_years = re.sub(r"\b20\d{2}\b", " ", query)
-    if re.search(r"\d", query_without_years):
-        return True
-    return any(
-        term in query
-        for term in (
-            "ratio",
-            "profit",
-            "income",
-            "revenue",
-            "sales",
-            "employees",
-            "fte",
-            "capital",
-            "assets",
-            "margin",
-            "dividend",
-            "cost",
-            "cet1",
-            "roe",
-            "nim",
-            "how many",
-            "how much",
-        )
-    )
-
-
-def _query_years(question: str) -> set[str]:
-    return set(re.findall(r"\b20\d{2}\b", question))
-
-
-def _metric_candidate_score(question: str, document: str) -> float:
-    query = question.casefold()
-    doc = document.casefold()
-    score = 0.0
-
-    if "total net sales" in query and "metric: total net sales" in doc:
-        score += 3.0
-
-    for year in _query_years(question):
-        if f"period: {year}" in doc:
-            score += 2.0
-
-    asks_millions = "million" in query or "million euros" in query
-    has_million_euro_unit = "unit:" in doc and "in millions" in doc and "€" in document
-    if asks_millions and has_million_euro_unit:
-        score += 2.0
-
-    query_terms = {
-        term
-        for term in re.findall(r"[a-z0-9]+", query)
-        if len(term) > 2 and term not in {"what", "were", "was", "the", "asml", "did"}
-    }
-    doc_terms = set(re.findall(r"[a-z0-9]+", doc))
-    score += 0.1 * len(query_terms & doc_terms)
-    return score
-
-
-def _metric_candidates(collection, query: RetrievalQuery) -> list[RetrievedChunk]:
-    raw = collection.get(
-        where=_build_metric_where(query.company, query.year),
-        include=["documents", "metadatas"],
-    )
-    ids = raw.get("ids") or []
-    docs = raw.get("documents") or []
-    metas = raw.get("metadatas") or []
-
-    scored: list[tuple[float, RetrievedChunk]] = []
-    for cid, doc, meta in zip(ids, docs, metas, strict=True):
-        score = _metric_candidate_score(query.question, doc or "")
-        if score <= 0:
-            continue
-        scored.append((
-            score,
-            _retrieved_chunk(
-                cid=cid,
-                doc=doc or "",
-                meta=meta or {},
-                score=score,
-            ),
-        ))
-    scored.sort(key=lambda item: item[0], reverse=True)
-    return [chunk for _, chunk in scored[:METRIC_TOP_N]]
 
 
 def _chunk_search_text(record: dict[str, Any]) -> str:
@@ -293,23 +194,18 @@ def _rrf_merge(
     *,
     dense_chunks: list[RetrievedChunk],
     bm25_chunks: list[RetrievedChunk],
-    metric_chunks: list[RetrievedChunk],
-    metric_weight: float,
     top_k: int,
 ) -> list[RetrievedChunk]:
     scores: dict[str, float] = {}
     chunks_by_id: dict[str, RetrievedChunk] = {}
 
-    def add_ranked(chunks: list[RetrievedChunk], weight: float, use_metric_score: bool = False) -> None:
+    def add_ranked(chunks: list[RetrievedChunk], weight: float) -> None:
         for rank, chunk in enumerate(chunks, start=1):
             chunks_by_id.setdefault(chunk.id, chunk)
             scores[chunk.id] = scores.get(chunk.id, 0.0) + weight / (RRF_K + rank)
-            if use_metric_score:
-                scores[chunk.id] += 0.01 * chunk.score
 
     add_ranked(dense_chunks, 1.0)
     add_ranked(bm25_chunks, 1.2)
-    add_ranked(metric_chunks, metric_weight, use_metric_score=metric_weight > 1.0)
 
     ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
     out: list[RetrievedChunk] = []
@@ -355,16 +251,9 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
 
     retrieval_query = query.model_copy(update={"question": retrieval_text}) if retrieval_text != query.question else query
 
-    metric_weight = 1.5 if _is_numeric_query(query.question) else 0.5
-    if os.environ.get("DISABLE_METRIC_CANDIDATES") == "1":
-        metric_chunks: list[RetrievedChunk] = []
-    else:
-        metric_chunks = _metric_candidates(collection, query)
     chunks = _rrf_merge(
         dense_chunks=dense_chunks,
         bm25_chunks=_bm25_candidates(retrieval_query),
-        metric_chunks=metric_chunks,
-        metric_weight=metric_weight,
         top_k=candidate_k,
     )
 
