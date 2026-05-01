@@ -91,13 +91,15 @@ questions:
     category: sustainability_goal
     question: "By what year does ASML aim to be greenhouse gas neutral across its value chain?"
     expected_source: "asml.pdf"
-    expected_page: [190, 205]
+    expected_page:
+      - 153
+      - 156
     expected_answer_contains_any:
       - "2040"
       - "greenhouse gas neutral across our value chain by 2040"
-      - "GHG neutral"
+      - "GHG neutrality across the value chain by 2040"
     difficulty: easy
-    notes: "Future-oriented climate ambition."
+    notes: "ASML 2025 states the value-chain GHG neutrality ambition on the climate action pages."
 
   - id: asml_2025_sustainability_goal_scope_1_2_neutral
     company: ASML
@@ -105,27 +107,31 @@ questions:
     category: sustainability_goal
     question: "What is ASML's goal for scope 1 and scope 2 emissions?"
     expected_source: "asml.pdf"
-    expected_page: [190, 225]
+    expected_page:
+      - 178
+      - 163
     expected_answer_contains_all:
-      - "scope 1"
-      - "scope 2"
-      - "greenhouse gas neutral"
+      - "scope 1 and 2"
+      - "GHG neutral"
+      - "2025"
     difficulty: medium
-    notes: "Goal/target question; do not answer with only actual emissions."
+    notes: "Target question: ASML aims to become GHG neutral for scope 1 and 2 emissions from manufacturing and buildings by 2025."
 
   - id: asml_2025_sustainability_goal_scope_3_upstream
     company: ASML
     year: 2025
     category: sustainability_goal
-    question: "What is ASML's ambition for scope 3 upstream supply chain emissions?"
+    question: "What is ASML's ambition for scope 3 emissions related to purchased goods, capital goods and logistics?"
     expected_source: "asml.pdf"
-    expected_page: [130, 132]
+    expected_page:
+      - 178
     expected_answer_contains_all:
-      - "scope 3 upstream"
-      - "supply chain"
+      - "scope 3"
+      - "purchased goods"
+      - "capital goods"
       - "2030"
     difficulty: medium
-    notes: "Supplier/supply-chain climate ambition."
+    notes: "ASML 2025 describes this scope 3 near-term target as GHG neutrality for purchased goods, capital goods and logistics by 2030."
 
   - id: asml_2025_sustainability_goal_roadmap_year
     company: ASML
@@ -133,12 +139,13 @@ questions:
     category: sustainability_goal
     question: "In what year did ASML present its roadmap to GHG neutrality across the value chain?"
     expected_source: "asml.pdf"
-    expected_page: [195, 200]
+    expected_page:
+      - 156
     expected_answer_contains_any:
       - "2021"
-      - "roadmap to GHG neutrality"
+      - "roadmap to GHG neutrality across the value chain by 2040"
     difficulty: easy
-    notes: "Checks retrieval of the climate roadmap explanation."
+    notes: "ASML 2025 says it presented the roadmap to GHG neutrality across the value chain in 2021."
 
   - id: asml_2025_sustainability_goal_energy_efficiency_climate_action
     company: ASML
@@ -146,28 +153,27 @@ questions:
     category: sustainability_goal
     question: "Which ESG theme contains ASML's GHG targets and indicators?"
     expected_source: "asml.pdf"
-    expected_page: [220, 222]
+    expected_page:
+      - 178
     expected_answer_contains_any:
       - "Energy efficiency and climate action"
-      - "energy efficiency"
-      - "climate action"
     difficulty: medium
-    notes: "Sustainability target context, not an actual emissions value."
+    notes: "The methodology section places the GHG targets and indicators under the ESG theme Energy efficiency and climate action."
 
   - id: asml_2025_sustainability_goal_supplier_climate
     company: ASML
     year: 2025
     category: sustainability_goal
-    question: "What supplier-related climate goal does ASML describe in relation to scope 3?"
+    question: "What commitment does ASML seek from its top 80% suppliers by CO₂e emissions by 2030?"
     expected_source: "asml.pdf"
-    expected_page: [130, 132]
+    expected_page:
+      - 179
     expected_answer_contains_all:
-      - "scope 3"
-      - "upstream"
-      - "supply chain"
+      - "top 80% suppliers"
+      - "CO₂e"
       - "2030"
     difficulty: medium
-    notes: "Expected answer should mention GHG neutrality for upstream supply chain emissions by 2030."
+    notes: "Supplier-specific climate goal: commitment from top 80% suppliers by CO₂e emissions to reduce their CO₂e footprint by 2030."
 
   - id: asml_2025_esg_datapoint_scope_1_2_actual
     company: ASML
