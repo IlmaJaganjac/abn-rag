@@ -124,6 +124,7 @@ def parse_pdf_llamaparse(
     api_key: str | None,
     processed_dir: Path | None = None,
     use_pdf_text_layer: bool = True,
+    extract_layout: bool = False,
 ) -> list[ParsedPage]:
     if not api_key:
         raise ParserUnavailableError(
@@ -146,6 +147,7 @@ def parse_pdf_llamaparse(
         verbose=False,
         show_progress=False,
         ignore_errors=False,
+        extract_layout=extract_layout,
     )
     results = parser.get_json_result(str(path))
 
@@ -183,6 +185,7 @@ def parse_pdf_pages(
     parser: str = "llamaparse",
     use_pdf_text_layer: bool = True,
     allow_fallback: bool = True,
+    extract_layout: bool = False,
 ) -> ParseResult:
     if parser == "pymupdf":
         return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
@@ -193,6 +196,7 @@ def parse_pdf_pages(
             api_key=llama_cloud_api_key,
             processed_dir=processed_dir,
             use_pdf_text_layer=use_pdf_text_layer,
+            extract_layout=extract_layout,
         )
     except Exception as exc:
         if not allow_fallback:

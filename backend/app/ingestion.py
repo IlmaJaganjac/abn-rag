@@ -390,6 +390,7 @@ def ingest_pdf(
     allow_parser_fallback: bool = True,
     use_pdf_text_layer: bool = True,
     source_name: str | None = None,
+    extract_layout: bool = False,
 ) -> int:
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
@@ -405,6 +406,7 @@ def ingest_pdf(
         use_pdf_text_layer=use_pdf_text_layer,
         processed_dir=processed_dir,
         llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+        extract_layout=extract_layout,
     )
     pages = list(as_page_tuples(parsed.pages))
     logger.info("parsed %d non-empty pages with %s", len(pages), parsed.parser)
@@ -518,6 +520,11 @@ def _cli(argv: list[str] | None = None) -> int:
         action="store_true",
         help="skip PyMuPDF text layer augmentation when using llamaparse (pure llamaparse output)",
     )
+    parser.add_argument(
+        "--extract-layout",
+        action="store_true",
+        help="enable LlamaParse extract_layout mode (layout-aware parsing)",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -531,6 +538,7 @@ def _cli(argv: list[str] | None = None) -> int:
             allow_parser_fallback=not args.no_parser_fallback,
             use_pdf_text_layer=not args.no_pdf_text_layer,
             source_name=args.source_name,
+            extract_layout=args.extract_layout,
         )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
