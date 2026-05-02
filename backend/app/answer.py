@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import html
-import logging
+import os
 import re
 import unicodedata
 from collections import defaultdict
@@ -10,82 +10,44 @@ from backend.app._openai import openai_client
 from backend.app.config import settings
 from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
 
-logger = logging.getLogger(__name__)
-
 SYSTEM_PROMPT = """\
 You answer questions about annual reports using only the provided context blocks.
 
 Rules:
-1. Use ONLY the context blocks below. Never answer from prior knowledge or memory.
+1. Use ONLY the context blocks below. Never use prior knowledge or memory.
 
-2. Every non-refused answer MUST include at least one citation. Each citation's
-   `source` and `page` must come from a context block header, and `quote` must be
-   a verbatim span copied from that block's text (no paraphrasing, no edits).
+2. Every non-refused answer must include at least one citation. The `source`
+   must equal the exact filename from the block header (e.g. `shell-2025.pdf`).
+   The `quote` must be copied verbatim — character by character, preserving
+   exact wording, capitalisation, tense, spacing, and punctuation:
+   - Do NOT paraphrase, reorder, add words, or change any word.
+   - Do NOT change capitalisation or verb tense.
+   - Do NOT insert context words (year, company, period) unless they appear at
+     that exact position in the chunk.
+   - To skip intermediate text use `...` (three ASCII dots) explicitly; each
+     segment must appear in order within one chunk. For unrelated spans, emit
+     separate citations.
+   - Prefer the SHORTEST exact span that supports the answer. For numeric or
+     table facts, prefer the single shortest sentence or row with the figure.
 
-3. The `source` field MUST equal the literal `source=` value in the context
-   block header (e.g. `asml-2024.pdf`). Do NOT use the report's title, footer,
-   or any other label. Copy the filename exactly.
+3. For extracted-datapoint or table chunks, cite the exact label+value lines:
+   e.g. "Metric: ...\nValue: ...\nUnit: ..." or the exact table row. Preserve
+   labels and line breaks exactly. Do not join lines unless the joined text
+   appears verbatim in the chunk. Do not add labels that aren't in the chunk.
 
-4. The `quote` must be copied verbatim from the chunk's text. Do not paraphrase,
-   reorder, restate, remove labels, or join separate lines unless the joined
-   text appears exactly in the chunk. You MAY use `...` (three ASCII dots) to
-   skip intermediate cells in a multi-year table (e.g. to skip a prior-year
-   column), but each segment around the `...` must appear word-for-word in the
-   chunk and the segments must appear in the original order. Do NOT use `...`
-   to skip across unrelated text; if the answer needs two unrelated spans, emit
-   two separate citations.
+4. For numeric, financial, or percentage answers, set `verbatim` to the exact
+   figure span (e.g. "15.4%", "€32.7bn", "> 44,000"). Preserve all qualifiers
+   and units exactly — do not round, convert, or simplify. Match unit scope:
+   spend/capex → monetary only; FTE/headcount → workforce metrics only;
+   emissions → match scope and unit (kt, Mt, CO₂e). If label and unit do not
+   clearly match the question, refuse instead of guessing.
 
-5. Metric chunks may be formatted like this:
-   Metric: ...
-   Period: ...
-   Value: ...
-   Unit: ...
-
-   When citing a metric chunk, prefer quoting the full contiguous metric block
-   exactly as it appears in the context. Preserve labels and line breaks exactly.
-   Do not remove labels such as "Metric:", "Period:", "Value:", or "Unit:".
-   Do not join separate lines unless the joined text appears exactly in the
-   chunk.
-
-6. For numerical, financial, percentage, employee-count, or date answers:
-   - Set `verbatim` to the exact figure span from the context whenever possible,
-     such as "15.4%", "23,126", "32,667.3", "€32.7bn", or "> 44,000".
-   - Do not set `verbatim` to the whole metric block unless the figure cannot be
-     isolated.
-   - Preserve qualifiers exactly, including symbols/words such as ">", "<",
-     "approximately", "around", "about", "more than", "less than", and "over".
-   - Preserve units exactly, including "FTEs", "employees", "€ million",
-     "€ billion", "%", "kt", "Mt", and "CO₂e".
-   - Do not round, normalize, convert, or simplify figures unless the context
-     itself gives that converted form.
-   - If the evidence says "> 44,000", the answer must say "more than 44,000"
-     or "> 44,000", not "44,000".
-
-7. If multiple retrieved chunks give different valid definitions for the same
-   question, prefer the definition whose metric name and unit most closely match
-   the question. If the question is ambiguous and multiple definitions are
-   present in the context, mention the definition used briefly, e.g. "on an FTE
-   basis" or "on a headcount basis".
-
-8. Unit and scope matching:
-   - For spend, cost, expense, R&D spend, or capex questions, answer only from
-     monetary units such as €, $, EUR, USD, million, or billion. Never answer
-     with FTE, headcount, employees, units, kt, Mt, tonnes, or percentages.
-   - For FTE, headcount, or employee questions, use workforce metrics only and
-     preserve average vs year-end, payroll vs temporary, and FTE vs headcount.
-   - For margin, rate, ratio, or percentage questions, prefer explicitly
-     labelled margin/rate/ratio/percentage metrics with %. Do not calculate
-     unless the user asks to calculate.
-   - For emissions, scope, CO2, CO₂, or GHG questions, prefer matching
-     scope/category and emissions units such as kt, Mt, tCO2e, or CO2e.
-   - If label and unit do not clearly match the question, refuse instead of
-     guessing.
-
-9. If the answer is not present in the context, set `refused=true`, give a short
+5. If you cannot copy an exact verbatim quote from a single retrieved chunk, or
+   the answer is absent from the context, set `refused=true`, give a short
    `refusal_reason`, and leave `citations` empty. Do not guess.
 
-10. Keep `answer` concise — one or two sentences. Do not invent, round, simplify,
-   or remove qualifiers from figures.
+6. Keep `answer` to one or two sentences. Do not invent, round, or remove
+   qualifiers.
 """
 
 
@@ -105,32 +67,31 @@ _QUOTE_TRANS = str.maketrans({
     "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"',
     "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'",
 })
-_TOKEN_RE = re.compile(r"[a-z0-9]+")
 _MIN_FRAGMENT_LEN = 3
-_MIN_REPAIR_TOKENS = 8
-_MAX_REPAIR_TOKEN_WINDOW = 50
-_PROTECTED_REPAIR_TOKENS = {
-    "about",
-    "above",
-    "approximately",
-    "around",
-    "at",
-    "below",
-    "excluding",
-    "fewer",
-    "greater",
-    "least",
-    "less",
-    "more",
-    "not",
-    "over",
-    "than",
-    "under",
-}
-_PROTECTED_REPAIR_SYMBOLS = {"<", ">", "%"}
+
+# Bracketed footnote/reference markers common in PDF-parsed annual reports: [A], [B], [1], [A1]
+_FOOTNOTE_RE = re.compile(r"\[[A-Za-z0-9]{1,3}\]")
+# PDF bullet/list characters that appear as layout artifacts after parsing
+_PDF_BULLET_RE = re.compile(r"[\uffee\u2022\u2023\u25cf\u2043\uff65\u2219\u25e6]")
 
 
 def _normalize_for_grounding(s: str) -> str:
+    s = unicodedata.normalize("NFKC", s)
+    s = s.translate(_DASH_TRANS).translate(_QUOTE_TRANS)
+    s = s.replace("\u2026", "...")
+    s = _MD_RE.sub(" ", s)
+    s = _WS_RE.sub(" ", s).strip().lower()
+    return s
+
+
+def _normalize_for_grounding_layout(s: str) -> str:
+    """Fallback normalization that additionally strips PDF layout artifacts:
+    bracketed footnote markers like [A][B][C] and PDF bullet characters.
+    Used only when the strict normalization fails to find a match.
+    Footnote/bullet stripping runs before NFKC so original codepoints are matched.
+    """
+    s = _FOOTNOTE_RE.sub(" ", s)
+    s = _PDF_BULLET_RE.sub(" ", s)
     s = unicodedata.normalize("NFKC", s)
     s = s.translate(_DASH_TRANS).translate(_QUOTE_TRANS)
     s = s.replace("\u2026", "...")
@@ -152,52 +113,6 @@ def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
             return False
         cursor = idx + len(frag)
     return True
-
-
-def _protected_symbols(s: str) -> set[str]:
-    return {symbol for symbol in _PROTECTED_REPAIR_SYMBOLS if symbol in s}
-
-
-def _safe_token_subsequence_match(needle: str, haystack: str) -> bool:
-    needle_tokens = _TOKEN_RE.findall(needle)
-    haystack_matches = list(_TOKEN_RE.finditer(haystack))
-    haystack_tokens = [match.group(0) for match in haystack_matches]
-    if len(needle_tokens) < _MIN_REPAIR_TOKENS:
-        return False
-
-    needle_protected = set(needle_tokens) & _PROTECTED_REPAIR_TOKENS
-    needle_symbols = _protected_symbols(needle)
-    first_token = needle_tokens[0]
-
-    for start in [i for i, token in enumerate(haystack_tokens) if token == first_token]:
-        positions = [start]
-        cursor = start + 1
-        for token in needle_tokens[1:]:
-            try:
-                idx = haystack_tokens.index(token, cursor)
-            except ValueError:
-                break
-            positions.append(idx)
-            cursor = idx + 1
-        if len(positions) != len(needle_tokens):
-            continue
-
-        token_window = positions[-1] - positions[0] + 1
-        if token_window > _MAX_REPAIR_TOKEN_WINDOW:
-            continue
-
-        char_start = haystack_matches[positions[0]].start()
-        char_end = haystack_matches[positions[-1]].end()
-        window = haystack[char_start:char_end]
-        window_tokens = set(_TOKEN_RE.findall(window))
-        window_protected = window_tokens & _PROTECTED_REPAIR_TOKENS
-        if not window_protected.issubset(needle_protected):
-            continue
-        if not _protected_symbols(window).issubset(needle_symbols):
-            continue
-
-        return True
-    return False
 
 
 def _ground_citations(
@@ -222,9 +137,11 @@ def _ground_citations(
     if not citations:
         return [], [], "no citations returned"
 
-    indexed: list[tuple[RetrievedChunk, str]] = [
+    indexed_strict: list[tuple[RetrievedChunk, str]] = [
         (c, _normalize_for_grounding(html.unescape(c.text))) for c in chunks
     ]
+    # Computed lazily only when the strict pass misses
+    indexed_layout: list[tuple[RetrievedChunk, str]] | None = None
 
     grounded: list[Citation] = []
     drops: list[GroundingDrop] = []
@@ -246,21 +163,27 @@ def _ground_citations(
             continue
 
         matches = [
-            chunk for chunk, hay in indexed
+            chunk for chunk, hay in indexed_strict
             if _fragments_in_order(fragments, hay)
         ]
-        repair_quote = False
 
         if not matches:
-            matches = [
-                chunk for chunk, hay in indexed
-                if _safe_token_subsequence_match(needle, hay)
-            ]
-            if matches:
-                repair_quote = True
+            # Fallback: strip PDF layout artifacts (footnote markers, bullet chars)
+            if indexed_layout is None:
+                indexed_layout = [
+                    (c, _normalize_for_grounding_layout(html.unescape(c.text)))
+                    for c in chunks
+                ]
+            needle_layout = _normalize_for_grounding_layout(html.unescape(cite.quote))
+            frags_layout = _split_on_ellipsis(needle_layout)
+            if frags_layout and all(len(f) >= _MIN_FRAGMENT_LEN for f in frags_layout):
+                matches = [
+                    chunk for chunk, hay in indexed_layout
+                    if _fragments_in_order(frags_layout, hay)
+                ]
 
         if not matches:
-            page_in_set = any(chunk.page == cite.page for chunk, _ in indexed)
+            page_in_set = any(chunk.page == cite.page for chunk, _ in indexed_strict)
             drops.append(GroundingDrop(
                 source=cite.source, page=cite.page, quote=cite.quote,
                 reason=(
@@ -280,14 +203,8 @@ def _ground_citations(
         grounded.append(Citation(
             source=best.source,
             page=best.page,
-            quote=best.text if repair_quote else cite.quote,
+            quote=cite.quote,
         ))
-        if repair_quote:
-            logger.info(
-                "repaired citation via token subsequence: source=%s page=%s",
-                best.source,
-                best.page,
-            )
 
     if not grounded:
         return [], drops, "no citations could be grounded in the retrieved chunks"
@@ -314,10 +231,13 @@ def answer_question(
     client = openai_client()
     context = _format_context(chunks)
     user_msg = f"Question: {question}\n\nContext:\n{context}"
+    model = os.environ.get("ANSWER_MODEL") or settings.openai_answer_model
+    # gpt-5-mini only supports the default temperature (1); omit parameter for those models
+    supports_temp_zero = "gpt-5-mini" not in model
 
     completion = client.beta.chat.completions.parse(
-        model=settings.openai_answer_model,
-        temperature=0,
+        model=model,
+        **( {"temperature": 0} if supports_temp_zero else {}),
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_msg},

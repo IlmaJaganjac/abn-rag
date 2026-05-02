@@ -7,6 +7,7 @@ from backend.app.answer import (
     _fragments_in_order,
     _ground_citations,
     _normalize_for_grounding,
+    _normalize_for_grounding_layout,
     _split_on_ellipsis,
     answer_question,
 )
@@ -204,7 +205,7 @@ def test_fabricated_quote_is_dropped() -> None:
     assert drops[0].reason == "quote_not_found_verbatim"
 
 
-def test_non_verbatim_quote_can_repair_to_exact_chunk_text_when_tokens_match() -> None:
+def test_paraphrased_citation_quote_is_dropped() -> None:
     chunk = _chunk(
         source="asml.pdf",
         page=145,
@@ -216,7 +217,7 @@ def test_non_verbatim_quote_can_repair_to_exact_chunk_text_when_tokens_match() -
     )
     cite = Citation(
         source="asml.pdf",
-        page=166,
+        page=145,
         quote=(
             "Commitment from top-80% suppliers (based on CO₂e emissions) "
             "to reduce their CO₂e footprint by 2030 75% commitment from top 80% "
@@ -226,15 +227,94 @@ def test_non_verbatim_quote_can_repair_to_exact_chunk_text_when_tokens_match() -
 
     grounded, drops, failure = _ground_citations([cite], [chunk])
 
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
+    assert drops[0].reason == "quote_not_found_verbatim"
+
+
+def test_exact_citation_quote_from_context_grounds() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=21,
+        text="Adjusted Earnings 18,528 Cash flow from operating activities 42,863",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=21,
+        quote="Adjusted Earnings 18,528",
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
     assert failure is None
     assert drops == []
     assert len(grounded) == 1
-    assert grounded[0].source == "asml.pdf"
-    assert grounded[0].page == 145
-    assert grounded[0].quote == chunk.text
+    assert grounded[0].quote == "Adjusted Earnings 18,528"
 
 
-def test_token_repair_does_not_ground_across_long_unrelated_span() -> None:
+def test_extracted_datapoint_metric_value_unit_lines_ground() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=13,
+        text=(
+            "Datapoint type: financial_highlight\n"
+            "Metric: Adjusted Earnings\n"
+            "Period: 2025\n"
+            "Value: 18,528\n"
+            "Unit: $ million\n"
+            "Quote: Adjusted Earnings 18,528"
+        ),
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=13,
+        quote=(
+            "Metric: Adjusted Earnings\n"
+            "Period: 2025\n"
+            "Value: 18,528\n"
+            "Unit: $ million"
+        ),
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+    assert grounded[0].quote == cite.quote
+
+
+def test_table_metric_row_with_value_unit_grounds() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=21,
+        text=(
+            "Key metrics\n"
+            "$ million\n"
+            "2025\n"
+            "Adjusted Earnings\n"
+            "18,528\n"
+            "$ million\n"
+            "Cash flow from operating activities\n"
+            "42,863\n"
+            "$ million"
+        ),
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=21,
+        quote="Adjusted Earnings\n18,528\n$ million",
+    )
+
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+    assert grounded[0].quote == cite.quote
+
+
+def test_non_contiguous_quote_does_not_ground_across_long_unrelated_span() -> None:
     filler = " ".join(f"filler{i}" for i in range(60))
     chunk = _chunk(
         source="asml.pdf",
@@ -254,7 +334,7 @@ def test_token_repair_does_not_ground_across_long_unrelated_span() -> None:
     assert drops[0].reason == "quote_not_found_verbatim"
 
 
-def test_token_repair_does_not_drop_meaningful_qualifier() -> None:
+def test_non_verbatim_quote_does_not_drop_meaningful_qualifier() -> None:
     chunk = _chunk(
         source="asml.pdf",
         page=5,
@@ -329,9 +409,13 @@ def test_prefers_cited_page_when_quote_appears_on_multiple_pages() -> None:
 
 
 def test_answer_prompt_tells_rd_spend_to_choose_monetary_unit() -> None:
-    assert "For spend, cost, expense, R&D spend, or capex questions" in SYSTEM_PROMPT
-    assert "Never answer" in SYSTEM_PROMPT
+    assert "spend/capex" in SYSTEM_PROMPT
+    assert "monetary only" in SYSTEM_PROMPT
     assert "FTE" in SYSTEM_PROMPT
+    assert "extracted-datapoint" in SYSTEM_PROMPT
+    assert "table" in SYSTEM_PROMPT
+    assert "verbatim" in SYSTEM_PROMPT
+    assert "Do not add labels" in SYSTEM_PROMPT
 
 
 def test_rd_spend_answer_uses_monetary_chunk_over_fte(monkeypatch) -> None:
@@ -363,7 +447,7 @@ def test_rd_spend_answer_uses_monetary_chunk_over_fte(monkeypatch) -> None:
     assert answer.refused is False
     assert answer.citations[0].page == 30
     assert answer.verbatim == "4.7"
-    assert "Never answer" in completions.messages[0]["content"]
+    assert "monetary only" in completions.messages[0]["content"]
     assert "FTE" in completions.messages[0]["content"]
 
 
@@ -399,7 +483,7 @@ def test_average_payroll_fte_answer_uses_average_payroll_chunk(monkeypatch) -> N
     assert answer.refused is False
     assert answer.citations[0].page == 131
     assert answer.verbatim == "43,267"
-    assert "preserve average vs year-end" in completions.messages[0]["content"]
+    assert "FTE/headcount" in completions.messages[0]["content"]
 
 
 def test_gross_margin_answer_uses_explicit_margin_percentage(monkeypatch) -> None:
@@ -431,8 +515,7 @@ def test_gross_margin_answer_uses_explicit_margin_percentage(monkeypatch) -> Non
     assert answer.refused is False
     assert answer.citations[0].page == 53
     assert answer.verbatim == "52.8"
-    assert "Do not calculate" in completions.messages[0]["content"]
-    assert "unless the user asks to calculate" in completions.messages[0]["content"]
+    assert "refuse instead of guessing" in completions.messages[0]["content"]
 
 
 def test_spend_question_refuses_when_only_incompatible_unit_available(monkeypatch) -> None:
@@ -456,4 +539,122 @@ def test_spend_question_refuses_when_only_incompatible_unit_available(monkeypatc
 
     assert answer.refused is True
     assert answer.citations == []
-    assert "If label and unit do not clearly match the question" in completions.messages[0]["content"]
+    assert "refuse instead of guessing" in completions.messages[0]["content"]
+
+
+# ---------------------------------------------------------------------------
+# Layout normalization fallback tests
+# ---------------------------------------------------------------------------
+
+def test_layout_normalize_strips_footnote_markers() -> None:
+    assert _normalize_for_grounding_layout("priorities [A] for applying") == "priorities for applying"
+    assert _normalize_for_grounding_layout("distributions [B] enhanced [C] target") == "distributions enhanced target"
+
+
+def test_layout_normalize_strips_pdf_bullets() -> None:
+    result = _normalize_for_grounding_layout("￮Enhance distributions")
+    assert result == "enhance distributions"
+
+
+def test_line_break_in_chunk_matches_space_in_quote() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=24,
+        text="cash capital\nexpenditure of $20.9 billion compared with $21.1 billion",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=24,
+        quote="cash capital expenditure of $20.9 billion",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+
+
+def test_trailing_ellipsis_in_citation_quote_matches_chunk() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=14,
+        text="Enhance shareholder distributions from 30-40% to 40-50% of cash flow from operating activities through the cycle [A], continuing to prioritise share buybacks",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=14,
+        quote="Enhance shareholder distributions from 30-40% to 40-50% of cash flow from operating activities through the cycle [A]...",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+
+
+def test_footnote_marker_in_chunk_matched_by_clean_quote() -> None:
+    """Layout fallback: quote without [A][B] matches chunk that has them."""
+    chunk = _chunk(
+        source="shell.pdf",
+        page=260,
+        text="Management's current priorities [A] for applying Shell's cash are:\nBalanced capital allocation\nTotal distributions [B]\n40%-50% of CFFO through the cycle [C]",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=260,
+        quote="Management's current priorities for applying Shell's cash are: Balanced capital allocation Total distributions 40%-50% of CFFO through the cycle",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert failure is None
+    assert drops == []
+    assert len(grounded) == 1
+
+
+def test_paraphrase_enhanced_vs_enhance_is_dropped() -> None:
+    """'Enhanced' (past participle) does not match 'Enhance' (imperative) — true paraphrase."""
+    chunk = _chunk(
+        source="shell.pdf",
+        page=14,
+        text="Enhance shareholder distributions from 30-40% to 40-50% of cash flow from operating activities through the cycle",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=14,
+        quote="Enhanced shareholder distributions from 30-40% to 40-50% of cash flow from operating activities through the cycle",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
+    assert drops[0].reason == "quote_not_found_verbatim"
+
+
+def test_word_insertion_in_citation_is_dropped() -> None:
+    """'$20.9 billion in 2025' does not match '$20.9 billion' — added words are a paraphrase."""
+    chunk = _chunk(
+        source="shell.pdf",
+        page=24,
+        text="cash capital expenditure of $20.9 billion (compared with $21.1 billion in 2024)",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=24,
+        quote="cash capital expenditure of $20.9 billion in 2025 (compared with $21.1 billion in 2024)",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
+    assert drops[0].reason == "quote_not_found_verbatim"
+
+
+def test_unrelated_quote_still_dropped_after_layout_fallback() -> None:
+    chunk = _chunk(
+        source="shell.pdf",
+        page=14,
+        text="Enhance shareholder distributions from 30-40% to 40-50% through the cycle [A]",
+    )
+    cite = Citation(
+        source="shell.pdf",
+        page=14,
+        quote="Net income was $99 billion which never appears anywhere",
+    )
+    grounded, drops, failure = _ground_citations([cite], [chunk])
+    assert grounded == []
+    assert failure == "no citations could be grounded in the retrieved chunks"
