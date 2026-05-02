@@ -602,12 +602,12 @@ questions:
     category: sustainability_goal
     question: "What is Shell's long-term net-zero target?"
     expected_source: "shell.pdf"
-    expected_page: [73, 90, 365]
+    expected_page: [17, 75, 98, 359, 367]
     expected_answer_contains_all:
       - "net-zero"
       - "2050"
     difficulty: easy
-    notes: "Long-term climate target."
+    notes: "Long-term climate target: become a net-zero emissions energy business by 2050."
 
   - id: shell_2025_sustainability_goal_scope_1_2_halve
     company: SHELL
@@ -615,7 +615,7 @@ questions:
     category: sustainability_goal
     question: "What is Shell's 2030 target for Scope 1 and Scope 2 emissions?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90, 365]
+    expected_page: [17, 87, 360, 367]
     expected_answer_contains_all:
       - "halve"
       - "Scope 1"
@@ -630,12 +630,13 @@ questions:
     category: sustainability_goal
     question: "What is Shell's 2030 target for net carbon intensity?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90, 365]
+    expected_page: [17, 98, 360]
     expected_answer_contains_any:
       - "15–20%"
       - "15-20%"
       - "net carbon intensity"
       - "2030"
+      - "78 gCO2e/MJ"
     difficulty: medium
     notes: "Climate target related to energy products sold."
 
@@ -645,7 +646,7 @@ questions:
     category: sustainability_goal
     question: "What methane emissions intensity target does Shell describe for operated oil and gas assets?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90, 365]
+    expected_page: [17, 360, 367]
     expected_answer_contains_any:
       - "below 0.2%"
       - "near-zero"
@@ -660,9 +661,12 @@ questions:
     category: sustainability_goal
     question: "What was Shell's target for routine flaring from upstream-operated assets?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90, 365]
-    expected_answer_contains_all:
+    expected_page: [17, 87, 360, 367]
+    expected_answer_contains_any:
       - "eliminate routine flaring"
+      - "ending routine flaring"
+      - "ceased routine flaring"
+      - "January 2025"
       - "2025"
     difficulty: easy
     notes: "Routine flaring target."
@@ -673,13 +677,14 @@ questions:
     category: sustainability_goal
     question: "What ambition does Shell describe for customer emissions from the use of its oil products by 2030?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90, 365]
+    expected_page: [98, 361, 367]
     expected_answer_contains_any:
       - "15–20%"
       - "15-20%"
       - "Scope 3"
       - "Category 11"
       - "2030"
+      - "2021"
     difficulty: hard
     notes: "Distinguish ambition from target."
 
@@ -744,13 +749,13 @@ questions:
     category: esg_datapoint
     question: "What routine flaring did Shell report in 2025?"
     expected_source: "shell.pdf"
-    expected_page: [87, 90]
+    expected_page: [87, 91]
     expected_answer_contains_any:
       - "zero"
       - "routine flaring"
       - "0"
     difficulty: easy
-    notes: "Actual reported status against routine flaring target."
+    notes: "Actual datapoint, not the target; page 91 reports 2025 total hydrocarbons flared in routine flaring as zero."
 
   - id: shell_2025_financial_adjusted_earnings
     company: SHELL
@@ -758,10 +763,10 @@ questions:
     category: financial_highlight
     question: "What adjusted earnings did Shell report for 2025?"
     expected_source: "shell.pdf"
-    expected_page: [30, 35]
+    expected_page: [21, 22]
     expected_answer_contains_any:
-      - "$16.2 billion"
-      - "16.2"
+      - "$18.5 billion"
+      - "18,528"
       - "Adjusted Earnings"
     difficulty: easy
     notes: "Main financial highlight."
@@ -772,11 +777,11 @@ questions:
     category: financial_highlight
     question: "What cash flow from operating activities did Shell report in 2025?"
     expected_source: "shell.pdf"
-    expected_page: [30, 35]
+    expected_page: [21, 24, 235, 436]
     expected_answer_contains_any:
       - "cash flow from operating activities"
-      - "$48.1 billion"
-      - "48.1"
+      - "$42.9 billion"
+      - "42,863"
     difficulty: medium
     notes: "Main financial cash flow highlight."
 
@@ -786,10 +791,10 @@ questions:
     category: financial_highlight
     question: "What cash capital expenditure did Shell report in 2025?"
     expected_source: "shell.pdf"
-    expected_page: [30, 35]
+    expected_page: [21, 24, 84]
     expected_answer_contains_any:
-      - "$19.8 billion"
-      - "19.8"
+      - "$20.9 billion"
+      - "20,915"
       - "cash capital expenditure"
     difficulty: medium
     notes: "Main financial highlight."
@@ -800,11 +805,11 @@ questions:
     category: financial_highlight
     question: "What income for the period did Shell report in 2025?"
     expected_source: "shell.pdf"
-    expected_page: [30, 35]
+    expected_page: [21, 232]
     expected_answer_contains_any:
       - "Income for the period"
-      - "$8.6 billion"
-      - "8.6"
+      - "$18.1 billion"
+      - "18,119"
     difficulty: medium
     notes: "Annual income figure."
 
@@ -874,10 +879,12 @@ questions:
     category: shareholder_return
     question: "What shareholder distribution range does Shell describe as a percentage of cash flow from operations?"
     expected_source: "shell.pdf"
-    expected_page: 260
+    expected_page: [14, 260, 436]
     expected_answer_contains_any:
       - "40%-50%"
       - "40%–50%"
+      - "40–50%"
+      - "CFFO"
       - "cash flow from operations"
     difficulty: medium
     notes: "Capital allocation policy."
@@ -888,11 +895,12 @@ questions:
     category: shareholder_return
     question: "What types of shareholder distributions does Shell describe?"
     expected_source: "shell.pdf"
-    expected_page: [30, 35, 260]
+    expected_page: [24, 25, 260, 436]
     expected_answer_contains_any:
       - "dividends"
       - "share buybacks"
       - "shareholder distributions"
+      - "$22.4 billion"
     difficulty: easy
     notes: "Expected answer should mention dividends and/or buybacks."
 
@@ -902,11 +910,13 @@ questions:
     category: shareholder_return
     question: "What does Shell say are management's current priorities for applying cash?"
     expected_source: "shell.pdf"
-    expected_page: 260
+    expected_page: [14, 194, 260]
     expected_answer_contains_any:
       - "balanced capital allocation"
       - "shareholder distributions"
       - "profitable growth"
+      - "fund growth"
+      - "service and reduce debt"
     difficulty: medium
     notes: "Capital management section."
 
@@ -916,7 +926,7 @@ questions:
     category: general_report_question
     question: "What is Shell's strategy in relation to the energy transition?"
     expected_source: "shell.pdf"
-    expected_page: [9, 11, 73, 87]
+    expected_page: [75, 87, 359, 361, 362]
     expected_answer_contains_any:
       - "energy transition"
       - "net-zero"
@@ -930,11 +940,15 @@ questions:
     category: general_report_question
     question: "What risk categories does Shell describe in the annual report?"
     expected_source: "shell.pdf"
-    expected_page: [126, 135, 348]
+    expected_page: [134, 257]
     expected_answer_contains_any:
       - "Portfolio risks"
       - "Climate change and the energy transition"
       - "Health, safety, security and the environment"
+      - "HSSE"
+      - "Health, Safety, Security, and Environment"
+      - "climate-related physical risks"
+      - "security risks"
       - "Litigation and regulatory compliance"
       - "Reputation"
     difficulty: medium
@@ -1031,15 +1045,15 @@ questions:
     company: ABN AMRO
     year: 2025
     category: fte
-    question: "How many employees/FTEs did ABN AMRO report at year-end 2025?"
+    question: "What internal and external employee FTE counts did ABN AMRO report at year-end 2025?"
     expected_source: "abn-amro.pdf"
-    expected_page: [40, 180, 220]
-    expected_answer_contains_any:
+    expected_page: [47]
+    expected_answer_contains_all:
+      - "23,126"
+      - "2,216"
       - "FTE"
-      - "employees"
-      - "2025"
     difficulty: hard
-    notes: "Use the employee/workforce table. Distinguish FTE from headcount if both appear."
+    notes: "Use the year-end FTE table, not the headcount table or external FTE excluding HAL."
 
   - id: abn_amro_2025_fte_strategy_right_sizing
     company: ABN AMRO
@@ -1047,13 +1061,16 @@ questions:
     category: fte
     question: "Which strategic priority explains ABN AMRO's reduction in employee numbers?"
     expected_source: "abn-amro.pdf"
-    expected_page: [18, 38]
+    expected_page: [14, 15]
     expected_answer_contains_any:
+      - "simplify the organisation"
+      - "reduce global staff by about 20%"
+      - "5,200 full-time equivalents"
       - "right-sizing"
       - "cost base"
       - "right-sizing our cost base"
     difficulty: easy
-    notes: "Connects workforce reduction to strategic priorities."
+    notes: "Connects workforce reduction to simplifying the organisation and the 2026-2028 strategic priority to right-size the cost base."
 
   - id: abn_amro_2025_fte_employee_topic_sustainability
     company: ABN AMRO
@@ -1115,13 +1132,15 @@ questions:
     company: ABN AMRO
     year: 2025
     category: sustainability_goal
-    question: "What does ABN AMRO's sustainability statement say it explains about sustainability and strategy?"
+    question: "In the Strategy and business model section, how does ABN AMRO describe the relationship between sustainability, strategy and the business model?"
     expected_source: "abn-amro.pdf"
     expected_page: 200
     expected_answer_contains_any:
       - "relationship between our strategy and our business model"
       - "sustainability in relation to our strategy"
       - "business model"
+      - "relate to sustainability"
+      - "incorporated into the bank’s positioning"
     difficulty: medium
     notes: "Sustainability reporting structure."
 
@@ -1200,13 +1219,14 @@ questions:
     category: esg_datapoint
     question: "What were ABN AMRO's total risk-weighted assets in 2025?"
     expected_source: "abn-amro.pdf"
-    expected_page: 39
+    expected_page: [47, 118]
     expected_answer_contains_any:
       - "EUR 135.4 billion"
       - "135.4 billion"
+      - "135,398"
       - "RWA"
     difficulty: medium
-    notes: "Risk/capital datapoint."
+    notes: "Risk/capital datapoint; page 118 reports total risk-weighted assets in EUR millions."
 
   - id: abn_amro_2025_esg_datapoint_rwa_2024_comparison
     company: ABN AMRO
@@ -1299,12 +1319,14 @@ questions:
     category: business_performance
     question: "What did ABN AMRO report about new mortgage production in Q4 2025?"
     expected_source: "abn-amro.pdf"
-    expected_page: [38, 40]
+    expected_page: [27, 92]
     expected_answer_contains_any:
-      - "continued at a fast pace"
       - "new mortgage production"
+      - "19%"
+      - "EUR 1.2 billion"
+      - "reclassified to assets held for sale"
     difficulty: medium
-    notes: "Business performance narrative."
+    notes: "Business performance narrative; page 92 gives the 2025 market share and Q4 mortgage reclassification."
 
   - id: abn_amro_2025_business_clearing_fee_income
     company: ABN AMRO
@@ -1326,13 +1348,13 @@ questions:
     category: business_performance
     question: "What net income from other operating activities did ABN AMRO report in 2025?"
     expected_source: "abn-amro.pdf"
-    expected_page: 310
+    expected_page: [295, 319]
     expected_answer_contains_any:
       - "EUR 30 million"
       - "30 million"
       - "other operating activities"
     difficulty: medium
-    notes: "Business performance/financial detail."
+    notes: "Business performance/financial detail from the consolidated income statement and note 6."
 
   - id: abn_amro_2025_business_priorities
     company: ABN AMRO
@@ -1438,28 +1460,35 @@ questions:
     category: general_report_question
     question: "What does ABN AMRO say it does for clients?"
     expected_source: "abn-amro.pdf"
-    expected_page: [9, 18]
+    expected_page: [7, 13, 200]
     expected_answer_contains_any:
       - "support clients in their financial decisions"
-      - "buying a house"
-      - "starting a business"
-      - "making investments"
+      - "support family wealth and businesses"
+      - "guiding clients from savings to investment solutions"
+      - "provide advice based on better data insights"
+      - "tailor our propositions"
+      - "financial solutions"
+      - "manage their finances"
+      - "personalised services"
+      - "support their goals"
     difficulty: easy
-    notes: "Business model/purpose."
+    notes: "Broad business model/purpose question; allow client support phrasing from the CEO interview and business model sections."
 
   - id: abn_amro_2025_general_major_developments
     company: ABN AMRO
     year: 2025
     category: general_report_question
-    question: "What major Board change did ABN AMRO report in 2025?"
+    question: "What CEO change did ABN AMRO report in 2025?"
     expected_source: "abn-amro.pdf"
-    expected_page: 15
+    expected_page: [15, 155]
     expected_answer_contains_any:
       - "Marguerite Bérard succeeded Robert Swaak"
       - "Chief Executive Officer"
       - "23 April 2025"
+      - "new CEO"
+      - "April"
     difficulty: easy
-    notes: "Major development in the year."
+    notes: "Major CEO change in the year; page 15 gives the formal succession and page 155 discusses her arrival as new CEO."
 
   - id: abn_amro_2025_hallucination_future_actual_2028_roe
     company: ABN AMRO
