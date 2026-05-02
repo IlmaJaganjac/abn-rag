@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-name", default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--context-window", type=int, default=1)
-    parser.add_argument("--max-pages-per-category", type=int, default=50)
+    parser.add_argument("--max-pages-per-category", type=int, default=15)
     parser.add_argument(
         "--categories",
         default="fte,sustainability",

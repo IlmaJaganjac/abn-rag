@@ -261,6 +261,18 @@ def build_chunks(
     )
 
 
+def deduplicate_chunks(chunks: list[Chunk]) -> list[Chunk]:
+    seen: set[tuple[str, str]] = set()
+    deduped: list[Chunk] = []
+    for chunk in chunks:
+        key = (chunk.source, chunk.embedding_text or chunk.text)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(chunk)
+    return deduped
+
+
 def embed_texts(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
@@ -380,6 +392,41 @@ def build_datapoint_chunks(
     return chunks
 
 
+def _apply_enhanced_text(
+    pages: list[tuple[int, str]],
+    enhanced_jsonl: Path,
+) -> list[tuple[int, str]]:
+    overrides: dict[int, str] = {}
+    with enhanced_jsonl.open(encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            enhanced = record.get("enhanced_text")
+            if enhanced:
+                overrides[int(record["page"])] = enhanced
+    if overrides:
+        logger.info("applying enhanced_text overrides for %d pages", len(overrides))
+    return [(page, overrides.get(page, text)) for page, text in pages]
+
+
+def _load_pages_jsonl(path: Path) -> tuple[list[tuple[int, str]], str]:
+    pages: list[tuple[int, str]] = []
+    parser: str | None = None
+    with path.open(encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            text = record.get("enhanced_text") or record.get("text")
+            if not text:
+                continue
+            pages.append((int(record["page"]), str(text)))
+            if parser is None and record.get("parser"):
+                parser = str(record["parser"])
+    return pages, parser or "pages_jsonl"
+
+
 def ingest_pdf(
     pdf_path: Path,
     *,
@@ -388,28 +435,42 @@ def ingest_pdf(
     reset: bool = False,
     parser: str | None = None,
     source_name: str | None = None,
+    enhanced_jsonl: Path | None = None,
+    pages_jsonl: Path | None = None,
 ) -> int:
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
     source = source_name or pdf_path.name
     requested_parser = parser or settings.pdf_parser
-    logger.info("parsing %s with %s", source, requested_parser)
     processed_dir = settings.get_processed_path()
-    parsed = parse_pdf_pages(
-        pdf_path,
-        parser=requested_parser,
-        processed_dir=processed_dir,
-        llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
-    )
-    pages = list(as_page_tuples(parsed.pages))
-    logger.info("parsed %d non-empty pages with %s", len(pages), parsed.parser)
+
+    if pages_jsonl is not None:
+        logger.info("loading parsed pages from %s", pages_jsonl)
+        pages, parsed_parser = _load_pages_jsonl(pages_jsonl)
+        parser_name = parsed_parser
+        logger.info("loaded %d non-empty pages from %s", len(pages), pages_jsonl)
+    else:
+        logger.info("parsing %s with %s", source, requested_parser)
+        parsed = parse_pdf_pages(
+            pdf_path,
+            parser=requested_parser,
+            processed_dir=processed_dir,
+            llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+        )
+        pages = list(as_page_tuples(parsed.pages))
+        parser_name = parsed.parser
+        logger.info("parsed %d non-empty pages with %s", len(pages), parser_name)
+
+    if enhanced_jsonl is not None and pages_jsonl is None:
+        pages = _apply_enhanced_text(pages, enhanced_jsonl)
+
     pages_path = persist_parsed_pages(
         pages,
         source=source,
         company=company,
         year=year,
-        parser=parsed.parser,
+        parser=parser_name,
         processed_dir=processed_dir,
     )
     logger.info("wrote parsed pages to %s", pages_path)
@@ -420,11 +481,13 @@ def ingest_pdf(
         year=year,
         max_tokens=settings.chunk_size_tokens,
         overlap=settings.chunk_overlap_tokens,
-        parser=parsed.parser,
+        parser=parser_name,
     )
     logger.info("built %d semantic chunks", len(chunks))
+    chunks = deduplicate_chunks(chunks)
+    logger.info("kept %d semantic chunks after exact deduplication", len(chunks))
 
-    datapoints = extract_datapoint_candidates(chunks, parser=parsed.parser)
+    datapoints = extract_datapoint_candidates(chunks, parser=parser_name)
     datapoints_path = persist_datapoints(
         datapoints,
         source=source,
@@ -441,11 +504,13 @@ def ingest_pdf(
         source=source,
         company=company,
         year=year,
-        parser=parsed.parser,
+        parser=parser_name,
         existing_chunks=chunks,
     )
     chunks.extend(datapoint_chunks)
     logger.info("built %d total chunks including datapoints", len(chunks))
+    chunks = deduplicate_chunks(chunks)
+    logger.info("kept %d total chunks after final exact embedding-text deduplication", len(chunks))
     chunks_path = persist_chunks(chunks, source=source, processed_dir=processed_dir)
     logger.info("wrote debug chunks to %s", chunks_path)
 
@@ -504,6 +569,18 @@ def _cli(argv: list[str] | None = None) -> int:
         default=settings.pdf_parser,
         help="PDF parser to use before chunking",
     )
+    parser.add_argument(
+        "--enhanced-jsonl",
+        type=Path,
+        default=None,
+        help="path to enhanced pages JSONL; pages with enhanced_text override parser output",
+    )
+    parser.add_argument(
+        "--pages-jsonl",
+        type=Path,
+        default=None,
+        help="path to parsed pages JSONL to ingest directly without running the PDF parser",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -515,6 +592,8 @@ def _cli(argv: list[str] | None = None) -> int:
             reset=args.reset,
             parser=args.parser,
             source_name=args.source_name,
+            enhanced_jsonl=args.enhanced_jsonl,
+            pages_jsonl=args.pages_jsonl,
         )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)

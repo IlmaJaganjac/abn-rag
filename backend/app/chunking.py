@@ -188,6 +188,7 @@ def _page_drafts(
                 boilerplate=boilerplate,
                 max_tokens=max_tokens,
                 overlap=overlap,
+                token_counter=token_counter,
                 split_oversize=split_oversize,
             )
         )
@@ -235,6 +236,7 @@ def _table_drafts(
     boilerplate: set[str],
     max_tokens: int,
     overlap: int,
+    token_counter: Callable[[str], int],
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
     drafts: list[ChunkDraft] = []
@@ -242,7 +244,11 @@ def _table_drafts(
     full_table = _clean_block("\n".join(rows))
     if full_table:
         table_context = _table_context(section_path, rows, table_kind)
-        for part in split_oversize(full_table, max_tokens, overlap):
+        for part in _split_table_on_rows(
+            rows=rows,
+            max_tokens=max_tokens,
+            token_counter=token_counter,
+        ):
             drafts.append(
                 _draft(
                     page=page,
@@ -259,25 +265,6 @@ def _table_drafts(
 
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
     headers, body_rows = _table_headers_and_body(data_rows)
-
-    if table_kind == "kpi_pairs":
-        for row in data_rows:
-            cells = _parse_table_cells(row)
-            for value, label in _metric_pairs(cells):
-                if not _is_kpi_label(label):
-                    continue
-                drafts.append(
-                    _kpi_metric_draft(
-                        page=page,
-                        value=value,
-                        label=label,
-                        section_path=section_path,
-                        company=company,
-                        year=year,
-                        parser=parser,
-                        boilerplate=boilerplate,
-                    )
-                )
 
     if table_kind == "header_table":
         for row in body_rows:
@@ -298,26 +285,52 @@ def _table_drafts(
                     extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
-            for metric_text in _financial_metric_texts_from_header_row(
-                headers,
-                cells,
-                section_path=section_path,
-            ):
-                drafts.append(
-                    _draft(
-                        page=page,
-                        text=metric_text,
-                        chunk_kind="metric",
-                        section_path=section_path,
-                        company=company,
-                        year=year,
-                        parser=parser,
-                        boilerplate=boilerplate,
-                        extra_embedding_context=_table_context(section_path, rows, table_kind),
-                    )
-                )
-
     return drafts
+
+
+def _split_table_on_rows(
+    *,
+    rows: list[str],
+    max_tokens: int,
+    token_counter: Callable[[str], int],
+) -> list[str]:
+    full_table = _clean_block("\n".join(rows))
+    if not full_table or token_counter(full_table) <= max_tokens:
+        return [full_table] if full_table else []
+
+    header_rows: list[str] = []
+    body_start = 0
+    if rows:
+        header_rows.append(rows[0])
+        body_start = 1
+    if len(rows) > 1 and TABLE_SEPARATOR_RE.match(rows[1]):
+        header_rows.append(rows[1])
+        body_start = 2
+
+    header_text = "\n".join(header_rows)
+    body_rows = rows[body_start:]
+    if not body_rows:
+        return [full_table]
+
+    parts: list[str] = []
+    current: list[str] = []
+
+    def current_text() -> str:
+        return "\n".join(header_rows + current)
+
+    for row in body_rows:
+        candidate_rows = current + [row]
+        candidate = "\n".join(header_rows + candidate_rows)
+        if current and token_counter(candidate) > max_tokens:
+            parts.append(_clean_block(current_text()))
+            current = [row]
+        else:
+            current = candidate_rows
+
+    if current:
+        parts.append(_clean_block(current_text()))
+
+    return parts or [full_table]
 
 
 def _draft(

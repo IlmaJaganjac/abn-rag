@@ -522,7 +522,7 @@ def datapoints_to_chunks(datapoint_set: NormalizedDatapointSet) -> list[Chunk]:
             page=dp.page or 1,
             text=text,
             token_count=len(text.split()),
-            parser="llamaextract",
+            parser=dp.extractor,
             chunk_kind="extracted_datapoint",
             section_path=section_path,
             embedding_text=embedding_text,

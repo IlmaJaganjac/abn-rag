@@ -272,7 +272,7 @@ def scan_pages(
     scored: dict[str, list[PageScore]] = {c: [] for c in CATEGORIES}
 
     for record in pages:
-        text = record.get("text", "")
+        text = record.get("enhanced_text") or record.get("text", "")
         scores = score_page(text)
         for cat in CATEGORIES:
             if scores[cat] > 0:

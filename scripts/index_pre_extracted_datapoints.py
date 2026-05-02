@@ -15,6 +15,7 @@ from backend.app.extracted_datapoints import NormalizedDatapointSet, datapoints_
 from backend.app.ingestion import (
     CHROMA_UPSERT_BATCH_SIZE,
     _chunk_metadata,
+    deduplicate_chunks,
     embed_texts,
     get_collection,
 )
@@ -59,6 +60,8 @@ def main(argv: list[str] | None = None) -> int:
     # Convert to chunks
     chunks = datapoints_to_chunks(ds)
     log.info("converted to %d chunks", len(chunks))
+    chunks = deduplicate_chunks(chunks)
+    log.info("kept %d chunks after exact embedding-text deduplication", len(chunks))
 
     by_type: Counter = Counter(dp.datapoint_type for dp in ds.datapoints)
     print(f"\nDatapoints loaded: {len(ds.datapoints)}")
