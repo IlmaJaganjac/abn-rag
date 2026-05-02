@@ -238,7 +238,7 @@ def test_persist_parsed_pages_writes_inspectable_jsonl(tmp_path) -> None:
         source="asml.pdf",
         company="ASML",
         year=2025,
-        parser="docling",
+        parser="llamaparse",
         processed_dir=tmp_path,
     )
 
@@ -249,7 +249,7 @@ def test_persist_parsed_pages_writes_inspectable_jsonl(tmp_path) -> None:
     assert record["company"] == "ASML"
     assert record["year"] == 2025
     assert record["page"] == 5
-    assert record["parser"] == "docling"
+    assert record["parser"] == "llamaparse"
     assert record["text"] == "Total employees (FTEs): > 44,000"
     assert record["char_count"] > 0
     assert record["token_count"] > 0
@@ -268,7 +268,7 @@ def test_ingest_pdf_can_store_stable_source_name(
         "backend.app.ingestion.parse_pdf_pages",
         lambda *args, **kwargs: ParseResult(
             pages=[ParsedPage(page=5, text="Total employees (FTEs): > 44,000")],
-            parser="pymupdf",
+            parser="llamaparse",
         ),
     )
     monkeypatch.setattr(
@@ -307,7 +307,7 @@ def test_ingest_pdf_can_store_stable_source_name(
     assert collection.upsert_calls[0]["documents"] == ["Total employees (FTEs): > 44,000"]
     assert collection.upsert_calls[0]["embeddings"] == [[0.1, 0.2]]
     assert collection.upsert_calls[0]["metadatas"][0]["source"] == "asml.pdf"
-    assert collection.upsert_calls[0]["metadatas"][0]["parser"] == "pymupdf"
+    assert collection.upsert_calls[0]["metadatas"][0]["parser"] == "llamaparse"
     assert collection.upsert_calls[0]["metadatas"][0]["chunk_kind"] == "section"
     assert collection.upsert_calls[1]["ids"] == ["asml.pdf:5:1"]
     assert collection.upsert_calls[1]["metadatas"][0]["chunk_kind"] == "datapoint"
@@ -337,7 +337,7 @@ def test_extract_fte_candidates_detects_full_time_equivalent() -> None:
         source="asml.pdf",
         company="ASML",
         year=2025,
-        parser="docling",
+        parser="llamaparse",
     )
 
     assert len(candidates) == 1
@@ -353,7 +353,7 @@ def test_persist_datapoints_writes_json(tmp_path) -> None:
             "datapoint_type": "fte_candidate",
             "page": 5,
             "verbatim_text": "Total employees (FTEs): > 44,000",
-            "parser": "pymupdf",
+            "parser": "llamaparse",
         }
     ]
 
@@ -576,7 +576,7 @@ def test_extract_fte_candidates_returns_empty_list_when_no_candidate_exists() ->
         source="asml.pdf",
         company="ASML",
         year=2025,
-        parser="docling",
+        parser="llamaparse",
     )
 
     assert candidates == []

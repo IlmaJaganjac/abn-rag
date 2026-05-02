@@ -6,10 +6,9 @@
 # All facts verified from the 2024 Annual Report (US GAAP version) at-a-glance
 # page and CFO message page (printed pp. 4-5 and 53-55).
 #
-# IMPORTANT — page numbers: these are the report's PRINTED page numbers, which
-# match PyMuPDF/pymupdf4llm 1-indexed PDF pages on this report (cover counts as
-# page 1, contents page 3, etc.). Verify after ingestion that PDF page numbers
-# align — if there's a 1-2 page offset, update expected_page accordingly.
+# IMPORTANT — page numbers: these are the report's PRINTED page numbers (cover
+# counts as page 1, contents page 3, etc.). Verify after ingestion that PDF page
+# numbers align — if there's a 1-2 page offset, update expected_page accordingly.
 #
 # Source filename: name your ingested PDF asml-2024.pdf (or update expected_source)
 

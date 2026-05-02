@@ -8,8 +8,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import fitz  # PyMuPDF
-
 logger = logging.getLogger(__name__)
 
 
@@ -64,12 +62,7 @@ def combine_with_pdf_text_layer(
     parsed_pages: list[ParsedPage],
     pdf_text_pages: list[ParsedPage],
 ) -> list[ParsedPage]:
-    """Prefer the PDF text layer for verbatim reading, keep parser text too.
-
-    LlamaParse markdown is useful for structure, but annual-report highlight
-    pages sometimes lose visual reading order in dense KPI layouts. PyMuPDF's
-    native text layer often preserves those verbatim datapoints.
-    """
+    """Merge a parsed page list with a PDF native text layer."""
     pdf_text_by_page = {page.page: page.text for page in pdf_text_pages}
     combined: list[ParsedPage] = []
     for page in parsed_pages:
@@ -89,15 +82,6 @@ def combine_with_pdf_text_layer(
             text = f"{pdf_text}\n\n--- Parsed markdown ---\n\n{parsed_text}"
             combined.append(ParsedPage(page=page.page, text=text))
     return combined
-
-
-def _add_pdf_text_layer(path: Path, pages: list[ParsedPage]) -> list[ParsedPage]:
-    try:
-        pdf_text_pages = parse_pdf_pymupdf(path)
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("could not add PDF text layer for %s: %s", path, exc)
-        return pages
-    return combine_with_pdf_text_layer(pages, pdf_text_pages)
 
 
 def persist_llamaparse_artifacts(
@@ -123,7 +107,6 @@ def parse_pdf_llamaparse(
     *,
     api_key: str | None,
     processed_dir: Path | None = None,
-    use_pdf_text_layer: bool = True,
 ) -> list[ParsedPage]:
     if not api_key:
         raise ParserUnavailableError(
@@ -157,22 +140,7 @@ def parse_pdf_llamaparse(
         )
 
     pages = llamaparse_json_to_pages(results)
-    if use_pdf_text_layer:
-        pages = _add_pdf_text_layer(path, pages)
     return [ParsedPage(page=p.page, text=strip_boilerplate(p.text)) for p in pages if strip_boilerplate(p.text)]
-
-
-def parse_pdf_pymupdf(path: Path) -> list[ParsedPage]:
-    doc = fitz.open(path)
-    try:
-        pages: list[ParsedPage] = []
-        for i in range(doc.page_count):
-            text = doc.load_page(i).get_text("text").strip()
-            if text:
-                pages.append(ParsedPage(page=i + 1, text=text))
-        return pages
-    finally:
-        doc.close()
 
 
 def parse_pdf_pages(
@@ -181,25 +149,14 @@ def parse_pdf_pages(
     processed_dir: Path | None = None,
     llama_cloud_api_key: str | None = None,
     parser: str = "llamaparse",
-    use_pdf_text_layer: bool = True,
-    allow_fallback: bool = True,
 ) -> ParseResult:
-    if parser == "pymupdf":
-        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
-
-    try:
-        llama_pages = parse_pdf_llamaparse(
-            path,
-            api_key=llama_cloud_api_key,
-            processed_dir=processed_dir,
-            use_pdf_text_layer=use_pdf_text_layer,
-        )
-    except Exception as exc:
-        if not allow_fallback:
-            raise
-        logger.warning("%s parser failed; falling back to PyMuPDF for %s: %s", parser, path, exc)
-        return ParseResult(pages=parse_pdf_pymupdf(path), parser="pymupdf")
-
+    if parser != "llamaparse":
+        raise ValueError(f"unsupported PDF parser: {parser!r}")
+    llama_pages = parse_pdf_llamaparse(
+        path,
+        api_key=llama_cloud_api_key,
+        processed_dir=processed_dir,
+    )
     return ParseResult(pages=llama_pages, parser="llamaparse")
 
 

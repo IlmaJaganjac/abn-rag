@@ -387,8 +387,6 @@ def ingest_pdf(
     year: int | None,
     reset: bool = False,
     parser: str | None = None,
-    allow_parser_fallback: bool = True,
-    use_pdf_text_layer: bool = True,
     source_name: str | None = None,
 ) -> int:
     if not pdf_path.exists():
@@ -401,8 +399,6 @@ def ingest_pdf(
     parsed = parse_pdf_pages(
         pdf_path,
         parser=requested_parser,
-        allow_fallback=allow_parser_fallback,
-        use_pdf_text_layer=use_pdf_text_layer,
         processed_dir=processed_dir,
         llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
     )
@@ -504,19 +500,9 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--reset", action="store_true", help="drop and recreate the collection")
     parser.add_argument(
         "--parser",
-        choices=["docling", "llamaparse", "pymupdf"],
+        choices=["llamaparse"],
         default=settings.pdf_parser,
         help="PDF parser to use before chunking",
-    )
-    parser.add_argument(
-        "--no-parser-fallback",
-        action="store_true",
-        help="fail instead of falling back to PyMuPDF when the selected parser fails",
-    )
-    parser.add_argument(
-        "--no-pdf-text-layer",
-        action="store_true",
-        help="skip PyMuPDF text layer augmentation when using llamaparse (pure llamaparse output)",
     )
     args = parser.parse_args(argv)
 
@@ -528,8 +514,6 @@ def _cli(argv: list[str] | None = None) -> int:
             year=args.year,
             reset=args.reset,
             parser=args.parser,
-            allow_parser_fallback=not args.no_parser_fallback,
-            use_pdf_text_layer=not args.no_pdf_text_layer,
             source_name=args.source_name,
         )
     except (FileNotFoundError, RuntimeError) as exc:
