@@ -20,6 +20,8 @@ from backend.app.llama_extract_datapoints import (
     AnnualReportDatapoints,
     extract_annual_report_datapoints,
 )
+from backend.app.openai_extract_datapoints import extract_annual_report_datapoints_openai
+from backend.app.openai_validate_datapoints import validate_datapoints_openai
 
 _PRE_EXTRACTED_ROOT = Path("backend/data/processed/pre_extracted")
 _PAGE_PLANS_ROOT = Path("backend/data/processed/extraction_page_plans")
@@ -66,29 +68,103 @@ def _filter_category(cat: str, result: AnnualReportDatapoints) -> AnnualReportDa
     return result
 
 
+def parse_page_range_to_pages(page_range: str) -> list[int]:
+    pages: list[int] = []
+    for part in page_range.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            start, end = part.split("-", 1)
+            pages.extend(range(int(start), int(end) + 1))
+        else:
+            pages.append(int(part))
+    return sorted(set(pages))
+
+
+def pages_to_range(pages: list[int]) -> str:
+    if not pages:
+        return ""
+    pages = sorted(set(pages))
+    parts: list[str] = []
+    start = prev = pages[0]
+    for p in pages[1:]:
+        if p == prev + 1:
+            prev = p
+        else:
+            parts.append(str(start) if start == prev else f"{start}-{prev}")
+            start = prev = p
+    parts.append(str(start) if start == prev else f"{start}-{prev}")
+    return ",".join(parts)
+
+
+def chunk_pages(pages: list[int], size: int) -> list[list[int]]:
+    return [pages[i : i + size] for i in range(0, len(pages), size)]
+
+
 def _run_category(
     cat: str,
     pdf: Path,
+    pages: list[dict],
     company: str | None,
     year: int | None,
     source: str,
     page_range: str,
+    extractor: str,
+    batch_pages: int = 0,
 ) -> tuple[str, list]:
     log = logging.getLogger(__name__)
     log.info("running category=%s pages=%s", cat, page_range)
-    result = extract_annual_report_datapoints(
-        pdf,
-        company=company,
-        year=year,
-        page_range=page_range,
-        category=cat,
-    )
+
+    if extractor == "openai" and batch_pages > 0:
+        all_page_nums = parse_page_range_to_pages(page_range)
+        batches = chunk_pages(all_page_nums, batch_pages)
+        normalized: list = []
+        for i, batch in enumerate(batches, 1):
+            batch_range = pages_to_range(batch)
+            log.info("category=%s batch=%d/%d pages=%s", cat, i, len(batches), batch_range)
+            result = extract_annual_report_datapoints_openai(
+                pages=pages,
+                company=company,
+                year=year,
+                page_range=batch_range,
+                category=cat,
+            )
+            filtered = _filter_category(cat, result)
+            batch_normalized = normalize_llamaextract_result(
+                filtered,
+                source=source,
+                company=company,
+                year=year,
+                extractor=extractor,
+            )
+            normalized.extend(batch_normalized)
+        log.info("category=%s: %d datapoints extracted across %d batches", cat, len(normalized), len(batches))
+        return cat, normalized
+
+    if extractor == "openai":
+        result = extract_annual_report_datapoints_openai(
+            pages=pages,
+            company=company,
+            year=year,
+            page_range=page_range,
+            category=cat,
+        )
+    else:
+        result = extract_annual_report_datapoints(
+            pdf,
+            company=company,
+            year=year,
+            page_range=page_range,
+            category=cat,
+        )
     filtered = _filter_category(cat, result)
     normalized = normalize_llamaextract_result(
         filtered,
         source=source,
         company=company,
         year=year,
+        extractor=extractor,
     )
     log.info("category=%s: %d datapoints extracted", cat, len(normalized))
     return cat, normalized
@@ -103,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-name", default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--context-window", type=int, default=1)
-    parser.add_argument("--max-pages-per-category", type=int, default=20)
+    parser.add_argument("--max-pages-per-category", type=int, default=50)
     parser.add_argument(
         "--categories",
         default="fte,sustainability",
@@ -114,6 +190,24 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=None,
         help="max parallel LlamaExtract jobs (default: min(4, num_categories))",
+    )
+    parser.add_argument(
+        "--extractor",
+        choices=["llamaextract", "openai"],
+        default="llamaextract",
+        help="structured extractor backend to use",
+    )
+    parser.add_argument(
+        "--batch-pages",
+        type=int,
+        default=0,
+        help="when --extractor openai: split page range into batches of N pages (0 = no batching)",
+    )
+    parser.add_argument(
+        "--validate-extracted",
+        action="store_true",
+        default=False,
+        help="run an OpenAI validation/deduplication pass on extracted datapoints per category",
     )
     args = parser.parse_args(argv)
 
@@ -166,10 +260,13 @@ def main(argv: list[str] | None = None) -> int:
                 _run_category,
                 cat,
                 args.pdf,
+                pages,
                 args.company,
                 args.year,
                 source,
                 rng,
+                args.extractor,
+                args.batch_pages,
             ): cat
             for cat, rng in active
         }
@@ -187,6 +284,33 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     log.info("all categories complete")
+
+    # 3b. Optionally validate/deduplicate per category with OpenAI
+    if args.validate_extracted:
+        for cat in categories:
+            dps = results_by_cat.get(cat)
+            if not dps:
+                continue
+            try:
+                items = validate_datapoints_openai(
+                    category=cat,
+                    datapoints=dps,
+                    company=args.company,
+                    year=args.year,
+                )
+                if items:
+                    keep_indices = {
+                        it.index
+                        for it in items
+                        if it.is_valid and it.duplicate_of_index is None
+                    }
+                    kept = [dp for i, dp in enumerate(dps) if i in keep_indices]
+                    log.info("category=%s validation: kept %d/%d datapoints", cat, len(kept), len(dps))
+                    results_by_cat[cat] = kept
+                else:
+                    log.warning("category=%s validation returned no items, keeping original", cat)
+            except Exception as exc:
+                log.warning("category=%s validation failed (%s), keeping original datapoints", cat, exc)
 
     # 4. Combine in deterministic category order
     all_datapoints = []

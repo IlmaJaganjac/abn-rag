@@ -30,6 +30,73 @@ _FTE_SPECIFIC = re.compile(
     r"dedicated\s+fte|team\s+fte|program\s+fte|project\s+fte",
     re.IGNORECASE,
 )
+_FTE_SIGNAL = re.compile(
+    r"\bfte?s?\b|full[- ]time\s+equivalents?|headcount|employees?|workforce|"
+    r"payroll|permanent|temporary|internal|external|contractors?|turnover|attrition",
+    re.IGNORECASE,
+)
+_FTE_NON_EMPLOYEE = re.compile(
+    r"survey\s+score|engagement\s+score|training\s+hours?|lost\s+time|incident\s+rate|"
+    r"revenue|net\s+sales|dividend|buyback|emissions?|scope\s+[123]|net[- ]zero",
+    re.IGNORECASE,
+)
+_SUST_SIGNAL = re.compile(
+    r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|net[- ]zero|"
+    r"carbon|methane|flaring|renewable|energy\s+(?:efficien|savings?|use)|"
+    r"electricity|power\s+consumption|wafer|waste|recycl|circular|water|"
+    r"biodiversity|supplier\s+sustainability|"
+    r"diversity|inclusion|safety|ethics|governance",
+    re.IGNORECASE,
+)
+_SUST_TARGET_SIGNAL = re.compile(
+    r"target|goal|ambition|commitment|committed|aim|reduce|reduction|halve|"
+    r"achieve|become|maintain|eliminate|by\s+20[2-9]\d|20[3-9]\d",
+    re.IGNORECASE,
+)
+_SUST_BUSINESS_ONLY = re.compile(
+    r"lng\s+sales|liquids?\s+production|barrels?\s+per\s+day|refining\s+throughput|"
+    r"production\s+growth|volume\s+growth|market\s+share|revenue\s+growth|"
+    r"customer\s+growth|stores?|branches?|locations?",
+    re.IGNORECASE,
+)
+_ESG_SIGNAL = re.compile(
+    r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|renewable|"
+    r"energy|waste|recycl|water|circular|biodiversity|supplier|diversity|"
+    r"inclusion|safety|ethics|governance",
+    re.IGNORECASE,
+)
+_FIN_SIGNAL = re.compile(
+    r"net\s+sales|revenue|total\s+income|gross\s+profit|gross\s+margin|"
+    r"operating\s+(?:income|profit)|income\s+from\s+operations|\bebit(?:da)?\b|"
+    r"net\s+(?:income|profit)|income\s+tax|effective\s+tax\s+rate|\betr\b|"
+    r"earnings\s+per\s+share|\beps\b|r&d|research\s+and\s+development|"
+    r"free\s+cash\s+flow|operating\s+cash\s+flow|cash\s+flow\s+from\s+operat|"
+    r"net\s+cash\s+provided\s+by\s+operating\s+activities|"
+    r"cash\s+and\s+cash\s+equivalents|short[- ]term\s+investments?|"
+    r"capex|capital\s+expenditure|property,\s+plant\s+and\s+equipment|"
+    r"intangible\s+assets|return\s+on\s+(?:equity|invested\s+capital)|"
+    r"\broe\b|\broic\b|\bcet1\b|capital\s+ratio|liquidity\s+coverage|"
+    r"net\s+interest\s+margin|\bnim\b",
+    re.IGNORECASE,
+)
+_BIZ_SIGNAL = re.compile(
+    r"systems?\s+sold|systems?\s+recognized|lithography\s+systems?|euv\s+systems?|"
+    r"units?\s+sold|installed\s+base|"
+    r"order\s+intake|order\s+book|backlog|bookings|customers?|clients?|"
+    r"customer\s+satisfaction|suppliers?|reuse\s+rate|market\s+share|"
+    r"production\s+volume|deliveries|loans?|deposits?|mortgages?|lng|"
+    r"barrels?\s+per\s+day|refining\s+throughput|beer\s+volume|hectoliters?|"
+    r"stores?|branches?|locations?|assets\s+under\s+management|\baum\b|"
+    r"transaction\s+volume",
+    re.IGNORECASE,
+)
+_SH_SIGNAL = re.compile(
+    r"dividend|share\s+buybacks?|share\s+repurchases?|repurchased|"
+    r"returned?\s+to\s+shareholders?|shareholder\s+(?:returns?|distributions?)|"
+    r"capital\s+return|payout\s+ratio|treasury\s+shares?|shares?\s+cancelled|"
+    r"cash\s+returned",
+    re.IGNORECASE,
+)
 
 
 class NormalizedDatapoint(BaseModel):
@@ -119,6 +186,57 @@ def _esg_priority(quote: str | None, period: str | None) -> int:
     return 70
 
 
+def _combined_dp_text(dp: NormalizedDatapoint) -> str:
+    return " ".join(
+        part for part in (
+            dp.datapoint_type,
+            dp.metric,
+            dp.value,
+            dp.unit,
+            dp.period,
+            dp.quote,
+            dp.basis,
+            dp.scope,
+            dp.target_year,
+        )
+        if part
+    )
+
+
+def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
+    text = _combined_dp_text(dp)
+    if dp.datapoint_type == "fte":
+        if _FTE_SPECIFIC.search(text):
+            return False
+        return bool(_FTE_SIGNAL.search(text)) and not bool(_FTE_NON_EMPLOYEE.search(text))
+
+    if dp.datapoint_type == "sustainability_goal":
+        has_sust_signal = bool(_SUST_SIGNAL.search(text))
+        has_target_signal = bool(_SUST_TARGET_SIGNAL.search(text) or dp.target_year)
+        business_only = bool(_SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
+        return has_sust_signal and has_target_signal and not business_only
+
+    if dp.datapoint_type == "esg_datapoint":
+        return bool(_ESG_SIGNAL.search(text)) and not bool(_SUST_TARGET_SIGNAL.search(text))
+
+    if dp.datapoint_type == "financial_highlight":
+        if _SH_SIGNAL.search(text) or _FTE_SIGNAL.search(text) or _SUST_SIGNAL.search(text):
+            return False
+        return bool(_FIN_SIGNAL.search(text))
+
+    if dp.datapoint_type == "business_performance":
+        if _FTE_SIGNAL.search(text) or _SH_SIGNAL.search(text):
+            return False
+        if _SUST_SIGNAL.search(text) and _SUST_TARGET_SIGNAL.search(text):
+            return False
+        return bool(_BIZ_SIGNAL.search(text))
+
+    if dp.datapoint_type == "shareholder_return":
+        return bool(_SH_SIGNAL.search(text))
+
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Public normalization
 # ---------------------------------------------------------------------------
@@ -129,12 +247,17 @@ def normalize_llamaextract_result(
     source: str,
     company: str | None,
     year: int | None,
+    extractor: str = "llamaextract",
 ) -> list[NormalizedDatapoint]:
     out: list[NormalizedDatapoint] = []
 
+    def append_if_plausible(dp: NormalizedDatapoint) -> None:
+        if _is_plausible_datapoint(dp):
+            out.append(dp)
+
     for dp in result.fte_datapoints:
         priority = _fte_priority(dp.label, dp.basis)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -146,13 +269,14 @@ def normalize_llamaextract_result(
             page=dp.page,
             quote=dp.quote,
             basis=dp.basis,
+            extractor=extractor,
             priority=priority,
             confidence=dp.confidence,
         ))
 
     for sg in result.sustainability_goals:
         priority = _sustainability_priority(sg.goal, sg.quote, sg.target_year)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -165,13 +289,14 @@ def normalize_llamaextract_result(
             quote=sg.quote,
             scope=sg.scope,
             target_year=sg.target_year,
+            extractor=extractor,
             priority=priority,
             confidence=sg.confidence,
         ))
 
     for esg in result.esg_datapoints:
         priority = _esg_priority(esg.quote, esg.period)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -183,13 +308,14 @@ def normalize_llamaextract_result(
             scope=esg.scope,
             page=esg.page,
             quote=esg.quote,
+            extractor=extractor,
             priority=priority,
             confidence=esg.confidence,
         ))
 
     for fh in result.financial_highlights:
         priority = _highlight_priority(fh.page, fh.quote)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -201,13 +327,14 @@ def normalize_llamaextract_result(
             page=fh.page,
             quote=fh.quote,
             basis=fh.basis,
+            extractor=extractor,
             priority=priority,
             confidence=fh.confidence,
         ))
 
     for bp in result.business_performance:
         priority = _highlight_priority(bp.page, bp.quote)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -219,13 +346,14 @@ def normalize_llamaextract_result(
             page=bp.page,
             quote=bp.quote,
             basis=bp.basis,
+            extractor=extractor,
             priority=priority,
             confidence=bp.confidence,
         ))
 
     for sr in result.shareholder_returns:
         priority = _highlight_priority(sr.page, sr.quote)
-        out.append(NormalizedDatapoint(
+        append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
@@ -237,6 +365,7 @@ def normalize_llamaextract_result(
             page=sr.page,
             quote=sr.quote,
             basis=sr.basis,
+            extractor=extractor,
             priority=priority,
             confidence=sr.confidence,
         ))
@@ -346,7 +475,7 @@ def _build_text(dp: NormalizedDatapoint) -> str:
             lines.append(f"Basis: {dp.basis}")
     if dp.quote:
         lines.append(f"Quote: {dp.quote}")
-    lines.append(f"Extractor: llamaextract")
+    lines.append(f"Extractor: {dp.extractor}")
     lines.append(f"Priority: {dp.priority}")
     return "\n".join(lines)
 

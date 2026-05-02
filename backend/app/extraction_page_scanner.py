@@ -261,7 +261,7 @@ def scan_pages(
     pages: list[dict],
     *,
     context_window: int = 1,
-    max_pages_per_category: int = 20,
+    max_pages_per_category: int = 50,
 ) -> tuple[PageScanResult, dict[str, str]]:
     """Score pages and return top candidates per category.
 

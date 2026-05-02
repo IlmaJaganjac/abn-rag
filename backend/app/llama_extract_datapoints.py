@@ -28,16 +28,46 @@ You extract workforce and headcount datapoints from annual reports. Only populat
 
 Extract workforce/headcount datapoints: total employees (FTEs or headcount), average number of payroll employees, number of internal employees, permanent employees, temporary employees, part-time employees, full-time employees, non-guaranteed hours employees, external employees, contractors, year-end employee count, average employee count, employees by gender, employees by region or country, employee turnover or attrition rate. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated. Include label, value, unit (FTEs or headcount), basis (FTE/headcount/payroll/etc.), period (year or date), page, and verbatim quote.
 
-Do not extract: dedicated FTEs for a specific project, program, or team. Do not extract financial, sustainability, operational, or shareholder data.
+Do not extract: dedicated FTEs for a specific project, program, or team; employee engagement survey scores; training hours; safety incident rates; board or executive diversity percentages unless they are explicitly reported as employee/headcount counts. Do not extract financial, sustainability, operational, or shareholder data.
 
 {_BASE_INSTRUCTIONS}""",
 
     "sustainability": f"""\
 You extract sustainability goals, targets, ambitions, and commitments from annual reports. Only populate sustainability_goals. Leave all other lists empty.
 
-Extract explicit forward-looking targets, ambitions, commitments, or goals related to: climate change mitigation, greenhouse gas (GHG) emission reductions, net zero, gross Scope 1 / Scope 2 / Scope 3 emissions reduction, carbon intensity, renewable electricity or energy, energy efficiency, circularity, waste, recycling, water, biodiversity, supplier sustainability. Look for language such as: "target", "goal", "ambition", "commitment", "aim", "we will", "we plan to", "reduce by [X%] by [year]", "achieve net zero by [year]", "transition plan", "SBTi", "Science Based Targets", "1.5°C". Include target_year, scope (Scope 1/2/3 or value chain), value_or_target (the reduction percentage or absolute target), and a verbatim quote.
+EXTRACT every distinct forward-looking sustainability goal, target, ambition, or commitment. Cover all of the following categories when present:
+- Climate/GHG: net-zero 2050, Scope 1 emissions reduction, Scope 2 emissions reduction, Scope 3 (upstream / downstream / customer) emissions reduction, net carbon intensity (NCI), carbon intensity, absolute emissions halving
+- Methane: methane intensity target, near-zero methane emissions
+- Routine flaring: eliminate routine flaring target year
+- Energy: renewable electricity target, energy efficiency target
+- Circular economy / waste / water / biodiversity: recycling targets, circularity targets, water use targets, biodiversity commitments
+- Supplier: supplier sustainability audits, supplier GHG commitments
+- Social: gender diversity / inclusion targets, safety targets (TRIR, fatalities), human rights commitments
+- Governance / ethics: ethics policies, anti-corruption commitments
 
-Do not extract: actual historical ESG performance values (e.g., reported GHG emissions for last year). Do not extract FTE, financial, business performance, or shareholder data.
+If one sentence, paragraph, bullet, or table row contains multiple distinct goals, targets, ambitions, or commitments, ALWAYS split them into separate sustainability_goals items. Do not combine multiple goals in one item.
+
+Examples:
+- "Maintain methane emissions intensity below 0.2% and achieve near-zero methane emissions intensity by 2030" must become two items:
+  1. metric: "Methane emissions intensity maintenance target"; value_or_target: "below 0.2%"
+  2. metric: "Near-zero methane emissions intensity target"; value_or_target: "near-zero methane emissions intensity"; target_year: "2030"
+- "Reduce NCI by 15-20% by 2030 and become net-zero by 2050" must become two items:
+  1. metric: "Net carbon intensity (NCI) reduction target"; value_or_target: "15-20% reduction"; target_year: "2030"
+  2. metric: "Net-zero emissions target"; value_or_target: "net-zero"; target_year: "2050"
+
+For each goal use a SPECIFIC metric name (not generic names like "% reduction"). Examples: "Scope 1 and 2 emissions reduction target", "Methane intensity target", "Net carbon intensity (NCI) 2030 target", "Routine flaring elimination target", "Net-zero Scope 1, 2 and 3 by 2050".
+
+Always populate:
+- goal: short description of the goal/target/ambition/commitment
+- metric: specific metric name as described above
+- value_or_target: the reduction %, absolute level, or qualitative commitment
+- target_year: if stated
+- baseline: if stated (e.g., "compared to 2016")
+- scope: Scope 1 / Scope 2 / Scope 3 / value chain / upstream / downstream if stated
+- page: exact page number
+- quote: exact verbatim sentence(s) from the report
+
+REJECT: actual historical ESG performance values (reported emissions for the reporting year), business growth or production targets (LNG sales, liquids production, barrels per day, refining throughput, revenue, market share), financial / FTE / operational / shareholder data, general sustainability context or strategy text that states no specific target, and governance or risk text without an explicit target.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -46,7 +76,7 @@ You extract actual ESG performance values from annual reports. Only populate esg
 
 Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results, social/workforce ESG metrics. Include value, unit, period/year, scope if present, page, and verbatim quote.
 
-Do not extract forward-looking targets or commitments. Do not extract FTE headcount, financial KPIs, business performance, or shareholder data.
+Do not extract forward-looking targets or commitments. Do not extract business production volumes, financial KPIs, shareholder data, FTE/headcount totals, or general operational KPIs unless the value is explicitly reported as an ESG performance metric.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -55,7 +85,7 @@ You extract financial KPI values from annual reports. Only populate financial_hi
 
 Extract financial performance values from summaries, income statements, tables, or "at a glance" / highlights pages. Target metrics: total net sales / revenue / total income, gross profit, gross margin (%), operating income / operating profit / EBIT / EBITDA / adjusted EBITDA, net income / net profit / profit for the period, earnings per share (EPS) / diluted EPS, R&D spend / research and development expense, free cash flow, operating cash flow / cash flow from operating activities, cash and cash equivalents, capex / capital expenditure, return on equity (ROE), return on invested capital (ROIC), CET1 ratio, capital ratio, liquidity coverage ratio, net interest margin (NIM). Include metric, value, unit (€m / €bn / %), period (year), page, and a short verbatim quote.
 
-Do not extract: workforce/FTE data, sustainability targets, operational KPIs (systems sold, suppliers, satisfaction), or shareholder return amounts.
+Do not extract: workforce/FTE data, sustainability or ESG targets, operational KPIs (systems sold, suppliers, satisfaction, LNG sales, barrels per day, production volume), or shareholder return/distribution amounts such as dividends and buybacks.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -64,7 +94,7 @@ You extract business and operational performance KPI values from annual reports.
 
 Extract operational/business performance values from summaries, segment tables, or "at a glance" pages. Target metrics: systems sold / lithography systems / net system sales in units, new systems sold, used systems sold, installed base / active systems, order intake / bookings, order book / backlog, number of customers or clients, customer satisfaction score / NPS, number of suppliers, reuse rate (operational/circularity KPI), market share, production volume, delivery volume, loans / deposits / mortgages (banking), LNG sales / barrels per day / refining throughput (energy), beer volume / hectoliters (consumer goods), number of stores / branches / locations (retail), assets under management (AUM), transaction volume. Include metric, value, unit, period, page, and a short verbatim quote.
 
-Do not extract: FTE/headcount, financial statement lines (net sales, net income, gross margin), sustainability targets, or shareholder distributions.
+Do not extract: FTE/headcount, employee demographics, financial statement lines (revenue/net sales as money, net income, gross margin), sustainability or ESG targets, actual ESG performance values, or shareholder distributions.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -73,7 +103,7 @@ You extract shareholder return and capital distribution values from annual repor
 
 Extract: total returned to shareholders, total shareholder distributions, capital return, dividends paid, ordinary dividend, special dividend, final dividend, interim dividend, dividend per share, proposed dividend, payout ratio, share buybacks, share repurchases, treasury shares purchased, shares cancelled, number of shares repurchased, total cash returned. Include metric, value, unit (€ per share / €bn / €m / %), period (year), page, and a short verbatim quote.
 
-Do not extract: financial performance KPIs (net income, gross margin), workforce data, sustainability targets, or business operational KPIs.
+Do not extract: financial performance KPIs (net income, gross margin, revenue, cash flow), workforce data, sustainability targets, business operational KPIs, or general share price/market capitalization values unless they are explicitly part of dividends, buybacks, capital returns, or shareholder distributions.
 
 {_BASE_INSTRUCTIONS}""",
 }
@@ -170,6 +200,12 @@ def _json_schema() -> dict[str, Any]:
     return AnnualReportDatapoints.model_json_schema()
 
 
+def category_prompt(category: str | None) -> str:
+    if not category:
+        return _DEFAULT_PROMPT
+    return _CATEGORY_PROMPTS.get(category, _DEFAULT_PROMPT)
+
+
 def _poll_until_done(client_extract: Any, job_id: str) -> str:
     from llama_cloud import ExtractJobStatus
 
@@ -203,6 +239,7 @@ def extract_annual_report_datapoints(
     try:
         from llama_cloud.client import LlamaCloud
         from llama_cloud import ExtractConfig, FileData
+        from llama_cloud.types.extract_mode import ExtractMode
     except ModuleNotFoundError as exc:
         raise RuntimeError(
             f"llama-cloud SDK not installed. Run `pip install llama-cloud`. Missing: {exc}"
@@ -214,13 +251,15 @@ def extract_annual_report_datapoints(
     client = LlamaCloud(token=api_key)
     le = client.llama_extract
 
-    system_prompt = _CATEGORY_PROMPTS.get(category, _DEFAULT_PROMPT) if category else _DEFAULT_PROMPT
+    system_prompt = category_prompt(category)
     schema = _json_schema()
     config = ExtractConfig(
         cite_sources=True,
         confidence_scores=True,
+        extraction_mode=ExtractMode.FAST,
         system_prompt=system_prompt,
         page_range=page_range,
+        use_reasoning=True,
     )
 
     logger.info("submitting LlamaExtract job for %s", pdf_path.name)

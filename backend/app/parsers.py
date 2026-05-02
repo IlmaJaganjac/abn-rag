@@ -126,6 +126,7 @@ def parse_pdf_llamaparse(
         api_key=api_key,
         result_type="markdown",
         split_by_page=True,
+        disable_image_extraction=True,
         verbose=False,
         show_progress=False,
         ignore_errors=False,
