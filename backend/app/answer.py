@@ -74,6 +74,28 @@ _FOOTNOTE_RE = re.compile(r"\[[A-Za-z0-9]{1,3}\]")
 # PDF bullet/list characters that appear as layout artifacts after parsing
 _PDF_BULLET_RE = re.compile(r"[\uffee\u2022\u2023\u25cf\u2043\uff65\u2219\u25e6]")
 
+# Table grounding fallback
+_NUM_RE = re.compile(r"\d[\d,\.]*")
+_TABLE_KINDS = frozenset({"table", "table_row"})
+_METRIC_STOP = frozenset({
+    # generic English function words
+    "that", "this", "were", "have", "been", "with", "which", "from", "into",
+    "when", "than", "after", "before", "during", "between", "about", "under",
+    "within", "through", "their", "they", "more", "less", "some", "also",
+    "both", "each", "such",
+    # question words (what/how/was/did are len<4 so already excluded by the regex)
+    "what", "many", "much", "does",
+    # units / scale
+    "million", "billion", "percent",
+    # generic report / table noise
+    "total", "amount", "value", "year", "period", "report", "reported", "company",
+})
+
+
+def _source_tokens(source: str) -> frozenset[str]:
+    """Tokens of len≥4 extracted from a source filename, used to filter company names."""
+    return frozenset(re.findall(r"[a-z]{4,}", source.lower()))
+
 
 def _normalize_for_grounding(s: str) -> str:
     s = unicodedata.normalize("NFKC", s)
@@ -115,8 +137,75 @@ def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
     return True
 
 
+def _table_grounding_fallback(
+    cite: Citation,
+    indexed: list[tuple[RetrievedChunk, str]],
+    verbatim: str | None,
+    question: str | None = None,
+) -> RetrievedChunk | None:
+    """Fallback for table/table_row chunks when exact quote grounding fails.
+
+    Accepts only if:
+    - chunk_kind is table or table_row
+    - an exact numeric token from verbatim or citation.quote appears in the chunk
+      (unit conversions are rejected — "32.7" does not match "32,667")
+    - AND either ≥2 distinct metric words from question/quote appear in the chunk,
+      OR a metric bigram (adjacent pair of metric words) appears in the chunk
+    """
+    quote_norm = _normalize_for_grounding(html.unescape(cite.quote))
+    verbatim_norm = _normalize_for_grounding(verbatim) if verbatim else ""
+
+    value_nums = frozenset(
+        m
+        for src in (quote_norm, verbatim_norm)
+        for m in _NUM_RE.findall(src)
+        if len(m) >= 3
+    )
+    if not value_nums:
+        return None
+
+    question_norm = _normalize_for_grounding(question) if question else ""
+    source_stop = _source_tokens(cite.source)
+    combined = quote_norm + " " + question_norm
+    words_in_order = re.findall(r"[a-z]{4,}", combined)
+    metric_words = [w for w in words_in_order if w not in _METRIC_STOP and w not in source_stop]
+
+    if not metric_words:
+        return None
+
+    metric_word_set = set(metric_words)
+    bigrams = [
+        f"{words_in_order[i]} {words_in_order[i + 1]}"
+        for i in range(len(words_in_order) - 1)
+        if words_in_order[i] in metric_word_set and words_in_order[i + 1] in metric_word_set
+    ]
+
+    matches: list[RetrievedChunk] = []
+    for chunk, chunk_norm in indexed:
+        if chunk.chunk_kind not in _TABLE_KINDS:
+            continue
+        if not any(v in chunk_norm for v in value_nums):
+            continue
+        matching_words = {w for w in metric_word_set if w in chunk_norm}
+        if len(matching_words) < 2 and not any(b in chunk_norm for b in bigrams):
+            continue
+        matches.append(chunk)
+
+    if not matches:
+        return None
+
+    return (
+        next((c for c in matches if c.page == cite.page and c.source == cite.source), None)
+        or next((c for c in matches if c.page == cite.page), None)
+        or matches[0]
+    )
+
+
 def _ground_citations(
-    citations: list[Citation], chunks: list[RetrievedChunk]
+    citations: list[Citation],
+    chunks: list[RetrievedChunk],
+    question: str | None = None,
+    verbatim: str | None = None,
 ) -> tuple[list[Citation], list[GroundingDrop], str | None]:
     """Return (grounded_citations, drops, failure_reason).
 
@@ -181,6 +270,11 @@ def _ground_citations(
                     chunk for chunk, hay in indexed_layout
                     if _fragments_in_order(frags_layout, hay)
                 ]
+
+        if not matches:
+            table_chunk = _table_grounding_fallback(cite, indexed_strict, verbatim, question=question)
+            if table_chunk is not None:
+                matches = [table_chunk]
 
         if not matches:
             page_in_set = any(chunk.page == cite.page for chunk, _ in indexed_strict)
@@ -259,7 +353,7 @@ def answer_question(
             raw_citations=parsed.citations,
         )
 
-    grounded, drops, failure = _ground_citations(parsed.citations, chunks)
+    grounded, drops, failure = _ground_citations(parsed.citations, chunks, question=question, verbatim=parsed.verbatim)
     if failure is not None:
         return VerbatimAnswer(
             question=question,

@@ -14,7 +14,7 @@ from backend.app.answer import (
 from backend.app.schemas import Citation, LLMAnswer, RetrievedChunk
 
 
-def _chunk(*, source: str, page: int, text: str, idx: int = 0) -> RetrievedChunk:
+def _chunk(*, source: str, page: int, text: str, idx: int = 0, chunk_kind: str | None = None) -> RetrievedChunk:
     return RetrievedChunk(
         id=f"{source}:{page}:{idx}",
         source=source,
@@ -24,6 +24,7 @@ def _chunk(*, source: str, page: int, text: str, idx: int = 0) -> RetrievedChunk
         text=text,
         token_count=len(text.split()),
         score=0.9,
+        chunk_kind=chunk_kind,
     )
 
 
@@ -658,3 +659,178 @@ def test_unrelated_quote_still_dropped_after_layout_fallback() -> None:
     grounded, drops, failure = _ground_citations([cite], [chunk])
     assert grounded == []
     assert failure == "no citations could be grounded in the retrieved chunks"
+
+
+# ---------------------------------------------------------------------------
+# Table grounding fallback tests
+# ---------------------------------------------------------------------------
+
+def test_table_row_fallback_grounds_when_metric_and_value_present(monkeypatch) -> None:
+    """table_row chunk: model stripped pipes/reformatted, but metric and value are present."""
+    chunk = _chunk(
+        source="asml.pdf",
+        page=227,
+        text="| Less: Temporary employees (in FTE) | | 1,241 | 689 |",
+        chunk_kind="table_row",
+    )
+    parsed = LLMAnswer(
+        answer="ASML had 689 temporary employees (in FTE) in 2025.",
+        verbatim="689",
+        citations=[Citation(source="asml.pdf", page=227, quote="Temporary employees (in FTE) 2025: 689")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="How many temporary employees did ASML have in 2025?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    assert answer.refused is False
+    assert answer.citations[0].page == 227
+
+
+def test_table_fallback_grounds_when_pipes_stripped(monkeypatch) -> None:
+    """table chunk: model dropped | separators but metric and value are present."""
+    chunk = _chunk(
+        source="shell.pdf",
+        page=25,
+        text="| Total distributions | $22.4 billion | 52% of CFFO |",
+        chunk_kind="table",
+    )
+    parsed = LLMAnswer(
+        answer="Shell's total distributions were $22.4 billion.",
+        verbatim="22.4",
+        citations=[Citation(source="shell.pdf", page=25, quote="Total distributions $22.4 billion 52% of CFFO")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="What were Shell's total distributions?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    assert answer.refused is False
+    assert answer.citations[0].page == 25
+
+
+def test_table_fallback_rejects_when_value_absent(monkeypatch) -> None:
+    """table chunk: metric matches but value (€32.7bn → 32.7) not in table (has 32,667)."""
+    chunk = _chunk(
+        source="asml.pdf",
+        page=54,
+        text="| Total net sales | 28,263 | 32,667 |",
+        chunk_kind="table",
+    )
+    parsed = LLMAnswer(
+        answer="ASML reported total net sales of €32.7bn.",
+        verbatim="32.7",
+        citations=[Citation(source="asml.pdf", page=54, quote="Total net sales €32.7bn")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="What were ASML's total net sales in 2025?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    assert answer.refused is True
+
+
+def test_table_fallback_rejects_when_metric_term_absent(monkeypatch) -> None:
+    """table chunk: value matches but no metric keyword from quote is present."""
+    chunk = _chunk(
+        source="asml.pdf",
+        page=54,
+        text="| Operating expenses | 689 |",
+        chunk_kind="table",
+    )
+    parsed = LLMAnswer(
+        answer="ASML had 689 temporary employees.",
+        verbatim="689",
+        citations=[Citation(source="asml.pdf", page=54, quote="Temporary employees 689")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="How many temporary employees did ASML have?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    assert answer.refused is True
+
+
+def test_prose_chunk_not_used_for_table_fallback(monkeypatch) -> None:
+    """Prose chunks (chunk_kind=None) must not be rescued by table fallback."""
+    chunk = _chunk(
+        source="shell.pdf",
+        page=87,
+        text="in January 2025, achieving our target to eliminate routine flaring from upstream assets.",
+        chunk_kind=None,
+    )
+    parsed = LLMAnswer(
+        answer="Shell ceased routine flaring in January 2025.",
+        verbatim="2025",
+        citations=[Citation(source="shell.pdf", page=87, quote="We ceased routine flaring in January 2025 achieving our target")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="When did Shell cease routine flaring?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    assert answer.refused is True
+
+
+def test_paraphrase_on_prose_still_dropped_with_table_fallback_present(monkeypatch) -> None:
+    """Paraphrase of prose must still be rejected even when a nearby table chunk exists."""
+    prose = _chunk(
+        source="shell.pdf",
+        page=14,
+        text="Shareholder distributions totalled 22,400 million in the period",
+        chunk_kind=None,
+    )
+    table = _chunk(
+        source="shell.pdf",
+        page=14,
+        text="| Operating income | 22,400 |",
+        chunk_kind="table",
+        idx=1,
+    )
+    parsed = LLMAnswer(
+        answer="Shell's shareholder distributions were 22,400 million.",
+        verbatim="22,400",
+        citations=[Citation(
+            source="shell.pdf",
+            page=14,
+            quote="Shareholder distributions were 22,400 million in the period",
+        )],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="What were Shell's shareholder distributions?",
+        chunks=[prose, table],
+        parsed=parsed,
+    )
+    # Exact prose grounding fails (paraphrase: "totalled" → "were").
+    # Table fallback: 22,400 is in the table but metric words "shareholder"/"distributions"
+    # are absent from the table chunk ("operating income") → fallback rejects → refused.
+    assert answer.refused is True
+
+
+def test_table_fallback_rejects_single_weak_generic_metric_word(monkeypatch) -> None:
+    """A single stopword-category word ('total') is not a sufficient metric signal."""
+    chunk = _chunk(
+        source="asml.pdf",
+        page=54,
+        text="| Total revenue | 22,400 |",
+        chunk_kind="table",
+    )
+    parsed = LLMAnswer(
+        answer="The total was 22,400.",
+        verbatim="22,400",
+        citations=[Citation(source="asml.pdf", page=54, quote="Total 22,400")],
+    )
+    answer, _ = _answer_with_fake_llm(
+        monkeypatch,
+        question="What was the total?",
+        chunks=[chunk],
+        parsed=parsed,
+    )
+    # "total" is in _METRIC_STOP → metric_words is empty → fallback returns None → refused
+    assert answer.refused is True
