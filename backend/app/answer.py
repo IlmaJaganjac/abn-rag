@@ -59,6 +59,9 @@ Rules:
      temporary employees, and average employees.
    - For sales, distinguish total net sales, system sales, net system sales,
      units sold, recognized systems, geographic sales, and customer sales.
+   - Match unit scope: spend/capex → monetary only; FTE/headcount → workforce
+     metrics only; emissions → match scope and unit (kt, Mt, CO₂e). If label
+     and unit do not clearly match the question, refuse instead of guessing.
 
 7. For calculations from tables:
    - Calculate only when all required rows and values are present in the

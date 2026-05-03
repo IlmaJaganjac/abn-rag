@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr = Field(default=SecretStr(""))
     llama_cloud_api_key: SecretStr = Field(default=SecretStr(""))
     openai_embedding_model: str = "text-embedding-3-small"
-    openai_answer_model: str = "gpt-4o-mini"
+    openai_answer_model: str = "gpt-5.4-mini"
 
     chroma_persist_dir: Path = Path("backend/data/chroma")
     chroma_collection: str = "annual_reports"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     chunk_size_tokens: int = 800
     chunk_overlap_tokens: int = 120
-    top_k: int = 8
+    top_k: int = 12
     embedding_batch_size: int = 64
 
     def get_chroma_path(self) -> Path:

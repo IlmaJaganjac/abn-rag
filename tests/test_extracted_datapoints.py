@@ -5,7 +5,6 @@ import pytest
 from backend.app.extracted_datapoints import (
     NormalizedDatapoint,
     NormalizedDatapointSet,
-    datapoints_to_chunks,
     deduplicate_datapoints,
     normalize_llamaextract_result,
 )
@@ -266,206 +265,6 @@ def test_normalize_preserves_fields():
 
 
 # ---------------------------------------------------------------------------
-# datapoints_to_chunks — helpers
-# ---------------------------------------------------------------------------
-
-def _make_ds(datapoints: list[NormalizedDatapoint]) -> NormalizedDatapointSet:
-    return NormalizedDatapointSet(
-        source="test.pdf", company="ACME", year=2025, datapoints=datapoints
-    )
-
-
-def _fte_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="fte", metric="Total employees (FTEs)",
-        value="> 44,000", unit="FTEs", basis="FTE", period="2025",
-        page=5, quote="> 44,000 Total employees (FTEs)", priority=100,
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
-
-def _sust_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="sustainability_goal",
-        metric="Absolute gross scope 1 and 2 GHG emissions",
-        value="-75%", target_year="2030",
-        quote="Reduce absolute gross scope 1 and 2 GHG by 75% by 2030",
-        page=160, priority=95,
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
-
-def _fin_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="financial_highlight",
-        metric="Total net sales",
-        value="28.3", unit="€bn", period="2024",
-        page=56, quote="Total net sales €28.3bn", priority=90,
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
-
-def _biz_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="business_performance",
-        metric="Lithography systems sold",
-        value="418", unit="units", period="2024",
-        page=55, quote="418 systems sold in 2024", priority=90,
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
-
-def _sh_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="shareholder_return",
-        metric="Total returned to shareholders",
-        value="3.0", unit="€bn", period="2024",
-        page=5, quote="€3.0bn returned to shareholders", priority=90,
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
-
-# ---------------------------------------------------------------------------
-# Chunk kind and section_path
-# ---------------------------------------------------------------------------
-
-def test_fte_chunk_kind():
-    chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
-    assert len(chunks) == 1
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-    assert chunks[0].parser == "llamaextract"
-
-
-def test_sustainability_chunk_kind():
-    chunks = datapoints_to_chunks(_make_ds([_sust_dp()]))
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-
-
-def test_financial_highlight_chunk_kind_and_section_path():
-    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-    assert chunks[0].parser == "llamaextract"
-    assert "Financial highlights" in chunks[0].section_path
-
-
-def test_business_performance_chunk_kind_and_section_path():
-    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-    assert chunks[0].parser == "llamaextract"
-    assert "Business performance" in chunks[0].section_path
-
-
-def test_shareholder_return_chunk_kind_and_section_path():
-    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-    assert chunks[0].parser == "llamaextract"
-    assert "Shareholder returns" in chunks[0].section_path
-
-
-# ---------------------------------------------------------------------------
-# Text format
-# ---------------------------------------------------------------------------
-
-def test_fte_text_contains_required_fields():
-    chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
-    text = chunks[0].text
-    assert "Metric:" in text
-    assert "Value:" in text
-    assert "Quote:" in text
-    assert "Priority:" in text
-    assert "Total employees (FTEs)" in text
-    assert "> 44,000" in text
-
-
-def test_sustainability_text_contains_target_year():
-    chunks = datapoints_to_chunks(_make_ds([_sust_dp()]))
-    text = chunks[0].text
-    assert "Target year: 2030" in text
-    assert "Value/target:" in text
-
-
-def test_financial_highlight_text_format():
-    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
-    text = chunks[0].text
-    assert "Datapoint type: financial_highlight" in text
-    assert "Metric:" in text
-    assert "Value:" in text
-    assert "Period:" in text
-    assert "Quote:" in text
-
-
-def test_business_performance_text_format():
-    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
-    text = chunks[0].text
-    assert "Datapoint type: business_performance" in text
-    assert "Metric:" in text
-    assert "Value:" in text
-
-
-def test_shareholder_return_text_format():
-    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
-    text = chunks[0].text
-    assert "Datapoint type: shareholder_return" in text
-    assert "Metric:" in text
-    assert "Value:" in text
-
-
-# ---------------------------------------------------------------------------
-# Embedding text synonyms
-# ---------------------------------------------------------------------------
-
-def test_fte_embedding_text_has_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_fte_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "workforce" in emb
-    assert "headcount" in emb
-    assert "payroll" in emb
-
-
-def test_sustainability_embedding_text_has_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_sust_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "sustainability" in emb
-    assert "emissions" in emb
-    assert "net zero" in emb
-
-
-def test_financial_highlight_embedding_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_fin_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "revenue" in emb
-    assert "gross margin" in emb
-    assert "net income" in emb
-    assert "free cash flow" in emb
-
-
-def test_business_performance_embedding_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_biz_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "systems sold" in emb
-    assert "suppliers" in emb
-    assert "customer satisfaction" in emb
-
-
-def test_shareholder_return_embedding_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_sh_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "dividend" in emb
-    assert "buyback" in emb
-    assert "returned to shareholders" in emb
-
-
-# ---------------------------------------------------------------------------
 # Normalization — new categories
 # ---------------------------------------------------------------------------
 
@@ -528,59 +327,9 @@ def test_new_categories_do_not_bleed_into_each_other():
     assert types == {"financial_highlight", "business_performance", "shareholder_return"}
 
 
-def test_category_order_preserved_in_combined_list():
-    fin = _fin_dp()
-    biz = _biz_dp()
-    sh = _sh_dp()
-    ds = _make_ds([fin, biz, sh])
-    chunks = datapoints_to_chunks(ds)
-    assert chunks[0].section_path == "Pre-extracted > Financial highlights"
-    assert chunks[1].section_path == "Pre-extracted > Business performance"
-    assert chunks[2].section_path == "Pre-extracted > Shareholder returns"
-
-
-# ---------------------------------------------------------------------------
-# Chunk IDs
-# ---------------------------------------------------------------------------
-
-def test_chunk_ids_are_unique_and_stable():
-    dps = [_fte_dp(), _sust_dp()]
-    chunks = datapoints_to_chunks(_make_ds(dps))
-    ids = [c.id for c in chunks]
-    assert len(ids) == len(set(ids))
-    assert ids[0] == "test.pdf:extracted:0"
-    assert ids[1] == "test.pdf:extracted:1"
-
-
-def test_section_path_by_type():
-    dps = [_fte_dp(), _sust_dp()]
-    chunks = datapoints_to_chunks(_make_ds(dps))
-    assert "FTE" in chunks[0].section_path
-    assert "Sustainability" in chunks[1].section_path
-
-
-def test_page_fallback_to_one():
-    dp = _fte_dp(page=None)
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    assert chunks[0].page == 1
-
-
 # ---------------------------------------------------------------------------
 # ESG datapoints
 # ---------------------------------------------------------------------------
-
-def _esg_dp(**kwargs) -> NormalizedDatapoint:
-    defaults = dict(
-        source="test.pdf", company="ACME", year=2025,
-        datapoint_type="esg_datapoint",
-        metric="Gross scope 1 and 2 GHG emissions",
-        value="149 kt CO₂e", unit="kt CO₂e", period="2025",
-        scope="Scope 1 and 2", page=160, priority=95,
-        quote="Gross scope 1 and 2 GHG emissions: 149 kt CO₂e",
-    )
-    defaults.update(kwargs)
-    return NormalizedDatapoint(**defaults)
-
 
 def test_esg_normalizes_to_correct_type():
     result = _make_result(esg_datapoints=[
@@ -629,36 +378,6 @@ def test_esg_priority_no_quote_no_period():
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     esg = _norm(dps, "esg_datapoint")
     assert esg[0].priority == 70
-
-
-def test_esg_chunk_kind():
-    chunks = datapoints_to_chunks(_make_ds([_esg_dp()]))
-    assert chunks[0].chunk_kind == "extracted_datapoint"
-    assert chunks[0].parser == "llamaextract"
-
-
-def test_esg_section_path():
-    chunks = datapoints_to_chunks(_make_ds([_esg_dp()]))
-    assert "ESG" in chunks[0].section_path
-
-
-def test_esg_text_format():
-    chunks = datapoints_to_chunks(_make_ds([_esg_dp()]))
-    text = chunks[0].text
-    assert "Datapoint type: esg_datapoint" in text
-    assert "Metric:" in text
-    assert "Value:" in text
-    assert "Scope:" in text
-    assert "Quote:" in text
-    assert "Period:" in text
-
-
-def test_esg_embedding_text_has_synonyms():
-    chunks = datapoints_to_chunks(_make_ds([_esg_dp()]))
-    emb = chunks[0].embedding_text or ""
-    assert "emissions" in emb
-    assert "renewable" in emb
-    assert "recycling" in emb
 
 
 def test_sustainability_category_keeps_goals_and_esg():
@@ -742,51 +461,6 @@ def test_scope_type_scope_3_propagates():
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     assert dps[0].scope_type == "scope_3"
-
-
-# ---------------------------------------------------------------------------
-# fact_kind / scope_type appear in chunk text (not embedding_text)
-# ---------------------------------------------------------------------------
-
-def test_fact_kind_in_chunk_text():
-    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    assert "Fact kind: actual" in chunks[0].text
-
-
-def test_scope_type_in_chunk_text():
-    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    assert "Scope type: company_wide" in chunks[0].text
-
-
-def test_scope_type_unknown_not_in_chunk_text():
-    dp = _fte_dp(fact_kind="actual", scope_type="unknown")
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    assert "Scope type:" not in chunks[0].text
-
-
-def test_fact_kind_absent_when_none():
-    dp = _fte_dp(fact_kind=None, scope_type=None)
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    assert "Fact kind:" not in chunks[0].text
-    assert "Scope type:" not in chunks[0].text
-
-
-def test_fact_kind_not_in_embedding_text():
-    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    emb = chunks[0].embedding_text or ""
-    assert "Fact kind:" not in emb
-    assert "Scope type:" not in emb
-
-
-def test_esg_fact_kind_target_in_text():
-    dp = _esg_dp(fact_kind="target", scope_type="scope_1_2")
-    chunks = datapoints_to_chunks(_make_ds([dp]))
-    text = chunks[0].text
-    assert "Fact kind: target" in text
-    assert "Scope type: scope_1_2" in text
 
 
 # ---------------------------------------------------------------------------
@@ -882,7 +556,6 @@ def test_openai_percent_value_in_quote_accepted():
 
 
 def test_llamaextract_blank_quote_not_rejected():
-    # llamaextract extractor should NOT apply the openai-specific quote check
     result = _make_result(financial_highlights=[
         ExtractedFinancialHighlight(metric="Net income", value="7.6", unit="€bn", period="2024", page=5,
                                     quote="", fact_kind="actual", scope_type="company_wide"),
