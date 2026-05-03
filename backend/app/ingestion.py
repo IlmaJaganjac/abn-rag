@@ -516,18 +516,8 @@ def ingest_pdf(
         datapoints_path,
     )
 
-    datapoint_chunks = build_datapoint_chunks(
-        datapoints,
-        source=source,
-        company=company,
-        year=year,
-        parser=parser_name,
-        existing_chunks=chunks,
-    )
-    chunks.extend(datapoint_chunks)
-    logger.info("built %d total chunks including datapoints", len(chunks))
     chunks = deduplicate_chunks(chunks)
-    logger.info("kept %d total chunks after final exact embedding-text deduplication", len(chunks))
+    logger.info("kept %d chunks after exact deduplication", len(chunks))
     chunks_path = persist_chunks(chunks, source=source, processed_dir=processed_dir)
     logger.info("wrote debug chunks to %s", chunks_path)
 
