@@ -38,7 +38,7 @@ def _norm(datapoints: list[NormalizedDatapoint], dtype: str) -> list[NormalizedD
 
 def test_total_employees_fte_gets_priority_100():
     result = _make_result(fte_datapoints=[
-        ExtractedFTEDatapoint(label="Total employees (FTEs)", value="> 44,000", basis="FTE", page=5),
+        ExtractedFTEDatapoint(label="Total employees (FTEs)", value="> 44,000", basis="FTE", page=5, quote="Total employees (FTEs): > 44,000", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = _norm(dps, "fte")
@@ -48,7 +48,7 @@ def test_total_employees_fte_gets_priority_100():
 
 def test_average_payroll_gets_priority_85():
     result = _make_result(fte_datapoints=[
-        ExtractedFTEDatapoint(label="Average number of payroll employees in FTEs", value="43,267", basis="FTE average", page=131),
+        ExtractedFTEDatapoint(label="Average number of payroll employees in FTEs", value="43,267", basis="FTE average", page=131, quote="Average number of payroll employees in FTEs: 43,267", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = _norm(dps, "fte")
@@ -57,7 +57,7 @@ def test_average_payroll_gets_priority_85():
 
 def test_headcount_gets_priority_70():
     result = _make_result(fte_datapoints=[
-        ExtractedFTEDatapoint(label="Women in our workforce (headcount)", value="21%", basis="headcount", page=5),
+        ExtractedFTEDatapoint(label="Women in our workforce (headcount)", value="21%", basis="headcount", page=5, quote="Women in our workforce (headcount): 21%", fact_kind="actual", scope_type="segment"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = _norm(dps, "fte")
@@ -66,7 +66,7 @@ def test_headcount_gets_priority_70():
 
 def test_dedicated_fte_gets_priority_30():
     result = _make_result(fte_datapoints=[
-        ExtractedFTEDatapoint(label="Dedicated FTEs for sustainability team", value="12", basis="dedicated FTE", page=50),
+        ExtractedFTEDatapoint(label="Dedicated FTEs for sustainability team", value="12", basis="dedicated FTE", page=50, quote="Dedicated FTEs for sustainability team: 12", fact_kind="actual", scope_type="project"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = _norm(dps, "fte")
@@ -75,8 +75,8 @@ def test_dedicated_fte_gets_priority_30():
 
 def test_company_wide_outprioritizes_program_specific():
     result = _make_result(fte_datapoints=[
-        ExtractedFTEDatapoint(label="Total employees (FTEs)", value="> 44,000", basis="FTE", page=5),
-        ExtractedFTEDatapoint(label="Dedicated FTEs for sustainability team", value="12", page=50),
+        ExtractedFTEDatapoint(label="Total employees (FTEs)", value="> 44,000", basis="FTE", page=5, quote="Total employees (FTEs): > 44,000", fact_kind="actual", scope_type="company_wide"),
+        ExtractedFTEDatapoint(label="Dedicated FTEs for sustainability team", value="12", page=50, quote="Dedicated FTEs for sustainability team: 12", fact_kind="actual", scope_type="project"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = sorted(_norm(dps, "fte"), key=lambda d: d.priority, reverse=True)
@@ -95,6 +95,8 @@ def test_sustainability_goal_with_year_and_quote_priority_95():
             target_year="2040",
             quote="We aim to achieve net-zero GHG by 2040.",
             page=160,
+            fact_kind="target",
+            scope_type="company_wide",
         ),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -104,7 +106,7 @@ def test_sustainability_goal_with_year_and_quote_priority_95():
 
 def test_sustainability_goal_no_quote_priority_70():
     result = _make_result(sustainability_goals=[
-        ExtractedSustainabilityGoal(goal="Reduce GHG emissions", page=160),
+        ExtractedSustainabilityGoal(goal="Reduce GHG emissions", page=160, quote="", fact_kind="target", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     sg = _norm(dps, "sustainability_goal")
@@ -117,7 +119,7 @@ def test_sustainability_goal_no_quote_priority_70():
 
 def test_financial_highlight_with_page_and_quote_priority_90():
     result = _make_result(financial_highlights=[
-        ExtractedFinancialHighlight(metric="Total net sales", value="28.3", page=5, quote="€28.3bn Total net sales"),
+        ExtractedFinancialHighlight(metric="Total net sales", value="28.3", page=5, quote="€28.3bn Total net sales", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fh = _norm(dps, "financial_highlight")
@@ -126,7 +128,7 @@ def test_financial_highlight_with_page_and_quote_priority_90():
 
 def test_financial_highlight_without_quote_priority_75():
     result = _make_result(financial_highlights=[
-        ExtractedFinancialHighlight(metric="Gross margin", value="51.3%", page=56),
+        ExtractedFinancialHighlight(metric="Gross margin", value="51.3%", page=56, quote="", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fh = _norm(dps, "financial_highlight")
@@ -135,7 +137,7 @@ def test_financial_highlight_without_quote_priority_75():
 
 def test_business_performance_with_page_and_quote_priority_90():
     result = _make_result(business_performance=[
-        ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems sold in 2024"),
+        ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems sold in 2024", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     bp = _norm(dps, "business_performance")
@@ -144,7 +146,7 @@ def test_business_performance_with_page_and_quote_priority_90():
 
 def test_shareholder_return_with_page_and_quote_priority_90():
     result = _make_result(shareholder_returns=[
-        ExtractedShareholderReturn(metric="Total returned to shareholders", value="3.0", page=5, quote="€3.0bn returned"),
+        ExtractedShareholderReturn(metric="Total returned to shareholders", value="3.0", page=5, quote="€3.0bn returned", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     sr = _norm(dps, "shareholder_return")
@@ -153,7 +155,7 @@ def test_shareholder_return_with_page_and_quote_priority_90():
 
 def test_shareholder_return_no_page_no_quote_priority_60():
     result = _make_result(shareholder_returns=[
-        ExtractedShareholderReturn(metric="Dividends paid", value="1.2"),
+        ExtractedShareholderReturn(metric="Dividends paid", value="1.2", quote="", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     sr = _norm(dps, "shareholder_return")
@@ -247,6 +249,8 @@ def test_normalize_preserves_fields():
             period="2025",
             page=5,
             quote="> 44,000 Total employees (FTEs)",
+            fact_kind="actual",
+            scope_type="company_wide",
             confidence=0.98,
         ),
     ])
@@ -470,6 +474,7 @@ def test_financial_highlight_normalize():
         ExtractedFinancialHighlight(
             metric="Total net sales", value="28.3", unit="€bn",
             period="2024", page=56, quote="€28.3bn net sales",
+            fact_kind="actual", scope_type="company_wide",
         ),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -483,6 +488,7 @@ def test_business_performance_normalize():
         ExtractedBusinessPerformance(
             metric="Lithography systems sold", value="418", unit="units",
             period="2024", page=55, quote="418 systems sold",
+            fact_kind="actual", scope_type="company_wide",
         ),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -496,6 +502,7 @@ def test_shareholder_return_normalize():
         ExtractedShareholderReturn(
             metric="Total returned to shareholders", value="3.0", unit="€bn",
             period="2024", page=5, quote="€3.0bn returned to shareholders",
+            fact_kind="actual", scope_type="company_wide",
         ),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -507,13 +514,13 @@ def test_shareholder_return_normalize():
 def test_new_categories_do_not_bleed_into_each_other():
     result = _make_result(
         financial_highlights=[
-            ExtractedFinancialHighlight(metric="Net income", value="7.6", page=58, quote="net income 7.6"),
+            ExtractedFinancialHighlight(metric="Net income", value="7.6", page=58, quote="net income 7.6", fact_kind="actual", scope_type="company_wide"),
         ],
         business_performance=[
-            ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems"),
+            ExtractedBusinessPerformance(metric="Systems sold", value="418", page=55, quote="418 systems", fact_kind="actual", scope_type="company_wide"),
         ],
         shareholder_returns=[
-            ExtractedShareholderReturn(metric="Dividends paid", value="1.2", page=5, quote="dividends 1.2"),
+            ExtractedShareholderReturn(metric="Dividends paid", value="1.2", page=5, quote="dividends 1.2", fact_kind="actual", scope_type="company_wide"),
         ],
     )
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -585,6 +592,8 @@ def test_esg_normalizes_to_correct_type():
             scope="Scope 1 and 2",
             page=160,
             quote="Gross scope 1 and 2 GHG emissions: 149 kt CO₂e",
+            fact_kind="actual",
+            scope_type="company_wide",
         ),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
@@ -597,7 +606,7 @@ def test_esg_normalizes_to_correct_type():
 
 def test_esg_priority_quote_and_period():
     result = _make_result(esg_datapoints=[
-        ExtractedESGDatapoint(metric="Scope 3 emissions", value="4,200 kt", period="2025", quote="Scope 3: 4,200 kt", page=161),
+        ExtractedESGDatapoint(metric="Scope 3 emissions", value="4,200 kt", period="2025", quote="Scope 3: 4,200 kt", page=161, fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     esg = _norm(dps, "esg_datapoint")
@@ -606,7 +615,7 @@ def test_esg_priority_quote_and_period():
 
 def test_esg_priority_quote_only():
     result = _make_result(esg_datapoints=[
-        ExtractedESGDatapoint(metric="Renewable electricity", value="85%", quote="85% renewable electricity", page=160),
+        ExtractedESGDatapoint(metric="Renewable electricity", value="85%", quote="85% renewable electricity", page=160, fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     esg = _norm(dps, "esg_datapoint")
@@ -615,7 +624,7 @@ def test_esg_priority_quote_only():
 
 def test_esg_priority_no_quote_no_period():
     result = _make_result(esg_datapoints=[
-        ExtractedESGDatapoint(metric="Water use", value="1,200 ML", page=160),
+        ExtractedESGDatapoint(metric="Water use", value="1,200 ML", page=160, quote="", fact_kind="actual", scope_type="company_wide"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     esg = _norm(dps, "esg_datapoint")
@@ -656,12 +665,265 @@ def test_sustainability_category_keeps_goals_and_esg():
     result = AnnualReportDatapoints(
         company="ACME", year=2025,
         sustainability_goals=[
-            ExtractedSustainabilityGoal(goal="Achieve net-zero by 2040", target_year="2040", quote="net-zero by 2040", page=5),
+            ExtractedSustainabilityGoal(goal="Achieve net-zero by 2040", target_year="2040", quote="net-zero by 2040", page=5, fact_kind="target", scope_type="company_wide"),
         ],
         esg_datapoints=[
-            ExtractedESGDatapoint(metric="Scope 1 emissions", value="50 kt", period="2025", quote="50 kt scope 1", page=10),
+            ExtractedESGDatapoint(metric="Scope 1 emissions", value="50 kt", period="2025", quote="50 kt scope 1", page=10, fact_kind="actual", scope_type="company_wide"),
         ],
     )
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     assert any(d.datapoint_type == "sustainability_goal" for d in dps)
     assert any(d.datapoint_type == "esg_datapoint" for d in dps)
+
+
+# ---------------------------------------------------------------------------
+# fact_kind and scope_type propagation
+# ---------------------------------------------------------------------------
+
+def test_fact_kind_propagates_for_fte():
+    result = _make_result(fte_datapoints=[
+        ExtractedFTEDatapoint(label="Total employees (FTEs)", value="> 44,000", basis="FTE", page=5, quote="Total employees: > 44,000", fact_kind="actual", scope_type="company_wide"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert dps[0].fact_kind == "actual"
+    assert dps[0].scope_type == "company_wide"
+
+
+def test_fact_kind_propagates_for_sustainability_goal():
+    result = _make_result(sustainability_goals=[
+        ExtractedSustainabilityGoal(goal="Reach net-zero by 2050", target_year="2050", quote="net-zero by 2050", page=5, fact_kind="target", scope_type="company_wide"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    sg = [d for d in dps if d.datapoint_type == "sustainability_goal"]
+    assert sg[0].fact_kind == "target"
+    assert sg[0].scope_type == "company_wide"
+
+
+def test_fact_kind_propagates_for_esg():
+    result = _make_result(esg_datapoints=[
+        ExtractedESGDatapoint(metric="Scope 1 and 2 GHG emissions", value="149 kt", period="2025", quote="Scope 1 and 2 GHG emissions: 149 kt", page=10, fact_kind="actual", scope_type="scope_1_2"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    esg = [d for d in dps if d.datapoint_type == "esg_datapoint"]
+    assert esg[0].fact_kind == "actual"
+    assert esg[0].scope_type == "scope_1_2"
+
+
+def test_fact_kind_propagates_for_financial_highlight():
+    result = _make_result(financial_highlights=[
+        ExtractedFinancialHighlight(metric="Net income", value="7.6", unit="€bn", period="2024", page=58, quote="net income 7.6", fact_kind="actual", scope_type="company_wide"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert dps[0].fact_kind == "actual"
+    assert dps[0].scope_type == "company_wide"
+
+
+def test_fact_kind_propagates_for_business_performance():
+    result = _make_result(business_performance=[
+        ExtractedBusinessPerformance(metric="Systems sold", value="418", period="2024", page=55, quote="418 systems sold", fact_kind="actual", scope_type="segment"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert dps[0].fact_kind == "actual"
+    assert dps[0].scope_type == "segment"
+
+
+def test_fact_kind_propagates_for_shareholder_return():
+    result = _make_result(shareholder_returns=[
+        ExtractedShareholderReturn(metric="Total returned to shareholders", value="3.0", unit="€bn", period="2024", page=5, quote="€3.0bn returned", fact_kind="actual", scope_type="company_wide"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert dps[0].fact_kind == "actual"
+    assert dps[0].scope_type == "company_wide"
+
+
+def test_scope_type_scope_3_propagates():
+    result = _make_result(esg_datapoints=[
+        ExtractedESGDatapoint(metric="Scope 3 emissions", value="4,200 kt", period="2025", quote="Scope 3: 4,200 kt", page=11, fact_kind="actual", scope_type="scope_3"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert dps[0].scope_type == "scope_3"
+
+
+# ---------------------------------------------------------------------------
+# fact_kind / scope_type appear in chunk text (not embedding_text)
+# ---------------------------------------------------------------------------
+
+def test_fact_kind_in_chunk_text():
+    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    assert "Fact kind: actual" in chunks[0].text
+
+
+def test_scope_type_in_chunk_text():
+    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    assert "Scope type: company_wide" in chunks[0].text
+
+
+def test_scope_type_unknown_not_in_chunk_text():
+    dp = _fte_dp(fact_kind="actual", scope_type="unknown")
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    assert "Scope type:" not in chunks[0].text
+
+
+def test_fact_kind_absent_when_none():
+    dp = _fte_dp(fact_kind=None, scope_type=None)
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    assert "Fact kind:" not in chunks[0].text
+    assert "Scope type:" not in chunks[0].text
+
+
+def test_fact_kind_not_in_embedding_text():
+    dp = _fte_dp(fact_kind="actual", scope_type="company_wide")
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    emb = chunks[0].embedding_text or ""
+    assert "Fact kind:" not in emb
+    assert "Scope type:" not in emb
+
+
+def test_esg_fact_kind_target_in_text():
+    dp = _esg_dp(fact_kind="target", scope_type="scope_1_2")
+    chunks = datapoints_to_chunks(_make_ds([dp]))
+    text = chunks[0].text
+    assert "Fact kind: target" in text
+    assert "Scope type: scope_1_2" in text
+
+
+# ---------------------------------------------------------------------------
+# OpenAI validation — quote, placeholder, status-only, value-in-quote
+# ---------------------------------------------------------------------------
+
+def _openai_fin(**kwargs) -> AnnualReportDatapoints:
+    defaults = dict(
+        metric="Net income", value="7.6", unit="€bn", period="2024", page=5,
+        quote="Net income was €7.6bn in 2024.", fact_kind="actual", scope_type="company_wide",
+    )
+    defaults.update(kwargs)
+    return _make_result(financial_highlights=[ExtractedFinancialHighlight(**defaults)])
+
+
+def _norm_openai(result: AnnualReportDatapoints) -> list:
+    return normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025, extractor="openai")
+
+
+def test_openai_blank_quote_rejected():
+    dps = _norm_openai(_openai_fin(quote=""))
+    assert len(dps) == 0
+
+
+def test_openai_valid_quote_accepted():
+    dps = _norm_openai(_openai_fin(quote="Net income was €7.6bn in 2024."))
+    assert len(dps) == 1
+
+
+def test_openai_placeholder_unknown_rejected():
+    dps = _norm_openai(_openai_fin(value="unknown", quote="Net income unknown"))
+    assert len(dps) == 0
+
+
+def test_openai_placeholder_na_rejected():
+    dps = _norm_openai(_openai_fin(value="N/A", quote="Net income N/A"))
+    assert len(dps) == 0
+
+
+def test_openai_placeholder_dash_rejected():
+    dps = _norm_openai(_openai_fin(value="-", quote="Net income -"))
+    assert len(dps) == 0
+
+
+def test_openai_placeholder_xx_percent_rejected():
+    dps = _norm_openai(_openai_fin(value="xx%", quote="reduction of xx%"))
+    assert len(dps) == 0
+
+
+def test_openai_status_on_track_rejected():
+    dps = _norm_openai(_openai_fin(value="On track", quote="Net income on track"))
+    assert len(dps) == 0
+
+
+def test_openai_status_tbc_rejected():
+    dps = _norm_openai(_openai_fin(value="TBC", quote="Net income TBC"))
+    assert len(dps) == 0
+
+
+def test_openai_status_tbd_rejected():
+    dps = _norm_openai(_openai_fin(value="TBD", quote="Net income TBD"))
+    assert len(dps) == 0
+
+
+def test_openai_status_in_progress_rejected():
+    dps = _norm_openai(_openai_fin(value="in progress", quote="Net income in progress"))
+    assert len(dps) == 0
+
+
+def test_openai_status_ongoing_rejected():
+    dps = _norm_openai(_openai_fin(value="ongoing", quote="Net income ongoing"))
+    assert len(dps) == 0
+
+
+def test_openai_value_not_in_quote_rejected():
+    dps = _norm_openai(_openai_fin(value="7.6", quote="Net income was strong last year."))
+    assert len(dps) == 0
+
+
+def test_openai_percent_value_not_in_quote_rejected():
+    dps = _norm_openai(_openai_fin(value="51.3%", quote="Gross margin improved year on year."))
+    assert len(dps) == 0
+
+
+def test_openai_less_than_value_not_in_quote_rejected():
+    dps = _norm_openai(_openai_fin(value="<5%", quote="Gross margin was strong."))
+    assert len(dps) == 0
+
+
+def test_openai_percent_value_in_quote_accepted():
+    dps = _norm_openai(_openai_fin(value="51.3%", quote="Gross margin was 51.3% in 2024."))
+    assert len(dps) == 1
+
+
+def test_llamaextract_blank_quote_not_rejected():
+    # llamaextract extractor should NOT apply the openai-specific quote check
+    result = _make_result(financial_highlights=[
+        ExtractedFinancialHighlight(metric="Net income", value="7.6", unit="€bn", period="2024", page=5,
+                                    quote="", fact_kind="actual", scope_type="company_wide"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025, extractor="llamaextract")
+    assert len(dps) == 1
+
+
+# ---------------------------------------------------------------------------
+# Raw audit payload
+# ---------------------------------------------------------------------------
+
+from scripts.run_pre_extraction import _build_raw_audit_payload  # noqa: E402
+
+
+def test_raw_audit_payload_structure():
+    raw_batch = {"company": "ACME", "year": 2024, "fte_datapoints": [{"label": "FTE", "value": "44000"}]}
+    payload = _build_raw_audit_payload(
+        source="acme_2024.pdf",
+        company="ACME",
+        year=2024,
+        extractor="openai",
+        categories=["fte", "esg"],
+        raw_by_cat={"fte": [raw_batch]},
+    )
+    assert payload["source"] == "acme_2024.pdf"
+    assert payload["company"] == "ACME"
+    assert payload["year"] == 2024
+    assert payload["extractor"] == "openai"
+    assert payload["categories"] == ["fte", "esg"]
+    assert payload["raw"]["fte"] == [raw_batch]
+
+
+def test_raw_audit_payload_does_not_mutate_input():
+    raw_batch = {"company": "ACME", "fte_datapoints": []}
+    original = {"fte": [raw_batch]}
+    _build_raw_audit_payload("x.pdf", "ACME", 2024, "openai", ["fte"], original)
+    assert original == {"fte": [raw_batch]}
+
+
+def test_raw_audit_payload_empty_categories():
+    payload = _build_raw_audit_payload("x.pdf", None, None, "openai", [], {})
+    assert payload["categories"] == []
+    assert payload["raw"] == {}

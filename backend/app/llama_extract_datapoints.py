@@ -5,7 +5,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -19,7 +19,15 @@ Do not infer, calculate, convert, round, or normalize values.
 Preserve exact values and qualifiers, including >, <, approximately, more than, %, €, kt, Mt, CO₂e, FTEs.
 For every extracted item, include page and a short verbatim quote if available.
 Preserve exact value-label relationships. Do not swap labels between nearby tiles or columns.
-If not present, leave the list empty. Do not guess.\
+If not present, leave the list empty. Do not guess.
+
+For every item, classify:
+- fact_kind: "actual" (reported/historical for the period), "target" (forward-looking goal/ambition), "progress" (status update against a target), or "forecast" (outlook/guidance).
+- scope_type: "company_wide" if total/group-level; otherwise "segment", "geography", "product", "customer", or "project". For greenhouse-gas / emissions / climate datapoints, use "scope_1_2", "scope_3", or "supply_chain" only when the report explicitly mentions that scope. Use "unknown" only when the text gives no scope clue.
+
+quote is REQUIRED: a verbatim evidence snippet from the page, table row, or nearby text that contains or directly supports both the metric label and the value. If no such evidence exists, omit the item.
+
+Reject placeholder values ("N/A", "—", "xx%", "TBD") and status-only values ("On track", "TBC", "approved", "executed", "in progress", "ongoing").\
 """
 
 _CATEGORY_PROMPTS: dict[str, str] = {
@@ -121,44 +129,52 @@ _MAX_WAIT = 600
 class ExtractedFTEDatapoint(BaseModel):
     label: str
     value: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     unit: str | None = None
     basis: str | None = None
     period: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
 
 
 class ExtractedSustainabilityGoal(BaseModel):
     goal: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     target_year: str | None = None
     metric: str | None = None
     baseline: str | None = None
     value_or_target: str | None = None
     scope: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
 
 
 class ExtractedESGDatapoint(BaseModel):
     metric: str
     value: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     unit: str | None = None
     period: str | None = None
     scope: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
 
 
 class ExtractedFinancialHighlight(BaseModel):
     metric: str
     value: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     unit: str | None = None
     period: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
     basis: str | None = None
 
@@ -166,10 +182,12 @@ class ExtractedFinancialHighlight(BaseModel):
 class ExtractedBusinessPerformance(BaseModel):
     metric: str
     value: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     unit: str | None = None
     period: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
     basis: str | None = None
 
@@ -177,10 +195,12 @@ class ExtractedBusinessPerformance(BaseModel):
 class ExtractedShareholderReturn(BaseModel):
     metric: str
     value: str
+    quote: str
+    fact_kind: Literal["actual", "target", "progress", "forecast"]
+    scope_type: Literal["company_wide", "segment", "geography", "product", "customer", "project", "scope_1_2", "scope_3", "supply_chain", "unknown"]
     unit: str | None = None
     period: str | None = None
     page: int | None = None
-    quote: str | None = None
     confidence: float | None = None
     basis: str | None = None
 

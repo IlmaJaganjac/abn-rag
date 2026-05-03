@@ -24,7 +24,42 @@ from backend.app.openai_extract_datapoints import extract_annual_report_datapoin
 from backend.app.openai_validate_datapoints import validate_datapoints_openai
 
 _PRE_EXTRACTED_ROOT = Path("backend/data/processed/pre_extracted")
+_RAW_AUDIT_ROOT = Path("backend/data/processed/pre_extracted_raw")
 _PAGE_PLANS_ROOT = Path("backend/data/processed/extraction_page_plans")
+
+
+def _build_raw_audit_payload(
+    source: str,
+    company: str | None,
+    year: int | None,
+    extractor: str,
+    categories: list[str],
+    raw_by_cat: dict[str, list[dict]],
+) -> dict:
+    return {
+        "source": source,
+        "company": company,
+        "year": year,
+        "extractor": extractor,
+        "categories": categories,
+        "raw": raw_by_cat,
+    }
+
+
+def _save_raw_audit(
+    stem: str,
+    source: str,
+    company: str | None,
+    year: int | None,
+    extractor: str,
+    categories: list[str],
+    raw_by_cat: dict[str, list[dict]],
+) -> Path:
+    path = _RAW_AUDIT_ROOT / f"{stem}.openai.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = _build_raw_audit_payload(source, company, year, extractor, categories, raw_by_cat)
+    path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    return path
 
 
 def _preview(text: str | None, n: int = 70) -> str:
@@ -112,7 +147,7 @@ def _run_category(
     page_range: str,
     extractor: str,
     batch_pages: int = 0,
-) -> tuple[str, list]:
+) -> tuple[str, list, list[dict]]:
     log = logging.getLogger(__name__)
     log.info("running category=%s pages=%s", cat, page_range)
 
@@ -120,6 +155,7 @@ def _run_category(
         all_page_nums = parse_page_range_to_pages(page_range)
         batches = chunk_pages(all_page_nums, batch_pages)
         normalized: list = []
+        raw_batches: list[dict] = []
         for i, batch in enumerate(batches, 1):
             batch_range = pages_to_range(batch)
             log.info("category=%s batch=%d/%d pages=%s", cat, i, len(batches), batch_range)
@@ -130,6 +166,7 @@ def _run_category(
                 page_range=batch_range,
                 category=cat,
             )
+            raw_batches.append(result.model_dump(mode="json"))
             filtered = _filter_category(cat, result)
             batch_normalized = normalize_llamaextract_result(
                 filtered,
@@ -140,7 +177,7 @@ def _run_category(
             )
             normalized.extend(batch_normalized)
         log.info("category=%s: %d datapoints extracted across %d batches", cat, len(normalized), len(batches))
-        return cat, normalized
+        return cat, normalized, raw_batches
 
     if extractor == "openai":
         result = extract_annual_report_datapoints_openai(
@@ -150,6 +187,7 @@ def _run_category(
             page_range=page_range,
             category=cat,
         )
+        raw_batches = [result.model_dump(mode="json")]
     else:
         result = extract_annual_report_datapoints(
             pdf,
@@ -158,6 +196,7 @@ def _run_category(
             page_range=page_range,
             category=cat,
         )
+        raw_batches = []
     filtered = _filter_category(cat, result)
     normalized = normalize_llamaextract_result(
         filtered,
@@ -167,7 +206,7 @@ def _run_category(
         extractor=extractor,
     )
     log.info("category=%s: %d datapoints extracted", cat, len(normalized))
-    return cat, normalized
+    return cat, normalized, raw_batches
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -252,6 +291,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # 3. Extract categories in parallel
     results_by_cat: dict[str, list] = {}
+    raw_by_cat: dict[str, list[dict]] = {}
     errors: list[str] = []
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -273,8 +313,10 @@ def main(argv: list[str] | None = None) -> int:
         for future in as_completed(futures):
             cat = futures[future]
             try:
-                cat_name, dps = future.result()
+                cat_name, dps, raw_batches = future.result()
                 results_by_cat[cat_name] = dps
+                if raw_batches:
+                    raw_by_cat[cat_name] = raw_batches
             except Exception as exc:
                 errors.append(f"category={cat}: {exc}")
 
@@ -285,7 +327,20 @@ def main(argv: list[str] | None = None) -> int:
 
     log.info("all categories complete")
 
-    # 3b. Optionally validate/deduplicate per category with OpenAI
+    # 3b. Save raw audit for OpenAI extractor
+    if args.extractor == "openai" and raw_by_cat:
+        raw_path = _save_raw_audit(
+            stem=stem,
+            source=source,
+            company=args.company,
+            year=args.year,
+            extractor=args.extractor,
+            categories=categories,
+            raw_by_cat=raw_by_cat,
+        )
+        print(f"\nRaw audit saved → {raw_path}")
+
+    # 3c. Optionally validate/deduplicate per category with OpenAI
     if args.validate_extracted:
         for cat in categories:
             dps = results_by_cat.get(cat)

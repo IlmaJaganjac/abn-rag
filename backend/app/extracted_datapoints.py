@@ -16,7 +16,8 @@ _SPACE_RE = re.compile(r"\s+")
 _SYMBOL_SPACE_RE = re.compile(r"\s*([€$£%><=,.])\s*")
 _PLACEHOLDER_VALUE = re.compile(r"^(?:unknown|n/?a|none|null|[-—]+|[€$£]?\s*x+x+%?|x+x+%?)$", re.IGNORECASE)
 _STATUS_ONLY_VALUE = re.compile(
-    r"^(?:approved|executed|suspended|modified|discontinued|may\s+(?:suspend|not declare|pay).*)$",
+    r"^(?:approved|executed|suspended|modified|discontinued|may\s+(?:suspend|not declare|pay).*|"
+    r"on\s+track|tbc|tbd|in\s+progress|ongoing)$",
     re.IGNORECASE,
 )
 _ACTUAL_METRIC = re.compile(r"\bactual\b|\breported\b|\bperformance\b", re.IGNORECASE)
@@ -260,9 +261,11 @@ def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
     unit = dp.unit or ""
     strict_openai = dp.extractor == "openai"
     if strict_openai:
+        if not quote:
+            return False
         if value and (_PLACEHOLDER_VALUE.fullmatch(value) or _STATUS_ONLY_VALUE.fullmatch(value)):
             return False
-        if value and re.search(r"\d", value) and quote and not _normalized_contains_value(quote, value):
+        if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
             return False
     if dp.datapoint_type == "fte":
         return bool(_FTE_SIGNAL.search(text)) and not bool(_FTE_NON_EMPLOYEE.search(text))
@@ -328,6 +331,8 @@ def normalize_llamaextract_result(
             page=dp.page,
             quote=dp.quote,
             basis=dp.basis,
+            fact_kind=getattr(dp, "fact_kind", None),
+            scope_type=getattr(dp, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=dp.confidence,
@@ -348,6 +353,8 @@ def normalize_llamaextract_result(
             quote=sg.quote,
             scope=sg.scope,
             target_year=sg.target_year,
+            fact_kind=getattr(sg, "fact_kind", None),
+            scope_type=getattr(sg, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=sg.confidence,
@@ -367,6 +374,8 @@ def normalize_llamaextract_result(
             scope=esg.scope,
             page=esg.page,
             quote=esg.quote,
+            fact_kind=getattr(esg, "fact_kind", None),
+            scope_type=getattr(esg, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=esg.confidence,
@@ -386,6 +395,8 @@ def normalize_llamaextract_result(
             page=fh.page,
             quote=fh.quote,
             basis=fh.basis,
+            fact_kind=getattr(fh, "fact_kind", None),
+            scope_type=getattr(fh, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=fh.confidence,
@@ -405,6 +416,8 @@ def normalize_llamaextract_result(
             page=bp.page,
             quote=bp.quote,
             basis=bp.basis,
+            fact_kind=getattr(bp, "fact_kind", None),
+            scope_type=getattr(bp, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=bp.confidence,
@@ -424,6 +437,8 @@ def normalize_llamaextract_result(
             page=sr.page,
             quote=sr.quote,
             basis=sr.basis,
+            fact_kind=getattr(sr, "fact_kind", None),
+            scope_type=getattr(sr, "scope_type", None),
             extractor=extractor,
             priority=priority,
             confidence=sr.confidence,
@@ -534,6 +549,10 @@ def _build_text(dp: NormalizedDatapoint) -> str:
             lines.append(f"Basis: {dp.basis}")
     if dp.quote:
         lines.append(f"Quote: {dp.quote}")
+    if dp.fact_kind:
+        lines.append(f"Fact kind: {dp.fact_kind}")
+    if dp.scope_type and dp.scope_type != "unknown":
+        lines.append(f"Scope type: {dp.scope_type}")
     lines.append(f"Extractor: {dp.extractor}")
     lines.append(f"Priority: {dp.priority}")
     return "\n".join(lines)
