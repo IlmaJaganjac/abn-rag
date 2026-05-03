@@ -214,6 +214,12 @@ def persist_chunks(
                 "token_count": chunk.token_count,
                 "text": chunk.text,
                 "embedding_text": chunk.embedding_text,
+                "fact_kind": chunk.fact_kind,
+                "basis": chunk.basis,
+                "scope_type": chunk.scope_type,
+                "quality": chunk.quality,
+                "validation_status": chunk.validation_status,
+                "canonical_metric": chunk.canonical_metric,
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return out_path
@@ -316,6 +322,17 @@ def _chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
         md["chunk_kind"] = chunk.chunk_kind
     if chunk.section_path is not None:
         md["section_path"] = chunk.section_path
+    for field in (
+        "fact_kind",
+        "basis",
+        "scope_type",
+        "quality",
+        "validation_status",
+        "canonical_metric",
+    ):
+        value = getattr(chunk, field, None)
+        if value is not None:
+            md[field] = value
     return md
 
 

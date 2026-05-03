@@ -65,27 +65,17 @@ def _chunk(cid: str, text: str, page: int, kind: str = "section") -> RetrievedCh
 
 def test_expand_fte_question():
     expanded = expand_query_for_retrieval("How many FTEs did ASML have in 2025?")
-    assert expanded.startswith("How many FTEs did ASML have in 2025?")
-    assert "employees" in expanded
-    assert "headcount" in expanded
-    assert "workforce" in expanded
-    assert "full-time equivalents" in expanded
+    assert expanded == "How many FTEs did ASML have in 2025?"
 
 
 def test_expand_sustainability_question():
     expanded = expand_query_for_retrieval("What are ASML's sustainability goals for 2030?")
-    assert expanded.startswith("What are ASML's sustainability goals for 2030?")
-    assert "climate" in expanded
-    assert "emissions" in expanded
-    assert "scope" in expanded
-    assert "net zero" in expanded
+    assert expanded == "What are ASML's sustainability goals for 2030?"
 
 
 def test_expand_financial_question():
     expanded = expand_query_for_retrieval("What was ASML's revenue in 2025?")
-    assert expanded.startswith("What was ASML's revenue in 2025?")
-    assert "net sales" in expanded
-    assert "gross margin" in expanded
+    assert expanded == "What was ASML's revenue in 2025?"
 
 
 def test_expand_unrelated_question_unchanged():

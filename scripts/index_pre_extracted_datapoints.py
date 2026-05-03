@@ -28,7 +28,6 @@ def _delete_extracted_datapoint_chunks(collection, *, source: str) -> None:
         collection.delete(where={"$and": [
             {"source": source},
             {"chunk_kind": "extracted_datapoint"},
-            {"parser": "llamaextract"},
         ]})
     except Exception as exc:
         logging.getLogger(__name__).info(
@@ -114,6 +113,12 @@ def main(argv: list[str] | None = None) -> int:
                 "token_count": chunk.token_count,
                 "text": chunk.text,
                 "embedding_text": chunk.embedding_text,
+                "fact_kind": chunk.fact_kind,
+                "basis": chunk.basis,
+                "scope_type": chunk.scope_type,
+                "quality": chunk.quality,
+                "validation_status": chunk.validation_status,
+                "canonical_metric": chunk.canonical_metric,
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     print(f"BM25 sidecar:      {out_jsonl}")

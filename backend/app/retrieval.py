@@ -18,25 +18,20 @@ RRF_K = 60
 DENSE_TOP_N = 30
 BM25_TOP_N = 30
 
-_FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
-_FTE_EXPANSION = "employees workforce headcount staff personnel FTE full-time equivalents payroll temporary internal external year-end average"
-
-_SUST_TERMS = frozenset({"sustainability", "sustainable", "climate", "emissions", "emission", "ghg", "co2", "co₂", "scope", "net zero", "target", "goal"})
-_SUST_EXPANSION = "sustainability climate targets goals ambition commitment GHG CO2 CO₂ CO2e CO₂e emissions scope 1 scope 2 scope 3 net zero renewable energy waste recycling carbon intensity"
-
-_FIN_TERMS = frozenset({"revenue", "sales", "margin", "profit", "income", "dividend", "cash flow", "r&d", "research and development"})
-_FIN_EXPANSION = "financial performance revenue net sales gross margin operating income net income dividend cash flow R&D research and development"
-
-
-_RERANKER_MODEL_NAME = "BAAI/bge-reranker-base"
+DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+DEFAULT_RERANK_CANDIDATE_K = 40
+DEFAULT_RERANK_TEXT_CHARS = 1000
 _reranker_model = None
+_reranker_model_name: str | None = None
 
 
 def _get_reranker():
-    global _reranker_model
-    if _reranker_model is None:
+    global _reranker_model, _reranker_model_name
+    model_name = os.environ.get("RERANKER_MODEL") or DEFAULT_RERANKER_MODEL
+    if _reranker_model is None or _reranker_model_name != model_name:
         from sentence_transformers import CrossEncoder
-        _reranker_model = CrossEncoder(_RERANKER_MODEL_NAME)
+        _reranker_model = CrossEncoder(model_name)
+        _reranker_model_name = model_name
     return _reranker_model
 
 
@@ -58,17 +53,7 @@ def rerank_chunks_cross_encoder(
 
 
 def expand_query_for_retrieval(question: str) -> str:
-    q = question.casefold()
-    tokens = set(re.findall(r"[a-z0-9₂&]+", q))
-    parts = [question]
-    if tokens & _FTE_TERMS:
-        parts.append(_FTE_EXPANSION)
-    if tokens & _SUST_TERMS or "net zero" in q or "cash flow" in q or "research and development" in q:
-        if tokens & _SUST_TERMS or "net zero" in q:
-            parts.append(_SUST_EXPANSION)
-    if tokens & _FIN_TERMS or "cash flow" in q or "r&d" in q or "research and development" in q:
-        parts.append(_FIN_EXPANSION)
-    return "\n".join(parts)
+    return question
 
 
 def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
@@ -102,6 +87,12 @@ def _retrieved_chunk(
         parser=meta.get("parser"),
         chunk_kind=meta.get("chunk_kind"),
         section_path=meta.get("section_path"),
+        fact_kind=meta.get("fact_kind"),
+        basis=meta.get("basis"),
+        scope_type=meta.get("scope_type"),
+        quality=meta.get("quality"),
+        validation_status=meta.get("validation_status"),
+        canonical_metric=meta.get("canonical_metric"),
         score=score,
     )
 
@@ -220,7 +211,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     reranker_enabled = os.environ.get("ENABLE_RERANKER") == "1"
     if reranker_enabled:
         _ck = os.environ.get("RERANK_CANDIDATE_K")
-        candidate_k = int(_ck) if _ck else max(query.top_k * 3, 30)
+        candidate_k = int(_ck) if _ck else max(query.top_k * 4, DEFAULT_RERANK_CANDIDATE_K)
     else:
         candidate_k = query.top_k
 
@@ -259,7 +250,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
 
     if reranker_enabled:
         _tc = os.environ.get("RERANK_TEXT_CHARS")
-        text_chars = int(_tc) if _tc else 3000
+        text_chars = int(_tc) if _tc else DEFAULT_RERANK_TEXT_CHARS
         chunks = rerank_chunks_cross_encoder(query.question, chunks, query.top_k, text_chars=text_chars)
 
     return RetrievalResult(query=query, chunks=chunks)

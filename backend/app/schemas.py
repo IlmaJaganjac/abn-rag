@@ -35,6 +35,12 @@ class Chunk(BaseModel):
     chunk_kind: str | None = None
     section_path: str | None = None
     embedding_text: str | None = None
+    fact_kind: str | None = None
+    basis: str | None = None
+    scope_type: str | None = None
+    quality: str | None = None
+    validation_status: str | None = None
+    canonical_metric: str | None = None
 
 
 class RetrievedChunk(Chunk):

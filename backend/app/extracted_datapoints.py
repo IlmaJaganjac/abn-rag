@@ -14,6 +14,22 @@ from backend.app.schemas import Chunk
 _PUNCT_RE = re.compile(r"[^\w\s]")
 _SPACE_RE = re.compile(r"\s+")
 _SYMBOL_SPACE_RE = re.compile(r"\s*([€$£%><=,.])\s*")
+_PLACEHOLDER_VALUE = re.compile(r"^(?:unknown|n/?a|none|null|[-—]+|[€$£]?\s*x+x+%?|x+x+%?)$", re.IGNORECASE)
+_STATUS_ONLY_VALUE = re.compile(
+    r"^(?:approved|executed|suspended|modified|discontinued|may\s+(?:suspend|not declare|pay).*)$",
+    re.IGNORECASE,
+)
+_ACTUAL_METRIC = re.compile(r"\bactual\b|\breported\b|\bperformance\b", re.IGNORECASE)
+_PROGRESS_SIGNAL = re.compile(r"\bprogress\b|achieved|completion|against\s+(?:the\s+)?target", re.IGNORECASE)
+_FORECAST_SIGNAL = re.compile(r"\bforecast\b|outlook|guidance|expect(?:ed|s|ation)?|anticipate|project(?:ed|ion)?", re.IGNORECASE)
+_DEFINITION_SIGNAL = re.compile(r"\bdefinition\b|defined as|means|refers to", re.IGNORECASE)
+_SCOPE_CUSTOMER_SIGNAL = re.compile(r"\bcustomer\b|client", re.IGNORECASE)
+_SCOPE_SEGMENT_SIGNAL = re.compile(r"\bsegment\b|division|business unit|product line|product-specific", re.IGNORECASE)
+_SCOPE_GEOGRAPHY_SIGNAL = re.compile(r"\bgeograph|region|country|emea|asia|europe|united states|china|japan", re.IGNORECASE)
+_SCOPE_PRODUCT_SIGNAL = re.compile(r"\bproduct\b|system|unit model", re.IGNORECASE)
+_TOTAL_COMPANY_SIGNAL = re.compile(r"\btotal\b|company[- ]wide|group", re.IGNORECASE)
+_COUNT_METRIC_SIGNAL = re.compile(r"\b(?:count|number|units?|systems?|employees?|fte?s?|headcount|sold|shipped)\b", re.IGNORECASE)
+_RATE_UNIT_SIGNAL = re.compile(r"%|per[-\s]?hour|per\s+\w+|rate|ratio|intensity|throughput|efficiency", re.IGNORECASE)
 
 # FTE priority helpers
 _FTE_COMPANY_WIDE = re.compile(
@@ -43,7 +59,7 @@ _FTE_NON_EMPLOYEE = re.compile(
 _SUST_SIGNAL = re.compile(
     r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|net[- ]zero|"
     r"carbon|methane|flaring|renewable|energy\s+(?:efficien|savings?|use)|"
-    r"electricity|power\s+consumption|wafer|waste|recycl|circular|water|"
+    r"electricity|power\s+consumption|wafer|waste|reuse|re-?use|recycl|circular|water|"
     r"biodiversity|supplier\s+sustainability|"
     r"diversity|inclusion|safety|ethics|governance",
     re.IGNORECASE,
@@ -61,7 +77,7 @@ _SUST_BUSINESS_ONLY = re.compile(
 )
 _ESG_SIGNAL = re.compile(
     r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|renewable|"
-    r"energy|waste|recycl|water|circular|biodiversity|supplier|diversity|"
+    r"energy|waste|reuse|re-?use|recycl|water|circular|biodiversity|supplier|diversity|"
     r"inclusion|safety|ethics|governance",
     re.IGNORECASE,
 )
@@ -116,6 +132,11 @@ class NormalizedDatapoint(BaseModel):
     extractor: str = "llamaextract"
     priority: int = 50
     confidence: float | None = None
+    fact_kind: str | None = None
+    scope_type: str | None = None
+    quality: str | None = None
+    validation_status: str | None = None
+    canonical_metric: str | None = None
 
 
 class NormalizedDatapointSet(BaseModel):
@@ -203,14 +224,52 @@ def _combined_dp_text(dp: NormalizedDatapoint) -> str:
     )
 
 
+def _normalized_contains_value(quote: str, value: str) -> bool:
+    if not quote or not value:
+        return True
+    if value in quote:
+        return True
+    compact_value = re.sub(r"[^\w.%><=-]+", "", value.casefold())
+    compact_quote = re.sub(r"[^\w.%><=-]+", "", quote.casefold())
+    if compact_value and compact_value in compact_quote:
+        return True
+    numeric_value = re.sub(r"[^\d.%-]+", "", value).lstrip("+-")
+    numeric_quote = re.sub(r"[^\d.%-]+", "", quote)
+    return bool(numeric_value and numeric_value in numeric_quote)
+
+
+def _is_scoped_total(dp: NormalizedDatapoint) -> bool:
+    text = _combined_dp_text(dp)
+    return bool(
+        _TOTAL_COMPANY_SIGNAL.search(dp.metric or "")
+        and (
+            _SCOPE_CUSTOMER_SIGNAL.search(text)
+            or _SCOPE_SEGMENT_SIGNAL.search(text)
+            or _SCOPE_GEOGRAPHY_SIGNAL.search(text)
+            or _SCOPE_PRODUCT_SIGNAL.search(text)
+            or _FTE_SPECIFIC.search(text)
+        )
+    )
+
+
 def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
     text = _combined_dp_text(dp)
-    if dp.datapoint_type == "fte":
-        if _FTE_SPECIFIC.search(text):
+    value = (dp.value or "").strip()
+    quote = dp.quote or ""
+    metric = dp.metric or ""
+    unit = dp.unit or ""
+    strict_openai = dp.extractor == "openai"
+    if strict_openai:
+        if value and (_PLACEHOLDER_VALUE.fullmatch(value) or _STATUS_ONLY_VALUE.fullmatch(value)):
             return False
+        if value and re.search(r"\d", value) and quote and not _normalized_contains_value(quote, value):
+            return False
+    if dp.datapoint_type == "fte":
         return bool(_FTE_SIGNAL.search(text)) and not bool(_FTE_NON_EMPLOYEE.search(text))
 
     if dp.datapoint_type == "sustainability_goal":
+        if strict_openai and _ACTUAL_METRIC.search(metric):
+            return False
         has_sust_signal = bool(_SUST_SIGNAL.search(text))
         has_target_signal = bool(_SUST_TARGET_SIGNAL.search(text) or dp.target_year)
         business_only = bool(_SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
@@ -510,7 +569,8 @@ def _build_embedding_text(dp: NormalizedDatapoint) -> str:
 
 def datapoints_to_chunks(datapoint_set: NormalizedDatapointSet) -> list[Chunk]:
     chunks: list[Chunk] = []
-    for idx, dp in enumerate(datapoint_set.datapoints):
+    filtered = [dp for dp in datapoint_set.datapoints if _is_plausible_datapoint(dp)]
+    for idx, dp in enumerate(filtered):
         text = _build_text(dp)
         embedding_text = _build_embedding_text(dp)
         section_path = _SECTION_PATH.get(dp.datapoint_type, "Pre-extracted")
