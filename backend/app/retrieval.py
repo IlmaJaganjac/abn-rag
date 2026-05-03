@@ -52,8 +52,27 @@ def rerank_chunks_cross_encoder(
         return chunks[:top_k]
 
 
+_FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
+_FTE_EXPANSION = "employees workforce headcount staff personnel FTE full-time equivalents payroll temporary internal external year-end average"
+
+_SUST_TERMS = frozenset({"sustainability", "sustainable", "climate", "emissions", "emission", "ghg", "co2", "co₂", "scope", "net zero", "target", "goal"})
+_SUST_EXPANSION = "sustainability climate targets goals ambition commitment GHG CO2 CO₂ CO2e CO₂e emissions scope 1 scope 2 scope 3 net zero renewable energy waste recycling carbon intensity"
+
+_FIN_TERMS = frozenset({"revenue", "sales", "margin", "profit", "income", "dividend", "cash", "flow", "interest", "nii", "fee", "commission"})
+_FIN_EXPANSION = "financial performance revenue net sales gross margin operating income net income net interest income NII fee commission dividend cash flow R&D research and development"
+
+
 def expand_query_for_retrieval(question: str) -> str:
-    return question
+    q = question.casefold()
+    tokens = set(re.findall(r"[a-z0-9₂&]+", q))
+    parts = [question]
+    if tokens & _FTE_TERMS:
+        parts.append(_FTE_EXPANSION)
+    if tokens & _SUST_TERMS or "net zero" in q:
+        parts.append(_SUST_EXPANSION)
+    if tokens & _FIN_TERMS or "cash flow" in q or "r&d" in q or "research and development" in q:
+        parts.append(_FIN_EXPANSION)
+    return "\n".join(parts)
 
 
 def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
@@ -215,10 +234,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     else:
         candidate_k = query.top_k
 
-    if os.environ.get("ENABLE_QUERY_EXPANSION") == "1":
-        retrieval_text = expand_query_for_retrieval(query.question)
-    else:
-        retrieval_text = query.question
+    retrieval_text = expand_query_for_retrieval(query.question)
 
     [embedding] = embed_texts([retrieval_text])
 

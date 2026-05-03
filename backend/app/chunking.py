@@ -17,6 +17,40 @@ VALUE_RE = re.compile(
 )
 READ_MORE_RE = re.compile(r"^read more on page \d+\s*>?$", re.IGNORECASE)
 PAGE_NUMBER_RE = re.compile(r"^\d{1,4}$")
+
+KPI_RETRIEVAL_HINTS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (
+        ("shareholder", "shareholders", "returned", "dividend", "dividends", "buyback", "buybacks"),
+        ("dividends", "buybacks", "shareholder distributions"),
+    ),
+    (
+        ("r&d", "research", "development", "investment", "spend", "spending"),
+        ("research and development spend", "monetary R&D investment", "financial expense"),
+    ),
+    (
+        ("margin", "rate", "ratio", "percentage"),
+        ("percentage", "margin", "rate", "ratio"),
+    ),
+    (
+        ("employee", "employees", "fte", "ftes", "headcount", "workforce"),
+        ("workforce", "employees", "headcount", "full-time equivalents"),
+    ),
+    (
+        ("emission", "emissions", "scope", "co2", "co₂", "ghg"),
+        ("greenhouse gas", "GHG", "CO2e", "emissions"),
+    ),
+    (
+        ("sales", "revenue", "turnover"),
+        ("revenue", "net sales", "turnover"),
+    ),
+)
+
+VAGUE_KPI_LABELS: frozenset[str] = frozenset(
+    {
+        "read more", "continued", "cont.", "cont", "key", "on track",
+        "more", "see more", "tbd", "n/a", "note", "notes",
+    }
+)
 SENTENCE_HEADING_PREFIXES = (
     "we ",
     "our ",
@@ -264,6 +298,24 @@ def _table_drafts(
                     extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
+            for metric_text in _financial_metric_texts_from_header_row(
+                headers,
+                cells,
+                section_path=section_path,
+            ):
+                drafts.append(
+                    _draft(
+                        page=page,
+                        text=metric_text,
+                        chunk_kind="metric",
+                        section_path=section_path,
+                        company=company,
+                        year=year,
+                        parser=parser,
+                        boilerplate=boilerplate,
+                        extra_embedding_context=_table_context(section_path, rows, table_kind),
+                    )
+                )
     return drafts
 
 
@@ -419,9 +471,178 @@ def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
     return pairs
 
 
+def _is_kpi_label(label: str) -> bool:
+    clean = label.strip()
+    if len(clean) < 3 or len(clean) > 80:
+        return False
+    if _looks_like_value(clean):
+        return False
+    norm = _normalize_line(clean)
+    if norm in VAGUE_KPI_LABELS:
+        return False
+    if not re.search(r"[A-Za-z]", clean):
+        return False
+    return True
+
+
+def _infer_kpi_unit(value: str, label: str) -> str | None:
+    raw = value.strip()
+    if not raw:
+        return None
+    if "%" in raw:
+        return "%"
+    if re.search(r"\bMt\b", raw):
+        return "Mt"
+    if re.search(r"\bkt\b", raw):
+        return "kt"
+    has_eur = "€" in raw
+    has_usd = "$" in raw
+    has_gbp = "£" in raw
+    has_billion = bool(re.search(r"(?<![A-Za-z])bn(?![A-Za-z])|billion", raw, re.IGNORECASE))
+    has_million = bool(re.search(r"(?<![A-Za-z])m(?![A-Za-z])|million", raw, re.IGNORECASE))
+    if has_eur and has_billion:
+        return "EUR billion"
+    if has_eur and has_million:
+        return "EUR million"
+    if has_usd and has_billion:
+        return "USD billion"
+    if has_usd and has_million:
+        return "USD million"
+    if has_billion:
+        return "billion"
+    if has_million:
+        return "million"
+    if has_eur:
+        return "EUR"
+    if has_usd:
+        return "USD"
+    if re.search(r"\bFTEs?\b", label):
+        return "FTEs"
+    return None
+
+
+def _matches_keyword(keyword: str, tokens: set[str], norm: str) -> bool:
+    if keyword in tokens:
+        return True
+    if "&" in keyword or " " in keyword:
+        return keyword in norm
+    return False
+
+
+def _kpi_retrieval_hints(label: str) -> list[str]:
+    norm = label.casefold()
+    tokens = set(re.findall(r"[a-z0-9&₂]+", norm))
+    hints: list[str] = []
+    seen: set[str] = set()
+    for keywords, category_hints in KPI_RETRIEVAL_HINTS:
+        if not any(_matches_keyword(kw, tokens, norm) for kw in keywords):
+            continue
+        for hint in category_hints:
+            if hint not in seen:
+                seen.add(hint)
+                hints.append(hint)
+    return hints
+
+
+def _kpi_metric_draft(
+    *,
+    page: int,
+    value: str,
+    label: str,
+    section_path: str | None,
+    company: str | None,
+    year: int | None,
+    parser: str | None,
+    boilerplate: set[str],
+) -> ChunkDraft:
+    unit = _infer_kpi_unit(value, label)
+    period = str(year) if year is not None else None
+    text_lines = [f"Metric: {label}"]
+    if period:
+        text_lines.append(f"Period: {period}")
+    text_lines.append(f"Value: {value}")
+    if unit:
+        text_lines.append(f"Unit: {unit}")
+    text_lines.append("Presentation: highlight")
+    text = "\n".join(text_lines)
+
+    extra_lines = ["Type: KPI highlight", f"Metric: {label}", f"Value: {value}"]
+    if unit:
+        extra_lines.append(f"Unit: {unit}")
+    hints = _kpi_retrieval_hints(label)
+    if hints:
+        extra_lines.append("Retrieval hints: " + ", ".join(hints))
+
+    return _draft(
+        page=page,
+        text=text,
+        chunk_kind="metric",
+        section_path=section_path,
+        company=company,
+        year=year,
+        parser=parser,
+        boilerplate=boilerplate,
+        extra_embedding_context="\n".join(extra_lines),
+    )
+
+
 def _year_period(text: str) -> str | None:
     match = re.fullmatch(r"(?:FY\s*|Year\s*)?(20\d{2})", text.strip(), re.IGNORECASE)
     return match.group(1) if match else None
+
+
+def _unit_from_text(text: str) -> str | None:
+    if not text:
+        return None
+    t = text.strip()
+    if re.search(r"\bEUR\b|\b€\b", t):
+        if re.search(r"\bmillion\b|\bm\b", t, re.IGNORECASE):
+            return "EUR million"
+        if re.search(r"\bbillion\b|\bbn\b", t, re.IGNORECASE):
+            return "EUR billion"
+        return "EUR"
+    if re.search(r"\bUSD\b|\$", t):
+        return "USD million" if re.search(r"\bmillion\b", t, re.IGNORECASE) else "USD"
+    if re.search(r"\bkt\b", t):
+        return "kt"
+    if re.search(r"\bMt\b", t):
+        return "Mt"
+    return None
+
+
+def _is_useful_metric_header(text: str) -> bool:
+    clean = text.strip().casefold()
+    if not clean or _year_period(clean) is not None:
+        return True
+    return clean not in {"metric", "name", "description", "topic"}
+
+
+def _financial_metric_texts_from_header_row(
+    headers: list[str] | None,
+    cells: list[str],
+    *,
+    section_path: str | None,
+) -> list[str]:
+    if headers is None or len(headers) != len(cells) or len(cells) < 2:
+        return []
+    label_idx = next((i for i, cell in enumerate(cells) if cell.strip()), None)
+    if label_idx is None:
+        return []
+    metric = cells[label_idx].strip()
+    if _looks_like_value(metric):
+        return []
+    unit = _unit_from_text(headers[0]) or _unit_from_text(section_path or "")
+    metrics: list[str] = []
+    for header, cell in zip(headers[label_idx + 1:], cells[label_idx + 1:], strict=False):
+        period = _year_period(header)
+        value = cell.strip()
+        if period is None or not value or not _looks_like_value(value):
+            continue
+        lines = [f"Metric: {metric}", f"Period: {period}", f"Value: {value}"]
+        if unit:
+            lines.append(f"Unit: {unit}")
+        metrics.append("\n".join(lines))
+    return metrics
 
 
 def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:

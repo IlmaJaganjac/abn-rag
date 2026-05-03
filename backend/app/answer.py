@@ -75,9 +75,16 @@ Rules:
 8. If the answer is absent from the context, or no retrieved quote directly
    supports it, set `refused=true`, give a short `refusal_reason`, and leave
    `citations` empty. Do not guess.
+   - If the question asks for an actual result but only a target/forecast is
+     available, set `refused=true`. Do not report the target as a proxy.
+   - If the question asks about company A but retrieved chunks are from company
+     B, set `refused=true`. Do not summarise what the other company says.
+   - Any answer that begins "not reported", "not available", or "not in the
+     context" must have `refused=true` — never give an explanatory non-refusal.
 
 9. Keep `answer` to one or two sentences. Do not invent, round, drop units, or
    remove qualifiers.
+
 """
 
 
