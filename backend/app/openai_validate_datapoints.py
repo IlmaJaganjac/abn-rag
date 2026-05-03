@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
-import os
 from typing import Any
 
 from pydantic import BaseModel
 
 from backend.app._openai import openai_client
+from backend.app.config import settings
 
 log = logging.getLogger(__name__)
 
@@ -145,11 +145,8 @@ def validate_datapoints_openai(
         f"Candidate datapoints:\n{json.dumps(candidates, indent=2)}"
     )
 
-    model = os.environ.get(
-        "PRE_EXTRACT_VALIDATION_MODEL",
-        os.environ.get("PRE_EXTRACT_MODEL", "gpt-4o-mini"),
-    )
-    supports_temp_zero = "gpt-5-mini" not in model
+    model = settings.openai_validate_model
+    supports_temp_zero = "gpt-5" not in model
 
     client = openai_client()
     completion = client.beta.chat.completions.parse(

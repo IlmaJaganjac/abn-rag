@@ -1,0 +1,922 @@
+{
+  "timestamp": "2026-05-01T13:06:41+00:00",
+  "questions_path": "evals/questions-2025-multi-company.yaml",
+  "eval_set": {
+    "source": null,
+    "company": null,
+    "year": null,
+    "n_questions": 105
+  },
+  "config": {
+    "company": "ASML",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 4,
+    "pct": 80.0,
+    "by_category": {
+      "fte": {
+        "passed": 4,
+        "total": 5,
+        "pct": 80.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "asml_2025_fte_total_employees",
+      "question": "How many total employees did ASML report in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "44,175",
+          "44175",
+          "total number of employees",
+          "headcount"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          227
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": true,
+      "answer_correct": false,
+      "citation_grounded": true,
+      "reasons": [
+        "none of ['44,175', '44175', 'total number of employees', 'headcount'] found in answer"
+      ],
+      "retrieval": {
+        "pages": [
+          301,
+          301,
+          301,
+          301,
+          227,
+          227,
+          301,
+          301,
+          227,
+          227,
+          227,
+          301
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:extracted:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.0358011634056055,
+            "text": "Datapoint type: fte\nMetric: Total number of payroll and temporary employees as of December 31\nPeriod: 2025\nValue: 44,209\nUnit: FTE\nBasis: year-end payroll and temporary employees in FTE\nQuote: The total number of payroll and temporary employees as of December 31 in FTE per sector was: ... Total | 42,416 | 44,027 | 44,209\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:extracted:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03378474697077691,
+            "text": "Datapoint type: fte\nMetric: Payroll employees as of December 31\nPeriod: 2025\nValue: 43,520\nUnit: FTE\nBasis: year-end payroll employees in FTE\nQuote: Payroll employees | 40,309 | 42,786 | 43,520\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:301:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03329506314580942,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:extracted:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03301587301587301,
+            "text": "Datapoint type: fte\nMetric: Average number of payroll employees in FTEs - Worldwide (including Netherlands)\nPeriod: 2025\nValue: 43,267\nUnit: FTE\nBasis: average payroll employees in FTEs\nQuote: Average number of payroll employees in FTEs ... Worldwide (including Netherlands) | 38,805 | 41,697 | 43,267\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:227:58",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.029084507042253523,
+            "text": "Topic: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n2024: 44,027\n2025: 44,209"
+          },
+          {
+            "id": "asml.pdf:227:59",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.02701252236135957,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2024\nValue: 44,027\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:301:40",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.026611716220194287,
+            "text": "Year ended December 31 (in FTE): Less: Temporary employees\n2023: 2,107\n2024: 1,241\n2025: 689"
+          },
+          {
+            "id": "asml.pdf:301:92",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.026538908246225318,
+            "text": "Year ended December 31 (in FTE): Research and Development\n2023: 15,604\n2024: 15,992\n2025: 16,448"
+          },
+          {
+            "id": "asml.pdf:227:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01935483870967742,
+            "text": "| Topic                                                                                                                                       | Description | 2024   | 2025   |\n| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------ |\n| Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)                        |             | 44,027 | 44,209 |\n| Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)           |             | 1,241  | 689    |\n| Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)                                      |             | 42,786 | 43,520 |\n| Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount) |             | 43,395 | 44,175 |\n| Number of employees as defined by ESRS (in headcount)                                                                                       |             | 43,395 | 44,175 |"
+          },
+          {
+            "id": "asml.pdf:227:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.019047619047619046,
+            "text": "Characteristics of our employees\nTotal number of employees –\nheadcount by gender\n(as of December 31)\nMale\n\n34,454\n34,844\nFemale\n\n8,899\n9,270\nOther\n\n38\n57\nNot reported\n\n4\n4\nTotal number of employees\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nTopic\nDescription\n2024\n2025\nNumber of employees by significant\nemployment country or jurisdiction\n(representing >10% total employees)\n(headcount as of December 31)\nThe Netherlands\n\n23,194\n23,707\nTaiwan\n\n4,572\n4,548\nUnited States\n\n8,310\n8,242\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2024\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,212\n32,216\n32\n4\n40,464\nTemporary employees\n687\n2,238\n6\n0\n2,931\nTotal employees\n8,899\n34,454\n38\n4\n43,395\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2025\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,672\n32,960\n50\n4\n41,686\nTemporary employees\n598\n1,884\n7\n0\n2,489\nTotal employees\n9,270\n34,844\n57\n4\n44,175\nTopic\nDescription\n2024\n2025\nReconciliation of the total number of\nemployees per ESRS to number of\nemployees reported in the\nConsolidated financial statements\n(as of December 31)\nTotal number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n44,027\n44,209\nLess: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n\n1,241\n689\nTotal number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n42,786\n43,520\nTotal number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\n\n43,395\n44,175\nNumber of employees as defined by ESRS (in headcount)\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nEmployee turnover (For the period\nJanuary 1 to December 31)1\nEmployee turnover (in headcount)\n1,652\n1,847\nEmployee turnover rate\n 3.9 %\n 4.2 %\n\n227\nAttractive workplace for all: Metrics table\n1. We have redefined our calculation of ‘employee turnover’ and revised our comparative figures accordingly. Read more in Sustainability statements – Social – Attractive workplace for all: Additional disclosures – Methodology on metrics\n\n--- Parsed markdown ---"
+          },
+          {
+            "id": "asml.pdf:227:56",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01875,
+            "text": "Characteristics of our employees\nTotal number of employees –\nheadcount by gender\n(as of December 31)\nMale\n\n34,454\n34,844\nFemale\n\n8,899\n9,270\nOther\n\n38\n57\nNot reported\n\n4\n4\nTotal number of employees\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nTopic\nDescription\n2024\n2025\nNumber of employees by significant\nemployment country or jurisdiction\n(representing >10% total employees)\n(headcount as of December 31)\nThe Netherlands\n\n23,194\n23,707\nTaiwan\n\n4,572\n4,548\nUnited States\n\n8,310\n8,242\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2024\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,212\n32,216\n32\n4\n40,464\nTemporary employees\n687\n2,238\n6\n0\n2,931\nTotal employees\n8,899\n34,454\n38\n4\n43,395\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2025\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,672\n32,960\n50\n4\n41,686\nTemporary employees\n598\n1,884\n7\n0\n2,489\nTotal employees\n9,270\n34,844\n57\n4\n44,175\nTopic\nDescription\n2024\n2025\nReconciliation of the total number of\nemployees per ESRS to number of\nemployees reported in the\nConsolidated financial statements\n(as of December 31)\nTotal number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n44,027\n44,209\nLess: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n\n1,241\n689\nTotal number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n42,786\n43,520\nTotal number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\n\n43,395\n44,175\nNumber of employees as defined by ESRS (in headcount)\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nEmployee turnover (For the period\nJanuary 1 to December 31)1\nEmployee turnover (in headcount)\n1,652\n1,847\nEmployee turnover rate\n 3.9 %\n 4.2 %\n\n227\nAttractive workplace for all: Metrics table\n1. We have redefined our calculation of ‘employee turnover’ and revised our comparative figures accordingly. Read more in Sustainability statements – Social – Attractive workplace for all: Additional disclosures – Methodology on metrics\n\n--- Parsed markdown ---"
+          },
+          {
+            "id": "asml.pdf:301:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.01846153846153846,
+            "text": "The total number of payroll and temporary employees as of December 31 in FTE per sector was:"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many total employees did ASML report in 2025?",
+        "answer": "ASML reported a total of 44,209 payroll and temporary employees as of December 31, 2025.",
+        "verbatim": "44,209",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Topic: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n2024: 44,027\n2025: 44,209"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE) 2025: 44,209"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_fte_payroll_employees_fte",
+      "question": "How many payroll employees in FTE did ASML report in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "43,520",
+          "43520",
+          "payroll employees",
+          "FTE"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          227,
+          301
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          301,
+          301,
+          301,
+          301,
+          301,
+          227,
+          301,
+          227,
+          227,
+          301,
+          301,
+          227
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:extracted:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.035545147020556854,
+            "text": "Datapoint type: fte\nMetric: Total number of payroll and temporary employees as of December 31\nPeriod: 2025\nValue: 44,209\nUnit: FTE\nBasis: year-end payroll and temporary employees in FTE\nQuote: The total number of payroll and temporary employees as of December 31 in FTE per sector was: ... Total | 42,416 | 44,027 | 44,209\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:extracted:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.035441061670569866,
+            "text": "Datapoint type: fte\nMetric: Payroll employees as of December 31\nPeriod: 2025\nValue: 43,520\nUnit: FTE\nBasis: year-end payroll employees in FTE\nQuote: Payroll employees | 40,309 | 42,786 | 43,520\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:extracted:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03487903225806452,
+            "text": "Datapoint type: fte\nMetric: Average number of payroll employees in FTEs - Worldwide (including Netherlands)\nPeriod: 2025\nValue: 43,267\nUnit: FTE\nBasis: average payroll employees in FTEs\nQuote: Average number of payroll employees in FTEs ... Worldwide (including Netherlands) | 38,805 | 41,697 | 43,267\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:301:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03228602383531961,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:301:92",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.02902155887230514,
+            "text": "Year ended December 31 (in FTE): Research and Development\n2023: 15,604\n2024: 15,992\n2025: 16,448"
+          },
+          {
+            "id": "asml.pdf:227:58",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.028403361344537813,
+            "text": "Topic: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n2024: 44,027\n2025: 44,209"
+          },
+          {
+            "id": "asml.pdf:301:40",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.027627906976744186,
+            "text": "Year ended December 31 (in FTE): Less: Temporary employees\n2023: 2,107\n2024: 1,241\n2025: 689"
+          },
+          {
+            "id": "asml.pdf:227:59",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.02744484431231419,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2024\nValue: 44,027\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01935483870967742,
+            "text": "| Topic                                                                                                                                       | Description | 2024   | 2025   |\n| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------ |\n| Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)                        |             | 44,027 | 44,209 |\n| Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)           |             | 1,241  | 689    |\n| Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)                                      |             | 42,786 | 43,520 |\n| Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount) |             | 43,395 | 44,175 |\n| Number of employees as defined by ESRS (in headcount)                                                                                       |             | 43,395 | 44,175 |"
+          },
+          {
+            "id": "asml.pdf:301:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.01846153846153846,
+            "text": "The total number of payroll and temporary employees as of December 31 in FTE per sector was:"
+          },
+          {
+            "id": "asml.pdf:301:63",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.01818181818181818,
+            "text": "The total number of payroll and temporary employees as of December 31 in FTE per sector was:"
+          },
+          {
+            "id": "asml.pdf:227:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01764705882352941,
+            "text": "Characteristics of our employees\nTotal number of employees –\nheadcount by gender\n(as of December 31)\nMale\n\n34,454\n34,844\nFemale\n\n8,899\n9,270\nOther\n\n38\n57\nNot reported\n\n4\n4\nTotal number of employees\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nTopic\nDescription\n2024\n2025\nNumber of employees by significant\nemployment country or jurisdiction\n(representing >10% total employees)\n(headcount as of December 31)\nThe Netherlands\n\n23,194\n23,707\nTaiwan\n\n4,572\n4,548\nUnited States\n\n8,310\n8,242\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2024\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,212\n32,216\n32\n4\n40,464\nTemporary employees\n687\n2,238\n6\n0\n2,931\nTotal employees\n8,899\n34,454\n38\n4\n43,395\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2025\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,672\n32,960\n50\n4\n41,686\nTemporary employees\n598\n1,884\n7\n0\n2,489\nTotal employees\n9,270\n34,844\n57\n4\n44,175\nTopic\nDescription\n2024\n2025\nReconciliation of the total number of\nemployees per ESRS to number of\nemployees reported in the\nConsolidated financial statements\n(as of December 31)\nTotal number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n44,027\n44,209\nLess: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n\n1,241\n689\nTotal number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n42,786\n43,520\nTotal number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\n\n43,395\n44,175\nNumber of employees as defined by ESRS (in headcount)\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nEmployee turnover (For the period\nJanuary 1 to December 31)1\nEmployee turnover (in headcount)\n1,652\n1,847\nEmployee turnover rate\n 3.9 %\n 4.2 %\n\n227\nAttractive workplace for all: Metrics table\n1. We have redefined our calculation of ‘employee turnover’ and revised our comparative figures accordingly. Read more in Sustainability statements – Social – Attractive workplace for all: Additional disclosures – Methodology on metrics\n\n--- Parsed markdown ---"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many payroll employees in FTE did ASML report in 2025?",
+        "answer": "ASML reported 43,520 payroll employees in FTE as of December 31, 2025.",
+        "verbatim": "43,520",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Payroll employees | 40,309 | 42,786 | 43,520"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Payroll employees | 40,309 | 42,786 | 43,520"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_fte_average_payroll_employees",
+      "question": "What was ASML's average number of payroll employees worldwide in FTEs in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "43,267",
+          "43267",
+          "average number of payroll employees",
+          "FTE"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          301,
+          132
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          301,
+          301,
+          301,
+          301,
+          301,
+          131,
+          301,
+          301,
+          301,
+          227,
+          301,
+          301
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:extracted:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.0360655737704918,
+            "text": "Datapoint type: fte\nMetric: Average number of payroll employees in FTEs - Worldwide (including Netherlands)\nPeriod: 2025\nValue: 43,267\nUnit: FTE\nBasis: average payroll employees in FTEs\nQuote: Average number of payroll employees in FTEs ... Worldwide (including Netherlands) | 38,805 | 41,697 | 43,267\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:extracted:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03522785458269329,
+            "text": "Datapoint type: fte\nMetric: Total number of payroll and temporary employees as of December 31\nPeriod: 2025\nValue: 44,209\nUnit: FTE\nBasis: year-end payroll and temporary employees in FTE\nQuote: The total number of payroll and temporary employees as of December 31 in FTE per sector was: ... Total | 42,416 | 44,027 | 44,209\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:301:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.033846153846153845,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:301:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.0315359477124183,
+            "text": "Metric: Worldwide (including Netherlands)\nPeriod: 2024\nValue: 43,267"
+          },
+          {
+            "id": "asml.pdf:extracted:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.03058686358336572,
+            "text": "Datapoint type: fte\nMetric: Payroll employees as of December 31\nPeriod: 2025\nValue: 43,520\nUnit: FTE\nBasis: year-end payroll employees in FTE\nQuote: Payroll employees | 40,309 | 42,786 | 43,520\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:131:104",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.027238066188805858,
+            "text": "Metric: Average number of payroll employees in FTEs\nPeriod: 2025\nValue: 43,267\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:301:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.019047619047619046,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:301:62",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.01875,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:301:61",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.01818181818181818,
+            "text": "18. Personnel expenses and employee information\nPersonnel expenses for all payroll employees were as follows:\nYear ended December 31 (€, in millions)\n2023\n2024\n2025\nWages and salaries\n\n4,447.0\n5,001.2\n5,460.2\nSocial security expenses\n\n410.5\n468.4\n516.6\nPension and retirement expenses\n\n348.9\n395.2\n433.7\nShare-based payments\n\n134.8\n172.6\n202.3\nPersonnel expenses\n\n5,341.2\n6,037.4\n6,612.8\nThe continued increase in personnel expenses is primarily attributable to higher average wages and salaries per FTE,\nreflecting our ongoing investment in talent to support the growth and expansion of our business.\nShort-term incentive bonus plans\nWe offer annual performance-based STI bonus plans to our employees. Bonus payouts vary depending on job grade,\nplan type, and both company and individual performance. For employees excluding the Board of Management, the\npayout average is 17% of annual base gross salary. The 2025 STI bonus is accrued for as part of Accrued and other\nliabilities in the Consolidated balance sheets and will be paid in the first quarter of 2026.\nThe STI bonus expenses for the (former) Board of Management and other employees were as follows:\nYear ended December 31 (€, in millions)\n2023\n2024\n2025\nBoard of Management\n\n6.0\n5.3\n7.3\nFormer Board of Management1\n\n—\n1.0\n—\nOther employees\n\n712.6\n816.8\n951.0\nTotal STI bonus expenses\n\n718.6\n823.1\n958.3\n1. On April 24, 2024, Peter T.F.M. Wennink and Martin A. van den Brink stepped down from their roles as Presidents of ASML and are, therefore,\npresented as former Board of Management in 2024.\n\nThe average number of payroll employees in FTEs was:\nAverage number of payroll employees in FTEs\n2023\n2024\n2025\nNetherlands\n\n19,876\n21,811\n22,801\nWorldwide (including Netherlands)\n\n38,805\n41,697\n43,267\nThe total number of payroll and temporary employees as of December 31 in FTE per sector was:\nYear ended December 31 (in FTE)\n2023\n2024\n2025\nCustomer Support and Sales\n\n10,790\n10,344\n10,235\nManufacturing and Supply Chain Management\n\n9,954\n11,341\n11,124\nStrategic Supply Management\n\n2,033\n1,965\n1,929\nGeneral and Administrative\n\n4,035\n4,385\n4,473\nResearch and Development\n\n15,604\n15,992\n16,448\nTotal\n\n42,416\n44,027\n44,209\nLess: Temporary employees\n\n2,107\n1,241\n689\nPayroll employees\n\n40,309\n42,786\n43,520\n\n301\nFinancial statements\nNotes\nAppendices\nDefinitions\nNotes to the Consolidated financial statements (continued)\n\n--- Parsed markdown ---"
+          },
+          {
+            "id": "asml.pdf:227:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01791044776119403,
+            "text": "| Topic                                                                                                                                       | Description | 2024   | 2025   |\n| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------ |\n| Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)                        |             | 44,027 | 44,209 |\n| Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)           |             | 1,241  | 689    |\n| Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)                                      |             | 42,786 | 43,520 |\n| Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount) |             | 43,395 | 44,175 |\n| Number of employees as defined by ESRS (in headcount)                                                                                       |             | 43,395 | 44,175 |"
+          },
+          {
+            "id": "asml.pdf:301:63",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.017391304347826087,
+            "text": "The total number of payroll and temporary employees as of December 31 in FTE per sector was:"
+          },
+          {
+            "id": "asml.pdf:301:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.017142857142857144,
+            "text": "| Personnel expenses for all payroll employees were as follows: |         |         |         |                                             |        |        |        |      |\n| ------------------------------------------------------------- | ------- | ------- | ------- | ------------------------------------------- | ------ | ------ | ------ | ---- |\n|                                                               |         |         |         | Average number of payroll employees in FTEs | 2023   |        | 2024   | 2025 |\n| Year ended December 31 (€, in millions)                       | 2023    | 2024    | 2025    |                                             |        |        |        |      |\n|                                                               |         |         |         | Netherlands                                 | 19,876 | 21,811 | 22,801 |      |\n| Wages and salaries                                            | 4,447.0 | 5,001.2 | 5,460.2 |                                             |        |        |        |      |\n|                                                               |         |         |         | Worldwide (including Netherlands)           | 38,805 | 41,697 | 43,267 |      |\n| Social security expenses                                      | 410.5   | 468.4   | 516.6   |                                             |        |        |        |      |\n| Pension and retirement expenses                               | 348.9   | 395.2   | 433.7   |                                             |        |        |        |      |\n| Share-based payments                                          | 134.8   | 172.6   | 202.3   |                                             |        |        |        |      |\n| Personnel expenses                                            | 5,341.2 | 6,037.4 | 6,612.8 |                                             |        |        |        |      |"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What was ASML's average number of payroll employees worldwide in FTEs in 2025?",
+        "answer": "ASML's average number of payroll employees worldwide in FTEs in 2025 was 43,267.",
+        "verbatim": "43,267",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Average number of payroll employees in FTEs ... Worldwide (including Netherlands) | 38,805 | 41,697 | 43,267"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Average number of payroll employees in FTEs ... Worldwide (including Netherlands) | 38,805 | 41,697 | 43,267"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_fte_employees_by_gender_total",
+      "question": "What total employee number did ASML use in its employee headcount by gender table for 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "44,175",
+          "44175",
+          "headcount by gender",
+          "total employees"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          227
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          301,
+          227,
+          227,
+          301,
+          301,
+          227
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:227:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.034432234432234435,
+            "text": "Description: Temporary employees\nFemale: 598\nMale: 1,884\nOther: 7\nNot disclosed: 0\nTotal 2025: 2,489"
+          },
+          {
+            "id": "asml.pdf:227:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.033756638189794505,
+            "text": "| Topic                                                               | Description               | 2024   | 2025   |\n| ------------------------------------------------------------------- | ------------------------- | ------ | ------ |\n| Total number of employees – headcount by gender (as of December 31) | Male                      | 34,454 | 34,844 |\n|                                                                     | Female                    | 8,899  | 9,270  |\n|                                                                     | Other                     | 38     | 57     |\n|                                                                     | Not reported              | 4      | 4      |\n|                                                                     | Total number of employees | 43,395 | 44,175 |"
+          },
+          {
+            "id": "asml.pdf:227:30",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.03301587301587301,
+            "text": "| Topic | Description         | Female | Male   | Other | Not disclosed | Total 2025 |\n| ----- | ------------------- | ------ | ------ | ----- | ------------- | ---------- |\n|       | Permanent employees | 8,672  | 32,960 | 50    | 4             | 41,686     |\n|       | Temporary employees | 598    | 1,884  | 7     | 0             | 2,489      |\n|       | Total employees     | 9,270  | 34,844 | 57    | 4             | 44,175     |"
+          },
+          {
+            "id": "asml.pdf:227:31",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.03234524847428073,
+            "text": "Description: Permanent employees\nFemale: 8,672\nMale: 32,960\nOther: 50\nNot disclosed: 4\nTotal 2025: 41,686"
+          },
+          {
+            "id": "asml.pdf:227:26",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.03182678158503258,
+            "text": "| Topic | Description         | Female | Male   | Other | Not disclosed | Total 2024 |\n| ----- | ------------------- | ------ | ------ | ----- | ------------- | ---------- |\n|       | Permanent employees | 8,212  | 32,216 | 32    | 4             | 40,464     |\n|       | Temporary employees | 687    | 2,238  | 6     | 0             | 2,931      |\n|       | Total employees     | 8,899  | 34,454 | 38    | 4             | 43,395     |"
+          },
+          {
+            "id": "asml.pdf:227:27",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.031151515151515152,
+            "text": "Description: Permanent employees\nFemale: 8,212\nMale: 32,216\nOther: 32\nNot disclosed: 4\nTotal 2024: 40,464"
+          },
+          {
+            "id": "asml.pdf:extracted:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.0309048178613396,
+            "text": "Datapoint type: fte\nMetric: Total number of payroll and temporary employees as of December 31\nPeriod: 2025\nValue: 44,209\nUnit: FTE\nBasis: year-end payroll and temporary employees in FTE\nQuote: The total number of payroll and temporary employees as of December 31 in FTE per sector was: ... Total | 42,416 | 44,027 | 44,209\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:227:29",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.030625,
+            "text": "Description: Total employees\nFemale: 8,899\nMale: 34,454\nOther: 38\nNot disclosed: 4\nTotal 2024: 43,395"
+          },
+          {
+            "id": "asml.pdf:227:28",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.030495356037151703,
+            "text": "Description: Temporary employees\nFemale: 687\nMale: 2,238\nOther: 6\nNot disclosed: 0\nTotal 2024: 2,931"
+          },
+          {
+            "id": "asml.pdf:301:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.030105569712413544,
+            "text": "Metric: Worldwide (including Netherlands)\nPeriod: 2024\nValue: 43,267"
+          },
+          {
+            "id": "asml.pdf:301:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.026153846153846153,
+            "text": "The average number of payroll employees in FTEs was:"
+          },
+          {
+            "id": "asml.pdf:227:56",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.01935483870967742,
+            "text": "Characteristics of our employees\nTotal number of employees –\nheadcount by gender\n(as of December 31)\nMale\n\n34,454\n34,844\nFemale\n\n8,899\n9,270\nOther\n\n38\n57\nNot reported\n\n4\n4\nTotal number of employees\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nTopic\nDescription\n2024\n2025\nNumber of employees by significant\nemployment country or jurisdiction\n(representing >10% total employees)\n(headcount as of December 31)\nThe Netherlands\n\n23,194\n23,707\nTaiwan\n\n4,572\n4,548\nUnited States\n\n8,310\n8,242\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2024\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,212\n32,216\n32\n4\n40,464\nTemporary employees\n687\n2,238\n6\n0\n2,931\nTotal employees\n8,899\n34,454\n38\n4\n43,395\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2025\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,672\n32,960\n50\n4\n41,686\nTemporary employees\n598\n1,884\n7\n0\n2,489\nTotal employees\n9,270\n34,844\n57\n4\n44,175\nTopic\nDescription\n2024\n2025\nReconciliation of the total number of\nemployees per ESRS to number of\nemployees reported in the\nConsolidated financial statements\n(as of December 31)\nTotal number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n44,027\n44,209\nLess: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n\n1,241\n689\nTotal number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n42,786\n43,520\nTotal number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\n\n43,395\n44,175\nNumber of employees as defined by ESRS (in headcount)\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nEmployee turnover (For the period\nJanuary 1 to December 31)1\nEmployee turnover (in headcount)\n1,652\n1,847\nEmployee turnover rate\n 3.9 %\n 4.2 %\n\n227\nAttractive workplace for all: Metrics table\n1. We have redefined our calculation of ‘employee turnover’ and revised our comparative figures accordingly. Read more in Sustainability statements – Social – Attractive workplace for all: Additional disclosures – Methodology on metrics\n\n--- Parsed markdown ---"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What total employee number did ASML use in its employee headcount by gender table for 2025?",
+        "answer": "The total employee number ASML reported for 2025 is 44,175.",
+        "verbatim": "44,175",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Characteristics of our employees\nTotal number of employees –\nheadcount by gender\n(as of December 31)\nMale\n\n34,454\n34,844\nFemale\n\n8,899\n9,270\nOther\n\n38\n57\nNot reported\n\n4\n4\nTotal number of employees\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nTopic\nDescription\n2024\n2025\nNumber of employees by significant\nemployment country or jurisdiction\n(representing >10% total employees)\n(headcount as of December 31)\nThe Netherlands\n\n23,194\n23,707\nTaiwan\n\n4,572\n4,548\nUnited States\n\n8,310\n8,242\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2024\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,212\n32,216\n32\n4\n40,464\nTemporary employees\n687\n2,238\n6\n0\n2,931\nTotal employees\n8,899\n34,454\n38\n4\n43,395\nTopic\nDescription\nFemale\nMale\nOther\nNot\ndisclosed\nTotal 2025\nTotal number of permanent and\ntemporary employees by gender\n(headcount as of December 31)\nPermanent employees\n8,672\n32,960\n50\n4\n41,686\nTemporary employees\n598\n1,884\n7\n0\n2,489\nTotal employees\n9,270\n34,844\n57\n4\n44,175\nTopic\nDescription\n2024\n2025\nReconciliation of the total number of\nemployees per ESRS to number of\nemployees reported in the\nConsolidated financial statements\n(as of December 31)\nTotal number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n44,027\n44,209\nLess: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n\n1,241\n689\nTotal number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\n\n42,786\n43,520\nTotal number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\n\n43,395\n44,175\nNumber of employees as defined by ESRS (in headcount)\n\n43,395\n44,175\nTopic\nDescription\n2024\n2025\nEmployee turnover (For the period\nJanuary 1 to December 31)1\nEmployee turnover (in headcount)\n1,652\n1,847\nEmployee turnover rate\n 3.9 %\n 4.2 %\n\n227\nAttractive workplace for all: Metrics table\n1. We have redefined our calculation of ‘employee turnover’ and revised our comparative figures accordingly. Read more in Sustainability statements – Social – Attractive workplace for all: Additional disclosures – Methodology on metrics\n\n--- Parsed markdown ---"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Total number of employees | 9,270 | 34,844 | 57 | 4 | 44,175"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_fte_temporary_reconciliation",
+      "question": "How many temporary employees were included in ASML's ESRS employee reconciliation in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "hard",
+      "expected": {
+        "answer_contains_any": [
+          "689",
+          "temporary employees",
+          "ESRS"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          227,
+          301
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          301,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227,
+          227
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:extracted:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.032638888888888884,
+            "text": "Datapoint type: fte\nMetric: Total number of payroll and temporary employees as of December 31\nPeriod: 2025\nValue: 44,209\nUnit: FTE\nBasis: year-end payroll and temporary employees in FTE\nQuote: The total number of payroll and temporary employees as of December 31 in FTE per sector was: ... Total | 42,416 | 44,027 | 44,209\nExtractor: llamaextract\nPriority: 85"
+          },
+          {
+            "id": "asml.pdf:227:58",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.032539682539682535,
+            "text": "Topic: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n2024: 44,027\n2025: 44,209"
+          },
+          {
+            "id": "asml.pdf:227:59",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.03229437229437229,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2024\nValue: 44,027\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:60",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.031384615384615386,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:35",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.0309048178613396,
+            "text": "Topic: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\n2024: 44,027\n2025: 44,209"
+          },
+          {
+            "id": "asml.pdf:227:34",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.030600038587690524,
+            "text": "| Topic                                                                                                                                       | Description | 2024   | 2025   |\n| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------ | ------ |\n| Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)                        |             | 44,027 | 44,209 |\n| Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)           |             | 1,241  | 689    |\n| Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)                                      |             | 42,786 | 43,520 |\n| Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount) |             | 43,395 | 44,175 |\n| Number of employees as defined by ESRS (in headcount)                                                                                       |             | 43,395 | 44,175 |"
+          },
+          {
+            "id": "asml.pdf:227:61",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.030346930995043844,
+            "text": "Topic: Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n2024: 1,241\n2025: 689"
+          },
+          {
+            "id": "asml.pdf:227:62",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.029910714285714284,
+            "text": "Metric: Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\nPeriod: 2024\nValue: 1,241\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:36",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.02987398072646405,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2024\nValue: 44,027\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:37",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.028823529411764706,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:38",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.02874354561101549,
+            "text": "Topic: Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\n2024: 1,241\n2025: 689"
+          },
+          {
+            "id": "asml.pdf:227:42",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.02567901234567901,
+            "text": "Metric: Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2024\nValue: 42,786\nUnit: as of December 31"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many temporary employees were included in ASML's ESRS employee reconciliation in 2025?",
+        "answer": "In 2025, ASML included 689 temporary employees in their ESRS employee reconciliation.",
+        "verbatim": "689",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "2025: 689"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "2025: 689"
+          }
+        ],
+        "grounding_drops": []
+      }
+    }
+  ]
+}

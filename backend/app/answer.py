@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import html
-import os
 import re
 import unicodedata
 from collections import defaultdict
@@ -356,9 +355,8 @@ def answer_question(
     client = openai_client()
     context = _format_context(chunks)
     user_msg = f"Question: {question}\n\nContext:\n{context}"
-    model = os.environ.get("ANSWER_MODEL") or settings.openai_answer_model
-    # gpt-5-mini only supports the default temperature (1); omit parameter for those models
-    supports_temp_zero = "gpt-5-mini" not in model
+    model = settings.openai_answer_model
+    supports_temp_zero = "gpt-5" not in model
 
     completion = client.beta.chat.completions.parse(
         model=model,

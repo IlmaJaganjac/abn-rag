@@ -1,0 +1,902 @@
+{
+  "timestamp": "2026-05-01T20:42:43+00:00",
+  "questions_path": "evals/questions-2025-multi-company.yaml",
+  "eval_set": {
+    "source": null,
+    "company": null,
+    "year": null,
+    "n_questions": 105
+  },
+  "config": {
+    "company": "SHELL",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "pct": 100.0,
+    "by_category": {
+      "fte": {
+        "passed": 5,
+        "total": 5,
+        "pct": 100.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "shell_2025_fte_employees_excluding_portfolio",
+      "question": "How many people did Shell employ excluding portfolio companies at the end of December 2025?",
+      "company": "SHELL",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "72,000",
+          "72,000 people",
+          "excluding portfolio companies"
+        ],
+        "answer_contains_all": null,
+        "page": 117,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "shell.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          117,
+          116,
+          117,
+          117,
+          117,
+          401,
+          117,
+          117,
+          116,
+          401,
+          400,
+          117
+        ],
+        "chunks": [
+          {
+            "id": "shell.pdf:extracted:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.0360655737704918,
+            "text": "Datapoint type: fte\nMetric: Number of employees (excluding portfolio companies)\nPeriod: 2025\nValue: 72,000\nBasis: Headcount, year-end, excludes portfolio companies\nQuote: We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025. This is fewer than the 81,000 at the end of 2024. Shell's portfolio companies, which generally maintain their own HR systems, employed 13,000 people at the end of 2025 compared with 15,000 at the end of 2024.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:extracted:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03522785458269329,
+            "text": "Datapoint type: fte\nMetric: Number of employees\nPeriod: 2025\nValue: 85,000\nBasis: Headcount, year-end, includes portfolio companies\nQuote: We employed 85,000 people on a full- or part-time basis as of December 31, 2025. This compares with 96,000 at the end of 2024 and 103,000 at the end of 2023.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:extracted:2",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03487903225806452,
+            "text": "Datapoint type: fte\nMetric: Number of employees in portfolio companies\nPeriod: 2025\nValue: 13,000\nBasis: Headcount, year-end, portfolio companies only\nQuote: Shell's portfolio companies, which generally maintain their own HR systems, employed 13,000 people at the end of 2025 compared with 15,000 at the end of 2024.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:117:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03408653846153846,
+            "text": "Employee overview figures include people working for Shell companies\nand Shell-operated joint ventures, as well as those seconded to non-\noperated joint ventures, but exclude contingent workers, otherwise\nreferred to as contractors. Contractors are external workers who are\nengaged directly or through third parties to provide services to Shell.\nThey work alongside Shell employees across several of our businesses.\nChanges in headcount\nWe employed 72,000 people in Shell, excluding portfolio companies,\nat the end of December 2025. This is fewer than the 81,000 at the end\nof 2024. Shell's portfolio companies, which generally maintain their\nown HR systems, employed 13,000 people at the end of 2025\ncompared with 15,000 at the end of 2024.\nSee Note 33 to the \"Consolidated Financial Statements\" on page 305 for the average\nnumber of employees by business segment.\nThe table below presents the total number of employees by gender\nand region as of December 31, 2025.\nNumber of employees by gender and region [A]\n\nthousand\n2025\n2024\n2023\nMen\nWomen\nTotal\nTotal\nTotal\nNumber of employees\n55\n30\n85\n96\n103\nBreakdown by region\nAfrica\n1.2\n0.6\n2\n3\n4\nAsia\n19.7\n13.0\n33\n36\n38\nEurope\n16.3\n9.5\n26\n30\n31\nNorth America\n15.1\n5.7\n21\n23\n24\nOceania\n1.8\n0.8\n3\n3\n4\nSouth America\n0.9\n0.6\n2\n2\n2\n[A] Split may not add up to the total due to rounding.\nThe table below presents the distribution of employee contract type\nby gender as of December 31, 2025.\nEmployee contract type by gender [A]\nthousand\n2025\n2024\nMen\nWomen\nMen\nWomen\nPermanent contract/\nEmployment at-will [B]\n54.2\n29.8\n52.0\n28.0\nFixed-term contract\n0.7\n0.4\n0.8\n0.3\n[A] 2024 data excludes employees in portfolio companies.\n[B] Employment-at-will is used in the USA to describe the employment relationship.\nThe table below presents the number of employees by age group.\nEmployees by age group [A] [B]\nthousand\n% of\nemployees\n2025\n2024\n2023\nUnder 30 years old\n 13 %\n9\n10\n12\nBetween 30 and 50 years old\n 65 %\n47\n52\n54\nAbove 50 years old\n 22 %\n16\n19\n18\nTotal employees\n 100 %\n72\n81\n84\n[A] Excludes employees in portfolio companies.\n[B] Includes employees seconded to joint ventures.\nShell aims to be an attractive employer to its existing and prospective\nemployees. We offer employees the opportunity to develop their\ncareers within Shell to enable them to build their skills and progress.\nSee \"This is Shell\" on pages 6-8.\nAs of December 31, 2025 employee turnover was 18.3%. A total of\n16,613 employees left Shell including 8,416 voluntary resignations. The\ntotal includes 5,652 voluntary resignations from non-integrated portfolio\ncompanies, which we report separately for transparency [A]. In 2024,\nShell collected turnover data only for integrated companies, which did\nnot include portfolio companies. Excluding portfolio companies, turnover\nin 2025 was 11.2%, with 8,565 employees leaving Shell of whom 2,764\nresigned voluntarily. This"
+          },
+          {
+            "id": "shell.pdf:extracted:6",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.0330316742081448,
+            "text": "Datapoint type: fte\nMetric: Employees by age group\nPeriod: 2025\nValue: Under 30: 9,000; 30-50: 47,000; Above 50: 16,000; Total: 72,000\nBasis: Headcount, year-end, by age group, excludes portfolio companies\nQuote: Employees by age group [A] [B] | % of employees | 2025 | Under 30 years old | 13% | 9 | Between 30 and 50 years old | 65% | 47 | Above 50 years old | 22% | 16 | Total employees | 100% | 72\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:401:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.03293650793650793,
+            "text": "Employees by country [A] [B] [C]\nthousand\n2025\n2024\nIndia\n13\n13\nNetherlands\n8\n10\nUnited States of America\n17\n18\nOther\n48\n55\nTotal employees\n85\n96\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\n[C] Countries with more than 50 employees representing at least 10% of total employees.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nEmployees by contract type and gender\nSee the table \"Employee contract type by gender\" on page 115\nfor the number of employees on permanent contracts (including\nemployment-at-will) and temporary contracts by gender.\nEmployee turnover\nEmployee turnover [A] [B]\nunit\n2025\n2024\nDeparting employees\nexcluding portfolio companies\nnumber\n8,565\n6,227\nTotal departing employees\nnumber\n16,613\n6,227\nRate of turnover excluding\nportfolio companies [C]\n%\n 11.2 %\n 7.6 %\nTotal rate of turnover [C]\n%\n 18.3 %\n 7.6 %\n[A] Includes employees seconded to joint ventures.\n[B] 2024 data excludes employees in portfolio companies.\n[C] Calculated as the aggregate number of employees who leave voluntarily or due to\ndismissal, retirement or death in service, divided by average employee headcount for the\nreporting period. Excludes termination due to divestment.\nData for our own workforce are reported on the basis of headcount at\nthe end of the reporting period.\nAs of December 31, 2025 employee turnover was 18.3%, with a total\nof 16,613 leaving Shell. This number includes portfolio companies,\nwhich typically experience higher rates of turnover due to operating\nmodels and workforce dynamics that differ from Shell's integrated\ncompanies.\nExcluding portfolio companies, turnover in 2025 was 11.2%, with\n8,565 employees leaving Shell. This compares to 7.6% in 2024 with\n6,227 employees leaving, excluding portfolio companies. Data on\nturnover for portfolio companies is not available for periods prior\nto 2025.\nSee \"Changes in headcount\" on page 115 for more information.\nCollective bargaining coverage and social dialogue (S1-8)\nWe respect the right to collective bargaining and freedom of\nassociation. Where appropriate, engagements take place with union\nrepresentatives at asset and country level, as well as with the Shell\nEuropean Works Council. Employees covered by collective bargaining\nagreements are those individuals to whom Shell is obliged to apply the\nagreement. Agreements may apply to unionised and non-unionised\nemployees. An employee covered by more than one collective\nbargaining agreement is only counted once.\nCollective bargaining coverage and social dialogue [A]\nCollective bargaining\ncoverage\nSocial dialogue\nEmployees EEA [B], [C]\nWorkplace representation\n(EEA only) [C]\nCoverage rate\n2025\n2024\n2025\n2024\n0-19%\n-\n-\n-\n-\n20-39%\nNetherlands\nNetherlands\n-\n-\n40-59%\n-\n-\n-\n-\n60-79%\n-\n-\n-\n-\n80-100%\n-\n-\nNetherlands\nNetherlands\n[A] Excludes employees in portfolio companies.\n[B] The European Economic Area (EEA) countries include the 27 member states of the\nEuropean Union plus Iceland, Liechtenstein and Norway.\n[C] For countries with more than 50 employees representing at least 10% of total employees.\nSee \"Employee engagement"
+          },
+          {
+            "id": "shell.pdf:extracted:3",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03229437229437229,
+            "text": "Datapoint type: fte\nMetric: Number of employees by gender\nPeriod: 2025\nValue: Men: 55,000; Women: 30,000; Total: 85,000\nBasis: Headcount, year-end, by gender\nQuote: Number of employees | 2025 | Men | 55 | Women | 30 | Total | 85\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:117:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03219616204690832,
+            "text": "31, 2025 employee turnover was 18.3%. A total of\n16,613 employees left Shell including 8,416 voluntary resignations. The\ntotal includes 5,652 voluntary resignations from non-integrated portfolio\ncompanies, which we report separately for transparency [A]. In 2024,\nShell collected turnover data only for integrated companies, which did\nnot include portfolio companies. Excluding portfolio companies, turnover\nin 2025 was 11.2%, with 8,565 employees leaving Shell of whom 2,764\nresigned voluntarily. This compares to 7.6% in 2024 with 6,227\nemployees leaving of whom 2,931 resigned voluntarily excluding\nportfolio companies.\n[A] Turnover levels in portfolio companies are typically higher, reflecting operating models\nand workforce dynamics that differ materially from our fully integrated entities.\nEmployee engagement\nInsight into employee needs and perspectives enables Shell to\ncontinually learn and improve our policies, processes and practices.\nManagement regularly engages with employees through elected\nemployee representatives and a range of local formal and informal\nchannels. These channels include webcasts and all-employee messages\nfrom our Chief Executive Officer (CEO) and other senior leaders,\nas well as town halls, team meetings and site visits by the Board\nand Executive Committee (EC).\nIn 2025, members of the Board and EC visited Shell sites in\nQueensland, Australia where they engaged with employees on\nour business strategy and operations. The Board Chair also met\nwith employees based in London, China and the Netherlands.\nSee \"Workforce engagement\" on page 158\nIn 2025, 253,000 formal training days were delivered to employees\nand joint-venture partners. This compares with 264,000 training days\nin 2024 and the reduction mainly reflects lower employee numbers in\n2025 [A]. In 2025, we expanded access to self-directed learning via\nthe Learning Experience Platform, where we are curating internal and\nexternal learning content. In parallel, we continue to streamline the\ntraining content and assignments by making them more targeted for\nour people. These shifts support an enhanced learner-led culture,\nwith employees taking greater ownership of their development.\n[A] Training days are counted for all employees active at any point in the year, including\nthose who left before year-end.\nWe seek to comply with applicable local laws and regulations,\nincluding those on working hours. Shell is committed to respecting\nhuman rights. This includes, but is not limited to, the elimination of\nforced and child labour, respect for freedom of association and the\neffective recognition of the right to collective bargaining. Where\nappropriate, engagements take place with union and employee\nrepresentatives at asset and country level, as well as with the Shell\nEuropean Works Council. Employees have access to senior leaders,\nlocal employee forums and employee resource groups. We believe\nthese engagements enable Shell to maintain a constructive employee\nand industrial relations environment.\nStrategic Report | Performance in the year | Our Foundations | Our people continued\n115\n115"
+          },
+          {
+            "id": "shell.pdf:116:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03209718670076726,
+            "text": "Our people\nOur people are essential to our strategy of delivering more value\nwith less emissions. As we build our performance culture, we want\nour people to feel valued and respected, with a strong sense\nof belonging.\nWe are transforming Shell to be a leaner, more competitive\norganisation as we focus on performance, discipline and simplification\nacross our organisation. Simultaneously, we are building a\nperformance culture that we believe will help us succeed as we\nnavigate the energy transition. We aim to support positive social\nand economic impacts for our workforce by providing competitive\npay, benefits and working conditions.\nAs part of our performance culture, we aim to create a workplace that\ndelivers results, where all employees can learn and adapt, collaborate\nas one team and care for each other, building resilience as we\ntransform. We promote equal opportunity and aim to create an\nenvironment where people feel included.\nPeople development remains a priority for our organisation. We\nproactively identify skill and capability gaps for our traditional and\nemerging businesses; offer training to address these gaps; and if\nneeded, recruit talent externally to add to the skills and experiences of\nour workforce. To enable our leaders to lead this change, we support\nthem through targeted interventions including leadership development\nand coaching.\nSee \"This is Shell\" on pages 6-8 for more about our performance culture.\nAll metrics in this section exclude employees from portfolio\ncompanies [A], except for those showing the total number of\nemployees by gender and region, employee contract type by gender,\nthe percentage of women employees, employee turnover and certain\nmandatory training courses. Starting in 2025, the metrics for employee\ncontract type by gender and employee turnover include employees\nfrom portfolio companies.\n[A] Portfolio companies are non-integrated entities within the Shell Group. To give these\ncompanies the flexibility they need, they operate as subsidiaries while generally retaining\ntheir own processes and systems. Portfolio companies comply with Shell's minimum\nrequirements for controls and compliance. This includes the Shell Performance Framework\nand mandatory requirements for ethics and compliance, risk management and safety.\n\nEmployees\n85,000\n\nCountries and territories\n70\ncountries in which we operate\n\nDirectors\n42%\nwomen on the Board of Directors\n\nExecutive Committee\n44%\nwomen on the Executive Committee\n\nSenior leaders\n35%\nwomen in senior leadership positions\n\nWomen employees\n35%\nwomen employees\n\nTraining\n253,000\ntraining days for employees and joint-venture partners in 2025\n\nExternal hires\n3,593\npeople joined Shell (35% women, 65% men) in 2025\nThe numbers presented above reflect data as at December 31, 2025,\nunless otherwise stated.\nEmployee overview\nWe employed 85,000 people on a full- or part-time basis as of\nDecember 31, 2025. This compares with 96,000 at the end of\n2024 and 103,000 at the end of 2023.\nThe reduction in the number of employees in 2025 compared with\n2024 reflects our continued focus on performance, discipline and\nsimplification as we implement our strategy. We improved efficiencies,\nand made divestments in Singapore (Bukom, Jurong), in Nigeria\n(SPDC) and in the UK to the Adura joint venture and ended several\nactivities in our Downstream, Renewables and Energy Solutions\nbusiness. We also improved efficiencies in our Projects & Technology,\nIT and Finance functions.\nStrategic Report | Performance in the year | Our Foundations\n114\n114"
+          },
+          {
+            "id": "shell.pdf:extracted:7",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.03182678158503258,
+            "text": "Datapoint type: fte\nMetric: Employees by country\nPeriod: 2025\nValue: India: 13,000; Netherlands: 8,000; United States: 17,000; Other: 48,000; Total: 85,000\nUnit: thousand\nBasis: Headcount, year-end, by country\nQuote: Employees by country [A] [B] [C] | 2025 | India | 13 | Netherlands | 8 | United States of America | 17 | Other | 48 | Total employees | 85\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:400:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 400,
+            "score": 0.031339712918660285,
+            "text": "and managing material risks\nand opportunities (S1-5)\nShell has set voluntary ambitions to advance our aim to become one\nof the most diverse and inclusive organisations in the world. We\nengage with our own workforce and employee resource groups on\nShell's approach to diversity, equity and inclusion. These voluntary\nambitions as specified below meet the ESRS definition of a target.\nWe inform employees and employee representative bodies about\nour progress towards our ambitions and how we can improve our\nperformance. We communicate our progress transparently in internal\nand external reporting where relevant.\nWomen in senior leadership\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030,\ncompared with 29.5% in the baseline year of 2021.\nThe scope of this ambition refers to an existing Shell measure for senior\nleadership based on compensation grades. The total number of these\npositions may change from year to year. We focus on representation\nas a percentage of this total group.\nEthnic minorities in Senior Management\nIn support of the UK's Parker Review recommendations, we had\nan ambition to achieve 15% ethnic minority representation in Senior\nManagement by 2027, compared with 14% in the baseline year\nof 2023 (excluding portfolio companies). At the end of 2025, our\nrepresentation was 16%, (2024 15%). We now aim to achieve 17% by\n2027. This level of progress is consistent with our expectations when\nsetting the ambition.\nSenior Management refers to senior leadership based in the UK,\nmeasured based on compensation grade, and aligned with our self-\nidentification data collection and processes. Ethnic minority refers to an\nindividual who self-identifies as Asian, Black, Mixed/multiple or other\nethnic minority group, in line with UK Office for National Statistics\nclassifications.\nCharacteristics of the undertaking's employees (S1-6)\nThis section describes the key characteristics of employees in our\nown workforce.\nEmployees by gender\nEmployees by gender [A] [B]\nNumber of employees\n(thousand)\nPercentage of employees\n2025\n2024\n2025\n2024\nMen\n55\n63\n 65 %\n 65 %\nWomen\n30\n33\n 35 %\n 35 %\nOther\n—\n—\n — %\n — %\nNot reported\n—\n—\n — %\n — %\nTotal\n85\n96\n 100 %\n 100 %\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nSustainability Statements | Social | Own workforce (S1) continued\n398\n398"
+          },
+          {
+            "id": "shell.pdf:extracted:5",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.030931109787571964,
+            "text": "Datapoint type: fte\nMetric: Employee contract type by gender\nPeriod: 2025\nValue: Permanent contract/Employment at-will: Men 54,200; Women 29,800; Fixed-term contract: Men 700; Women 400\nBasis: Headcount, year-end, by contract type and gender\nQuote: Permanent contract/Employment at-will [B] | 54.2 | 29.8 | Fixed-term contract | 0.7 | 0.4\nExtractor: llamaextract\nPriority: 70"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many people did Shell employ excluding portfolio companies at the end of December 2025?",
+        "answer": "Shell employed 72,000 people, excluding portfolio companies, at the end of December 2025. This is fewer than the 81,000 at the end of 2024.",
+        "verbatim": "72,000",
+        "citations": [
+          {
+            "source": "shell.pdf",
+            "page": 117,
+            "quote": "We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "shell.pdf",
+            "page": 117,
+            "quote": "We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "shell_2025_fte_employee_change_2024",
+      "question": "How did Shell's employee count excluding portfolio companies change from 2024 to 2025?",
+      "company": "SHELL",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": [
+          "72,000",
+          "81,000"
+        ],
+        "page": 117,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "shell.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          116,
+          117,
+          117,
+          117,
+          401,
+          117,
+          117,
+          117,
+          400,
+          116,
+          117,
+          401
+        ],
+        "chunks": [
+          {
+            "id": "shell.pdf:extracted:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03492063492063492,
+            "text": "Datapoint type: fte\nMetric: Number of employees\nPeriod: 2025\nValue: 85,000\nBasis: Headcount, year-end, includes portfolio companies\nQuote: We employed 85,000 people on a full- or part-time basis as of December 31, 2025. This compares with 96,000 at the end of 2024 and 103,000 at the end of 2023.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:extracted:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03487903225806452,
+            "text": "Datapoint type: fte\nMetric: Number of employees (excluding portfolio companies)\nPeriod: 2025\nValue: 72,000\nBasis: Headcount, year-end, excludes portfolio companies\nQuote: We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025. This is fewer than the 81,000 at the end of 2024. Shell's portfolio companies, which generally maintain their own HR systems, employed 13,000 people at the end of 2025 compared with 15,000 at the end of 2024.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:extracted:2",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03430389038414485,
+            "text": "Datapoint type: fte\nMetric: Number of employees in portfolio companies\nPeriod: 2025\nValue: 13,000\nBasis: Headcount, year-end, portfolio companies only\nQuote: Shell's portfolio companies, which generally maintain their own HR systems, employed 13,000 people at the end of 2025 compared with 15,000 at the end of 2024.\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:117:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.033846153846153845,
+            "text": "Employee overview figures include people working for Shell companies\nand Shell-operated joint ventures, as well as those seconded to non-\noperated joint ventures, but exclude contingent workers, otherwise\nreferred to as contractors. Contractors are external workers who are\nengaged directly or through third parties to provide services to Shell.\nThey work alongside Shell employees across several of our businesses.\nChanges in headcount\nWe employed 72,000 people in Shell, excluding portfolio companies,\nat the end of December 2025. This is fewer than the 81,000 at the end\nof 2024. Shell's portfolio companies, which generally maintain their\nown HR systems, employed 13,000 people at the end of 2025\ncompared with 15,000 at the end of 2024.\nSee Note 33 to the \"Consolidated Financial Statements\" on page 305 for the average\nnumber of employees by business segment.\nThe table below presents the total number of employees by gender\nand region as of December 31, 2025.\nNumber of employees by gender and region [A]\n\nthousand\n2025\n2024\n2023\nMen\nWomen\nTotal\nTotal\nTotal\nNumber of employees\n55\n30\n85\n96\n103\nBreakdown by region\nAfrica\n1.2\n0.6\n2\n3\n4\nAsia\n19.7\n13.0\n33\n36\n38\nEurope\n16.3\n9.5\n26\n30\n31\nNorth America\n15.1\n5.7\n21\n23\n24\nOceania\n1.8\n0.8\n3\n3\n4\nSouth America\n0.9\n0.6\n2\n2\n2\n[A] Split may not add up to the total due to rounding.\nThe table below presents the distribution of employee contract type\nby gender as of December 31, 2025.\nEmployee contract type by gender [A]\nthousand\n2025\n2024\nMen\nWomen\nMen\nWomen\nPermanent contract/\nEmployment at-will [B]\n54.2\n29.8\n52.0\n28.0\nFixed-term contract\n0.7\n0.4\n0.8\n0.3\n[A] 2024 data excludes employees in portfolio companies.\n[B] Employment-at-will is used in the USA to describe the employment relationship.\nThe table below presents the number of employees by age group.\nEmployees by age group [A] [B]\nthousand\n% of\nemployees\n2025\n2024\n2023\nUnder 30 years old\n 13 %\n9\n10\n12\nBetween 30 and 50 years old\n 65 %\n47\n52\n54\nAbove 50 years old\n 22 %\n16\n19\n18\nTotal employees\n 100 %\n72\n81\n84\n[A] Excludes employees in portfolio companies.\n[B] Includes employees seconded to joint ventures.\nShell aims to be an attractive employer to its existing and prospective\nemployees. We offer employees the opportunity to develop their\ncareers within Shell to enable them to build their skills and progress.\nSee \"This is Shell\" on pages 6-8.\nAs of December 31, 2025 employee turnover was 18.3%. A total of\n16,613 employees left Shell including 8,416 voluntary resignations. The\ntotal includes 5,652 voluntary resignations from non-integrated portfolio\ncompanies, which we report separately for transparency [A]. In 2024,\nShell collected turnover data only for integrated companies, which did\nnot include portfolio companies. Excluding portfolio companies, turnover\nin 2025 was 11.2%, with 8,565 employees leaving Shell of whom 2,764\nresigned voluntarily. This"
+          },
+          {
+            "id": "shell.pdf:401:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.033756638189794505,
+            "text": "Employees by country [A] [B] [C]\nthousand\n2025\n2024\nIndia\n13\n13\nNetherlands\n8\n10\nUnited States of America\n17\n18\nOther\n48\n55\nTotal employees\n85\n96\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\n[C] Countries with more than 50 employees representing at least 10% of total employees.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nEmployees by contract type and gender\nSee the table \"Employee contract type by gender\" on page 115\nfor the number of employees on permanent contracts (including\nemployment-at-will) and temporary contracts by gender.\nEmployee turnover\nEmployee turnover [A] [B]\nunit\n2025\n2024\nDeparting employees\nexcluding portfolio companies\nnumber\n8,565\n6,227\nTotal departing employees\nnumber\n16,613\n6,227\nRate of turnover excluding\nportfolio companies [C]\n%\n 11.2 %\n 7.6 %\nTotal rate of turnover [C]\n%\n 18.3 %\n 7.6 %\n[A] Includes employees seconded to joint ventures.\n[B] 2024 data excludes employees in portfolio companies.\n[C] Calculated as the aggregate number of employees who leave voluntarily or due to\ndismissal, retirement or death in service, divided by average employee headcount for the\nreporting period. Excludes termination due to divestment.\nData for our own workforce are reported on the basis of headcount at\nthe end of the reporting period.\nAs of December 31, 2025 employee turnover was 18.3%, with a total\nof 16,613 leaving Shell. This number includes portfolio companies,\nwhich typically experience higher rates of turnover due to operating\nmodels and workforce dynamics that differ from Shell's integrated\ncompanies.\nExcluding portfolio companies, turnover in 2025 was 11.2%, with\n8,565 employees leaving Shell. This compares to 7.6% in 2024 with\n6,227 employees leaving, excluding portfolio companies. Data on\nturnover for portfolio companies is not available for periods prior\nto 2025.\nSee \"Changes in headcount\" on page 115 for more information.\nCollective bargaining coverage and social dialogue (S1-8)\nWe respect the right to collective bargaining and freedom of\nassociation. Where appropriate, engagements take place with union\nrepresentatives at asset and country level, as well as with the Shell\nEuropean Works Council. Employees covered by collective bargaining\nagreements are those individuals to whom Shell is obliged to apply the\nagreement. Agreements may apply to unionised and non-unionised\nemployees. An employee covered by more than one collective\nbargaining agreement is only counted once.\nCollective bargaining coverage and social dialogue [A]\nCollective bargaining\ncoverage\nSocial dialogue\nEmployees EEA [B], [C]\nWorkplace representation\n(EEA only) [C]\nCoverage rate\n2025\n2024\n2025\n2024\n0-19%\n-\n-\n-\n-\n20-39%\nNetherlands\nNetherlands\n-\n-\n40-59%\n-\n-\n-\n-\n60-79%\n-\n-\n-\n-\n80-100%\n-\n-\nNetherlands\nNetherlands\n[A] Excludes employees in portfolio companies.\n[B] The European Economic Area (EEA) countries include the 27 member states of the\nEuropean Union plus Iceland, Liechtenstein and Norway.\n[C] For countries with more than 50 employees representing at least 10% of total employees.\nSee \"Employee engagement"
+          },
+          {
+            "id": "shell.pdf:extracted:6",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03327205882352941,
+            "text": "Datapoint type: fte\nMetric: Employees by age group\nPeriod: 2025\nValue: Under 30: 9,000; 30-50: 47,000; Above 50: 16,000; Total: 72,000\nBasis: Headcount, year-end, by age group, excludes portfolio companies\nQuote: Employees by age group [A] [B] | % of employees | 2025 | Under 30 years old | 13% | 9 | Between 30 and 50 years old | 65% | 47 | Above 50 years old | 22% | 16 | Total employees | 100% | 72\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:117:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.032467532467532464,
+            "text": "31, 2025 employee turnover was 18.3%. A total of\n16,613 employees left Shell including 8,416 voluntary resignations. The\ntotal includes 5,652 voluntary resignations from non-integrated portfolio\ncompanies, which we report separately for transparency [A]. In 2024,\nShell collected turnover data only for integrated companies, which did\nnot include portfolio companies. Excluding portfolio companies, turnover\nin 2025 was 11.2%, with 8,565 employees leaving Shell of whom 2,764\nresigned voluntarily. This compares to 7.6% in 2024 with 6,227\nemployees leaving of whom 2,931 resigned voluntarily excluding\nportfolio companies.\n[A] Turnover levels in portfolio companies are typically higher, reflecting operating models\nand workforce dynamics that differ materially from our fully integrated entities.\nEmployee engagement\nInsight into employee needs and perspectives enables Shell to\ncontinually learn and improve our policies, processes and practices.\nManagement regularly engages with employees through elected\nemployee representatives and a range of local formal and informal\nchannels. These channels include webcasts and all-employee messages\nfrom our Chief Executive Officer (CEO) and other senior leaders,\nas well as town halls, team meetings and site visits by the Board\nand Executive Committee (EC).\nIn 2025, members of the Board and EC visited Shell sites in\nQueensland, Australia where they engaged with employees on\nour business strategy and operations. The Board Chair also met\nwith employees based in London, China and the Netherlands.\nSee \"Workforce engagement\" on page 158\nIn 2025, 253,000 formal training days were delivered to employees\nand joint-venture partners. This compares with 264,000 training days\nin 2024 and the reduction mainly reflects lower employee numbers in\n2025 [A]. In 2025, we expanded access to self-directed learning via\nthe Learning Experience Platform, where we are curating internal and\nexternal learning content. In parallel, we continue to streamline the\ntraining content and assignments by making them more targeted for\nour people. These shifts support an enhanced learner-led culture,\nwith employees taking greater ownership of their development.\n[A] Training days are counted for all employees active at any point in the year, including\nthose who left before year-end.\nWe seek to comply with applicable local laws and regulations,\nincluding those on working hours. Shell is committed to respecting\nhuman rights. This includes, but is not limited to, the elimination of\nforced and child labour, respect for freedom of association and the\neffective recognition of the right to collective bargaining. Where\nappropriate, engagements take place with union and employee\nrepresentatives at asset and country level, as well as with the Shell\nEuropean Works Council. Employees have access to senior leaders,\nlocal employee forums and employee resource groups. We believe\nthese engagements enable Shell to maintain a constructive employee\nand industrial relations environment.\nStrategic Report | Performance in the year | Our Foundations | Our people continued\n115\n115"
+          },
+          {
+            "id": "shell.pdf:extracted:3",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.032052923602219376,
+            "text": "Datapoint type: fte\nMetric: Number of employees by gender\nPeriod: 2025\nValue: Men: 55,000; Women: 30,000; Total: 85,000\nBasis: Headcount, year-end, by gender\nQuote: Number of employees | 2025 | Men | 55 | Women | 30 | Total | 85\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:400:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 400,
+            "score": 0.032013066557778684,
+            "text": "and managing material risks\nand opportunities (S1-5)\nShell has set voluntary ambitions to advance our aim to become one\nof the most diverse and inclusive organisations in the world. We\nengage with our own workforce and employee resource groups on\nShell's approach to diversity, equity and inclusion. These voluntary\nambitions as specified below meet the ESRS definition of a target.\nWe inform employees and employee representative bodies about\nour progress towards our ambitions and how we can improve our\nperformance. We communicate our progress transparently in internal\nand external reporting where relevant.\nWomen in senior leadership\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030,\ncompared with 29.5% in the baseline year of 2021.\nThe scope of this ambition refers to an existing Shell measure for senior\nleadership based on compensation grades. The total number of these\npositions may change from year to year. We focus on representation\nas a percentage of this total group.\nEthnic minorities in Senior Management\nIn support of the UK's Parker Review recommendations, we had\nan ambition to achieve 15% ethnic minority representation in Senior\nManagement by 2027, compared with 14% in the baseline year\nof 2023 (excluding portfolio companies). At the end of 2025, our\nrepresentation was 16%, (2024 15%). We now aim to achieve 17% by\n2027. This level of progress is consistent with our expectations when\nsetting the ambition.\nSenior Management refers to senior leadership based in the UK,\nmeasured based on compensation grade, and aligned with our self-\nidentification data collection and processes. Ethnic minority refers to an\nindividual who self-identifies as Asian, Black, Mixed/multiple or other\nethnic minority group, in line with UK Office for National Statistics\nclassifications.\nCharacteristics of the undertaking's employees (S1-6)\nThis section describes the key characteristics of employees in our\nown workforce.\nEmployees by gender\nEmployees by gender [A] [B]\nNumber of employees\n(thousand)\nPercentage of employees\n2025\n2024\n2025\n2024\nMen\n55\n63\n 65 %\n 65 %\nWomen\n30\n33\n 35 %\n 35 %\nOther\n—\n—\n — %\n — %\nNot reported\n—\n—\n — %\n — %\nTotal\n85\n96\n 100 %\n 100 %\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nSustainability Statements | Social | Own workforce (S1) continued\n398\n398"
+          },
+          {
+            "id": "shell.pdf:116:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03188405797101449,
+            "text": "Our people\nOur people are essential to our strategy of delivering more value\nwith less emissions. As we build our performance culture, we want\nour people to feel valued and respected, with a strong sense\nof belonging.\nWe are transforming Shell to be a leaner, more competitive\norganisation as we focus on performance, discipline and simplification\nacross our organisation. Simultaneously, we are building a\nperformance culture that we believe will help us succeed as we\nnavigate the energy transition. We aim to support positive social\nand economic impacts for our workforce by providing competitive\npay, benefits and working conditions.\nAs part of our performance culture, we aim to create a workplace that\ndelivers results, where all employees can learn and adapt, collaborate\nas one team and care for each other, building resilience as we\ntransform. We promote equal opportunity and aim to create an\nenvironment where people feel included.\nPeople development remains a priority for our organisation. We\nproactively identify skill and capability gaps for our traditional and\nemerging businesses; offer training to address these gaps; and if\nneeded, recruit talent externally to add to the skills and experiences of\nour workforce. To enable our leaders to lead this change, we support\nthem through targeted interventions including leadership development\nand coaching.\nSee \"This is Shell\" on pages 6-8 for more about our performance culture.\nAll metrics in this section exclude employees from portfolio\ncompanies [A], except for those showing the total number of\nemployees by gender and region, employee contract type by gender,\nthe percentage of women employees, employee turnover and certain\nmandatory training courses. Starting in 2025, the metrics for employee\ncontract type by gender and employee turnover include employees\nfrom portfolio companies.\n[A] Portfolio companies are non-integrated entities within the Shell Group. To give these\ncompanies the flexibility they need, they operate as subsidiaries while generally retaining\ntheir own processes and systems. Portfolio companies comply with Shell's minimum\nrequirements for controls and compliance. This includes the Shell Performance Framework\nand mandatory requirements for ethics and compliance, risk management and safety.\n\nEmployees\n85,000\n\nCountries and territories\n70\ncountries in which we operate\n\nDirectors\n42%\nwomen on the Board of Directors\n\nExecutive Committee\n44%\nwomen on the Executive Committee\n\nSenior leaders\n35%\nwomen in senior leadership positions\n\nWomen employees\n35%\nwomen employees\n\nTraining\n253,000\ntraining days for employees and joint-venture partners in 2025\n\nExternal hires\n3,593\npeople joined Shell (35% women, 65% men) in 2025\nThe numbers presented above reflect data as at December 31, 2025,\nunless otherwise stated.\nEmployee overview\nWe employed 85,000 people on a full- or part-time basis as of\nDecember 31, 2025. This compares with 96,000 at the end of\n2024 and 103,000 at the end of 2023.\nThe reduction in the number of employees in 2025 compared with\n2024 reflects our continued focus on performance, discipline and\nsimplification as we implement our strategy. We improved efficiencies,\nand made divestments in Singapore (Bukom, Jurong), in Nigeria\n(SPDC) and in the UK to the Adura joint venture and ended several\nactivities in our Downstream, Renewables and Energy Solutions\nbusiness. We also improved efficiencies in our Projects & Technology,\nIT and Finance functions.\nStrategic Report | Performance in the year | Our Foundations\n114\n114"
+          },
+          {
+            "id": "shell.pdf:extracted:5",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.03184873949579832,
+            "text": "Datapoint type: fte\nMetric: Employee contract type by gender\nPeriod: 2025\nValue: Permanent contract/Employment at-will: Men 54,200; Women 29,800; Fixed-term contract: Men 700; Women 400\nBasis: Headcount, year-end, by contract type and gender\nQuote: Permanent contract/Employment at-will [B] | 54.2 | 29.8 | Fixed-term contract | 0.7 | 0.4\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:extracted:7",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.03159203980099502,
+            "text": "Datapoint type: fte\nMetric: Employees by country\nPeriod: 2025\nValue: India: 13,000; Netherlands: 8,000; United States: 17,000; Other: 48,000; Total: 85,000\nUnit: thousand\nBasis: Headcount, year-end, by country\nQuote: Employees by country [A] [B] [C] | 2025 | India | 13 | Netherlands | 8 | United States of America | 17 | Other | 48 | Total employees | 85\nExtractor: llamaextract\nPriority: 70"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How did Shell's employee count excluding portfolio companies change from 2024 to 2025?",
+        "answer": "Shell's employee count excluding portfolio companies decreased from 81,000 at the end of 2024 to 72,000 at the end of 2025, reflecting a reduction of 9,000 employees.",
+        "verbatim": "72,000",
+        "citations": [
+          {
+            "source": "shell.pdf",
+            "page": 117,
+            "quote": "We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025. This is fewer than the 81,000 at the end of 2024."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "shell.pdf",
+            "page": 117,
+            "quote": "We employed 72,000 people in Shell, excluding portfolio companies, at the end of December 2025. This is fewer than the 81,000 at the end of 2024."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "shell_2025_fte_board_gender_women",
+      "question": "What percentage of Shell's Board were women in 2025?",
+      "company": "SHELL",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "42%",
+          "Board",
+          "women"
+        ],
+        "answer_contains_all": null,
+        "page": 119,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "shell.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          119,
+          165,
+          164,
+          118,
+          118,
+          116,
+          165,
+          400,
+          117,
+          212,
+          139,
+          341
+        ],
+        "chunks": [
+          {
+            "id": "shell.pdf:119:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 119,
+            "score": 0.03467261904761905,
+            "text": "Gender diversity at Board and management level [A]\nMen\nWomen\nLevel\n2025\n2024\n2025\n2024\nBoard\n 58 %\n 58 %\n 42 %\n 42 %\nExecutive Committee\n 56 %\n 43 %\n 44 %\n 57 %\nSenior Leadership roles [A] [B]\n 65 %\n 67 %\n 35 %\n 33 %\n[A] Senior Leadership is a Shell measure based on compensation grade levels. This measure\nis distinct from \"senior manager\" as per statutory disclosure requirements set out in the\ntable below.\n[B] Excludes employees in portfolio companies.\nGender diversity (at December 31, 2025)\nMen\nWomen\nNumber\n%\nNumber\n%\nDirectors of the Company\n\n7\n 58 %\n\n5\n 42 %\nSenior managers [A]\n\n695\n 64 %\n\n394\n 36 %\nEmployees (thousand)\n\n55\n 65 %\n\n30\n 35 %\n[A] Senior manager is defined in section 414C(9) of the UK Companies Act 2006 and,\naccordingly, the number disclosed comprises the EC members who were not Directors\nof the Company and other directors of Shell subsidiaries (excluding Directors of portfolio\ncompanies).\nAs of December 31, 2025, 35% of Shell employees were women.\nOf the external hires who joined Shell as of December 31, 2025,\n35% were women, compared with 39% in 2024.\nA crucial element of achieving gender balance is addressing any pay\ngap [A] and we continue to work towards improvements in this area.\nThe basis for paying fairly is equal pay for equal work, taking into\naccount factors such as performance and experience. At Shell, we\nmonitor pay equity [B] through regular analysis to be confident that\nwe have pay equity between genders for performing the same jobs.\nWe address any unexplained pay differences related to gender through\nrigorous internal processes and apply our Fair Pay Principles. We\ncontinue to make progress in our gender ambitions at Shell, but a gender\npay gap exists for several reasons, including fewer women in senior\nleadership positions and fewer women in higher-paid specialist roles.\n[A] Shell seeks to comply with applicable requirements and regulation on pay gap reporting.\n[B] Men and women who are paid the same for doing similar jobs, at similar level,\nresponsibility, tenure and performance.\nRace and ethnicity\nThrough racial and ethnic representation across our workforce, we\naim to reflect the communities in which we work. Shell's Global Council\nfor Race is supported by an Employee Advisory Board which aims to\nadvance diversity in our workforce.\nShell aims to maintain or exceed having at least one Board member\nfrom an ethnic minority background, while acknowledging that in\nperiods of Board change this may not be achieved. As of December 31,\n2025, the Board had three members who identify as being from an\nethnic minority group and one EC member who identifies as being\nfrom an ethnic minority group [A].\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [B]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[A] Ethnic minority refers to an individual who self-identifies as Asian, Black, Mixed/multiple\nor other ethnic minority group, in line with UK Office for National Statistics classifications.\n[B] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\n* Non-GAAP measure. See page 430.\nIn some countries, there are local restrictions on collecting and reporting"
+          },
+          {
+            "id": "shell.pdf:165:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03428021184400578,
+            "text": "See \"Other regulatory and statutory information\" on page 210.\nFor Senior Management succession, the selection principles include\nprocess-specific elements, such as a clear and proactive approach\nto identifying and developing succession candidates. The principles\nalso outline the long-term structured nature of the succession planning\nprocess. There is also strong focus on ensuring that the principles reflect\nthe leadership qualities required for future business success and that\nthey advance the progress of diversity in all its forms.\nSenior Management principles feature in the NOMCO's review\nof the succession plans which occurs routinely in Committee meetings.\nUsing the principles, the NOMCO implements any changes through\na well-defined and diligent process with overall Board engagement.\nThe NOMCO agrees on candidate profiles and meets prospective\ncandidates well ahead of any selection decision being necessary.\nIt also engages the Board early in the process to ensure Directors\nhave an opportunity to meet and assess prospective candidates.\nConsequently, some of the leaders with whom the NOMCO and\nBoard engaged extensively in the past became members of the Board\n(Wael Sawan and Sinead Gorman) or the Executive Committee\n(Andrew Smith, Machteld de Haan, Cederic Cremers and Peter\nCostello whose appointments became effective April 1, 2025).\nDuring 2025, the NOMCO undertook its annual in-depth look at the\nstatus and succession plans for Senior Management within Shell, along\nwith the review of the health of the talent pipeline. In this regard, the\nBoard also reflected on the delayering of the most senior leadership\nstructure to reflect the three primary areas of business value –\nIntegrated Gas; Upstream; and Downstream, Renewables and Energy\nSolutions, whilst also elevating Trading and Supply, which is a key\nenabler across the organisation.\nDiversity of leadership\nThe NOMCO recognises that continuing to improve all types of\ndiversity at each level of the Shell Group is crucial. Shell aims to be\nan inclusive workplace where everyone feels valued and respected\nand has a strong sense of belonging. The NOMCO's review of\ndiversity objectives and strategies for the Shell Group as a whole\nalso monitors the impact of diversity and inclusion initiatives.\nIn February 2021, Shell published its aspirations for DE&I with a focus\non four areas of gender, race and ethnicity, LGBT+ and disability\ninclusion. For more details on the progress against our ambitions\nfor women hired and women in Senior Leadership, see page 116.\n\"Senior Leadership\" is a Shell-specific measure based on compensation\ngrade levels. This is different from what we are required to report under\nthe Code, which is female representation in Senior Management and\ntheir direct reports, where the percentage as at December 31, 2025,\nwas 35%.\nNationality diversity, such as Asian and American talent, continues to\nbe managed in accordance with the business outlook and we have a\nstrong focus on progressing race and ethnic minority representation.\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [C]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women"
+          },
+          {
+            "id": "shell.pdf:164:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 164,
+            "score": 0.03405483405483405,
+            "text": ", including size and tenure, skills and experience,\nand the DE&I requirements of the UK Listing Rules, FTSE Women\nLeaders Review and the Parker Review. The current size and\ncomposition of the Board was considered to be appropriate, also\ntaking account of Committee memberships and the Board and\nCommittee changes announced on December 11, 2025, and no\nchanges were considered necessary as a result of the Board\nPerformance Review. Greater flexibility around Non-executive tenure\ncontinues to be an area of focus. Although Shell does not publish the\nBoard Composition Principles, its Board Diversity Policy (which was first\npublished in March 2024 following recommendation by NOMCO)\nis available on the Company's website. This Policy highlights that Shell\naims for a gender balance on the Board, with at least one senior Board\nposition (Chair, CEO, Senior Independent Director, or CFO) held by\na woman. In addition, Shell's target is to maintain the representation\nof both men and women at, or above, a minimum of 40% [B]. We\nbelieve that this allows Shell to be truly representative of all genders\nand gender identities and provides flexibility during periods of change.\nFurther, Shell aims to maintain or exceed having at least one Board\nmember from a minority ethnic background. For more details on\nthe progress against these targets see page 163.\n[B] These targets align with those set by the FCA under the UK Listing Rules, and all such\ntargets on Board diversity remain subject to applicable equalities legislation, including\nthe Equality Act 2010 (as amended from time to time) and its provisions on discrimination.\nGovernance\n162\nDick Boer\nAnn\nGodbehere\nSir Andrew\nMackenzie\n162"
+          },
+          {
+            "id": "shell.pdf:118:2",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 118,
+            "score": 0.03404050144648023,
+            "text": "Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in\nlocal jurisdictions, Shell has global aspirations for representation.\nWe are committed to building a diverse and inclusive workforce. All\nemployment decisions, including hiring, promotions and separations,\nare based solely on factors such as merit, qualifications, performance\nand business considerations. The following table shows\nthe representation of men and women as of December 31, 2025.\n[A] Senior Board position means Chair, CEO, Senior Independent Director or CFO.\nStrategic Report | Performance in the year | Our Foundations | Our people continued\n116\n116"
+          },
+          {
+            "id": "shell.pdf:118:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 118,
+            "score": 0.03303044070876874,
+            "text": "communications, engagements with elected employee representatives\nand through our experience-sharing portal for employees. This\ncommitment is underscored by our CEO's leadership pledge with\nMindForward Alliance and the launch of our Global Mental Well-being\nProgramme in 2023. The programme's interventions focus on developing\na workplace culture that supports good mental health and offers\nemployees the opportunity to complete an anonymous and voluntary\nsurvey in which they can voice their experience of well-being at Shell.\nWe monitor the survey results to identify opportunities to improve\nemployee well-being. In 2025, we continued to improve the\nprogramme, adding adaptive e-learning content for line managers\nin workplace mental health, enhancing accessibility of programme\nresources for front-line staff and introducing new resources such\nas those that address resilience and financial well-being.\nDiversity, equity and inclusion (DE&I)\nWe aim to become one of the world's most diverse and inclusive\norganisations, a place where everyone feels valued, respected and has\na strong sense of belonging. It is the diverse perspectives, experiences,\nexpertise, cultures and working styles of each employee that make\nShell unique. This uniqueness combined with equity and inclusion\nenables our performance culture. Our Code of Conduct prohibits\ndiscrimination and sets our Group expectations for equal opportunity\nin employment decisions, based on factors such as merit, qualifications,\nperformance and business considerations. Our ambitions around\ndiversity, equity and inclusion are monitored on a regular basis.\nWe continually assess our culture and employee engagement through\ntools such as the annual Shell People Survey.\nWe promote equal opportunity and aim to create an environment\nwhere people feel included. Our approach seeks to reinforce respect\nfor people and to provide psychological safety for all our employees.\nIn 2025, our Shell People Survey showed a result of 82 points out\nof 100 for all questions relating to DE&I. This is an increase of one\npoint from 2024. However, we are still below the top quartile of\norganisations in the comparison group which scored 85 and above.\nWe will continue to focus on improving these efforts in the workplace.\nAs of 2025, and where legally permissible, Shell is able to provide\n92% of employees with the option to voluntarily declare their gender\nidentity, sexual orientation, race and ethnicity, and disability via the HR\nsystem. Data from this self-identification initiative allow us to monitor\nprogress against our DE&I aspirations.\nSee \"Nomination and Succession Committee\" on pages 162-164.\nGender\nWe strive to achieve gender equality. We have signed the World\nEconomic Forum declaration on closing the gender gap in the oil and\ngas sector and, in line with the UK Listing Rules, the Board of Shell plc\naims for gender balance on the Board, with at least one senior Board\nposition [A] held by a woman. To provide flexibility for periods of\nchange, we aim to maintain the representation of both men and\nwomen on the Board at, or above, a minimum of 40%. As of December\n31, 2025, women made up 42% of the Board and the position of Chief\nFinancial Officer (CFO) was held by a woman.\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in"
+          },
+          {
+            "id": "shell.pdf:116:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03274725274725274,
+            "text": "Our people\nOur people are essential to our strategy of delivering more value\nwith less emissions. As we build our performance culture, we want\nour people to feel valued and respected, with a strong sense\nof belonging.\nWe are transforming Shell to be a leaner, more competitive\norganisation as we focus on performance, discipline and simplification\nacross our organisation. Simultaneously, we are building a\nperformance culture that we believe will help us succeed as we\nnavigate the energy transition. We aim to support positive social\nand economic impacts for our workforce by providing competitive\npay, benefits and working conditions.\nAs part of our performance culture, we aim to create a workplace that\ndelivers results, where all employees can learn and adapt, collaborate\nas one team and care for each other, building resilience as we\ntransform. We promote equal opportunity and aim to create an\nenvironment where people feel included.\nPeople development remains a priority for our organisation. We\nproactively identify skill and capability gaps for our traditional and\nemerging businesses; offer training to address these gaps; and if\nneeded, recruit talent externally to add to the skills and experiences of\nour workforce. To enable our leaders to lead this change, we support\nthem through targeted interventions including leadership development\nand coaching.\nSee \"This is Shell\" on pages 6-8 for more about our performance culture.\nAll metrics in this section exclude employees from portfolio\ncompanies [A], except for those showing the total number of\nemployees by gender and region, employee contract type by gender,\nthe percentage of women employees, employee turnover and certain\nmandatory training courses. Starting in 2025, the metrics for employee\ncontract type by gender and employee turnover include employees\nfrom portfolio companies.\n[A] Portfolio companies are non-integrated entities within the Shell Group. To give these\ncompanies the flexibility they need, they operate as subsidiaries while generally retaining\ntheir own processes and systems. Portfolio companies comply with Shell's minimum\nrequirements for controls and compliance. This includes the Shell Performance Framework\nand mandatory requirements for ethics and compliance, risk management and safety.\n\nEmployees\n85,000\n\nCountries and territories\n70\ncountries in which we operate\n\nDirectors\n42%\nwomen on the Board of Directors\n\nExecutive Committee\n44%\nwomen on the Executive Committee\n\nSenior leaders\n35%\nwomen in senior leadership positions\n\nWomen employees\n35%\nwomen employees\n\nTraining\n253,000\ntraining days for employees and joint-venture partners in 2025\n\nExternal hires\n3,593\npeople joined Shell (35% women, 65% men) in 2025\nThe numbers presented above reflect data as at December 31, 2025,\nunless otherwise stated.\nEmployee overview\nWe employed 85,000 people on a full- or part-time basis as of\nDecember 31, 2025. This compares with 96,000 at the end of\n2024 and 103,000 at the end of 2023.\nThe reduction in the number of employees in 2025 compared with\n2024 reflects our continued focus on performance, discipline and\nsimplification as we implement our strategy. We improved efficiencies,\nand made divestments in Singapore (Bukom, Jurong), in Nigeria\n(SPDC) and in the UK to the Adura joint venture and ended several\nactivities in our Downstream, Renewables and Energy Solutions\nbusiness. We also improved efficiencies in our Projects & Technology,\nIT and Finance functions.\nStrategic Report | Performance in the year | Our Foundations\n114\n114"
+          },
+          {
+            "id": "shell.pdf:165:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.031818181818181815,
+            "text": "by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women Leaders)\nand, in 2025, it met the Parker Review's objectives and the UK Listing\nRule diversity targets by reflecting 42% women representation with the\nCFO position held by a woman and three Directors from a minority\nethnic background.\n\nSee \"Our people\" on page 116 for more information on DE&I in Shell.\nThe People and Culture Strategy and diversity, equity\nand inclusion\nDiversity continued to be a key area of focus during the year. The\nBoard Diversity Policy is aligned to the requirements of the UK\nCorporate Governance Code and includes our targets for Board\ndiversity, as well as complementing Shell's wider diversity policies and\nembracing Shell's values, Code of Conduct and sustainability goals.\nCurrently, this policy is not applied to the individual Committees,\nalthough we strive to apply diverse representation across the\nCommittees. DE&I across Committee membership remains an ongoing\nconsideration. A copy of the Board Diversity Policy is available on our\nwebsite: shell.com/investors/environmental-social-and-governance/\nboard-of-directors.\nIn relation to Board director appointments and diversity, the NOMCO\noversees the development of a diverse pipeline for succession to\nthe Board and monitors that all Board appointments are subject\nto a formal, rigorous and transparent procedure. Appointments and\nsuccession plans are based on merit and objective criteria and promote\ndiversity, inclusion and equal opportunity.\nTo this end, the NOMCO is responsible for engaging an independent\nexecutive search consultant, who assists in preparing shortlists\nof candidates, co-ordinating interviews and seeking references.\nIn accordance with the Board Diversity Policy, the NOMCO only\nengages with external search firms who are able to align with\nShell's approach to DE&I in identifying suitable individuals from\ndiverse pools of candidates.\nUnder the Board Diversity Policy, the Board commits to:\n￮Ensuring an inclusive environment: Through inclusive behaviours and\npractices, we aim to create an environment in which every Board\nmember feels valued, respected and empowered to contribute fully.\n￮Ensuring support for External Best Practices: The Board endorses and\nsupports external best practices, such as the FTSE Women Leaders\nReview, Parker Review and others, to maintain and enhance diversity\nwithin the Board.\n￮Ensuring that Board appointments are managed with rigour and\ntransparency: Candidates are evaluated based on merit, skills,\nexperience, qualifications, performance and business considerations,\nwith due regard for diversity factors.\n￮Ensuring regular Board composition reviews: The Board regularly\nassesses the composition of the Board, including age, gender, race,\nethnicity, educational, social, geographical and professional\nbackgrounds, skills, knowledge and experience, making\nrecommendations for necessary adjustments.\nShell has an inclusive Board environment, comprising individuals that\nare suitably qualified. They have the required skills, industry expertise,\nbreadth of perspective and high-quality decision-making capabilities\nto support the strategy and overall direction of Shell.\n\nSee \"The Board of Shell plc\" on pages 143-148 for details about the skills and backgrounds\nof individual members.\nFrom a gender perspective, as at December 31, 2025, the Board\ncomprised five"
+          },
+          {
+            "id": "shell.pdf:400:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 400,
+            "score": 0.03073096058170685,
+            "text": "and managing material risks\nand opportunities (S1-5)\nShell has set voluntary ambitions to advance our aim to become one\nof the most diverse and inclusive organisations in the world. We\nengage with our own workforce and employee resource groups on\nShell's approach to diversity, equity and inclusion. These voluntary\nambitions as specified below meet the ESRS definition of a target.\nWe inform employees and employee representative bodies about\nour progress towards our ambitions and how we can improve our\nperformance. We communicate our progress transparently in internal\nand external reporting where relevant.\nWomen in senior leadership\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030,\ncompared with 29.5% in the baseline year of 2021.\nThe scope of this ambition refers to an existing Shell measure for senior\nleadership based on compensation grades. The total number of these\npositions may change from year to year. We focus on representation\nas a percentage of this total group.\nEthnic minorities in Senior Management\nIn support of the UK's Parker Review recommendations, we had\nan ambition to achieve 15% ethnic minority representation in Senior\nManagement by 2027, compared with 14% in the baseline year\nof 2023 (excluding portfolio companies). At the end of 2025, our\nrepresentation was 16%, (2024 15%). We now aim to achieve 17% by\n2027. This level of progress is consistent with our expectations when\nsetting the ambition.\nSenior Management refers to senior leadership based in the UK,\nmeasured based on compensation grade, and aligned with our self-\nidentification data collection and processes. Ethnic minority refers to an\nindividual who self-identifies as Asian, Black, Mixed/multiple or other\nethnic minority group, in line with UK Office for National Statistics\nclassifications.\nCharacteristics of the undertaking's employees (S1-6)\nThis section describes the key characteristics of employees in our\nown workforce.\nEmployees by gender\nEmployees by gender [A] [B]\nNumber of employees\n(thousand)\nPercentage of employees\n2025\n2024\n2025\n2024\nMen\n55\n63\n 65 %\n 65 %\nWomen\n30\n33\n 35 %\n 35 %\nOther\n—\n—\n — %\n — %\nNot reported\n—\n—\n — %\n — %\nTotal\n85\n96\n 100 %\n 100 %\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nSustainability Statements | Social | Own workforce (S1) continued\n398\n398"
+          },
+          {
+            "id": "shell.pdf:extracted:3",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 117,
+            "score": 0.027450980392156862,
+            "text": "Datapoint type: fte\nMetric: Number of employees by gender\nPeriod: 2025\nValue: Men: 55,000; Women: 30,000; Total: 85,000\nBasis: Headcount, year-end, by gender\nQuote: Number of employees | 2025 | Men | 55 | Women | 30 | Total | 85\nExtractor: llamaextract\nPriority: 70"
+          },
+          {
+            "id": "shell.pdf:212:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 212,
+            "score": 0.019672131147540982,
+            "text": "Disclosures required under UKLR 6.6.6R(10) as at December 31, 2025\nIn accordance with UKLR 6.6.6R(10), the gender identity and ethnicity data of the Board and executive management (which includes\nthe Company Secretary, as required by UKLR 6.6.6R(10)) in the format prescribed by UKLR 6 Annex 1 are set out in the below table.\nQuestionnaires are routinely circulated to the Board and Executive Committee members at the end of each financial year, requesting certain\ndeclarations and confirmations. For the purposes of UKLR 6.6.6R(9) and (10), the Board and Executive Committee were asked to confirm\nas part of this annual questionnaire with which of the below categories they identify.\nNumber of\nboard members\nPercentage\nof the board\nNumber of senior\npositions on the\nboard (CEO, CFO,\nSID and Chair)\nNumber in executive\nmanagement\nPercentage\nof executive\nmanagement\nMen\n\n7\n58%\n\n3\n5\n56%\nWomen\n\n5\n42%\n\n1\n4\n44%\nNot specified / prefer not to say\n\n–\n–\n–\n–\n–\nNumber of\nboard members\nPercentage\nof the board\nNumber of senior\npositions on the\nboard (CEO, CFO,\nSID and Chair)\nNumber in executive\nmanagement\nPercentage\nof executive\nmanagement\nWhite British or other White (including\nminority-white groups)\n\n9\n 75 %\n\n3\n8\n 89 %\nMixed / Multiple ethnic groups\n\n–\n–\n\n–\n–\n–\nAsian / Asian British\n\n2\n 17 %\n\n–\n–\n–\nBlack / African / Caribbean / Black British\n\n–\n–\n\n–\n–\n–\nOther ethnic group\n\n1\n 8 %\n\n1\n1\n 11.0 %\nNot specified / prefer not to say\n\n–\n–\n\n–\n–\n–\nThe Board met each of the UKLR and FTSE Women Leaders Review\ntargets of maintaining a minimum of 40% female representation on the\nBoard. The Company met the targets set out in UKLR 6.6.6(9) as the\nBoard was 42% female. The CFO and a senior position on the Board\nis a woman, and the Board has three Directors from minority ethnic\nbackgrounds.\nQualifying third-party indemnities\nThe Company has entered into a Deed of Indemnity (Deed) with\neach Director of the Company who served during the year. The Deeds\nwere in force during the 2025 financial year and are currently in force.\nThe Company has also entered into a Deed with each newly appointed\nDirector. The terms of each of these Deeds are identical and they reflect\nthe statutory provisions on indemnities contained in the Companies Act\n2006 (CA 2006). Under the terms of each Deed, the Company has\nagreed to indemnify the Director, to the fullest extent permitted by the CA\n2006, against any loss, liability or damage, howsoever caused (including\nin respect of a Director's own negligence), suffered or incurred by a\nDirector in respect of their acts or omissions while or in the course of\nacting as a Director or employee of the Company, any associated\ncompany or affiliate (within the meaning of the CA 2006). In addition, the\nCompany shall lend funds to Directors as required to meet reasonable\ncosts and expenses incurred or to be incurred by them in defending any\ncriminal or civil proceedings brought against them in their capacity as a\nDirector or employee of the Company, associated company or affiliate,\nor, in connection with certain applications brought under the CA 2006.\nThe provisions in the Company's Articles"
+          },
+          {
+            "id": "shell.pdf:139:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 139,
+            "score": 0.01875,
+            "text": "resulting outcomes.\nPrincipal decisions\nIn this section, we outline some of the principal decisions made by the\nBoard over the year. We explain how the Directors have engaged with\nor in relation to key stakeholder groups and how stakeholder interests\nwere considered in decision-making.\nTo remain concise, we have categorised our key stakeholders into\nseven groups. Where appropriate, each group is considered to include\nboth current and potential stakeholders. The groups are:\n￮investor community;\n￮employees/workforce/pensioners;\n￮our customers;\n￮regulators/governments;\n￮NGOs/civil society stakeholders/academia/think tanks;\n￮communities; and\n￮suppliers/strategic partners.\nBoard decisions\nWe define principal decisions taken by the Board as decisions taken\nin 2025 that are of a strategic nature and significant to any of our key\nstakeholder groups. As outlined in the UK Financial Reporting Council\n(FRC) Guidance on the Strategic Report, we include decisions related\nto capital allocation and dividend policy.\nHow were stakeholders considered\nWe describe how regard was given to the likely long-term\nconsequences of the decision, including how stakeholders were\nconsidered during the decision-making process.\nWhat was the outcome\nWe describe which accommodations or mitigations were made, if any,\nand how Directors have considered different interests, and what factors\nthey took into account.\nStrategic Report | Principal decisions and stakeholders | Section 172(1) statement continued\n137\n137"
+          },
+          {
+            "id": "shell.pdf:341:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 341,
+            "score": 0.017391304347826087,
+            "text": "reference\nWe have chosen to incorporate some of the disclosures required by the\nESRS by reference to other parts of the Annual Report and Accounts.\nWe generally do this to avoid duplication or when the required\ndisclosure is best read in conjunction with these sections.\nFor details of information incorporated in the Sustainability Statements\nby reference to other parts of the Annual Report and Accounts, see\n\"Disclosure requirements covered by the Sustainability Statements\"\non pages 350-354.\nThe role of the administrative, management and\nsupervisory bodies (GOV-1)\nMembers of the administrative, management and supervisory bodies\nconsist of the Board of Directors and the Executive Committee (EC) of\nShell plc.\nThe Board consists of 12 members, including two executive members\nand 10 non-executive members (2024: 12 members, 2 executive\nmembers and 10 non-executive members). No members of the Board or\nEC are representatives of employees or other workers (2024: 0). See\n\"The Board of Shell plc\" on pages 143-147 and \"Executive Committee\"\non page 149 for information about the skills and experience of\nmembers of the Board and EC.\nThe Board's gender diversity, calculated as an average ratio of female\nto male Board members as at December 31, 2025, is 0.7 (2024: 0.7).\nWomen made up 42% of the Board as at December 31, 2025 (2024:\n42%). See \"Board diversity\" on page 148 and \"Executive Committee\ndiversity\" on page 150 for other aspects of diversity relevant to the\nBoard and EC.\nAll non-executive Directors are considered by the Board to be\nindependent in character and judgement. The percentage of\nindependent Board members is 83% as at December 31, 2025\n(2024: 83%).\nOur governance framework is designed to effectively deliver\nour strategy, which is to deliver more value with less emissions,\nunderpinned by our focus on safety, people and sustainability. The\nBoard is supported by four standing committees: the Sustainability\nCommittee (SUSCO), the Remuneration Committee (REMCO), the\nAudit and Risk Committee (ARC) and the Nomination and Succession\nCommittee (NOMCO). Sustainability-related matters are considered\nas appropriate by the Board or the relevant committee.\nThree management-level committees with representatives from across\nShell also play a critical role in driving sustainability-related elements\nof our strategy. These include the Strategy and Investment Committee\n(SIC), the Carbon Reporting Committee (CRC) and the Sustainability\nManagement Committee (SMC).\nSee \"Our approach to sustainability\" on pages 104-109 for a\ndescription of governance bodies responsible for sustainability, the\nrole of management, procedures for managing sustainability-related\nimpacts, risks and opportunities, and reporting lines and controls.\nAt Group level, the potential impacts of the energy transition on our\nbusiness model and strategy are discussed and assessed by the Board\nand the Executive Committee as part of the annual business planning\ncycle. This assessment allows us to challenge accepted ways of\nthinking, identify material risks and opportunities and identify key\ntensions and trade-offs.\nSustainability Statements | ESRS 2 General continued\n339\n339"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What percentage of Shell's Board were women in 2025?",
+        "answer": "As of December 31, 2025, 42% of Shell's Board were women.",
+        "verbatim": "42%",
+        "citations": [
+          {
+            "source": "shell.pdf",
+            "page": 118,
+            "quote": "communications, engagements with elected employee representatives\nand through our experience-sharing portal for employees. This\ncommitment is underscored by our CEO's leadership pledge with\nMindForward Alliance and the launch of our Global Mental Well-being\nProgramme in 2023. The programme's interventions focus on developing\na workplace culture that supports good mental health and offers\nemployees the opportunity to complete an anonymous and voluntary\nsurvey in which they can voice their experience of well-being at Shell.\nWe monitor the survey results to identify opportunities to improve\nemployee well-being. In 2025, we continued to improve the\nprogramme, adding adaptive e-learning content for line managers\nin workplace mental health, enhancing accessibility of programme\nresources for front-line staff and introducing new resources such\nas those that address resilience and financial well-being.\nDiversity, equity and inclusion (DE&I)\nWe aim to become one of the world's most diverse and inclusive\norganisations, a place where everyone feels valued, respected and has\na strong sense of belonging. It is the diverse perspectives, experiences,\nexpertise, cultures and working styles of each employee that make\nShell unique. This uniqueness combined with equity and inclusion\nenables our performance culture. Our Code of Conduct prohibits\ndiscrimination and sets our Group expectations for equal opportunity\nin employment decisions, based on factors such as merit, qualifications,\nperformance and business considerations. Our ambitions around\ndiversity, equity and inclusion are monitored on a regular basis.\nWe continually assess our culture and employee engagement through\ntools such as the annual Shell People Survey.\nWe promote equal opportunity and aim to create an environment\nwhere people feel included. Our approach seeks to reinforce respect\nfor people and to provide psychological safety for all our employees.\nIn 2025, our Shell People Survey showed a result of 82 points out\nof 100 for all questions relating to DE&I. This is an increase of one\npoint from 2024. However, we are still below the top quartile of\norganisations in the comparison group which scored 85 and above.\nWe will continue to focus on improving these efforts in the workplace.\nAs of 2025, and where legally permissible, Shell is able to provide\n92% of employees with the option to voluntarily declare their gender\nidentity, sexual orientation, race and ethnicity, and disability via the HR\nsystem. Data from this self-identification initiative allow us to monitor\nprogress against our DE&I aspirations.\nSee \"Nomination and Succession Committee\" on pages 162-164.\nGender\nWe strive to achieve gender equality. We have signed the World\nEconomic Forum declaration on closing the gender gap in the oil and\ngas sector and, in line with the UK Listing Rules, the Board of Shell plc\naims for gender balance on the Board, with at least one senior Board\nposition [A] held by a woman. To provide flexibility for periods of\nchange, we aim to maintain the representation of both men and\nwomen on the Board at, or above, a minimum of 40%. As of December\n31, 2025, women made up 42% of the Board and the position of Chief\nFinancial Officer (CFO) was held by a woman.\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "shell.pdf",
+            "page": 117,
+            "quote": "As of December 31, 2025, women made up 42% of the Board."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "shell_2025_fte_executive_committee_women",
+      "question": "What percentage of Shell's Executive Committee were women in 2025?",
+      "company": "SHELL",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "44%",
+          "Executive Committee",
+          "women"
+        ],
+        "answer_contains_all": null,
+        "page": 119,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "shell.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          165,
+          164,
+          119,
+          116,
+          165,
+          152,
+          400,
+          118,
+          401,
+          150,
+          197,
+          212
+        ],
+        "chunks": [
+          {
+            "id": "shell.pdf:165:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03497983870967742,
+            "text": "See \"Other regulatory and statutory information\" on page 210.\nFor Senior Management succession, the selection principles include\nprocess-specific elements, such as a clear and proactive approach\nto identifying and developing succession candidates. The principles\nalso outline the long-term structured nature of the succession planning\nprocess. There is also strong focus on ensuring that the principles reflect\nthe leadership qualities required for future business success and that\nthey advance the progress of diversity in all its forms.\nSenior Management principles feature in the NOMCO's review\nof the succession plans which occurs routinely in Committee meetings.\nUsing the principles, the NOMCO implements any changes through\na well-defined and diligent process with overall Board engagement.\nThe NOMCO agrees on candidate profiles and meets prospective\ncandidates well ahead of any selection decision being necessary.\nIt also engages the Board early in the process to ensure Directors\nhave an opportunity to meet and assess prospective candidates.\nConsequently, some of the leaders with whom the NOMCO and\nBoard engaged extensively in the past became members of the Board\n(Wael Sawan and Sinead Gorman) or the Executive Committee\n(Andrew Smith, Machteld de Haan, Cederic Cremers and Peter\nCostello whose appointments became effective April 1, 2025).\nDuring 2025, the NOMCO undertook its annual in-depth look at the\nstatus and succession plans for Senior Management within Shell, along\nwith the review of the health of the talent pipeline. In this regard, the\nBoard also reflected on the delayering of the most senior leadership\nstructure to reflect the three primary areas of business value –\nIntegrated Gas; Upstream; and Downstream, Renewables and Energy\nSolutions, whilst also elevating Trading and Supply, which is a key\nenabler across the organisation.\nDiversity of leadership\nThe NOMCO recognises that continuing to improve all types of\ndiversity at each level of the Shell Group is crucial. Shell aims to be\nan inclusive workplace where everyone feels valued and respected\nand has a strong sense of belonging. The NOMCO's review of\ndiversity objectives and strategies for the Shell Group as a whole\nalso monitors the impact of diversity and inclusion initiatives.\nIn February 2021, Shell published its aspirations for DE&I with a focus\non four areas of gender, race and ethnicity, LGBT+ and disability\ninclusion. For more details on the progress against our ambitions\nfor women hired and women in Senior Leadership, see page 116.\n\"Senior Leadership\" is a Shell-specific measure based on compensation\ngrade levels. This is different from what we are required to report under\nthe Code, which is female representation in Senior Management and\ntheir direct reports, where the percentage as at December 31, 2025,\nwas 35%.\nNationality diversity, such as Asian and American talent, continues to\nbe managed in accordance with the business outlook and we have a\nstrong focus on progressing race and ethnic minority representation.\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [C]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women"
+          },
+          {
+            "id": "shell.pdf:164:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 164,
+            "score": 0.033846153846153845,
+            "text": ", including size and tenure, skills and experience,\nand the DE&I requirements of the UK Listing Rules, FTSE Women\nLeaders Review and the Parker Review. The current size and\ncomposition of the Board was considered to be appropriate, also\ntaking account of Committee memberships and the Board and\nCommittee changes announced on December 11, 2025, and no\nchanges were considered necessary as a result of the Board\nPerformance Review. Greater flexibility around Non-executive tenure\ncontinues to be an area of focus. Although Shell does not publish the\nBoard Composition Principles, its Board Diversity Policy (which was first\npublished in March 2024 following recommendation by NOMCO)\nis available on the Company's website. This Policy highlights that Shell\naims for a gender balance on the Board, with at least one senior Board\nposition (Chair, CEO, Senior Independent Director, or CFO) held by\na woman. In addition, Shell's target is to maintain the representation\nof both men and women at, or above, a minimum of 40% [B]. We\nbelieve that this allows Shell to be truly representative of all genders\nand gender identities and provides flexibility during periods of change.\nFurther, Shell aims to maintain or exceed having at least one Board\nmember from a minority ethnic background. For more details on\nthe progress against these targets see page 163.\n[B] These targets align with those set by the FCA under the UK Listing Rules, and all such\ntargets on Board diversity remain subject to applicable equalities legislation, including\nthe Equality Act 2010 (as amended from time to time) and its provisions on discrimination.\nGovernance\n162\nDick Boer\nAnn\nGodbehere\nSir Andrew\nMackenzie\n162"
+          },
+          {
+            "id": "shell.pdf:119:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 119,
+            "score": 0.033264320220841956,
+            "text": "Gender diversity at Board and management level [A]\nMen\nWomen\nLevel\n2025\n2024\n2025\n2024\nBoard\n 58 %\n 58 %\n 42 %\n 42 %\nExecutive Committee\n 56 %\n 43 %\n 44 %\n 57 %\nSenior Leadership roles [A] [B]\n 65 %\n 67 %\n 35 %\n 33 %\n[A] Senior Leadership is a Shell measure based on compensation grade levels. This measure\nis distinct from \"senior manager\" as per statutory disclosure requirements set out in the\ntable below.\n[B] Excludes employees in portfolio companies.\nGender diversity (at December 31, 2025)\nMen\nWomen\nNumber\n%\nNumber\n%\nDirectors of the Company\n\n7\n 58 %\n\n5\n 42 %\nSenior managers [A]\n\n695\n 64 %\n\n394\n 36 %\nEmployees (thousand)\n\n55\n 65 %\n\n30\n 35 %\n[A] Senior manager is defined in section 414C(9) of the UK Companies Act 2006 and,\naccordingly, the number disclosed comprises the EC members who were not Directors\nof the Company and other directors of Shell subsidiaries (excluding Directors of portfolio\ncompanies).\nAs of December 31, 2025, 35% of Shell employees were women.\nOf the external hires who joined Shell as of December 31, 2025,\n35% were women, compared with 39% in 2024.\nA crucial element of achieving gender balance is addressing any pay\ngap [A] and we continue to work towards improvements in this area.\nThe basis for paying fairly is equal pay for equal work, taking into\naccount factors such as performance and experience. At Shell, we\nmonitor pay equity [B] through regular analysis to be confident that\nwe have pay equity between genders for performing the same jobs.\nWe address any unexplained pay differences related to gender through\nrigorous internal processes and apply our Fair Pay Principles. We\ncontinue to make progress in our gender ambitions at Shell, but a gender\npay gap exists for several reasons, including fewer women in senior\nleadership positions and fewer women in higher-paid specialist roles.\n[A] Shell seeks to comply with applicable requirements and regulation on pay gap reporting.\n[B] Men and women who are paid the same for doing similar jobs, at similar level,\nresponsibility, tenure and performance.\nRace and ethnicity\nThrough racial and ethnic representation across our workforce, we\naim to reflect the communities in which we work. Shell's Global Council\nfor Race is supported by an Employee Advisory Board which aims to\nadvance diversity in our workforce.\nShell aims to maintain or exceed having at least one Board member\nfrom an ethnic minority background, while acknowledging that in\nperiods of Board change this may not be achieved. As of December 31,\n2025, the Board had three members who identify as being from an\nethnic minority group and one EC member who identifies as being\nfrom an ethnic minority group [A].\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [B]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[A] Ethnic minority refers to an individual who self-identifies as Asian, Black, Mixed/multiple\nor other ethnic minority group, in line with UK Office for National Statistics classifications.\n[B] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\n* Non-GAAP measure. See page 430.\nIn some countries, there are local restrictions on collecting and reporting"
+          },
+          {
+            "id": "shell.pdf:116:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.033132126089872566,
+            "text": "Our people\nOur people are essential to our strategy of delivering more value\nwith less emissions. As we build our performance culture, we want\nour people to feel valued and respected, with a strong sense\nof belonging.\nWe are transforming Shell to be a leaner, more competitive\norganisation as we focus on performance, discipline and simplification\nacross our organisation. Simultaneously, we are building a\nperformance culture that we believe will help us succeed as we\nnavigate the energy transition. We aim to support positive social\nand economic impacts for our workforce by providing competitive\npay, benefits and working conditions.\nAs part of our performance culture, we aim to create a workplace that\ndelivers results, where all employees can learn and adapt, collaborate\nas one team and care for each other, building resilience as we\ntransform. We promote equal opportunity and aim to create an\nenvironment where people feel included.\nPeople development remains a priority for our organisation. We\nproactively identify skill and capability gaps for our traditional and\nemerging businesses; offer training to address these gaps; and if\nneeded, recruit talent externally to add to the skills and experiences of\nour workforce. To enable our leaders to lead this change, we support\nthem through targeted interventions including leadership development\nand coaching.\nSee \"This is Shell\" on pages 6-8 for more about our performance culture.\nAll metrics in this section exclude employees from portfolio\ncompanies [A], except for those showing the total number of\nemployees by gender and region, employee contract type by gender,\nthe percentage of women employees, employee turnover and certain\nmandatory training courses. Starting in 2025, the metrics for employee\ncontract type by gender and employee turnover include employees\nfrom portfolio companies.\n[A] Portfolio companies are non-integrated entities within the Shell Group. To give these\ncompanies the flexibility they need, they operate as subsidiaries while generally retaining\ntheir own processes and systems. Portfolio companies comply with Shell's minimum\nrequirements for controls and compliance. This includes the Shell Performance Framework\nand mandatory requirements for ethics and compliance, risk management and safety.\n\nEmployees\n85,000\n\nCountries and territories\n70\ncountries in which we operate\n\nDirectors\n42%\nwomen on the Board of Directors\n\nExecutive Committee\n44%\nwomen on the Executive Committee\n\nSenior leaders\n35%\nwomen in senior leadership positions\n\nWomen employees\n35%\nwomen employees\n\nTraining\n253,000\ntraining days for employees and joint-venture partners in 2025\n\nExternal hires\n3,593\npeople joined Shell (35% women, 65% men) in 2025\nThe numbers presented above reflect data as at December 31, 2025,\nunless otherwise stated.\nEmployee overview\nWe employed 85,000 people on a full- or part-time basis as of\nDecember 31, 2025. This compares with 96,000 at the end of\n2024 and 103,000 at the end of 2023.\nThe reduction in the number of employees in 2025 compared with\n2024 reflects our continued focus on performance, discipline and\nsimplification as we implement our strategy. We improved efficiencies,\nand made divestments in Singapore (Bukom, Jurong), in Nigeria\n(SPDC) and in the UK to the Adura joint venture and ended several\nactivities in our Downstream, Renewables and Energy Solutions\nbusiness. We also improved efficiencies in our Projects & Technology,\nIT and Finance functions.\nStrategic Report | Performance in the year | Our Foundations\n114\n114"
+          },
+          {
+            "id": "shell.pdf:165:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03094098883572568,
+            "text": "by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women Leaders)\nand, in 2025, it met the Parker Review's objectives and the UK Listing\nRule diversity targets by reflecting 42% women representation with the\nCFO position held by a woman and three Directors from a minority\nethnic background.\n\nSee \"Our people\" on page 116 for more information on DE&I in Shell.\nThe People and Culture Strategy and diversity, equity\nand inclusion\nDiversity continued to be a key area of focus during the year. The\nBoard Diversity Policy is aligned to the requirements of the UK\nCorporate Governance Code and includes our targets for Board\ndiversity, as well as complementing Shell's wider diversity policies and\nembracing Shell's values, Code of Conduct and sustainability goals.\nCurrently, this policy is not applied to the individual Committees,\nalthough we strive to apply diverse representation across the\nCommittees. DE&I across Committee membership remains an ongoing\nconsideration. A copy of the Board Diversity Policy is available on our\nwebsite: shell.com/investors/environmental-social-and-governance/\nboard-of-directors.\nIn relation to Board director appointments and diversity, the NOMCO\noversees the development of a diverse pipeline for succession to\nthe Board and monitors that all Board appointments are subject\nto a formal, rigorous and transparent procedure. Appointments and\nsuccession plans are based on merit and objective criteria and promote\ndiversity, inclusion and equal opportunity.\nTo this end, the NOMCO is responsible for engaging an independent\nexecutive search consultant, who assists in preparing shortlists\nof candidates, co-ordinating interviews and seeking references.\nIn accordance with the Board Diversity Policy, the NOMCO only\nengages with external search firms who are able to align with\nShell's approach to DE&I in identifying suitable individuals from\ndiverse pools of candidates.\nUnder the Board Diversity Policy, the Board commits to:\n￮Ensuring an inclusive environment: Through inclusive behaviours and\npractices, we aim to create an environment in which every Board\nmember feels valued, respected and empowered to contribute fully.\n￮Ensuring support for External Best Practices: The Board endorses and\nsupports external best practices, such as the FTSE Women Leaders\nReview, Parker Review and others, to maintain and enhance diversity\nwithin the Board.\n￮Ensuring that Board appointments are managed with rigour and\ntransparency: Candidates are evaluated based on merit, skills,\nexperience, qualifications, performance and business considerations,\nwith due regard for diversity factors.\n￮Ensuring regular Board composition reviews: The Board regularly\nassesses the composition of the Board, including age, gender, race,\nethnicity, educational, social, geographical and professional\nbackgrounds, skills, knowledge and experience, making\nrecommendations for necessary adjustments.\nShell has an inclusive Board environment, comprising individuals that\nare suitably qualified. They have the required skills, industry expertise,\nbreadth of perspective and high-quality decision-making capabilities\nto support the strategy and overall direction of Shell.\n\nSee \"The Board of Shell plc\" on pages 143-148 for details about the skills and backgrounds\nof individual members.\nFrom a gender perspective, as at December 31, 2025, the Board\ncomprised five"
+          },
+          {
+            "id": "shell.pdf:152:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 152,
+            "score": 0.030708969839404625,
+            "text": "Changes to the Executive Committee\nLeavers (on March 31, 2025)\n￮Huibert Vigeveno (Downstream, Renewables and Energy\nSolutions Director)\n￮Zoë Yujnovich (Integrated Gas and Upstream Director)\nLeaver (on February 28, 2026)\n￮Robin Mooldijk (Projects & Technology Director)\nJoiners (on April 1, 2025)\n￮Machteld de Haan (President, Downstream, Renewables\nand Energy Solutions)\n￮Andrew Smith (President, Trading and Supply)\n￮Cederic Cremers (President, Integrated Gas)\n￮Peter Costello (President, Upstream)\nAs announced on March 4, 2025, with effect from April 1, 2025, leaders on the Executive Committee representing Integrated Gas;\nUpstream; Downstream, Renewables and Energy Solutions; Trading and Supply; and Projects & Technology, are each referred to as\nPresident of their respective organisations, rather than \"Director\". Functional leaders on the Executive Committee are referred to as Chief\nOfficer of their respective functions. The changes to the Executive Committee structure were designed to support our strategy to deliver\nmore value with less emissions, and as part of our ongoing transformation. Shell's financial reporting segments remain Integrated Gas;\nUpstream; Marketing; Chemicals and Products; Renewables and Energy Solutions; and Corporate.\nOn January 20, 2026, Shell announced that significant progress had been made against the previously announced plan to integrate the\ntechnical divisions, which today make up the Projects & Technology organisation, into the business lines; and that as a result of the progress\nwe have made, Robin Mooldijk, President, Projects & Technology will step down after 35 years of distinguished service with Shell, effective\nFebruary 28, 2026. Following Robin's departure, Shell's Executive Committee has reduced in size from nine to eight members.\n[A] As at December 31, 2025.\nGovernance | Executive Committee continued\n150\nExecutive Committee diversity [A]\nGender diversity\nWhite British or other White\n(including minority-white groups)\nOther Minority\nEthnic Group\n89%\n11%\nEthnicity\nMale\nFemale\n44%\n56%\n150"
+          },
+          {
+            "id": "shell.pdf:400:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 400,
+            "score": 0.030414921964217738,
+            "text": "and managing material risks\nand opportunities (S1-5)\nShell has set voluntary ambitions to advance our aim to become one\nof the most diverse and inclusive organisations in the world. We\nengage with our own workforce and employee resource groups on\nShell's approach to diversity, equity and inclusion. These voluntary\nambitions as specified below meet the ESRS definition of a target.\nWe inform employees and employee representative bodies about\nour progress towards our ambitions and how we can improve our\nperformance. We communicate our progress transparently in internal\nand external reporting where relevant.\nWomen in senior leadership\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030,\ncompared with 29.5% in the baseline year of 2021.\nThe scope of this ambition refers to an existing Shell measure for senior\nleadership based on compensation grades. The total number of these\npositions may change from year to year. We focus on representation\nas a percentage of this total group.\nEthnic minorities in Senior Management\nIn support of the UK's Parker Review recommendations, we had\nan ambition to achieve 15% ethnic minority representation in Senior\nManagement by 2027, compared with 14% in the baseline year\nof 2023 (excluding portfolio companies). At the end of 2025, our\nrepresentation was 16%, (2024 15%). We now aim to achieve 17% by\n2027. This level of progress is consistent with our expectations when\nsetting the ambition.\nSenior Management refers to senior leadership based in the UK,\nmeasured based on compensation grade, and aligned with our self-\nidentification data collection and processes. Ethnic minority refers to an\nindividual who self-identifies as Asian, Black, Mixed/multiple or other\nethnic minority group, in line with UK Office for National Statistics\nclassifications.\nCharacteristics of the undertaking's employees (S1-6)\nThis section describes the key characteristics of employees in our\nown workforce.\nEmployees by gender\nEmployees by gender [A] [B]\nNumber of employees\n(thousand)\nPercentage of employees\n2025\n2024\n2025\n2024\nMen\n55\n63\n 65 %\n 65 %\nWomen\n30\n33\n 35 %\n 35 %\nOther\n—\n—\n — %\n — %\nNot reported\n—\n—\n — %\n — %\nTotal\n85\n96\n 100 %\n 100 %\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nSustainability Statements | Social | Own workforce (S1) continued\n398\n398"
+          },
+          {
+            "id": "shell.pdf:118:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 118,
+            "score": 0.0304147465437788,
+            "text": "communications, engagements with elected employee representatives\nand through our experience-sharing portal for employees. This\ncommitment is underscored by our CEO's leadership pledge with\nMindForward Alliance and the launch of our Global Mental Well-being\nProgramme in 2023. The programme's interventions focus on developing\na workplace culture that supports good mental health and offers\nemployees the opportunity to complete an anonymous and voluntary\nsurvey in which they can voice their experience of well-being at Shell.\nWe monitor the survey results to identify opportunities to improve\nemployee well-being. In 2025, we continued to improve the\nprogramme, adding adaptive e-learning content for line managers\nin workplace mental health, enhancing accessibility of programme\nresources for front-line staff and introducing new resources such\nas those that address resilience and financial well-being.\nDiversity, equity and inclusion (DE&I)\nWe aim to become one of the world's most diverse and inclusive\norganisations, a place where everyone feels valued, respected and has\na strong sense of belonging. It is the diverse perspectives, experiences,\nexpertise, cultures and working styles of each employee that make\nShell unique. This uniqueness combined with equity and inclusion\nenables our performance culture. Our Code of Conduct prohibits\ndiscrimination and sets our Group expectations for equal opportunity\nin employment decisions, based on factors such as merit, qualifications,\nperformance and business considerations. Our ambitions around\ndiversity, equity and inclusion are monitored on a regular basis.\nWe continually assess our culture and employee engagement through\ntools such as the annual Shell People Survey.\nWe promote equal opportunity and aim to create an environment\nwhere people feel included. Our approach seeks to reinforce respect\nfor people and to provide psychological safety for all our employees.\nIn 2025, our Shell People Survey showed a result of 82 points out\nof 100 for all questions relating to DE&I. This is an increase of one\npoint from 2024. However, we are still below the top quartile of\norganisations in the comparison group which scored 85 and above.\nWe will continue to focus on improving these efforts in the workplace.\nAs of 2025, and where legally permissible, Shell is able to provide\n92% of employees with the option to voluntarily declare their gender\nidentity, sexual orientation, race and ethnicity, and disability via the HR\nsystem. Data from this self-identification initiative allow us to monitor\nprogress against our DE&I aspirations.\nSee \"Nomination and Succession Committee\" on pages 162-164.\nGender\nWe strive to achieve gender equality. We have signed the World\nEconomic Forum declaration on closing the gender gap in the oil and\ngas sector and, in line with the UK Listing Rules, the Board of Shell plc\naims for gender balance on the Board, with at least one senior Board\nposition [A] held by a woman. To provide flexibility for periods of\nchange, we aim to maintain the representation of both men and\nwomen on the Board at, or above, a minimum of 40%. As of December\n31, 2025, women made up 42% of the Board and the position of Chief\nFinancial Officer (CFO) was held by a woman.\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in"
+          },
+          {
+            "id": "shell.pdf:401:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.029292929292929294,
+            "text": "4\n2025\n2024\n0-19%\n-\n-\n-\n-\n20-39%\nNetherlands\nNetherlands\n-\n-\n40-59%\n-\n-\n-\n-\n60-79%\n-\n-\n-\n-\n80-100%\n-\n-\nNetherlands\nNetherlands\n[A] Excludes employees in portfolio companies.\n[B] The European Economic Area (EEA) countries include the 27 member states of the\nEuropean Union plus Iceland, Liechtenstein and Norway.\n[C] For countries with more than 50 employees representing at least 10% of total employees.\nSee \"Employee engagement\" on page 115.\nDiversity metrics (S1-9)\nThis section describes the gender distribution at senior leadership level\nand the age distribution of our employees.\nGender distribution of senior leadership [A]\nNumber\nPercentage\nLevel\n2025\n2024\n2025\n2024\nExecutive Committee\nMen\n5\n3\n 56 %\n 43 %\nWomen\n4\n4\n 44 %\n 57 %\nSenior Leadership\nroles [B] [C]\nMen\n651\n768\n 65 %\n 67 %\nWomen\n345\n370\n 35 %\n 33 %\n[A] As at December 31, 2025.\n[B] Senior Leadership is a Shell measure based on compensation grade levels.\n[C] Excludes employees in portfolio companies.\nSee the table \"Employees by age group\" on page 115 for information\non the distribution of employees by age group.\nAdequate wages (S1-10)\nShell's pay is designed to be market competitive. We expect that our\nemployees can meet their basic needs through the pay and benefits\nthat we provide. Shell pays its employees an adequate wage, in line\nwith applicable benchmarks, which we regularly check. There has been\nno change from last year's outcome.\nSee \"Pay philosophy and Fair Pay Principles\" on page 396 for more\ninformation.\nThis assessment does not take into account any additional non-salary\ncomponents of total remuneration that may be applicable, such as\nbenefits and share awards.\nHealth and safety metrics (S1-14)\nThe Shell Commitment and Policy on Health, Security, Safety, the\nEnvironment and Social Performance (HSSE & SP) requires Shell\ncompanies, contractors and joint ventures under our operational\ncontrol to adopt a systematic approach to managing HSSE risk to\nachieve compliance with the law and continuous improvement in\nperformance. We expect ventures not under our operational control\nto adopt an equivalent approach.\nAll employees and non-employees working under our day-to-day\nsupervision are covered by the appropriate HSSE & SP requirements\nwhich may be implemented through our own management system\nSustainability Statements | Social | Own workforce (S1) continued\n399\n399"
+          },
+          {
+            "id": "shell.pdf:150:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 150,
+            "score": 0.02803921568627451,
+            "text": "Board diversity\nGender diversity\nNon-executive Director tenure (years)\nEthnicity\nNon-executive Director sector experience\nThe graphs above capture board diversity data as at December 31, 2025. For further information in relation to UK Listing Rule 6.6.6R(10)\nand (11), see \"Other regulatory and statutory information\" on page 210.\nDirector independence\nAll Non-executive Directors are considered by the Board to be independent in character and judgement. The Chair is not subject to the UK\nCorporate Governance Code's independence test other than on appointment.\nEthnic diversity\nIn line with the Parker Review recommendations, Shell aimed to achieve 15% ethnic minority group representation in Senior Management\n[A] by 2027, which has been achieved in advance of the target date. We will now aim to achieve 17% by 2027.\n[A] Senior Management refers to senior leadership based in the UK, measured based on compensation grade, and aligned with our self-identification data collection and processes.\nAttendance\nThe Board met 10 times during 2025.\nFive of the 10 meetings were held\nphysically -- one meeting in Australia,\nand four meetings in London, UK. Five\nmeetings were held virtually. Attendance\nin 2025 for all Board meetings is given\nin the table [A].\nBoard member\nScheduled meetings\nattended\nAd-hoc meetings\nattended\nDick Boer\n8/8\n2/2\nNeil Carson OBE [B]\n8/8\n1/2\nAnn Godbehere\n 8/8\n2/2\nSinead Gorman\n8/8\n2/2\nCatherine J. Hughes\n8/8\n2/2\nJane H. Lute [C]\n8/8\n1/2\nSir Andrew Mackenzie\n8/8\n2/2\nSir Charles Roxburgh\n8/8\n2/2\nWael Sawan\n8/8\n2/2\nBram Schot [D]\n7/8\n1/2\nLeena Srivastava\n8/8\n2/2\nCyrus Taraporevala\n8/8\n2/2\n[A] For attendance at committee meetings during the year, please refer to individual committee reports.\n[B] Neil Carson OBE was absent from the ad-hoc February 2025 Board meeting due to personal circumstances.\n[C] Jane H. Lute was absent from the ad-hoc May 2025 Board meeting due to personal circumstances.\n[D] Bram Schot was absent from the ad-hoc February 2025 and September 2025 Board meetings due to scheduled business commitments.\nGovernance | The Board of Shell plc continued\n148\nMale\nFemale\n58%\n42%\nAccounting and Finance\nOil and gas, Extractives, Energy\nStrategy development\nEngineering, Industrial\nConsumer, Marketing\nRegulatory, Government\naffairs, Public policy\n90%\n70%\n80%\n100%\n90%\n80%\n0-3\n4-6\n7-9\n40%\n30%\n30%\nWhite British or other White\n(including minority white groups)\nAsian / Asian British\nOther ethnic groups\n8%\n17%\n75%\n148"
+          },
+          {
+            "id": "shell.pdf:197:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 197,
+            "score": 0.027160493827160494,
+            "text": "Percentage change in remuneration of the Directors and employees\nThe table below compares the remuneration of the Executive and Non-executive Directors of Shell plc with an employee comparator group\nconsisting of local employees in the UK, the USA and the Netherlands. The local employee population of these countries is considered a suitable\nemployee comparator group because: these are countries with a significant Shell employee base, a large proportion of senior managers come\nfrom these countries, and the REMCO considers remuneration levels in these countries when setting base salaries for Executive Directors. For the\npurposes of comparison, the change in employee remuneration is calculated by reference to the change in salary scale, benefits and annual bonus\nfor a notional employee in each of the base countries, not by reference to the actual change in pay for a group of employees.\nTaxable benefits are those that align with the definition of taxable benefits applying in the respective country. In line with the \"Single figure of total\nremuneration for Executive Directors\" table on page 185, the annual bonus is included in the year in which it was earned (rather than paid).\n\nPercentage change in remuneration of Directors and employees [A]\n\nSalary/fees (% change)\nBenefits (% change)\nAnnual bonus (% change)\n2024–\n25\n2023–\n24\n2022–\n23\n2021–\n22\n2020–\n21\n2024–\n25\n2023–\n24\n2022–\n23\n2021–\n22\n2020–\n21\n2024–\n25\n2023–\n24\n2022–\n23\n2021–\n22\n2020–\n21\nEmployees [B]\n 3.7%\n 3.7%\n 5.7%\n 2.4%\n 0.6%\n 13.8%\n 13.7%\n (10.2%)\n (8.4%)\n —\n (8.4%)\n 7.5%\n 14.3%\n (0.4%)\n —\nExecutive Directors\nWael Sawan\n 5.5%\n 3.9%\n —\n —\n —\n 72.5%\n (88.2%)\n —\n —\n —\n (6.9%)\n 7.9%\n —\n —\n —\nSinead Gorman [C]\n 5.5%\n 3.9%\n 37.0%\n —\n —\n 7.4%\n (83.5%)\n (39.7%)\n —\n —\n (6.7%)\n 12.2%\n 45.8%\n —\n —\nNon-executive Directors [D]\nDick Boer\n —\n 14.7%\n 25.4%\n 6.3%\n 70.4%\n 77.9%\n (58.0%)\n 389.8%\n —\n —\nNeil Carson OBE\n (14.6%)\n 3.5%\n —\n 3.6%\n 4.3%\n (40.2%)\n (19.4%)\n 593.0%\n —\n —\nAnn Godbehere\n —\n 1.1%\n —\n 0.8%\n 2.9%\n 21.1%\n (46.8%)\n 829.4%\n 1,286.7%\n —\nJane H. Lute\n —\n 1.1%\n 6.7%\n 80.4%\n —\n (62.1%)\n 67.0%\n 155.0%\n 1,893.8%\n —\nCatherine Hughes\n (2.0%)\n 3.0%\n 4.6%\n 14.1%\n 2.8%\n (9.5%)\n (37.3%)\n 435.0"
+          },
+          {
+            "id": "shell.pdf:212:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 212,
+            "score": 0.019672131147540982,
+            "text": "Disclosures required under UKLR 6.6.6R(10) as at December 31, 2025\nIn accordance with UKLR 6.6.6R(10), the gender identity and ethnicity data of the Board and executive management (which includes\nthe Company Secretary, as required by UKLR 6.6.6R(10)) in the format prescribed by UKLR 6 Annex 1 are set out in the below table.\nQuestionnaires are routinely circulated to the Board and Executive Committee members at the end of each financial year, requesting certain\ndeclarations and confirmations. For the purposes of UKLR 6.6.6R(9) and (10), the Board and Executive Committee were asked to confirm\nas part of this annual questionnaire with which of the below categories they identify.\nNumber of\nboard members\nPercentage\nof the board\nNumber of senior\npositions on the\nboard (CEO, CFO,\nSID and Chair)\nNumber in executive\nmanagement\nPercentage\nof executive\nmanagement\nMen\n\n7\n58%\n\n3\n5\n56%\nWomen\n\n5\n42%\n\n1\n4\n44%\nNot specified / prefer not to say\n\n–\n–\n–\n–\n–\nNumber of\nboard members\nPercentage\nof the board\nNumber of senior\npositions on the\nboard (CEO, CFO,\nSID and Chair)\nNumber in executive\nmanagement\nPercentage\nof executive\nmanagement\nWhite British or other White (including\nminority-white groups)\n\n9\n 75 %\n\n3\n8\n 89 %\nMixed / Multiple ethnic groups\n\n–\n–\n\n–\n–\n–\nAsian / Asian British\n\n2\n 17 %\n\n–\n–\n–\nBlack / African / Caribbean / Black British\n\n–\n–\n\n–\n–\n–\nOther ethnic group\n\n1\n 8 %\n\n1\n1\n 11.0 %\nNot specified / prefer not to say\n\n–\n–\n\n–\n–\n–\nThe Board met each of the UKLR and FTSE Women Leaders Review\ntargets of maintaining a minimum of 40% female representation on the\nBoard. The Company met the targets set out in UKLR 6.6.6(9) as the\nBoard was 42% female. The CFO and a senior position on the Board\nis a woman, and the Board has three Directors from minority ethnic\nbackgrounds.\nQualifying third-party indemnities\nThe Company has entered into a Deed of Indemnity (Deed) with\neach Director of the Company who served during the year. The Deeds\nwere in force during the 2025 financial year and are currently in force.\nThe Company has also entered into a Deed with each newly appointed\nDirector. The terms of each of these Deeds are identical and they reflect\nthe statutory provisions on indemnities contained in the Companies Act\n2006 (CA 2006). Under the terms of each Deed, the Company has\nagreed to indemnify the Director, to the fullest extent permitted by the CA\n2006, against any loss, liability or damage, howsoever caused (including\nin respect of a Director's own negligence), suffered or incurred by a\nDirector in respect of their acts or omissions while or in the course of\nacting as a Director or employee of the Company, any associated\ncompany or affiliate (within the meaning of the CA 2006). In addition, the\nCompany shall lend funds to Directors as required to meet reasonable\ncosts and expenses incurred or to be incurred by them in defending any\ncriminal or civil proceedings brought against them in their capacity as a\nDirector or employee of the Company, associated company or affiliate,\nor, in connection with certain applications brought under the CA 2006.\nThe provisions in the Company's Articles"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What percentage of Shell's Executive Committee were women in 2025?",
+        "answer": "As of December 31, 2025, 44% of Shell's Executive Committee were women.",
+        "verbatim": "44%",
+        "citations": [
+          {
+            "source": "shell.pdf",
+            "page": 118,
+            "quote": "As of December 31, 2025, we had 44% women and 56% men on our EC."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "shell.pdf",
+            "page": 118,
+            "quote": "As of December 31, 2025, we had 44% women and 56% men on our EC."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "shell_2025_fte_senior_leadership_women",
+      "question": "What percentage of Shell's Senior Leadership roles were held by women in 2025?",
+      "company": "SHELL",
+      "year": 2025,
+      "category": "fte",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "35%",
+          "Senior Leadership",
+          "women"
+        ],
+        "answer_contains_all": null,
+        "page": 119,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "shell.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          118,
+          119,
+          400,
+          165,
+          118,
+          116,
+          401,
+          164,
+          165,
+          150,
+          166,
+          151
+        ],
+        "chunks": [
+          {
+            "id": "shell.pdf:118:2",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 118,
+            "score": 0.035441061670569866,
+            "text": "Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in\nlocal jurisdictions, Shell has global aspirations for representation.\nWe are committed to building a diverse and inclusive workforce. All\nemployment decisions, including hiring, promotions and separations,\nare based solely on factors such as merit, qualifications, performance\nand business considerations. The following table shows\nthe representation of men and women as of December 31, 2025.\n[A] Senior Board position means Chair, CEO, Senior Independent Director or CFO.\nStrategic Report | Performance in the year | Our Foundations | Our people continued\n116\n116"
+          },
+          {
+            "id": "shell.pdf:119:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 119,
+            "score": 0.03497983870967742,
+            "text": "Gender diversity at Board and management level [A]\nMen\nWomen\nLevel\n2025\n2024\n2025\n2024\nBoard\n 58 %\n 58 %\n 42 %\n 42 %\nExecutive Committee\n 56 %\n 43 %\n 44 %\n 57 %\nSenior Leadership roles [A] [B]\n 65 %\n 67 %\n 35 %\n 33 %\n[A] Senior Leadership is a Shell measure based on compensation grade levels. This measure\nis distinct from \"senior manager\" as per statutory disclosure requirements set out in the\ntable below.\n[B] Excludes employees in portfolio companies.\nGender diversity (at December 31, 2025)\nMen\nWomen\nNumber\n%\nNumber\n%\nDirectors of the Company\n\n7\n 58 %\n\n5\n 42 %\nSenior managers [A]\n\n695\n 64 %\n\n394\n 36 %\nEmployees (thousand)\n\n55\n 65 %\n\n30\n 35 %\n[A] Senior manager is defined in section 414C(9) of the UK Companies Act 2006 and,\naccordingly, the number disclosed comprises the EC members who were not Directors\nof the Company and other directors of Shell subsidiaries (excluding Directors of portfolio\ncompanies).\nAs of December 31, 2025, 35% of Shell employees were women.\nOf the external hires who joined Shell as of December 31, 2025,\n35% were women, compared with 39% in 2024.\nA crucial element of achieving gender balance is addressing any pay\ngap [A] and we continue to work towards improvements in this area.\nThe basis for paying fairly is equal pay for equal work, taking into\naccount factors such as performance and experience. At Shell, we\nmonitor pay equity [B] through regular analysis to be confident that\nwe have pay equity between genders for performing the same jobs.\nWe address any unexplained pay differences related to gender through\nrigorous internal processes and apply our Fair Pay Principles. We\ncontinue to make progress in our gender ambitions at Shell, but a gender\npay gap exists for several reasons, including fewer women in senior\nleadership positions and fewer women in higher-paid specialist roles.\n[A] Shell seeks to comply with applicable requirements and regulation on pay gap reporting.\n[B] Men and women who are paid the same for doing similar jobs, at similar level,\nresponsibility, tenure and performance.\nRace and ethnicity\nThrough racial and ethnic representation across our workforce, we\naim to reflect the communities in which we work. Shell's Global Council\nfor Race is supported by an Employee Advisory Board which aims to\nadvance diversity in our workforce.\nShell aims to maintain or exceed having at least one Board member\nfrom an ethnic minority background, while acknowledging that in\nperiods of Board change this may not be achieved. As of December 31,\n2025, the Board had three members who identify as being from an\nethnic minority group and one EC member who identifies as being\nfrom an ethnic minority group [A].\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [B]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[A] Ethnic minority refers to an individual who self-identifies as Asian, Black, Mixed/multiple\nor other ethnic minority group, in line with UK Office for National Statistics classifications.\n[B] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\n* Non-GAAP measure. See page 430.\nIn some countries, there are local restrictions on collecting and reporting"
+          },
+          {
+            "id": "shell.pdf:400:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 400,
+            "score": 0.034378013500482155,
+            "text": "and managing material risks\nand opportunities (S1-5)\nShell has set voluntary ambitions to advance our aim to become one\nof the most diverse and inclusive organisations in the world. We\nengage with our own workforce and employee resource groups on\nShell's approach to diversity, equity and inclusion. These voluntary\nambitions as specified below meet the ESRS definition of a target.\nWe inform employees and employee representative bodies about\nour progress towards our ambitions and how we can improve our\nperformance. We communicate our progress transparently in internal\nand external reporting where relevant.\nWomen in senior leadership\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030,\ncompared with 29.5% in the baseline year of 2021.\nThe scope of this ambition refers to an existing Shell measure for senior\nleadership based on compensation grades. The total number of these\npositions may change from year to year. We focus on representation\nas a percentage of this total group.\nEthnic minorities in Senior Management\nIn support of the UK's Parker Review recommendations, we had\nan ambition to achieve 15% ethnic minority representation in Senior\nManagement by 2027, compared with 14% in the baseline year\nof 2023 (excluding portfolio companies). At the end of 2025, our\nrepresentation was 16%, (2024 15%). We now aim to achieve 17% by\n2027. This level of progress is consistent with our expectations when\nsetting the ambition.\nSenior Management refers to senior leadership based in the UK,\nmeasured based on compensation grade, and aligned with our self-\nidentification data collection and processes. Ethnic minority refers to an\nindividual who self-identifies as Asian, Black, Mixed/multiple or other\nethnic minority group, in line with UK Office for National Statistics\nclassifications.\nCharacteristics of the undertaking's employees (S1-6)\nThis section describes the key characteristics of employees in our\nown workforce.\nEmployees by gender\nEmployees by gender [A] [B]\nNumber of employees\n(thousand)\nPercentage of employees\n2025\n2024\n2025\n2024\nMen\n55\n63\n 65 %\n 65 %\nWomen\n30\n33\n 35 %\n 35 %\nOther\n—\n—\n — %\n — %\nNot reported\n—\n—\n — %\n — %\nTotal\n85\n96\n 100 %\n 100 %\n[A] Employee numbers are based on headcount as of December 31, 2025.\n[B] Includes employees seconded to joint ventures.\nNote 33 to the \"Consolidated Financial Statements\" provides\nemployee numbers based on average headcount during the reporting\nperiod, excluding employees seconded to joint ventures and\nassociates. See page 305 for more information.\nSustainability Statements | Social | Own workforce (S1) continued\n398\n398"
+          },
+          {
+            "id": "shell.pdf:165:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03405483405483405,
+            "text": "See \"Other regulatory and statutory information\" on page 210.\nFor Senior Management succession, the selection principles include\nprocess-specific elements, such as a clear and proactive approach\nto identifying and developing succession candidates. The principles\nalso outline the long-term structured nature of the succession planning\nprocess. There is also strong focus on ensuring that the principles reflect\nthe leadership qualities required for future business success and that\nthey advance the progress of diversity in all its forms.\nSenior Management principles feature in the NOMCO's review\nof the succession plans which occurs routinely in Committee meetings.\nUsing the principles, the NOMCO implements any changes through\na well-defined and diligent process with overall Board engagement.\nThe NOMCO agrees on candidate profiles and meets prospective\ncandidates well ahead of any selection decision being necessary.\nIt also engages the Board early in the process to ensure Directors\nhave an opportunity to meet and assess prospective candidates.\nConsequently, some of the leaders with whom the NOMCO and\nBoard engaged extensively in the past became members of the Board\n(Wael Sawan and Sinead Gorman) or the Executive Committee\n(Andrew Smith, Machteld de Haan, Cederic Cremers and Peter\nCostello whose appointments became effective April 1, 2025).\nDuring 2025, the NOMCO undertook its annual in-depth look at the\nstatus and succession plans for Senior Management within Shell, along\nwith the review of the health of the talent pipeline. In this regard, the\nBoard also reflected on the delayering of the most senior leadership\nstructure to reflect the three primary areas of business value –\nIntegrated Gas; Upstream; and Downstream, Renewables and Energy\nSolutions, whilst also elevating Trading and Supply, which is a key\nenabler across the organisation.\nDiversity of leadership\nThe NOMCO recognises that continuing to improve all types of\ndiversity at each level of the Shell Group is crucial. Shell aims to be\nan inclusive workplace where everyone feels valued and respected\nand has a strong sense of belonging. The NOMCO's review of\ndiversity objectives and strategies for the Shell Group as a whole\nalso monitors the impact of diversity and inclusion initiatives.\nIn February 2021, Shell published its aspirations for DE&I with a focus\non four areas of gender, race and ethnicity, LGBT+ and disability\ninclusion. For more details on the progress against our ambitions\nfor women hired and women in Senior Leadership, see page 116.\n\"Senior Leadership\" is a Shell-specific measure based on compensation\ngrade levels. This is different from what we are required to report under\nthe Code, which is female representation in Senior Management and\ntheir direct reports, where the percentage as at December 31, 2025,\nwas 35%.\nNationality diversity, such as Asian and American talent, continues to\nbe managed in accordance with the business outlook and we have a\nstrong focus on progressing race and ethnic minority representation.\nIn line with the Parker Review recommendations, Shell aimed to achieve\n15% ethnic minority group representation in Senior Management [C]\nby 2027, which has been achieved in advance of the target date.\nWe will now aim to achieve 17% by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women"
+          },
+          {
+            "id": "shell.pdf:118:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 118,
+            "score": 0.03403948001925855,
+            "text": "communications, engagements with elected employee representatives\nand through our experience-sharing portal for employees. This\ncommitment is underscored by our CEO's leadership pledge with\nMindForward Alliance and the launch of our Global Mental Well-being\nProgramme in 2023. The programme's interventions focus on developing\na workplace culture that supports good mental health and offers\nemployees the opportunity to complete an anonymous and voluntary\nsurvey in which they can voice their experience of well-being at Shell.\nWe monitor the survey results to identify opportunities to improve\nemployee well-being. In 2025, we continued to improve the\nprogramme, adding adaptive e-learning content for line managers\nin workplace mental health, enhancing accessibility of programme\nresources for front-line staff and introducing new resources such\nas those that address resilience and financial well-being.\nDiversity, equity and inclusion (DE&I)\nWe aim to become one of the world's most diverse and inclusive\norganisations, a place where everyone feels valued, respected and has\na strong sense of belonging. It is the diverse perspectives, experiences,\nexpertise, cultures and working styles of each employee that make\nShell unique. This uniqueness combined with equity and inclusion\nenables our performance culture. Our Code of Conduct prohibits\ndiscrimination and sets our Group expectations for equal opportunity\nin employment decisions, based on factors such as merit, qualifications,\nperformance and business considerations. Our ambitions around\ndiversity, equity and inclusion are monitored on a regular basis.\nWe continually assess our culture and employee engagement through\ntools such as the annual Shell People Survey.\nWe promote equal opportunity and aim to create an environment\nwhere people feel included. Our approach seeks to reinforce respect\nfor people and to provide psychological safety for all our employees.\nIn 2025, our Shell People Survey showed a result of 82 points out\nof 100 for all questions relating to DE&I. This is an increase of one\npoint from 2024. However, we are still below the top quartile of\norganisations in the comparison group which scored 85 and above.\nWe will continue to focus on improving these efforts in the workplace.\nAs of 2025, and where legally permissible, Shell is able to provide\n92% of employees with the option to voluntarily declare their gender\nidentity, sexual orientation, race and ethnicity, and disability via the HR\nsystem. Data from this self-identification initiative allow us to monitor\nprogress against our DE&I aspirations.\nSee \"Nomination and Succession Committee\" on pages 162-164.\nGender\nWe strive to achieve gender equality. We have signed the World\nEconomic Forum declaration on closing the gender gap in the oil and\ngas sector and, in line with the UK Listing Rules, the Board of Shell plc\naims for gender balance on the Board, with at least one senior Board\nposition [A] held by a woman. To provide flexibility for periods of\nchange, we aim to maintain the representation of both men and\nwomen on the Board at, or above, a minimum of 40%. As of December\n31, 2025, women made up 42% of the Board and the position of Chief\nFinancial Officer (CFO) was held by a woman.\nOver the years, Shell has progressively increased the representation\nof women on the EC and in senior leadership roles. As of December 31,\n2025, we had 44% women and 56% men on our EC. Our aim was\nto achieve 35% representation of women in our senior leadership\npositions by 2025. As of December 31, 2025, we had achieved\n35%, up from 33% in 2024. We aim to achieve 40% by 2030.\nIn accordance with applicable laws, and where permissible in"
+          },
+          {
+            "id": "shell.pdf:116:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 116,
+            "score": 0.03231667748215444,
+            "text": "Our people\nOur people are essential to our strategy of delivering more value\nwith less emissions. As we build our performance culture, we want\nour people to feel valued and respected, with a strong sense\nof belonging.\nWe are transforming Shell to be a leaner, more competitive\norganisation as we focus on performance, discipline and simplification\nacross our organisation. Simultaneously, we are building a\nperformance culture that we believe will help us succeed as we\nnavigate the energy transition. We aim to support positive social\nand economic impacts for our workforce by providing competitive\npay, benefits and working conditions.\nAs part of our performance culture, we aim to create a workplace that\ndelivers results, where all employees can learn and adapt, collaborate\nas one team and care for each other, building resilience as we\ntransform. We promote equal opportunity and aim to create an\nenvironment where people feel included.\nPeople development remains a priority for our organisation. We\nproactively identify skill and capability gaps for our traditional and\nemerging businesses; offer training to address these gaps; and if\nneeded, recruit talent externally to add to the skills and experiences of\nour workforce. To enable our leaders to lead this change, we support\nthem through targeted interventions including leadership development\nand coaching.\nSee \"This is Shell\" on pages 6-8 for more about our performance culture.\nAll metrics in this section exclude employees from portfolio\ncompanies [A], except for those showing the total number of\nemployees by gender and region, employee contract type by gender,\nthe percentage of women employees, employee turnover and certain\nmandatory training courses. Starting in 2025, the metrics for employee\ncontract type by gender and employee turnover include employees\nfrom portfolio companies.\n[A] Portfolio companies are non-integrated entities within the Shell Group. To give these\ncompanies the flexibility they need, they operate as subsidiaries while generally retaining\ntheir own processes and systems. Portfolio companies comply with Shell's minimum\nrequirements for controls and compliance. This includes the Shell Performance Framework\nand mandatory requirements for ethics and compliance, risk management and safety.\n\nEmployees\n85,000\n\nCountries and territories\n70\ncountries in which we operate\n\nDirectors\n42%\nwomen on the Board of Directors\n\nExecutive Committee\n44%\nwomen on the Executive Committee\n\nSenior leaders\n35%\nwomen in senior leadership positions\n\nWomen employees\n35%\nwomen employees\n\nTraining\n253,000\ntraining days for employees and joint-venture partners in 2025\n\nExternal hires\n3,593\npeople joined Shell (35% women, 65% men) in 2025\nThe numbers presented above reflect data as at December 31, 2025,\nunless otherwise stated.\nEmployee overview\nWe employed 85,000 people on a full- or part-time basis as of\nDecember 31, 2025. This compares with 96,000 at the end of\n2024 and 103,000 at the end of 2023.\nThe reduction in the number of employees in 2025 compared with\n2024 reflects our continued focus on performance, discipline and\nsimplification as we implement our strategy. We improved efficiencies,\nand made divestments in Singapore (Bukom, Jurong), in Nigeria\n(SPDC) and in the UK to the Adura joint venture and ended several\nactivities in our Downstream, Renewables and Energy Solutions\nbusiness. We also improved efficiencies in our Projects & Technology,\nIT and Finance functions.\nStrategic Report | Performance in the year | Our Foundations\n114\n114"
+          },
+          {
+            "id": "shell.pdf:401:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 401,
+            "score": 0.03190789473684211,
+            "text": "4\n2025\n2024\n0-19%\n-\n-\n-\n-\n20-39%\nNetherlands\nNetherlands\n-\n-\n40-59%\n-\n-\n-\n-\n60-79%\n-\n-\n-\n-\n80-100%\n-\n-\nNetherlands\nNetherlands\n[A] Excludes employees in portfolio companies.\n[B] The European Economic Area (EEA) countries include the 27 member states of the\nEuropean Union plus Iceland, Liechtenstein and Norway.\n[C] For countries with more than 50 employees representing at least 10% of total employees.\nSee \"Employee engagement\" on page 115.\nDiversity metrics (S1-9)\nThis section describes the gender distribution at senior leadership level\nand the age distribution of our employees.\nGender distribution of senior leadership [A]\nNumber\nPercentage\nLevel\n2025\n2024\n2025\n2024\nExecutive Committee\nMen\n5\n3\n 56 %\n 43 %\nWomen\n4\n4\n 44 %\n 57 %\nSenior Leadership\nroles [B] [C]\nMen\n651\n768\n 65 %\n 67 %\nWomen\n345\n370\n 35 %\n 33 %\n[A] As at December 31, 2025.\n[B] Senior Leadership is a Shell measure based on compensation grade levels.\n[C] Excludes employees in portfolio companies.\nSee the table \"Employees by age group\" on page 115 for information\non the distribution of employees by age group.\nAdequate wages (S1-10)\nShell's pay is designed to be market competitive. We expect that our\nemployees can meet their basic needs through the pay and benefits\nthat we provide. Shell pays its employees an adequate wage, in line\nwith applicable benchmarks, which we regularly check. There has been\nno change from last year's outcome.\nSee \"Pay philosophy and Fair Pay Principles\" on page 396 for more\ninformation.\nThis assessment does not take into account any additional non-salary\ncomponents of total remuneration that may be applicable, such as\nbenefits and share awards.\nHealth and safety metrics (S1-14)\nThe Shell Commitment and Policy on Health, Security, Safety, the\nEnvironment and Social Performance (HSSE & SP) requires Shell\ncompanies, contractors and joint ventures under our operational\ncontrol to adopt a systematic approach to managing HSSE risk to\nachieve compliance with the law and continuous improvement in\nperformance. We expect ventures not under our operational control\nto adopt an equivalent approach.\nAll employees and non-employees working under our day-to-day\nsupervision are covered by the appropriate HSSE & SP requirements\nwhich may be implemented through our own management system\nSustainability Statements | Social | Own workforce (S1) continued\n399\n399"
+          },
+          {
+            "id": "shell.pdf:164:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 164,
+            "score": 0.031384615384615386,
+            "text": ", including size and tenure, skills and experience,\nand the DE&I requirements of the UK Listing Rules, FTSE Women\nLeaders Review and the Parker Review. The current size and\ncomposition of the Board was considered to be appropriate, also\ntaking account of Committee memberships and the Board and\nCommittee changes announced on December 11, 2025, and no\nchanges were considered necessary as a result of the Board\nPerformance Review. Greater flexibility around Non-executive tenure\ncontinues to be an area of focus. Although Shell does not publish the\nBoard Composition Principles, its Board Diversity Policy (which was first\npublished in March 2024 following recommendation by NOMCO)\nis available on the Company's website. This Policy highlights that Shell\naims for a gender balance on the Board, with at least one senior Board\nposition (Chair, CEO, Senior Independent Director, or CFO) held by\na woman. In addition, Shell's target is to maintain the representation\nof both men and women at, or above, a minimum of 40% [B]. We\nbelieve that this allows Shell to be truly representative of all genders\nand gender identities and provides flexibility during periods of change.\nFurther, Shell aims to maintain or exceed having at least one Board\nmember from a minority ethnic background. For more details on\nthe progress against these targets see page 163.\n[B] These targets align with those set by the FCA under the UK Listing Rules, and all such\ntargets on Board diversity remain subject to applicable equalities legislation, including\nthe Equality Act 2010 (as amended from time to time) and its provisions on discrimination.\nGovernance\n162\nDick Boer\nAnn\nGodbehere\nSir Andrew\nMackenzie\n162"
+          },
+          {
+            "id": "shell.pdf:165:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 165,
+            "score": 0.030735930735930735,
+            "text": "by 2027. As at the end of 2025,\nethnic minority representation in Senior Management was 16%.\n[C] Senior Management refers to senior leadership based in the UK, measured based\non compensation grade, and aligned with our self-identification data collection\nand processes.\nAlthough the NOMCO monitors Shell's organisational DE&I strategies\nand initiatives, it also holds itself accountable for the Board's own\ndiversity and inclusion. Back in 2020, the Board's diverse composition\nmet the Hampton-Alexander requirements (now FTSE Women Leaders)\nand, in 2025, it met the Parker Review's objectives and the UK Listing\nRule diversity targets by reflecting 42% women representation with the\nCFO position held by a woman and three Directors from a minority\nethnic background.\n\nSee \"Our people\" on page 116 for more information on DE&I in Shell.\nThe People and Culture Strategy and diversity, equity\nand inclusion\nDiversity continued to be a key area of focus during the year. The\nBoard Diversity Policy is aligned to the requirements of the UK\nCorporate Governance Code and includes our targets for Board\ndiversity, as well as complementing Shell's wider diversity policies and\nembracing Shell's values, Code of Conduct and sustainability goals.\nCurrently, this policy is not applied to the individual Committees,\nalthough we strive to apply diverse representation across the\nCommittees. DE&I across Committee membership remains an ongoing\nconsideration. A copy of the Board Diversity Policy is available on our\nwebsite: shell.com/investors/environmental-social-and-governance/\nboard-of-directors.\nIn relation to Board director appointments and diversity, the NOMCO\noversees the development of a diverse pipeline for succession to\nthe Board and monitors that all Board appointments are subject\nto a formal, rigorous and transparent procedure. Appointments and\nsuccession plans are based on merit and objective criteria and promote\ndiversity, inclusion and equal opportunity.\nTo this end, the NOMCO is responsible for engaging an independent\nexecutive search consultant, who assists in preparing shortlists\nof candidates, co-ordinating interviews and seeking references.\nIn accordance with the Board Diversity Policy, the NOMCO only\nengages with external search firms who are able to align with\nShell's approach to DE&I in identifying suitable individuals from\ndiverse pools of candidates.\nUnder the Board Diversity Policy, the Board commits to:\n￮Ensuring an inclusive environment: Through inclusive behaviours and\npractices, we aim to create an environment in which every Board\nmember feels valued, respected and empowered to contribute fully.\n￮Ensuring support for External Best Practices: The Board endorses and\nsupports external best practices, such as the FTSE Women Leaders\nReview, Parker Review and others, to maintain and enhance diversity\nwithin the Board.\n￮Ensuring that Board appointments are managed with rigour and\ntransparency: Candidates are evaluated based on merit, skills,\nexperience, qualifications, performance and business considerations,\nwith due regard for diversity factors.\n￮Ensuring regular Board composition reviews: The Board regularly\nassesses the composition of the Board, including age, gender, race,\nethnicity, educational, social, geographical and professional\nbackgrounds, skills, knowledge and experience, making\nrecommendations for necessary adjustments.\nShell has an inclusive Board environment, comprising individuals that\nare suitably qualified. They have the required skills, industry expertise,\nbreadth of perspective and high-quality decision-making capabilities\nto support the strategy and overall direction of Shell.\n\nSee \"The Board of Shell plc\" on pages 143-148 for details about the skills and backgrounds\nof individual members.\nFrom a gender perspective, as at December 31, 2025, the Board\ncomprised five"
+          },
+          {
+            "id": "shell.pdf:150:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 150,
+            "score": 0.028899321857068335,
+            "text": "Board diversity\nGender diversity\nNon-executive Director tenure (years)\nEthnicity\nNon-executive Director sector experience\nThe graphs above capture board diversity data as at December 31, 2025. For further information in relation to UK Listing Rule 6.6.6R(10)\nand (11), see \"Other regulatory and statutory information\" on page 210.\nDirector independence\nAll Non-executive Directors are considered by the Board to be independent in character and judgement. The Chair is not subject to the UK\nCorporate Governance Code's independence test other than on appointment.\nEthnic diversity\nIn line with the Parker Review recommendations, Shell aimed to achieve 15% ethnic minority group representation in Senior Management\n[A] by 2027, which has been achieved in advance of the target date. We will now aim to achieve 17% by 2027.\n[A] Senior Management refers to senior leadership based in the UK, measured based on compensation grade, and aligned with our self-identification data collection and processes.\nAttendance\nThe Board met 10 times during 2025.\nFive of the 10 meetings were held\nphysically -- one meeting in Australia,\nand four meetings in London, UK. Five\nmeetings were held virtually. Attendance\nin 2025 for all Board meetings is given\nin the table [A].\nBoard member\nScheduled meetings\nattended\nAd-hoc meetings\nattended\nDick Boer\n8/8\n2/2\nNeil Carson OBE [B]\n8/8\n1/2\nAnn Godbehere\n 8/8\n2/2\nSinead Gorman\n8/8\n2/2\nCatherine J. Hughes\n8/8\n2/2\nJane H. Lute [C]\n8/8\n1/2\nSir Andrew Mackenzie\n8/8\n2/2\nSir Charles Roxburgh\n8/8\n2/2\nWael Sawan\n8/8\n2/2\nBram Schot [D]\n7/8\n1/2\nLeena Srivastava\n8/8\n2/2\nCyrus Taraporevala\n8/8\n2/2\n[A] For attendance at committee meetings during the year, please refer to individual committee reports.\n[B] Neil Carson OBE was absent from the ad-hoc February 2025 Board meeting due to personal circumstances.\n[C] Jane H. Lute was absent from the ad-hoc May 2025 Board meeting due to personal circumstances.\n[D] Bram Schot was absent from the ad-hoc February 2025 and September 2025 Board meetings due to scheduled business commitments.\nGovernance | The Board of Shell plc continued\n148\nMale\nFemale\n58%\n42%\nAccounting and Finance\nOil and gas, Extractives, Energy\nStrategy development\nEngineering, Industrial\nConsumer, Marketing\nRegulatory, Government\naffairs, Public policy\n90%\n70%\n80%\n100%\n90%\n80%\n0-3\n4-6\n7-9\n40%\n30%\n30%\nWhite British or other White\n(including minority white groups)\nAsian / Asian British\nOther ethnic groups\n8%\n17%\n75%\n148"
+          },
+          {
+            "id": "shell.pdf:166:1",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 166,
+            "score": 0.01846153846153846,
+            "text": "and responsibilities of the\nSustainability Committee.\n[A] The NOMCO was assisted during 2025 by Korn Ferry (UK) Limited (\"Korn Ferry\"), an external global search company whose main role was to propose suitable candidates. Korn Ferry does\nnot have any connection with the Company other than that of search consultant, and leadership and advisory support. The Chair does not participate in discussions regarding his own\nsuccession. Korn Ferry is a signatory to The Voluntary Code of Conduct for Executive Search Firms, which aims to improve board diversity.\n\nExecutive Committee (EC) succession\nDuring the year, robust and effective succession planning\nsupported the appointment of a number of new members\nto the Executive Committee. Some of the NOMCO activities\nin supporting these appointments are outlined below.\nThe NOMCO undertakes comprehensive engagement\nto understand who the candidates are for senior roles, what\npersonally drives them and how they will ensure Shell achieves\nits strategic ambitions.\nSuccession for senior roles is planned well in advance and\nreviewed regularly. Succession planning is a crucial, ongoing\nconsideration and not just an area of focus when an EC member\nchange is anticipated. The Board oversees Shell's succession\nplanning process in which selection is the final step of a rigorous,\nsophisticated and well-planned process.\nFor Executive Director and EC appointments, the NOMCO has\nset a structured process:\n￮Before any potential decision on resourcing, it explicitly\ndescribes the requirements of the role and the candidate profile.\n￮By working in a planned, consistent manner, last-minute surprises\nare avoided and well-considered decisions are made in line with\nevolving business requirements.\n￮It also plans for the unexpected and maintains a list of\ncandidates capable of stepping into senior roles to provide\ncover if necessary.\nThe NOMCO spends time getting to know the candidates\nto ensure that the pipeline is robust, diverse and adaptive. The\nNOMCO ensures it has visibility of today's and tomorrow's\nleaders. Over the last few years, the NOMCO has met many\nleaders and had extensive engagements with each of them. Some\nof these leaders now sit on the EC, others were appointed to the\nBoard (Wael Sawan and Sinead Gorman).\nThe NOMCO engages across the executive talent pipeline\nto ensure it interacts and becomes familiar with talent at different\nlevels of the organisation; for example, on a regular basis informal\nengagements are held with employees from a range of businesses,\nfunctions and backgrounds prior to a Board meeting. Not only\ndoes this engagement support senior succession, it also provides\na helpful element of the NOMCO's workforce engagement.\nThe Board is proud that candidates for the most senior leadership\nroles have primarily come from within the business, demonstrating\nthat the leadership development and succession process\nremains effective.\nGovernance | Nomination and Succession Committee continued\n164\n164"
+          },
+          {
+            "id": "shell.pdf:151:0",
+            "source": "shell.pdf",
+            "company": "SHELL",
+            "year": 2025,
+            "page": 151,
+            "score": 0.01764705882352941,
+            "text": "Executive Committee\nThe Executive Committee of the Company comprises the Executive Directors, Wael Sawan and Sinead Gorman, and those listed below (see\n\"Governance Framework\" on page 151).\nPhilippa Bounds\nChief Legal Officer\nBritish, 55. Appointed July 1, 2023.\nCareer\nPhilippa joined Shell in 2005 after a decade\nof working at English and American law firms,\nspecialising in structured finance.\nShe has held legal roles across Shell's\nbusinesses, including Senior Legal Counsel\nin Gas and Power and in Corporate, and\nVice President in Projects & Technology and\nUpstream. She previously served as General\nCounsel for Trading and Supply. She has also\nlived and worked across Europe and Asia,\nbroadening her global legal and regulatory\nexperience. She has also held several\nadvisory roles, including special adviser to the\nEU Commission's Director General Internal\nMarkets on securities laws.\nPeter Costello\nPresident, Upstream\nBritish, 60. Appointed April 1, 2025.\nCareer\nPeter held geographically diverse senior roles\nacross a range of BG Group's businesses,\nincluding President and Country Head,\nKazakhstan. Following Shell's combination\nwith BG Group, Peter joined Shell in 2016 as\nVice President, Nigeria and Gabon. Prior to\nbeing appointed Executive Vice President,\nConventional Oil and Gas in November\n2021, he served as Senior Vice President,\nConventional Oil and Gas.\nCederic Cremers\nPresident, Integrated Gas\nDutch, 47. Appointed April 1, 2025.\nCareer\nCederic joined Shell's Retail business in 2002.\nPrior to being appointed Executive Vice\nPresident, Liquefied Natural Gas in August\n2021, he held a variety of financial and\nbusiness leadership roles across Shell's\nbusinesses. These roles include General\nManager, Shell Chemicals Europe; Vice\nPresident, Commercial and New Business\nDevelopment, Asia; and Executive Vice\nPresident and Country Chair, Russia.\nMachteld de Haan\nPresident, Downstream, Renewables\nand Energy Solutions\nDutch, 52. Appointed April 1, 2025.\nCareer\nMachteld joined Shell in 1998 and has had\nseveral leadership and geographically\ndiverse roles across the Downstream portfolio\nincluding Mobility, Strategy, Fleet Solutions,\nLubricants and most recently Chemicals and\nProducts. Prior to being appointed to\nlead Chemicals and Products, Machteld was\nSenior Vice President, Lubricants Americas,\nwhich included being the CEO of Pennzoil-\nQuaker State Company, and subsequently\nbecame Executive Vice President, Global\nLubricants.\nAndrew Smith\nPresident, Trading\nand Supply\nAustralian, 61. Appointed April 1, 2025.\nCareer\nAndrew joined Shell in 1986 as a refinery\nengineer and has worked across all of Shell's\nintegrated value chains, including leading\nShell's petrochemical manufacturing business\nin Singapore. He subsequently became Vice\nPresident, Downstream in Australia and then\nExecutive Vice President, Upstream and\nCountry Chair, where he led the expansion of\nShell's Liquid Natural Gas and Onshore Gas\nbusinesses in Australia. Andrew was appointed\nExecutive Vice President, Trading and Supply\nin 2017.\nRachel Solway\nChief Human Resources and\nCorporate Officer\nBritish, 52. Appointed January 1, 2024.\nCareer\nRachel joined Shell in 1995 in Upstream in\nAberdeen, Scotland. She has since held HR\nroles in manufacturing, LPG, lubricants and\nchemicals. In 2016"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What percentage of Shell's Senior Leadership roles were held by women in 2025?",
+        "answer": "As of December 31, 2025, 35% of Shell's Senior Leadership roles were held by women, which is an increase from 33% in 2024.",
+        "verbatim": "35%",
+        "citations": [
+          {
+            "source": "shell.pdf",
+            "page": 118,
+            "quote": "As of December 31, 2025, we had achieved 35%, up from 33% in 2024."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "shell.pdf",
+            "page": 118,
+            "quote": "As of December 31, 2025, we had achieved 35%, up from 33% in 2024."
+          }
+        ],
+        "grounding_drops": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+
+Selected 9 pages needing vision (complex table types):
+  page  341  [visual_infographic  ]  score=69.0
+  page   64  [visual_infographic  ]  score=60.5
+  page  281  [visual_infographic  ]  score=58.6
+  page  321  [visual_infographic  ]  score=35.2
+  page  207  [visual_infographic  ]  score=35.1
+  page  293  [visual_infographic  ]  score=24.4
+  page  217  [visual_infographic  ]  score=22.0
+  page  326  [visual_infographic  ]  score=21.5
+  page  224  [visual_infographic  ]  score=19.8
+
+
+Output saved → backend/data/processed/pages_enhanced/asml.jsonl

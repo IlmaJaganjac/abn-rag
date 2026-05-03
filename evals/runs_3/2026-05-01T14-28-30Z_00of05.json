@@ -1,0 +1,221 @@
+{
+  "timestamp": "2026-05-01T14:28:30+00:00",
+  "questions_path": "evals/questions-2025-multi-company.yaml",
+  "eval_set": {
+    "source": null,
+    "company": null,
+    "year": null,
+    "n_questions": 105
+  },
+  "config": {
+    "company": "ASML",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 0,
+    "pct": 0.0,
+    "by_category": {
+      "general_report_question": {
+        "passed": 0,
+        "total": 5,
+        "pct": 0.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "asml_2025_general_strategy",
+      "question": "What were ASML's main strategic themes in the 2025 annual report?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "general_report_question",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "Deepen customer trust",
+          "holistic product roadmap",
+          "Strengthen ecosystem relationships",
+          "Drive operational excellence",
+          "Deliver on ESG sustainability"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          93
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "exception: Connection error."
+      ],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": null
+    },
+    {
+      "id": "asml_2025_general_risks",
+      "question": "What risks does ASML describe in its annual report?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "general_report_question",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "geopolitical",
+          "trade restrictions",
+          "regulatory",
+          "technological",
+          "economic shifts"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          60,
+          61
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "exception: Connection error."
+      ],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": null
+    },
+    {
+      "id": "asml_2025_general_business_model",
+      "question": "What is ASML's business model focused on?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "general_report_question",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "world-leading lithography systems",
+          "powerful and energy-efficient chips",
+          "reduce their costs",
+          "environmental footprint",
+          "business model"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          42,
+          146
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "exception: Connection error."
+      ],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": null
+    },
+    {
+      "id": "asml_2025_general_ceo_message",
+      "question": "What major market theme did ASML's 2025 annual report associate with growth?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "general_report_question",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "AI",
+          "artificial intelligence",
+          "high-bandwidth Memory",
+          "HBM"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          6,
+          12,
+          50,
+          60
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "exception: Connection error."
+      ],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": null
+    },
+    {
+      "id": "asml_2025_general_major_development",
+      "question": "What major business development did ASML report regarding 2025 sales?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "general_report_question",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "record total net sales",
+          "€32.7bn",
+          "15.6% year-over-year increase"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          50,
+          60
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "exception: Connection error."
+      ],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": null
+    }
+  ]
+}

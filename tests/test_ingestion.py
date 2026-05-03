@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 
+from backend.app.extracted_datapoints import NormalizedDatapoint
 from backend.app.ingestion import (
     build_chunks,
+    extract_categorized_datapoints,
     extract_datapoint_candidates,
     extract_fte_candidates,
     ingest_pdf,
@@ -11,6 +13,7 @@ from backend.app.ingestion import (
     persist_datapoints,
     persist_parsed_pages,
 )
+from backend.app.llama_extract_datapoints import AnnualReportDatapoints
 from backend.app.parsers import ParsedPage, ParseResult
 
 
@@ -143,6 +146,109 @@ def test_build_chunks_formats_header_aware_table_rows() -> None:
     assert metric_chunks == []
 
 
+def test_build_chunks_treats_sentence_like_hash_lines_as_narrative() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    30,
+                    "# ESG update\n\n"
+                    "# We aim to be greenhouse gas neutral across our value chain by 2040.\n\n"
+                    "Progress is tracked annually.",
+                )
+            ]
+        ),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    assert [chunk.chunk_kind for chunk in chunks] == ["section"]
+    assert chunks[0].section_path == "ESG update"
+    assert chunks[0].text == (
+        "We aim to be greenhouse gas neutral across our value chain by 2040.\n\n"
+        "Progress is tracked annually."
+    )
+
+
+def test_build_chunks_filters_read_more_navigation_lines() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    31,
+                    "# Climate Transition Plan\n\n"
+                    "Our Climate Transition Plan is our strategic roadmap.\n\n"
+                    "Read more on page 155 >",
+                )
+            ]
+        ),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    assert len(chunks) == 1
+    assert chunks[0].text == "Our Climate Transition Plan is our strategic roadmap."
+
+
+def test_build_chunks_keeps_two_column_metric_table_as_generic_table() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    32,
+                    "# Empowered colleagues\n\n"
+                    "| Net scope 1 and 2 CO₂e emissions | 11.5 Mt |\n"
+                    "| -------------------------------- | ------- |\n"
+                    "| Net scope 3 CO₂e emissions       | 2       |",
+                )
+            ]
+        ),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    assert [chunk.chunk_kind for chunk in chunks] == ["table"]
+    assert "Table type: generic_table" in str(chunks[0].embedding_text)
+
+
+def test_build_chunks_keeps_layout_table_without_table_row_explosion() -> None:
+    chunks = build_chunks(
+        iter(
+            [
+                (
+                    33,
+                    "# Our commitment to sustainability\n\n"
+                    "| Global scale | Asia | EMEA | North America |\n"
+                    "| ------------ | ---- | ---- | ------------- |\n"
+                    "| China | Japan | Belgium | Arizona |\n"
+                    "| Malaysia | Germany | California | E |\n",
+                )
+            ]
+        ),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    assert [chunk.chunk_kind for chunk in chunks] == ["table"]
+    assert "Table type: generic_table" in str(chunks[0].embedding_text)
+
+
 def _skip_test_build_chunks_keeps_header_table_rows_without_metric_extraction() -> None:
     chunks = build_chunks(
         iter(
@@ -271,8 +377,29 @@ def test_ingest_pdf_can_store_stable_source_name(
         ),
     )
     monkeypatch.setattr(
+        "backend.app.ingestion.enhance_pages_with_vision",
+        lambda **kwargs: [(5, "Enhanced page text")],
+    )
+    monkeypatch.setattr(
         "backend.app.ingestion.embed_texts",
         lambda texts: embedded_texts.extend(texts) or [[0.1, 0.2] for _ in texts],
+    )
+    monkeypatch.setattr(
+        "backend.app.ingestion.extract_categorized_datapoints",
+        lambda pages, source, company, year: [
+            NormalizedDatapoint(
+                source=source,
+                company=company,
+                year=year,
+                datapoint_type="fte",
+                metric="Total employees (FTEs)",
+                value="> 44,000",
+                page=5,
+                quote="Total employees (FTEs): > 44,000",
+                extractor="openai",
+                priority=100,
+            )
+        ],
     )
     monkeypatch.setattr("backend.app.ingestion.CHROMA_UPSERT_BATCH_SIZE", 1)
 
@@ -303,13 +430,82 @@ def test_ingest_pdf_can_store_stable_source_name(
     }
     assert len(collection.upsert_calls) == 1
     assert collection.upsert_calls[0]["ids"] == ["asml.pdf:5:0"]
-    assert collection.upsert_calls[0]["documents"] == ["Total employees (FTEs): > 44,000"]
+    assert collection.upsert_calls[0]["documents"] == ["Enhanced page text"]
     assert collection.upsert_calls[0]["embeddings"] == [[0.1, 0.2]]
     assert collection.upsert_calls[0]["metadatas"][0]["source"] == "asml.pdf"
     assert collection.upsert_calls[0]["metadatas"][0]["parser"] == "llamaparse"
     assert collection.upsert_calls[0]["metadatas"][0]["chunk_kind"] == "section"
     assert (processed_dir / "pages" / "asml.jsonl").exists()
+    assert (processed_dir / "datapoints" / "asml.json").exists()
     assert (processed_dir / "chunks" / "asml.jsonl").exists()
+
+
+def test_ingest_pdf_extracts_datapoints_only_when_flag_enabled(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    pdf_path = tmp_path / "asml-2025.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4")
+    processed_dir = tmp_path / "processed"
+
+    monkeypatch.setattr("backend.app.ingestion.settings.processed_dir", processed_dir)
+    monkeypatch.setattr(
+        "backend.app.ingestion.parse_pdf_pages",
+        lambda *args, **kwargs: ParseResult(
+            pages=[ParsedPage(page=5, text="Total employees (FTEs): > 44,000")],
+            parser="llamaparse",
+        ),
+    )
+    monkeypatch.setattr(
+        "backend.app.ingestion.enhance_pages_with_vision",
+        lambda **kwargs: [(5, "Enhanced page text")],
+    )
+    monkeypatch.setattr(
+        "backend.app.ingestion.embed_texts",
+        lambda texts: [[0.1, 0.2] for _ in texts],
+    )
+    monkeypatch.setattr(
+        "backend.app.ingestion.extract_categorized_datapoints",
+        lambda pages, source, company, year: [
+            NormalizedDatapoint(
+                source=source,
+                company=company,
+                year=year,
+                datapoint_type="fte",
+                metric="Total employees (FTEs)",
+                value="> 44,000",
+                page=5,
+                quote="Total employees (FTEs): > 44,000",
+                extractor="openai",
+                priority=100,
+            )
+        ],
+    )
+
+    class FakeCollection:
+        def delete(self, **kwargs) -> None:
+            self.delete_kwargs = kwargs
+
+        def upsert(self, **kwargs) -> None:
+            self.upsert_kwargs = kwargs
+
+    monkeypatch.setattr("backend.app.ingestion.get_collection", lambda reset=False: FakeCollection())
+
+    ingest_pdf(
+        pdf_path,
+        company="ASML",
+        year=2025,
+        extract_datapoints=False,
+    )
+    assert not (processed_dir / "datapoints" / "asml-2025.json").exists()
+
+    ingest_pdf(
+        pdf_path,
+        company="ASML",
+        year=2025,
+        extract_datapoints=True,
+    )
+    assert (processed_dir / "datapoints" / "asml-2025.json").exists()
 
 
 def test_extract_fte_candidates_detects_fte_keyword() -> None:
@@ -357,6 +553,127 @@ def test_persist_datapoints_writes_json(tmp_path) -> None:
 
     assert out_path == tmp_path / "datapoints" / "asml.json"
     assert json.loads(out_path.read_text(encoding="utf-8")) == datapoints
+
+
+def test_persist_datapoints_writes_model_dump_json(tmp_path) -> None:
+    datapoints = [
+        NormalizedDatapoint(
+            source="asml.pdf",
+            company="ASML",
+            year=2025,
+            datapoint_type="fte",
+            metric="Total employees (FTEs)",
+            value="> 44,000",
+            page=5,
+            quote="Total employees (FTEs): > 44,000",
+            extractor="openai",
+            priority=100,
+        )
+    ]
+
+    out_path = persist_datapoints(datapoints, source="asml.pdf", processed_dir=tmp_path)
+
+    [record] = json.loads(out_path.read_text(encoding="utf-8"))
+    assert record["datapoint_type"] == "fte"
+    assert record["metric"] == "Total employees (FTEs)"
+    assert record["extractor"] == "openai"
+
+
+def test_extract_categorized_datapoints_uses_all_categories(monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_extract(*, pages, company, year, category):
+        calls.append(category)
+        payload = {
+            "company": company,
+            "year": year,
+            "fte_datapoints": [],
+            "sustainability_goals": [],
+            "esg_datapoints": [],
+            "financial_highlights": [],
+            "business_performance": [],
+            "shareholder_returns": [],
+        }
+        if category == "fte":
+            payload["fte_datapoints"] = [
+                {
+                    "label": "Total employees (FTEs)",
+                    "value": "> 44,000",
+                    "quote": "Total employees (FTEs): > 44,000",
+                    "fact_kind": "actual",
+                    "scope_type": "company_wide",
+                    "page": 5,
+                }
+            ]
+        return AnnualReportDatapoints(**payload)
+
+    monkeypatch.setattr(
+        "backend.app.ingestion.extract_annual_report_datapoints_openai",
+        fake_extract,
+    )
+
+    datapoints = extract_categorized_datapoints(
+        [(5, "Total employees (FTEs): > 44,000")],
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+    )
+
+    assert calls == [
+        "fte",
+        "sustainability",
+        "esg",
+        "financial_highlight",
+        "business_performance",
+        "shareholder_return",
+    ]
+    assert len(datapoints) == 1
+    assert datapoints[0].datapoint_type == "fte"
+    assert datapoints[0].extractor == "openai"
+
+
+def test_ingest_pdf_can_skip_vision_enhancement(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    pdf_path = tmp_path / "asml.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4")
+    processed_dir = tmp_path / "processed"
+
+    monkeypatch.setattr("backend.app.ingestion.settings.processed_dir", processed_dir)
+    monkeypatch.setattr(
+        "backend.app.ingestion.parse_pdf_pages",
+        lambda *args, **kwargs: ParseResult(
+            pages=[ParsedPage(page=5, text="Original page text")],
+            parser="llamaparse",
+        ),
+    )
+    called = {"vision": False}
+    def fake_enhance(**kwargs):
+        called["vision"] = True
+        return [(5, "Enhanced page text")]
+    monkeypatch.setattr("backend.app.ingestion.enhance_pages_with_vision", fake_enhance)
+    monkeypatch.setattr("backend.app.ingestion.extract_categorized_datapoints", lambda *args, **kwargs: [])
+    monkeypatch.setattr("backend.app.ingestion.embed_texts", lambda texts: [[0.1, 0.2] for _ in texts])
+
+    class FakeCollection:
+        def delete(self, **kwargs) -> None:
+            self.delete_kwargs = kwargs
+        def upsert(self, **kwargs) -> None:
+            self.upsert_kwargs = kwargs
+
+    collection = FakeCollection()
+    monkeypatch.setattr("backend.app.ingestion.get_collection", lambda reset=False: collection)
+
+    ingest_pdf(
+        pdf_path,
+        company="ASML",
+        year=2025,
+        enhance_vision=False,
+    )
+
+    assert called["vision"] is False
+    assert collection.upsert_kwargs["documents"] == ["Original page text"]
 
 
 def test_persist_chunks_writes_debug_jsonl(tmp_path) -> None:

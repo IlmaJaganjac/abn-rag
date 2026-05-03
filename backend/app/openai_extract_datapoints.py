@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import os
 from typing import Any
 
 from backend.app._openai import openai_client
+from backend.app.config import settings
 from backend.app.llama_extract_datapoints import AnnualReportDatapoints, category_prompt
 
 
@@ -52,8 +52,8 @@ def extract_annual_report_datapoints_openai(
         return AnnualReportDatapoints(company=company, year=year)
 
     client = openai_client()
-    model = os.environ.get("PRE_EXTRACT_MODEL", "gpt-4o-mini")
-    supports_temp_zero = "gpt-5-mini" not in model
+    model = settings.openai_extract_model
+    supports_temp_zero = "gpt-5" not in model
     prompt = category_prompt(category)
     user_msg = (
         f"Company: {company or ''}\n"

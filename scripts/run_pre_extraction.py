@@ -218,17 +218,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-name", default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--context-window", type=int, default=1)
-    parser.add_argument("--max-pages-per-category", type=int, default=15)
+    parser.add_argument("--max-pages-per-category", type=int, default=20)
     parser.add_argument(
         "--categories",
-        default="fte,sustainability",
+        default="fte,sustainability,financial_highlight,business_performance,shareholder_return",
         help="comma-separated list of categories to extract",
     )
     parser.add_argument(
         "--max-workers",
         type=int,
         default=None,
-        help="max parallel LlamaExtract jobs (default: min(4, num_categories))",
+        help="max parallel extraction jobs (default: one worker per category)",
     )
     parser.add_argument(
         "--extractor",
@@ -239,8 +239,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--batch-pages",
         type=int,
-        default=0,
-        help="when --extractor openai: split page range into batches of N pages (0 = no batching)",
+        default=1,
+        help="when --extractor openai: split page range into batches of N pages (default: 1 page per batch)",
     )
     parser.add_argument(
         "--validate-extracted",
@@ -256,7 +256,7 @@ def main(argv: list[str] | None = None) -> int:
     source = args.source_name or args.pdf.name
     stem = Path(source).stem
     categories = [c.strip() for c in args.categories.split(",") if c.strip()]
-    max_workers = args.max_workers if args.max_workers is not None else min(4, len(categories))
+    max_workers = args.max_workers if args.max_workers is not None else max(1, len(categories))
 
     # 1. Load parsed pages
     log.info("loading pages from %s", args.pages_jsonl)

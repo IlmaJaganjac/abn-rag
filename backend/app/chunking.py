@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import re
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable
@@ -13,6 +14,24 @@ YEAR_RE = re.compile(r"\b20\d{2}\b")
 VALUE_RE = re.compile(
     r"^\s*(?:[€$£]?\s*)?(?:[<>]?\s*)?\d[\d,.]*(?:\s?(?:%|bn|m|kt|mt|million|billion))?\s*$",
     re.IGNORECASE,
+)
+READ_MORE_RE = re.compile(r"^read more on page \d+\s*>?$", re.IGNORECASE)
+PAGE_NUMBER_RE = re.compile(r"^\d{1,4}$")
+SENTENCE_HEADING_PREFIXES = (
+    "we ",
+    "our ",
+    "the ",
+    "this ",
+    "these ",
+    "as ",
+    "in ",
+    "while ",
+    "today",
+    "at the ",
+    "closer to ",
+    "turning ",
+    "finally",
+    "i ",
 )
 
 @dataclass(frozen=True)
@@ -152,17 +171,22 @@ def _page_drafts(
         stripped = line.strip()
         heading = HEADING_RE.match(stripped)
         if heading:
-            flush_table()
-            flush_narrative()
             level = len(heading.group(1))
             title = _clean_heading(heading.group(2))
             if _normalize_line(title) in boilerplate:
                 continue
+            if not _looks_like_heading(title):
+                if table:
+                    flush_table()
+                narrative.append(title)
+                continue
+            flush_table()
+            flush_narrative()
             heading_stack[:] = [(lvl, val) for lvl, val in heading_stack if lvl < level]
             heading_stack.append((level, title))
             continue
 
-        if _normalize_line(stripped) in boilerplate:
+        if _normalize_line(stripped) in boilerplate or _is_noise_line(stripped):
             continue
 
         if _is_table_line(stripped):
@@ -355,8 +379,6 @@ def _classify_table(rows: list[str]) -> str:
         return "header_table"
     if data_rows and _mostly_metric_pairs(_parse_table_cells(data_rows[0])):
         return "kpi_pairs"
-    if headers is not None and body_rows:
-        return "header_table"
     return "generic_table"
 
 
@@ -412,8 +434,13 @@ def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, lis
 
 
 def _format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str | None:
-    if headers is None or len(headers) != len(cells):
+    if headers is None:
         return None
+    # Pad / truncate to match header count so misparsed rows still produce a chunk.
+    if len(cells) < len(headers):
+        cells = cells + [""] * (len(headers) - len(cells))
+    elif len(cells) > len(headers):
+        cells = cells[: len(headers)]
     lines = [
         f"{header.strip()}: {cell.strip()}"
         for header, cell in zip(headers, cells, strict=True)
@@ -447,6 +474,35 @@ def _starts_with_value(text: str) -> bool:
 
 def _is_table_line(line: str) -> bool:
     return line.startswith("|") and line.endswith("|") and line.count("|") >= 2
+
+
+def _looks_like_heading(text: str) -> bool:
+    clean = _clean_heading(text)
+    if not clean:
+        return False
+    normalized = clean.casefold()
+    if READ_MORE_RE.match(normalized):
+        return False
+    if clean.startswith("Q:") or clean.startswith("Q "):
+        return True
+    if len(clean) <= 60 and clean[-1] not in ".!?":
+        return True
+    if len(clean) > 100:
+        return False
+    if clean.endswith("."):
+        return False
+    if any(normalized.startswith(prefix) for prefix in SENTENCE_HEADING_PREFIXES):
+        return False
+    if "," in clean and len(clean) > 60:
+        return False
+    return True
+
+
+def _is_noise_line(line: str) -> bool:
+    if not line:
+        return False
+    normalized = _normalize_line(line)
+    return bool(READ_MORE_RE.match(normalized) or PAGE_NUMBER_RE.match(normalized))
 
 
 def _find_boilerplate_lines(texts: Iterable[str]) -> set[str]:
@@ -517,7 +573,7 @@ def _clean_heading(text: str) -> str:
 
 
 def _clean_cell(text: str) -> str:
-    return " ".join(text.replace("\\&", "&").split())
+    return " ".join(html.unescape(text).replace("\\&", "&").split())
 
 
 def _normalize_line(line: str) -> str:

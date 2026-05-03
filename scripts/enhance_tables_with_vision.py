@@ -4,9 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
-import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,12 +18,9 @@ from backend.app.openai_table_vision import (
     enhance_page_tables,
     tables_to_text,
 )
+from backend.app.vision_page_selection import classify_table_complexity
 
 log = logging.getLogger(__name__)
-
-_NUMBER_RE = re.compile(r"\d[\d,.]*")
-_SEP_RE = re.compile(r"^\|[\s\-:|]+\|$")
-_ESRS_RE = re.compile(r"ESRS|disclosure requirement", re.IGNORECASE)
 
 
 def _parse_page_range(s: str) -> list[int]:
@@ -40,61 +35,6 @@ def _parse_page_range(s: str) -> list[int]:
         else:
             pages.append(int(part))
     return sorted(set(pages))
-
-
-def _table_complexity(text: str) -> tuple[str, float]:
-    """Classify table complexity and return (kind, score).
-
-    Only pages needing vision are classified as:
-      'visual_infographic' — col_variance > 4 and max_cols > 7 and empty_ratio > 0.5
-      'wide_irregular'     — max_cols >= 8 and col_variance > 3 (not a unit-col false positive)
-      'multilevel_wide'    — multilevel headers and max_cols >= 8 and col_variance > 2
-
-    All other pages return kind='skip'.
-    Score reflects confidence/severity (higher = more complex).
-    """
-    lines = text.splitlines()
-    data_lines = [
-        l.strip() for l in lines
-        if l.strip().startswith("|") and l.strip().endswith("|")
-        and not _SEP_RE.match(l.strip())
-    ]
-    if len(data_lines) < 2:
-        return "skip", 0.0
-
-    # Skip ESRS cross-reference index tables (no datapoints, just page references)
-    if _ESRS_RE.search(text[:400]):
-        return "skip", 0.0
-
-    pipe_counts = [l.count("|") for l in data_lines]
-    max_cols = max(pipe_counts) - 1
-    col_variance = max(pipe_counts) - min(pipe_counts)
-    empty_cells = sum(1 for l in data_lines if re.search(r"\|\s*\|", l))
-    empty_ratio = empty_cells / len(data_lines)
-
-    # Detect multi-level headers: first two rows both have no numeric values
-    def _is_header_like(line: str) -> bool:
-        cells = [c.strip() for c in line.split("|") if c.strip()]
-        return not any(re.fullmatch(r"[\d,.()\-]+", c.replace(" ", "")) for c in cells if len(c) < 15)
-
-    multilevel = len(data_lines) >= 2 and all(_is_header_like(l) for l in data_lines[:2])
-
-    # Unit-column false positive: consistent col count but one column always empty (e.g. "$ million")
-    unit_col_only = col_variance <= 1 and empty_ratio > 0.8
-
-    if unit_col_only:
-        return "skip", 0.0
-
-    score = col_variance * 10.0 + max_cols * 2.0 + empty_ratio * 5.0
-
-    if col_variance > 4 and max_cols > 7 and empty_ratio > 0.5:
-        return "visual_infographic", score
-    if max_cols >= 8 and col_variance > 3:
-        return "wide_irregular", score
-    if multilevel and max_cols >= 8 and col_variance > 2:
-        return "multilevel_wide", score
-
-    return "skip", 0.0
 
 
 def _load_pages(path: Path) -> list[dict[str, Any]]:
@@ -168,6 +108,30 @@ def _enhance_with_retry(
     raise last_exc  # type: ignore[misc]
 
 
+def _strip_markdown_tables(text: str) -> str:
+    """Remove contiguous markdown-table line blocks from text.
+
+    Lines starting and ending with '|' (with >=2 pipes) are dropped, along with
+    their separator rows. Surrounding narrative is preserved.
+    """
+    out_lines: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2:
+            continue
+        out_lines.append(line)
+    cleaned: list[str] = []
+    blank = False
+    for line in out_lines:
+        if line.strip():
+            cleaned.append(line)
+            blank = False
+        elif not blank:
+            cleaned.append(line)
+            blank = True
+    return "\n".join(cleaned).strip()
+
+
 def _apply_enhancement(record: dict[str, Any], extraction: PageTableExtraction, model: str) -> dict[str, Any]:
     tables_dicts = [t.model_dump() for t in extraction.tables]
     out = dict(record)
@@ -178,7 +142,8 @@ def _apply_enhancement(record: dict[str, Any], extraction: PageTableExtraction, 
     if out["table_enhanced"] and tables_dicts:
         summary = tables_to_text(tables_dicts).strip()
         if summary:
-            out["enhanced_text"] = (record.get("text") or "") + "\n\n" + summary
+            narrative = _strip_markdown_tables(record.get("text") or "")
+            out["enhanced_text"] = (narrative + "\n\n" + summary).strip() if narrative else summary
     return out
 
 
@@ -231,12 +196,12 @@ def run(
         for page_num in pages_override:
             if page_num not in page_map:
                 continue
-            kind, score = _table_complexity(page_map[page_num].get("text", ""))
+            kind, score = classify_table_complexity(page_map[page_num].get("text", ""))
             scored_candidates.append((page_num, kind or "override", score))
         log.info("using --pages override: %d pages", len(scored_candidates))
     else:
         for p in pages:
-            kind, score = _table_complexity(p.get("text", ""))
+            kind, score = classify_table_complexity(p.get("text", ""))
             if kind != "skip":
                 scored_candidates.append((int(p["page"]), kind, score))
         log.info("detected %d complex-table candidate pages (vision needed)", len(scored_candidates))
@@ -314,8 +279,7 @@ def run(
                 extraction = future.result()
                 out_record = _apply_enhancement(page_map[page_num], extraction, model)
                 n_tables = len(extraction.tables)
-                n_metrics = sum(len(t.metrics) for t in extraction.tables)
-                log.info("page %d enhanced: %d tables, %d metrics", page_num, n_tables, n_metrics)
+                log.info("page %d enhanced: %d tables", page_num, n_tables)
             except Exception as exc:
                 log.warning("page %d failed after retries: %s", page_num, exc)
                 out_record = _apply_error(page_map[page_num], str(exc))
@@ -363,12 +327,8 @@ def main(argv: list[str] | None = None) -> int:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    model = (
-        args.model
-        or os.environ.get("TABLE_VISION_MODEL")
-        or os.environ.get("PRE_EXTRACT_MODEL")
-        or "gpt-4.1-mini"
-    )
+    from backend.app.config import settings as _settings
+    model = args.model or _settings.openai_table_vision_model
     pages_override = _parse_page_range(args.pages) if args.pages else None
 
     return run(

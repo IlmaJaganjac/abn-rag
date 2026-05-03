@@ -1,0 +1,584 @@
+{
+  "timestamp": "2026-05-01T13:08:14+00:00",
+  "questions_path": "evals/questions-2025-multi-company.yaml",
+  "eval_set": {
+    "source": null,
+    "company": null,
+    "year": null,
+    "n_questions": 105
+  },
+  "config": {
+    "company": "ASML",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 3,
+    "passed": 0,
+    "pct": 0.0,
+    "by_category": {
+      "shareholder_return": {
+        "passed": 0,
+        "total": 3,
+        "pct": 0.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "asml_2025_shareholder_total_returned",
+      "question": "How much did ASML return to shareholders through dividends and share buybacks in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "shareholder_return",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "€8.5bn",
+          "EUR 8.5 billion",
+          "dividends and share buybacks"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          45,
+          60
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [
+        "no retrieved chunk page within ±1 of [45, 60] and source='asml.pdf'"
+      ],
+      "retrieval": {
+        "pages": [
+          334,
+          315,
+          47,
+          324,
+          333,
+          47,
+          58,
+          333,
+          52,
+          57,
+          42,
+          53
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:334:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 334,
+            "score": 0.03329485107365504,
+            "text": "ASML aims to provide a sustainable dividend per share that will grow over time, paid quarterly. On an annual basis, the Board of Management, upon prior approval from the Supervisory Board, submits a proposal to the AGM with respect to the amount of dividend to be declared with respect to the prior year, taking into account any interim dividend distributions. The dividend proposal in any given year will be subject to availability of distributable profits, retained earnings and cash, and may be affected by, among other things, our view of potential future liquidity requirements including for investments in production capacity, working capital requirements, the funding of our R&#x26;D programs and acquisition opportunities that may arise from time to time, and future changes in applicable tax and corporate laws.\n\nASML intends to declare a total dividend for the year of 2025 of €7.50 per ordinary share, which is a 17.2% increase compared to the 2024 total dividend of €6.40 per ordinary share. Recognizing the interim dividends of €1.60 per ordinary share paid in August 2025, November 2025 and February 2026, this leads to a final dividend proposal to the General Meeting of €2.70 per ordinary share.\n\nIn addition to dividend payments, we intend to return cash to our shareholders on a regular basis through share buybacks or capital repayment, subject to our actual and anticipated level of liquidity requirements and other relevant factors.\n\nOn January 28, 2026 we announced a new share buyback program to be executed by December 31, 2028. ASML intends to repurchase shares of an amount up to €12 billion, of which we expect a total of up to 2.0 million shares will be used to cover employee share plans. ASML intends to cancel the remainder of the shares repurchased. The share buyback program may be suspended, modified or discontinued at any time. The previous program finished in December 2025, pursuant to which we repurchased a total of €7.6 billion out of the up to €12.0 billion program.\n\nIn 2025, we repurchased 8,323,320 shares (2024: 574,925 shares) for a total consideration of €5,950.0 million under the 2022 -2025 share buyback program (2024: €500.0 million). In 2025, we cancelled 5,683,018 shares (2024: 5,754,117 shares)."
+          },
+          {
+            "id": "asml.pdf:315:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 315,
+            "score": 0.031031746031746032,
+            "text": "Period: January 1 – 31, 2025\nTotal number of shares purchased: 181,400\nAverage price paid per Share (€): 714.60\nMaximum value of shares that may yet be purchased (€ millions): 10,170.4"
+          },
+          {
+            "id": "asml.pdf:47:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 47,
+            "score": 0.030812324929971987,
+            "text": "We aim to help shareholders – as well as financial and ESG sustainability analysts – understand our term strategy. We communicate with them about our financial growth strategies and opportunities, our financial and ESG sustainability performance, our outlook and our shareholder returns."
+          },
+          {
+            "id": "asml.pdf:324:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 324,
+            "score": 0.028867761452031116,
+            "text": "Subsequent events were evaluated up to February 25, 2026, which is the date the Consolidated financial statements included in this Annual Report were approved.\n\nOn January 28, 2026, ASML announced the intent to strengthen its focus on engineering and innovation in critical areas of the company through the streamlining of the Technology and the IT organizations. The proposed changes could ultimately result in a net reduction of around 1,700 positions, mostly in the Netherlands, with some in the United States. The anticipated expenses related to this are not expected to be material.\n\nOn January 28, 2026, ASML announced to declare a total dividend for the year 2025 of €7.50 per ordinary share, which is a 17.2% increase compared to the 2024 total dividend of €6.40 per ordinary share. Recognizing the interim dividends of €1.60 per ordinary share paid in August 2025, November 2025 and February 2026, this leads to a final dividend proposal to the General Meeting of €2.70 per ordinary share.\n\nOn January 28, 2026, ASML announced a new share buyback program to be executed by December 31, 2028. See Note 22 Shareholders’ equity.\n\nVeldhoven, the Netherlands\n\nFebruary 25, 2026\n\n/s/ Christophe D. Fouquet\n\nChristophe D. Fouquet\n\nPresident, CEO and Chair of the Board of Management\n\n/s/ Roger J.M. Dassen\n\nRoger J.M. Dassen\n\nExecutive Vice President, CFO and member of the Board of Management"
+          },
+          {
+            "id": "asml.pdf:333:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 333,
+            "score": 0.025029058504455637,
+            "text": "We continue to hold on to our long-held prudent financing policy, which is based on three foundational elements:\n\n- Liquidity: Maintain sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility\n- Capital structure: Maintain a capital structure that targets a solid investment-grade credit rating\n- Cash return: Provide a sustainable dividend per share that will grow over time, paid quarterly, while returning excess cash to shareholders through share buybacks or capital repayment"
+          },
+          {
+            "id": "asml.pdf:47:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 47,
+            "score": 0.019672131147540982,
+            "text": "During the year, we actively engaged with our investor community via a large number of conferences, roadshows and conference calls, to discuss specific topics relevant to our equity story, including ESG-related topics. We also encourage investors to visit our Veldhoven (the Netherlands) or Wilton (US) facilities in person to discuss and see our capacity expansion plans, as well as our technology challenges and opportunities in our ASML Experience Centers.\n\n€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          },
+          {
+            "id": "asml.pdf:58:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 58,
+            "score": 0.01935483870967742,
+            "text": "We expect that our ability to 1) scale our EUV technology well into the next decade, 2) extend holistic lithography into supporting 3D front end integration and 3) improve the performance and cost effectiveness of our EUV and DUV products will continue to address all our customers’ needs with a flexible and versatile portfolio.\n\nWe expect to continue to return significant amounts of cash to our shareholders through a combination of growing dividends and share buybacks. ASML values the strong industry partnerships which are critical to our success and our collective commitment to a leadership position in ESG."
+          },
+          {
+            "id": "asml.pdf:333:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 333,
+            "score": 0.01875,
+            "text": "We continue to hold on to our long-held prudent financing policy, which is based on three foundational elements:\n\n- Liquidity: Maintain sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility\n- Capital structure: Maintain a capital structure that targets a solid investment-grade credit rating\n- Cash return: Provide a sustainable dividend per share that will grow over time, paid quarterly, while returning excess cash to shareholders through share buybacks or capital repayment"
+          },
+          {
+            "id": "asml.pdf:52:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 52,
+            "score": 0.01846153846153846,
+            "text": "Executive Vice President and Chief Financial Officer\n\n…and of our future We took part in the consultation process for the revision of the ESRS standards. This followed from the EU’s Omnibus Simplification Package, aimed to simplify sustainability reporting for companies by reducing the number of mandatory data points, clarifying provisions, and streamlining requirements.\n\nIn line with our 2024 Investor Day announcements, we expect a 2030 revenue opportunity between €44 billion and €60 billion with a gross margin expected between 56% and 60%. We maintain our financing policy – a solid capital and liquidity structure, based on which we will continue to invest in our business and expect to return significant amounts of cash to our shareholders through growing dividends and share buybacks.\n\nIn summary, our long-term outlook remains robust, supported by the combination of strong market dynamics and a solid strategic roadmap for our products and services.\n\nRoger Dassen Chief Executive Officer\n\nExecutive Vice President and Financial Officer"
+          },
+          {
+            "id": "asml.pdf:57:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 57,
+            "score": 0.01818181818181818,
+            "text": "We continued to invest significantly in next-generation technologies to secure future growth opportunities. These investments required substantial cash outflows in net working capital, capital expenditures, and R&#x26;D. At the same time, we remained committed to returning cash to our shareholders through dividends and the share buyback program."
+          },
+          {
+            "id": "asml.pdf:42:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 42,
+            "score": 0.01791044776119403,
+            "text": "| Customers                                                                                                                                                                                                                                     | Employees                                                                                                                                                                                                                                    | Suppliers                                                                                                                                                                                                                                                                                          | Shareholders                                                                                                                                                                                                                                                                         | Society                                                                                                                                                                                                                                                                                                                                                         |\n| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Our world-leading lithography systems enable our customers to develop ever-more-powerful and energy-efficient chips for new applications and devices. At the same time, we help our customers reduce their costs and environmental footprint. | ASML is a growing business providing employment opportunities around the world. We invest in people’s career development and well-being, and aim to provide a diverse and inclusive environment where they can achieve their full potential. | Our suppliers help deliver our innovations and are critical to our value chain and our ambition to be a sustainable leader in the semiconductor industry. Long-term relationships, close collaboration, transparency and a commitment to sustainability with our suppliers are key to our success. | Effective and disciplined investment of cash flow drives the profitable growth of our company, and can deliver solid financial performance and a healthy financial position. This underpins our ability to return cash to shareholders through growing dividends and share buybacks. | We play an active role in the communities where we operate – supporting young tech companies and promoting science, technology, engineering and mathematics (STEM) education worldwide. We are also committed to creating sustainable value by reducing our environmental footprint – both from our operations and during the use of our products and services. |"
+          },
+          {
+            "id": "asml.pdf:53:17",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 53,
+            "score": 0.01764705882352941,
+            "text": "1. Lithography systems do not include metrology and inspection systems.\n\n2. Free cash flow is a non-GAAP measure and is defined as net cash provided by operating activities (2025: €12,658.5 million and 2024: €11,166.2 million) minus purchase of property, plant and equipment (2025: €1,573.6 million and 2024: €2,067.2 million) and purchase of intangible assets (2025: €57.6 million and 2024: €15.9 million). We believe that free cash flow is an important liquidity metric for our investors, reflecting cash that is available for acquisitions, to repay debt and to return money to our shareholders by means of dividends and share buybacks. Purchase of property, plant and equipment and purchase of intangible assets are deducted from net cash provided by operating activities in calculating free cash flow because these payments are necessary to support the maintenance and investments in our assets to maintain the current asset base."
+          }
+        ]
+      },
+      "answer": {
+        "question": "How much did ASML return to shareholders through dividends and share buybacks in 2025?",
+        "answer": "In 2025, ASML returned a total of €8.5 billion to shareholders through dividends and share buybacks.",
+        "verbatim": null,
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 47,
+            "quote": "€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 57,
+            "quote": "€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_shareholder_eps_basic",
+      "question": "What basic earnings per share did ASML report in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "shareholder_return",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "€24.73",
+          "24.73",
+          "EPS",
+          "earnings per share"
+        ],
+        "answer_contains_all": null,
+        "page": [
+          45,
+          60
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [
+        "no retrieved chunk page within ±1 of [45, 60] and source='asml.pdf'"
+      ],
+      "retrieval": {
+        "pages": [
+          276,
+          53,
+          56,
+          56,
+          56,
+          56,
+          316,
+          276,
+          276,
+          316,
+          316,
+          316
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:276:51",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.029545454545454545,
+            "text": "Year ended December 31 (€, in millions, except per share data): Diluted net income per ordinary share\nNotes: 23\n2023: 19.89\n2024: 19.24\n2025: 24.71"
+          },
+          {
+            "id": "asml.pdf:53:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 53,
+            "score": 0.019672131147540982,
+            "text": "Sales: Sales of lithography systems (in units)1\nProfitability: Earnings per share (basic)"
+          },
+          {
+            "id": "asml.pdf:56:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 56,
+            "score": 0.01935483870967742,
+            "text": "Selling, general and administrative costs (in millions)\n€1,166\n€1,258\n4.1%\n3.9%\nSG&A costs (in millions)\n% of total net sales\n2024\n2025\nSelling, general and administrative (SG&A) costs increased\nby 7.9% year-over-year, primarily due to higher average\nwages and salaries per FTE, and continued investments\nin our Community Partnership Program.\nIncome taxes (in millions)\n€1,681\n€2,013\n18.6%\n17.7%\nIncome tax expense (in millions)\nETR %\n2024\n2025\nThe effective tax rate (ETR) decreased to 17.7% in 2025,\ncompared to 18.6% in 2024. This reduction is primarily\ndue to a correction for a historic tax position recognized\nin 2024 that pertained to multiple years, for which the\nunderlying tax position has a lower impact in 2025.\nNet income and earnings per share\n€19.25\n€24.73\n393\n389\nEPS (basic)\nWeighted avg. # of shares (in millions)\n2024\n2025\nNet income for 2025 amounted to €9,609.4 million,\nrepresenting 29.4% of total net sales and €24.73\nbasic net income per ordinary share. This compares\nto €7,571.6 million, or 26.8% of total net sales, and\n€19.25 basic net income per ordinary share in 2024.\nThe increase in basic net income per ordinary share\nwas primarily driven by higher net income.\n\n56\nFinancial performance KPIs (continued)\n\n--- Parsed markdown ---"
+          },
+          {
+            "id": "asml.pdf:56:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 56,
+            "score": 0.019047619047619046,
+            "text": "Selling, general and administrative costs (in millions)\n€1,166\n€1,258\n4.1%\n3.9%\nSG&A costs (in millions)\n% of total net sales\n2024\n2025\nSelling, general and administrative (SG&A) costs increased\nby 7.9% year-over-year, primarily due to higher average\nwages and salaries per FTE, and continued investments\nin our Community Partnership Program.\nIncome taxes (in millions)\n€1,681\n€2,013\n18.6%\n17.7%\nIncome tax expense (in millions)\nETR %\n2024\n2025\nThe effective tax rate (ETR) decreased to 17.7% in 2025,\ncompared to 18.6% in 2024. This reduction is primarily\ndue to a correction for a historic tax position recognized\nin 2024 that pertained to multiple years, for which the\nunderlying tax position has a lower impact in 2025.\nNet income and earnings per share\n€19.25\n€24.73\n393\n389\nEPS (basic)\nWeighted avg. # of shares (in millions)\n2024\n2025\nNet income for 2025 amounted to €9,609.4 million,\nrepresenting 29.4% of total net sales and €24.73\nbasic net income per ordinary share. This compares\nto €7,571.6 million, or 26.8% of total net sales, and\n€19.25 basic net income per ordinary share in 2024.\nThe increase in basic net income per ordinary share\nwas primarily driven by higher net income.\n\n56\nFinancial performance KPIs (continued)\n\n--- Parsed markdown ---"
+          },
+          {
+            "id": "asml.pdf:56:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 56,
+            "score": 0.01875,
+            "text": "Selling, general and administrative (SG&#x26;A) costs increased by 7.9% year-over-year, primarily due to higher average wages and salaries per FTE, and continued investments in our Community Partnership Program.\n\nNet income for 2025 amounted to €9,609.4 million, representing 29.4% of total net sales and €24.73 basic net income per ordinary share. This compares to €7,571.6 million, or 26.8% of total net sales, and €19.25 basic net income per ordinary share in 2024. The increase in basic net income per ordinary share was primarily driven by higher net income."
+          },
+          {
+            "id": "asml.pdf:56:15",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 56,
+            "score": 0.01846153846153846,
+            "text": "Selling, general and administrative (SG&#x26;A) costs increased by 7.9% year-over-year, primarily due to higher average wages and salaries per FTE, and continued investments in our Community Partnership Program.\n\nNet income for 2025 amounted to €9,609.4 million, representing 29.4% of total net sales and €24.73 basic net income per ordinary share. This compares to €7,571.6 million, or 26.8% of total net sales, and €19.25 basic net income per ordinary share in 2024. The increase in basic net income per ordinary share was primarily driven by higher net income."
+          },
+          {
+            "id": "asml.pdf:316:16",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 316,
+            "score": 0.01791044776119403,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2025\nValue: 24.73\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:276:49",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.01764705882352941,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2023\nValue: 19.91\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:276:50",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.017391304347826087,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2024\nValue: 19.25\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:316:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 316,
+            "score": 0.017142857142857144,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2023\nValue: 19.91\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:316:15",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 316,
+            "score": 0.016901408450704224,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2024\nValue: 19.25\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:316:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 316,
+            "score": 0.016666666666666666,
+            "text": "Year ended December 31 (€, in millions, except per share data): Basic net income per ordinary share\n2023: 19.91\n2024: 19.25\n2025: 24.73"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What basic earnings per share did ASML report in 2025?",
+        "answer": "ASML reported a basic earnings per share of €24.73 for the year 2025.",
+        "verbatim": "24.73",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 316,
+            "quote": "Metric: Basic net income per ordinary share\nPeriod: 2025\nValue: 24.73\nUnit: €, in millions, except per share data"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 316,
+            "quote": "Metric: Basic net income per ordinary share\nPeriod: 2025\nValue: 24.73\nUnit: €, in millions, except per share data"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_2025_shareholder_buybacks_and_dividends",
+      "question": "What mechanisms did ASML use to return capital to shareholders in 2025?",
+      "company": "ASML",
+      "year": 2025,
+      "category": "shareholder_return",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": [
+          "dividends",
+          "share buybacks"
+        ],
+        "page": [
+          45,
+          60
+        ],
+        "pages": null,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "no retrieved chunk page within ±1 of [45, 60] and source='asml.pdf'",
+        "missing required substrings: ['dividends']",
+        "no citation page within ±1 of [45, 60] (got [47])"
+      ],
+      "retrieval": {
+        "pages": [
+          47,
+          334,
+          333,
+          47,
+          333,
+          194,
+          316,
+          10,
+          57,
+          318,
+          206,
+          315
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:47:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 47,
+            "score": 0.032266325224071704,
+            "text": "We aim to help shareholders – as well as financial and ESG sustainability analysts – understand our term strategy. We communicate with them about our financial growth strategies and opportunities, our financial and ESG sustainability performance, our outlook and our shareholder returns."
+          },
+          {
+            "id": "asml.pdf:334:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 334,
+            "score": 0.031129032258064515,
+            "text": "ASML aims to provide a sustainable dividend per share that will grow over time, paid quarterly. On an annual basis, the Board of Management, upon prior approval from the Supervisory Board, submits a proposal to the AGM with respect to the amount of dividend to be declared with respect to the prior year, taking into account any interim dividend distributions. The dividend proposal in any given year will be subject to availability of distributable profits, retained earnings and cash, and may be affected by, among other things, our view of potential future liquidity requirements including for investments in production capacity, working capital requirements, the funding of our R&#x26;D programs and acquisition opportunities that may arise from time to time, and future changes in applicable tax and corporate laws.\n\nASML intends to declare a total dividend for the year of 2025 of €7.50 per ordinary share, which is a 17.2% increase compared to the 2024 total dividend of €6.40 per ordinary share. Recognizing the interim dividends of €1.60 per ordinary share paid in August 2025, November 2025 and February 2026, this leads to a final dividend proposal to the General Meeting of €2.70 per ordinary share.\n\nIn addition to dividend payments, we intend to return cash to our shareholders on a regular basis through share buybacks or capital repayment, subject to our actual and anticipated level of liquidity requirements and other relevant factors.\n\nOn January 28, 2026 we announced a new share buyback program to be executed by December 31, 2028. ASML intends to repurchase shares of an amount up to €12 billion, of which we expect a total of up to 2.0 million shares will be used to cover employee share plans. ASML intends to cancel the remainder of the shares repurchased. The share buyback program may be suspended, modified or discontinued at any time. The previous program finished in December 2025, pursuant to which we repurchased a total of €7.6 billion out of the up to €12.0 billion program.\n\nIn 2025, we repurchased 8,323,320 shares (2024: 574,925 shares) for a total consideration of €5,950.0 million under the 2022 -2025 share buyback program (2024: €500.0 million). In 2025, we cancelled 5,683,018 shares (2024: 5,754,117 shares)."
+          },
+          {
+            "id": "asml.pdf:333:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 333,
+            "score": 0.03092537313432836,
+            "text": "We continue to hold on to our long-held prudent financing policy, which is based on three foundational elements:\n\n- Liquidity: Maintain sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility\n- Capital structure: Maintain a capital structure that targets a solid investment-grade credit rating\n- Cash return: Provide a sustainable dividend per share that will grow over time, paid quarterly, while returning excess cash to shareholders through share buybacks or capital repayment"
+          },
+          {
+            "id": "asml.pdf:47:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 47,
+            "score": 0.030346930995043844,
+            "text": "During the year, we actively engaged with our investor community via a large number of conferences, roadshows and conference calls, to discuss specific topics relevant to our equity story, including ESG-related topics. We also encourage investors to visit our Veldhoven (the Netherlands) or Wilton (US) facilities in person to discuss and see our capacity expansion plans, as well as our technology challenges and opportunities in our ASML Experience Centers.\n\n€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          },
+          {
+            "id": "asml.pdf:333:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 333,
+            "score": 0.019672131147540982,
+            "text": "We continue to hold on to our long-held prudent financing policy, which is based on three foundational elements:\n\n- Liquidity: Maintain sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility\n- Capital structure: Maintain a capital structure that targets a solid investment-grade credit rating\n- Cash return: Provide a sustainable dividend per share that will grow over time, paid quarterly, while returning excess cash to shareholders through share buybacks or capital repayment"
+          },
+          {
+            "id": "asml.pdf:194:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 194,
+            "score": 0.01935483870967742,
+            "text": "Our actions and resources include:\n\n- Setting clear definitions and boundaries on what we consider to be packaging.\n- Improving data insights by centralizing and enhancing packaging registrations tools.\n- Defining clear roles and responsibilities in the organization to enable efficient return and reuse process on transport materials.\n- Starting a pilot project to improve packaging design and recycling by moving design and engineering responsibility into the new packaging organization.\n- Initiating a pilot program to decrease the reliance on single-use packaging materials."
+          },
+          {
+            "id": "asml.pdf:316:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 316,
+            "score": 0.019047619047619046,
+            "text": "We are exposed to certain financial risks, such as foreign currency risk, interest rate risk, credit risk, liquidity risk and capital risk. Our overall risk management program focuses on the unpredictability of financial markets and seeks to minimize potentially adverse effects on our financial performance. Our risk management program focuses appropriately on the current environment of uncertainty in the financial markets.\n\nA key element within our risk management program is our long-held prudent financing policy, which is based on three foundational elements:\n\n- Liquidity: Maintain sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility\n- Capital structure: Maintain a capital structure that targets a solid investment-grade credit rating\n- Cash return: Provide a sustainable dividend per share that will grow over time, paid quarterly, while returning excess cash to shareholders through share buybacks or capital repayment"
+          },
+          {
+            "id": "asml.pdf:10:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 10,
+            "score": 0.01875,
+            "text": "We believe that leading the way on ESG issues has always been the right thing to do for all our stakeholders as well as for the planet we all share. Over the years, we have established and systematically executed plans to achieve clear ESG targets, and this continued at pace during 2025."
+          },
+          {
+            "id": "asml.pdf:57:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 57,
+            "score": 0.01846153846153846,
+            "text": "We continued to invest significantly in next-generation technologies to secure future growth opportunities. These investments required substantial cash outflows in net working capital, capital expenditures, and R&#x26;D. At the same time, we remained committed to returning cash to our shareholders through dividends and the share buyback program."
+          },
+          {
+            "id": "asml.pdf:318:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 318,
+            "score": 0.01791044776119403,
+            "text": "Our principal sources of liquidity consist of cash and cash equivalents, short-term investments and available credit facilities, with the objective of maintaining sufficient liquidity to ensure continued business growth and to provide a buffer for cash flow volatility. In addition, we may from time to time raise additional funding in debt and equity markets. We seek to ensure that our principal sources of liquidity will be sufficient to satisfy our liquidity requirements at all times.\n\nOur liquidity needs are affected by many factors, some of which are based on the normal ongoing operations of the business, and some of which relate to uncertainties of the global economy and the semiconductor industry. Although our cash requirements fluctuate based on the timing and extent of these factors, we believe that cash generated from operations, together with our other sources of liquidity, are sufficient to satisfy our requirements, including our expected capital expenditures, R&#x26;D expenses and debt servicing.\n\nWe intend to return cash to our shareholders on a regular basis in the form of dividend payments and, subject to our actual and anticipated liquidity requirements and other relevant factors, share buybacks or capital repayment."
+          },
+          {
+            "id": "asml.pdf:206:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 206,
+            "score": 0.01764705882352941,
+            "text": "Additions to property, plant and equipment: A subset of buildings included in scope for CCM 7.7 and CCA 7.2 that met the substantial contribution criteria by reducing the primary energy demand by more than 30% did not meet the DNSH criteria relating to water-usage – and, as such, we report 0% alignment on CCM 7.2 and CCA 7.2.\n\nSince the technical screening criteria for our activities under circular economy (CE 1.2) are not met as described in the section ‘Turnover’, we also report 0% alignment related to additions to machinery and equipment.\n\nAdditions to intangible assets: Since the technical screening criteria for our activities under circular economy (CE 1.2) are not met as described in the section ‘Turnover’, we also report 0% alignment related to capitalized R&#x26;D costs.\n\nAdditions to right-of-use assets and lease liabilities: Additions to right-of-use assets were considered below the threshold compared to the overall capex, as defined by the EU Taxonomy Regulation. They have been excluded and are reported as ‘not assessed activities considered non-material’."
+          },
+          {
+            "id": "asml.pdf:315:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 315,
+            "score": 0.017391304347826087,
+            "text": "In addition to dividend payments, we intend to return cash to our shareholders on a regular basis through share buybacks or capital repayment, subject to our actual and anticipated level of liquidity requirements and other relevant factors.\n\nOn January 28, 2026 we announced a new share buyback program to be executed by December 31, 2028. ASML intends to repurchase shares of an amount up to €12 billion, of which we expect a total of up to 2.0 million shares will be used to cover employee share plans. ASML intends to cancel the remainder of the shares repurchased. The share buyback program may be suspended, modified or discontinued at any time. The previous program finished in December 2025, pursuant to which we repurchased a total of €7.6 billion out of the up to €12.0 billion program.\n\nIn 2025, we repurchased 8,323,320 shares (2024: 574,925 shares) for a total consideration of €5,950.0 million (2024: €500.0 million). In 2025, we cancelled 5,683,018 shares (2024: 5,754,117 shares)."
+          }
+        ]
+      },
+      "answer": {
+        "question": "What mechanisms did ASML use to return capital to shareholders in 2025?",
+        "answer": "In 2025, ASML returned capital to shareholders through a total dividend of €7.50 per ordinary share and share buybacks amounting to €5,950.0 million, repurchasing 8,323,320 shares under their buyback program.",
+        "verbatim": null,
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 47,
+            "quote": "€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 334,
+            "quote": "ASML intends to declare a total dividend for the year of 2025 of €7.50 per ordinary share... In 2025, we repurchased 8,323,320 shares... for a total consideration of €5,950.0 million under the 2022 -2025 share buyback program."
+          },
+          {
+            "source": "asml.pdf",
+            "page": 4,
+            "quote": "€8.5bn Returned to shareholders through dividends and share buybacks in 2025."
+          }
+        ],
+        "grounding_drops": [
+          {
+            "source": "asml.pdf",
+            "page": 334,
+            "quote": "ASML intends to declare a total dividend for the year of 2025 of €7.50 per ordinary share... In 2025, we repurchased 8,323,320 shares... for a total consideration of €5,950.0 million under the 2022 -2025 share buyback program.",
+            "reason": "quote_not_found_verbatim"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,729 @@
+{
+  "timestamp": "2026-05-01T15:36:29+00:00",
+  "questions_path": "evals/questions-2025-multi-company.yaml",
+  "eval_set": {
+    "source": null,
+    "company": null,
+    "year": null,
+    "n_questions": 105
+  },
+  "config": {
+    "company": "ABN AMRO",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "pct": 100.0,
+    "by_category": {
+      "financial_highlight": {
+        "passed": 4,
+        "total": 4,
+        "pct": 100.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "abn_amro_2025_financial_net_profit",
+      "question": "What net profit did ABN AMRO report in 2025?",
+      "company": "ABN AMRO",
+      "year": 2025,
+      "category": "financial_highlight",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "EUR 2.3 billion",
+          "€2.3 billion",
+          "net profit"
+        ],
+        "answer_contains_all": null,
+        "page": 40,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "abn-amro.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          40,
+          43,
+          4,
+          317,
+          319,
+          41,
+          295,
+          387,
+          316,
+          299,
+          44,
+          121
+        ],
+        "chunks": [
+          {
+            "id": "abn-amro.pdf:40:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 40,
+            "score": 0.0360655737704918,
+            "text": "Financial performance\nABN AMRO delivered a solid financial performance in\n2025, achieving a net profit of EUR 2.3 billion and a\nreturn on equity of 8.7%. Net interest income was in line\nwith our guidance of more than EUR 6.3 billion for the\nyear. Fee and commission income increased by 12%,\nsupported by the consolidation of Hauck Aufhäuser\nLampe (HAL) and higher fees in asset management and\nsecurities services. Operating costs excluding large\nincidentals and restructuring expenses were at the\nlower end of our EUR 5.4-5.5 billion guidance.\nOur client units made important contributions to our\nprofitable growth. In the mortgage market, our share of\nnew production remained stable at 19%, while Wealth\nManagement grew client assets to over EUR 283 billion.\nWithin Corporate Banking, financing activity increased\nin the energy, digital and mobility sectors.\nFinancial indicators\n(in millions)\n2025\n2024\nChange\nNet interest income\n6,335\n6,504\n -3%\nNet fee and commission income\n2,132\n1,910\n 12%\nOther operating income\n249\n447\n -44%\nOperating income\n8,716\n8,861\n -2%\nPersonnel expenses\n3,104\n2,776\n 12%\nOther expenses\n2,506\n2,691\n -7%\nOperating expenses\n5,610\n5,467\n 3%\nOperating result\n3,106\n3,394\n -8.5%\nImpairment charges on financial instruments\n20\n-21\nProfit/(loss) for the period\n2,252\n2,403\n -6%\nOther indicators\nCommon Equity Tier 1 ratio¹\n 15.4 %\n 14.5 %\nNet interest margin (NIM) (in bps)\n152\n164\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\n1. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 are prepared in accordance\nwith CRR II (Basel III) regulations.\n2. Figures based on bank's profit (or loss) for the year, excluding payments attributable to AT1 capital securities and results attributable to non-controlling interests, divided by\naverage equity attributable to the owners of the company excluding AT1 capital securities.\n3. Figure for 2025 shows proposed dividend, subject to approval by ABN AMRO's Annual General Meeting (AGM).\nFinancial results\nOperating income decreased by 2% to\nEUR 8,716 million in 2025. This was primarily due to\nlower net interest income and other operating income.\nThese effects were partly offset by higher fee and\ncommission income.\nNet interest income (NII) declined by 3% to\nEUR 6,335 million in 2025. Excluding large incidentals,\nNII decreased by EUR 166 million, mainly as a result of\nmargin pressure on deposits due to the interest rate\nenvironment. Margin pressure on corporate loans and\nmortgages also contributed to the reduction. These\npressures were partly compensated by increased\ndeposit and mortgage volumes, improved Treasury\nresults and the positive impact of the integration of HAL.\nNet fee and commission income increased by 12% to\nEUR 2,132 million. This growth was largely attributable\nto higher fee income at Wealth Management, reflecting\nthe integration of HAL and increased fees for asset\nmanagement and securities services. Personal &\nBusiness Banking benefitted from higher payment\nservices fees, driven by increased payment package\npricing and transaction volumes. Corporate Banking\nalso recorded"
+          },
+          {
+            "id": "abn-amro.pdf:43:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 43,
+            "score": 0.03413461538461539,
+            "text": "Wealth Management\n(in millions)\n2025\n2024\nChange\nOperating income\n1,693\n1,568\n 8 %\nOperating expenses\n1,302\n1,092\n 19 %\nOperating result\n391\n476\n -18 %\nImpairment charges on financial instruments\n10\n14\n -24 %\nProfit/(loss) for the period\n267\n325\n -18 %\nNet profit for Wealth Management declined to\nEUR 267 million in 2025 (2024: EUR 325 million).\nOperating income rose by 8% to EUR 1,693 million,\nsupported by higher fee income and other income. Net\ninterest income decreased to EUR 900 million, mainly\nreflecting lower deposit margins. This was partly\ncompensated by higher volumes and the positive\nimpact of the integration of HAL. Fee income increased\nsignificantly to EUR 771 million, driven by that same\nintegration and by higher other fee income, particularly\nfrom asset management and securities services.\nOperating expenses increased to EUR 1,302 million,\nreflecting higher staff levels due to HAL’s integration,\nCLA impacts and restructuring provisions. Impairments\namounted to a EUR 10 million addition, slightly lower\nthan for the previous year.\nCorporate Banking\n(in millions)\n2025\n2024\nChange\nOperating income\n3,160\n3,358\n -6 %\nOperating expenses\n1,776\n1,802\n -1 %\nOperating result\n1,384\n1,556\n -11 %\nImpairment charges on financial instruments\n92\n74\n 23 %\nProfit/(loss) for the period\n989\n1,099\n -10 %\nNet profit for Corporate Banking decreased to\nEUR 989 million in 2025 (2024: EUR 1,099 million),\nmainly because of lower operating income and higher\nimpairments. Operating income decreased by 6% to\nEUR 3,160 million, as net interest income and other\noperating income declined. This was partly offset by a\nfee income increase of 4%. Net interest income\ndropped to EUR 2,117 million, reflecting margin\npressure on liabilities, lower corporate loan volumes\nand reduced Clearing NII. Fee income rose to\nEUR 730 million as increased market volatility added to\nhigher Clearing fees, and client mandates increased\nacross debt capital markets and advisory activities.\nOther operating income decreased to EUR 314 million,\nmainly as a result of lower equity revaluations and the\nwind down of the asset-based finance (ABF) portfolio.\nOperating expenses declined to EUR 1,776 million, led\nby lower external staffing costs in reflection of our cost\ndiscipline, and by VAT rebates. This was offset by\nincreased personnel expenses. Impairments rose to\nEUR 92 million, reflecting stage 3 charges despite\nreleases in stages 1 and 2. Our optimisation efforts\nreduced risk weighted assets by 14% in 2025.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n43"
+          },
+          {
+            "id": "abn-amro.pdf:4:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 4,
+            "score": 0.0316624895572264,
+            "text": "ABN AMRO in 2025\n2,252\n8.7%\n2024: 2,403\n2024: 10.1%\nNet profit (in EUR millions)\nReturn on equity\n64.4%\n152\n2024: 61.7%\n2024: 164\nCost/income ratio\nNet interest margin (in bps)\n1\n397\n2024: -2\n2024: 344\nCost of risk\n(in bps)\nClient assets (in EUR billions)\n2.45\n15.4%\n2024: 2.72\n2024: 14.5%\nEarnings per share (in EUR)\nCET1 ratio\nDefinitions for all performance indicators can be found in the Other information chapter.\nABN AMRO\n4"
+          },
+          {
+            "id": "abn-amro.pdf:317:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 317,
+            "score": 0.03116883116883117,
+            "text": "Interest expense\n(in millions)\n 2025\n 2024\nInterest expenses from:\nSecurities financing\n696\n896\nDue to banks\n244\n333\nDue to customers\n4,199\n5,260\nIssued debt\n2,242\n2,139\nSubordinated liabilities\n281\n297\nNon-trading derivatives - hedge accounting - Cash flow hedges\n288\n654\nNon-trading derivatives - hedge accounting - Fair value hedges\n517\n1,283\nOther\n-449\n-330\nInterest expense calculated using the effective interest method\n8,019\n10,532\nFinancial liabilities at fair value through profit or loss\n10\n9\nNon-trading derivatives - no hedge accounting\n72\n43\nOther\n21\n20\nOther interest and similar expense\n103\n72\nTotal interest expense\n8,122\n10,604\n5    Net fee and commission income\nAccounting policy for net fee and commission income\nABN AMRO applies IFRS 15 when recognising revenue from contracts with clients, all of which is included in net\nfee and commission income. After identifying contracts and their performance obligations, revenue is\nrecognised as an amount that reflects the consideration to which the bank expects to be entitled in exchange for\ntransferring promised services to clients. The transaction price is allocated to each performance obligation.\nRevenue is measured at the fair value of the consideration received, taking into account discounts and rebates.\nThe amount of revenue recognised is discounted to the present value of the consideration due, if payment\nextends beyond normal credit terms.\nRevenue is recognised when a promised service is transferred to the client. Fees and commission income are\nrecognised either:\n• at a certain point in time: the fee is a reward for a service provided at a moment in time, or\n• over time (amortised): the fee relates to services on an ongoing basis.\nABN AMRO engages in transactions where more than one party is involved in providing services to a client. In the case\nof these transactions, ABN AMRO assesses whether it is a principal or an agent in the transaction by evaluating the\nnature of its promise to the client.\nThe bank is a principal if it controls the promised goods or services before they are transferred to a client. The bank\nacts as an agent of another party if its service entails transferring goods or services to a client on behalf of that other\nparty and, as a result, the bank does not control the specified goods or services. Control of goods and services refers to\nthe ability to direct the use of, and obtain substantially all the remaining benefits from, the goods and services.\nIf the bank is assessed to be a principal in the transaction, it recognises as revenue the gross amount of the\nconsideration to which it expects to be entitled in exchange for the specified goods or services transferred. If, however,\nthe bank acts as an agent, it recognises as revenue the amount of the fee or commission to which it expects to be\nentitled in exchange for transferring the specified goods or services provided by the other party. The fee or\ncommission may be the net amount of consideration that the bank retains after paying the other party the\nconsideration received in exchange for the goods or services provided by that party.\n(in millions)\n 2025\n 2024\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n2,132\n1,910\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n317"
+          },
+          {
+            "id": "abn-amro.pdf:319:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 319,
+            "score": 0.031160572337042926,
+            "text": "6    Net income from other operating activities\nAccounting policy for other operating income\nOther operating income includes all other banking activities such as operating lease activities as lessor and\nresults on the disposal of assets. It also includes the change in fair value of derivatives used for risk management\npurposes that do not meet the requirements for hedge accounting, ineffectiveness of hedging programmes, fair\nvalue changes relating to assets and liabilities measured at fair value through profit or loss, and changes\nin the value of derivatives related to such instruments. Dividend income from non-trading equity investments is\nrecognised when entitlement is established. Income from operating lease activities is presented separately from\nthe depreciation expense of the related assets.\n(in millions)\n 2025\n 2024\nIncome from lease activities\n87\n101\nDisposal of operating activities and equity-accounted investments\n1\n-22\nResult from financial transactions\n2\n211\nOther\n10\n20\nIncome from other operating activities\n101\n311\n(in millions)\n 2025\n 2024\nExpenses from lease activities\n70\n84\nExpenses from other operating activities\n70\n84\n7    Net trading income\nAccounting policy for net trading income\nIn accordance with IFRS 9, trading positions are held at fair value, and net trading income includes gains and\nlosses arising from changes in the fair value of such financial assets and liabilities. The latter comprises gains and\nlosses from trading financial assets and liabilities, interest income and expenses related to trading financial\nassets and liabilities, and dividends received from trading instruments. Dividend income and dividends from\ntrading instruments are recognised at the dividend announcement date. Net trading income also includes\nchanges in fair value arising from changes in counterparty credit spreads (CVA) and changes in own credit\nspreads (DVA) where these affect the value of our trading assets and liabilities. The funding valuation adjustment\n(FVA) incorporates the incremental cost of funding into the valuation of uncollateralised and partly collateralised\nderivatives.\n(in millions)\n 2025\n 2024\nInterest instruments trading\n118\n133\nEquity and commodity trading\n-12\nForeign exchange transaction results\n113\n151\nTotal net trading income\n219\n283\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n319"
+          },
+          {
+            "id": "abn-amro.pdf:41:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 41,
+            "score": 0.03058686358336572,
+            "text": "Operating expenses rose by 3% to EUR 5,610 million\nin 2025. The increase was mainly driven by higher\npersonnel expenses and was partly offset by lower\nother expenses. Excluding large incidentals and\nrestructuring costs, operating expenses were at the\nlower end of our full-year guidance of\nEUR 5.4-5.5 billion.\nPersonnel expenses increased by 12% to\nEUR 3,104 million. Excluding large incidentals,\npersonnel expenses increased by EUR 350 million. The\nincrease was attributable to a higher number of internal\nemployees, largely driven by the consolidation of HAL,\nthe impact of the Dutch collective labour agreement\n(CLA) and higher restructuring provisions.\nOther expenses decreased by 7% to EUR 2,506 million.\nExcluding large incidentals, other expenses decreased\nby EUR 173 million. This was mainly due to lower\nexternal staffing costs and non-recurring VAT rebates in\n2025. These positive developments were partly offset\nby increased IT costs and higher depreciation and\namortisation expenses, mainly related to the integration\nof HAL.\nLending and credit quality\nIn 2025, total loans and advances increased to\nEUR 264.1 billion from EUR 256.2 billion a year earlier.\nGrowth was mainly driven by the continued expansion\nof our residential mortgage portfolio, underscoring our\nstrong position in a robust housing market. Corporate\nlending also rose, supported in part by the acquisition of\nHAL.\nThese increases were partly offset by a reduction in\ncorporate loans following the wind-down of activities at\nAsset Based Finance. Consumer loans also declined,\nprimarily because of the reclassification of Alfam’s loan\nportfolios, to assets held for sale.\nCredit quality remained strong over the year. Combined\nwith benign economic circumstances in the\nNetherlands, this resulted in a net impairment charge of\nEUR 20 million in 2025, compared with a\nEUR 21 million net impairment release the year before.\nThe resulting cost of risk was 1 basis point, compared to\n-2 basis points last year.\nCapital position\nABN AMRO’s capital position improved throughout the\nyear. The Common Equity Tier 1 (CET1) ratio ended the\nyear at 15.4% compared with 14.5% as at\n31 December 2024. This was due to optimisation\ninitiatives that led to a decrease in risk-weighted assets\n(RWA). These included methodological enhancements\nand data quality improvements. Besides that, significant\nrisk transfers contributed to the decrease.\nWe updated our capital framework and distribution\npolicy as announced during our Capital Markets Day on\n25 November 2025. We are committed to returning\ncapital to shareholders and we aim for an ordinary\ndistribution up to 100% of the reported net profit. In\n2025 an interim dividend of EUR 0.54 per share was\npaid and we propose a final dividend of EUR 0.70 per\nshare. This corresponds to a payout ratio of 50% of the\nreported net profit and brings the total dividend for\n2025 to EUR 1.24 per share. Additionally, we plan to\ndistribute EUR 500 million, comprising EUR 250 million\nin cash dividends and EUR 250 million through a share\nbuyback programme, for which we have applied for\nregulatory approval. Our year-end CET1 capital ratio\nalready takes into account the additional distributions.\nWe expect to present the outcome of our annual capital\nassessment with the fourth-quarter results.\nFinancial performance outlook for 2026\nWe maintain our 2026 guidance for commercial net\ninterest income to be around EUR 6.4 billion, excluding\nthe intended acquisition of NIBC. Our"
+          },
+          {
+            "id": "abn-amro.pdf:295:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 295,
+            "score": 0.03030998851894374,
+            "text": "Consolidated income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nNet interest income\n4\n6,335\n6,504\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n5\n2,132\n1,910\nIncome from other operating activities\n101\n311\nExpenses from other operating activities\n70\n84\nNet income from other operating activities\n6\n30\n226\nNet trading income\n7\n219\n283\nShare of result in equity-accounted investments\n28\n9\nNet gains/(losses) on derecognition of financial assets measured at amortised cost\n8\n-29\n-71\nOperating income\n8,716\n8,861\nExpenses\nPersonnel expenses\n9\n3,104\n2,776\nGeneral and administrative expenses\n10\n2,326\n2,531\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n24\n180\n160\nOperating expenses\n5,610\n5,467\nImpairment charges on financial instruments\n20\n-21\nTotal expenses\n5,630\n5,446\nProfit/(loss) before taxation\n3,086\n3,415\nIncome tax expense\n11\n834\n1,013\nProfit/(loss)\n2,252\n2,403\nAttributable to:\nOwners of the parent company\n2,252\n2,403\nEarnings per share (in EUR)\nBasic earnings per ordinary share (in EUR)¹\n12\n2.45\n2.72\n1. Earnings per share consist of profit for the period, excluding results attributable to non-controlling interests and payments to holders of AT1 instruments, divided by the\naverage outstanding and paid-up ordinary shares (31 December 2025: 829,609,770; 31 December 2024: 840,546,121).\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n295"
+          },
+          {
+            "id": "abn-amro.pdf:387:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 387,
+            "score": 0.02927438045997504,
+            "text": "Company income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income\n21,351\n31,252\nInterest expense\n16,448\n25,990\nNet interest income\n2\n4,903\n5,262\nFee and commission income\n1,571\n1,502\nFee and commission expense\n260\n262\nNet fee and commission income\n1,312\n1,241\nResults from financial transactions\n3\n-197\n-324\nIncome from securities and participating interests\n4\n942\n1,142\nOther operating income\n5\n16\n-20\nOperating income\n6,976\n7,300\nExpenses\nPersonnel expenses\n6\n2,571\n2,339\nGeneral and administrative expenses\n1,499\n1,780\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n146\n143\nOperating expenses\n4,216\n4,262\nImpairment charges on financial instruments\n-42\n10\nTotal expenses\n4,174\n4,272\nProfit/(loss) before taxation\n2,802\n3,029\nIncome tax expense\n551\n626\nProfit/(loss)\n2,252\n2,403\n\n≡\nAnnual Financial Statements 2025\nCompany Annual Financial Statements of ABN AMRO Bank N.V.\nABN AMRO\n387"
+          },
+          {
+            "id": "abn-amro.pdf:316:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 316,
+            "score": 0.02893835616438356,
+            "text": "4    Net interest income\nAccounting policy for net interest income\nInterest income and expenses on financial instruments are recognised in the income statement on an accrual\nbasis using the effective interest rate method, except where financial instruments are measured at fair value\nthrough profit or loss. The effective interest rate method allocates interest, amortisation of any discount or\npremium or other differences, including transaction costs and qualifying fees and commissions, over\nthe expected lives of the assets and liabilities. The effective interest rate is the rate that exactly discounts\nestimated future cash flows to the net carrying amount of the asset. As a result, this method requires ABN AMRO\nto estimate future cash flows, in some cases based on its experience with client behaviour, considering all\ncontractual terms of the financial instrument, as well as the expected lives of the assets and liabilities. Interest on\nloans and advances measured at fair value through profit or loss is also included in net interest income and\nrecognised using the contractual interest rate. Interest income and expenses on trading balances are included\nin net trading income. Interest paid on assets with a negative interest yield is classified as interest expense.\nInterest received from liabilities with a negative interest yield is classified as interest income.\n(in millions)\n 2025\n 2024\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest income\n14,457\n17,108\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nInterest expense\n8,122\n10,604\nNet interest income\n6,335\n6,504\nInterest income\n(in millions)\n 2025\n 2024\nInterest income from:\nFinancial investments at fair value through other comprehensive income\n1,136\n1,028\nSecurities financing\n1,455\n1,495\nLoans and advances banks\n1,268\n1,917\nLoans and advances customers\n8,840\n9,528\nNon-trading derivatives - hedge accounting - Cash flow hedges\n274\n208\nNon-trading derivatives - hedge accounting - Fair value hedges\n1,073\n2,369\nOther\n159\n213\nInterest income calculated using the effective interest method\n14,205\n16,757\nFinancial assets at fair value through profit or loss\n32\n34\nNon-trading derivatives - no hedge accounting\n95\n55\nOther\n126\n262\nOther interest and similar income\n253\n351\nTotal interest income\n14,457\n17,108\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n316"
+          },
+          {
+            "id": "abn-amro.pdf:299:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 299,
+            "score": 0.02875494071146245,
+            "text": "Investing activities\nPurchases of financial investments\n-37,352\n-49,211\nProceeds from sales and redemptions of financial investments\n36,240\n44,645\nAcquisition of subsidiaries (net of cash acquired), associates and joint ventures\n23\n5,955\n-25\nDivestments of subsidiaries (net of cash sold), associates and joint ventures\n23\n45\n183\nPurchases of property and equipment\n-294\n-312\nProceeds from sales of property and equipment\n70\n48\nPurchases of intangible assets\n-98\n-140\nCash flow from investing activities\n4,565\n-4,811\nFinancing activities\nProceeds from the issuance of debt\n29\n49,649\n42,885\nRepayment of issued debt\n29\n-48,161\n-36,980\nProceeds from subordinated liabilities issued\n29\n21\n767\nRepayment of subordinated liabilities issued\n29\n-1,342\n-21\nProceeds/(repayment) from other borrowing\n-249\n1,488\nProceeds/(repayment) from capital securities\n-17\n0\nPurchase of treasury shares\n-250\n-500\nDividends paid to the owners of the parent company\n33\n-1,085\n-1,244\nInterest paid AT1 capital securities\n-217\n-120\nPayment of lease liabilities\n-121\n-112\nCash flow from financing activities\n-1,772\n6,162\nNet increase/(decrease) of cash and cash equivalents\n5,028\n-9,444\nCash and cash equivalents as at 1 January\n45,629\n55,054\nEffect of exchange rate differences on cash and cash equivalents\n-39\n19\nCash and cash equivalents as at 31 December\n50,618\n45,629\nSupplementary disclosure of operating cash flow information\nInterest paid\n8,019\n10,419\nInterest received\n14,457\n17,016\nDividend received excluding associates\n9\n9\n(in millions)\nNote\n 2025\n 2024\n(in millions)\n31 December 2025\n31 December 2024\nCash and balances at central banks\n49,486\n44,464\nLoans and advances banks (less than 3 months)1\n1,132\n1,165\nTotal cash and cash equivalents¹\n50,618\n45,629\n1. Loans and advances banks with an original maturity of 3 months or more is included in loans and advances banks.\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n299"
+          },
+          {
+            "id": "abn-amro.pdf:44:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 44,
+            "score": 0.02812911725955204,
+            "text": "price development (in EUR)\nClosing price (end of period)\n29.79\n14.89\nHigh (during the period)\n29.95\n16.69\nLow (during the period)\n14.96\n13.05\nMarket capitalisation (end of period, in billions)\n24.52\n12.40\nValuation indicators (end of period, in EUR)\nPrice/Earnings\n12.15x\n5.48x\nPrice/Tangible book value\n1.05x\n0.55x\nDividend yield\n 5.2%\n 9.1%\nDividend payout ratio1, 2\n 50%\n 50%\n1. Earnings per share: Profit for the period excluding reserved coupons for AT1 capital securities (net of tax) and results attributable to other non-controlling interests divided by\nthe average outstanding and paid-up ordinary shares.\n2. Dividend per share and payout ratio subject to approval of the Annual General Meeting in April 2026.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n44"
+          },
+          {
+            "id": "abn-amro.pdf:121:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 121,
+            "score": 0.028078817733990145,
+            "text": "class B ordinary shares. Class A and B ordinary shares\nhave a nominal value of EUR 1.00 each.\nAs at 31 December 2025, issued and paid-up capital\namounted to EUR 823,201,264 (31 December 2024:\nEUR 833,048,566) and consisted entirely of class A\nordinary shares. Further information is provided in\nNote 33 Equity attributable to owners of the parent\ncompany in the Consolidated Annual Financial\nStatements.\nCapital framework and distribution policy\nWe updated our capital framework and distribution\npolicy as announced at the Capital Markets Day on\n25 November 2025. Our target is a CET1 ratio above\n13.75%, reflecting our regulatory requirements. We are\ncommitted to returning capital to shareholders. We aim\nfor an ordinary distribution up to 100% of the reported\nnet profit, after deduction of AT1 coupon payments and\nminority interests. Ordinary distributions are expected\nto be in the form of a combination of cash dividends\nand share buybacks (subject to regulatory approval),\nwith at least 50% of the reported net profit distributed\nin the form of cash dividends. Interim cash dividends of\n40% of the reported H1 net profit will be considered,\nprovided the profit is expected to be sustainable\nthroughout the year, at the discretion of the Executive\nBoard.\nIf the CET1 ratio is expected to remain significantly\nabove the 13.75% target level, additional distributions\ncan be considered. This is subject to successful strategy\nexecution, macroeconomic developments and\nregulatory approval.\nWe expect to communicate the outcome of our capital\nassessment annually with the Q4 results. Any\ndistribution will take into account factors such as\neconomic conditions, capital requirements and business\nopportunities, and ABN AMRO may propose deviations\nfrom the above distribution policy.\nDistributions\nBased on the distribution policy, the reported net profit\nfor 2025 of EUR 2,036 million (after deduction of AT1\nand minority interests) and the interim dividend of\nEUR 0.54 per share that was already paid in 2025, we\npropose a final cash dividend for 2025 of EUR 0.70 per\nshare (2024: EUR 0.75). This is equivalent to a final\ndividend of EUR 576 million (2024: EUR 625 million),\nbased on 823,201,264 outstanding shares at year-end\n2025. This corresponds to a payout ratio of 50% of the\nreported net profit and brings the total dividend for\n2025 to EUR 1.24 per share (2024: EUR 1.35), for a total\nof EUR 1,025 million. The proposed ex-dividend date is\n24 April 2026, with a record date of 27 April 2026 and\nthe dividend being paid on 22 May 2026. The Q4 2025\ncapital assessment confirmed the robustness of our\ncapital position and included the intended acquisition of\nNIBC. In view of this, we plan to distribute an additional\nEUR 500 million, consisting of an additional cash\ndividend of EUR 250 million, corresponding to around\nEUR 0.30 per share (based on the amount of shares\noutstanding at year-end 2025), and a EUR 250 million\nshare buyback (subject to regulatory approval).\nTogether with the ordinary cash dividend and the\nEUR 250 million share buyback realised in Q3 2025, this\nwould bring the total payout over 2025 to EUR\n1,775 million, equal to a payout ratio of 87% of the\nreported net profit (after deduction of AT1 and minority\ninterests).\nA EUR 250 million share buyback programme was\nannounced on the same day as the Q"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What net profit did ABN AMRO report in 2025?",
+        "answer": "ABN AMRO reported a net profit of EUR 2.3 billion in 2025.",
+        "verbatim": "EUR 2.3 billion",
+        "citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "ABN AMRO delivered a solid financial performance in 2025, achieving a net profit of EUR 2.3 billion and a return on equity of 8.7%."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "ABN AMRO delivered a solid financial performance in 2025, achieving a net profit of EUR 2.3 billion and a return on equity of 8.7%."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "abn_amro_2025_financial_roe",
+      "question": "What return on equity did ABN AMRO achieve in 2025?",
+      "company": "ABN AMRO",
+      "year": 2025,
+      "category": "financial_highlight",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "8.7%",
+          "return on equity",
+          "ROE"
+        ],
+        "answer_contains_all": null,
+        "page": 40,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "abn-amro.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          36,
+          4,
+          20,
+          40,
+          24,
+          94,
+          24,
+          38,
+          7,
+          30,
+          47,
+          47
+        ],
+        "chunks": [
+          {
+            "id": "abn-amro.pdf:36:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 36,
+            "score": 0.035176651305683565,
+            "text": "Ethics and integrity\nMaintaining trust in the bank requires us to uphold high\nstandards of ethics and integrity. This means:\n• what we have to do: ensure compliance with all\nrelevant laws and regulations\n• what we can do: as a commercial organisation, make\ndecisions that serve our business interests\n• what we want to do: act responsibly and demonstrate\nmorally sound behaviour to fulfil our purpose of\nBanking for better, for generations to come.\nLike other banks, ABN AMRO plays a key role as a\ngatekeeper, helping to protect the financial system\nagainst financial crime. To fulfil this responsibility:\n• We have established a framework of internal policies\nand controls to ensure compliance and minimise risks\nrelated to fraud, money laundering, bribery,\ncorruption and terrorist financing.\n• We conduct thorough due diligence of clients and\nbusiness partners, particularly those with political\nexposure and those operating in countries or\nindustries where financial crime is more common.\nAdditionally, we collaborate closely with law\nenforcement agencies to fight fraud, corruption and\nmoney laundering.\n• We foster a ‘speak-up’ culture, encouraging\nemployees to report potential violations and discuss\nethical dilemmas in a supportive environment.\nSuspected breaches can be reported through the\nbank’s dedicated ‘speak-up channels’, including\nwhistleblowing mechanisms. Employees receive\ntraining to identify signs of financial crime and are\nrequired to report all incidents, whether confirmed or\nsuspected, without delay.\nProgress on financial targets\nIn November 2025, ABN AMRO presented new strategic\ntargets for 2028. These paragraphs compare the 2025\nperformance with the 2026 targets that were set under\nthe previous strategic plan.\nOur return on average equity was 8.7% in 2025,\ncompared with a 2026 target of 9-10%. The cost/\nincome ratio amounted to 64.4%, compared with our\n2026 target of around 60%.\nOur strong capital position allowed us to continue\ninvesting in our strategic priorities in 2025 while still\nmaintaining financial stability. In the first quarter, we\nstarted reporting our capital position and credit risk\nexposures under the Basel IV framework. This resulted\nin a CET1 ratio of 15.4% at year-end, compared with\nour 2026 target of 13.5%. This capital ratio is a measure\nof a bank’s ability to absorb losses, with a higher ratio\nindicating a more resilient bank. For more information,\nplease refer to the Financial performance section.\nWe finalised the simplification of our credit risk model\nlandscape. We continue to use advanced models for\ncalculating the capital requirements for the majority of\nthe balance sheet, specifically mortgages, banks and\nother financial institutions. During the year, we received\nregulatory approval to use standardised, less\ncomplicated approaches to assess the credit risk of a\nfinal set of loan portfolios that require significant\nmodelling and data efforts. This simplification will bring\nstability and predictability to our capital position.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFuture-proof bank\nABN AMRO\n36"
+          },
+          {
+            "id": "abn-amro.pdf:4:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 4,
+            "score": 0.03329485107365504,
+            "text": "ABN AMRO in 2025\n2,252\n8.7%\n2024: 2,403\n2024: 10.1%\nNet profit (in EUR millions)\nReturn on equity\n64.4%\n152\n2024: 61.7%\n2024: 164\nCost/income ratio\nNet interest margin (in bps)\n1\n397\n2024: -2\n2024: 344\nCost of risk\n(in bps)\nClient assets (in EUR billions)\n2.45\n15.4%\n2024: 2.72\n2024: 14.5%\nEarnings per share (in EUR)\nCET1 ratio\nDefinitions for all performance indicators can be found in the Other information chapter.\nABN AMRO\n4"
+          },
+          {
+            "id": "abn-amro.pdf:20:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 20,
+            "score": 0.033061962912709186,
+            "text": "pathways, alongside already sustainable initiatives\naligned with regulatory definitions.\nAs part of our commercial efforts, we previously\nannounced initiatives to help Dutch homeowners invest\nin energy efficiency, including a pricing model that\nrewards improvements in their home’s energy label. In\nthe coming years, we aim to make further efforts in\nreducing the carbon footprint of specific high-emission\nsectors. At the same time, we remain steadfast in our\ndedication to renewable energy financing, setting an\ninterim target of EUR 8 billion by 2028 as part of our\npathway to EUR 10 billion by 2030.\nAlthough we focus on decarbonisation, we aim to\naddress other sustainability issues that are important to\nclients and society. For example, improving home\nenergy efficiency not only reduces emissions and\nenergy bills but can also create a positive social impact\nby addressing damp conditions and improving\noccupants’ health, particularly in lower-income\nneighbourhoods. Nature-related issues, such as cutting\nnitrogen emissions and boosting biodiversity, are\nimportant for our agricultural and other clients. We\ncontinue to support businesses moving towards a more\ncircular way of working, although 2025 will be the final\nyear that we measure progress against our 2027\ncircular loans target. Clients face increasingly complex\nchallenges, and we aim to help them navigate these\nwhen financing is needed.\nOur sustainability focus for the next strategic period is\nto help clients achieve their emission targets, supported\nby new commercial initiatives.\nOur goals\nThe strategic plan presented in November 2025 outlines our targets and\nlong-term ambitions. The tables below show our progress on these goals.\nAmbitions\nAmbition\nMetric\n2025\nAmbition (2028)\nStrengthen Dutch retail banking position Residential mortgages\n(in EUR billions)\n163\n> 190\nBecome a top-5 private bank in Europe\nClient assets\n(in EUR billions)\n283\n> 335\nSupport family wealth & businesses\nDual relationships with:\nSME clients\n68%\nc.70%\nCorporate clients\n55%\nc.60%\nDrive growth by supporting European\ntransitions\nRenewable energy financing\n(in EUR billions)\n 5.8\n8\nContinue global growth in Clearing\nGlobal market share position\nTop 3\nMaintain top 3\nGrow profitably\n2025\nTarget (2028)\nReturn on equity\n8.7%\n> 12%\nOperating income (in EUR billions)\n8.7\n> 10\nRight-size cost base\n2025\nTarget (2028)\nCost/income ratio\n64.4%\n< 55%\nOptimise capital allocation\n2025\nTarget (2028)\nCapital allocation to Corporate Bank 1\n51%\nc. 50%\nCommon Equity Tier 1 (CET1) ratio\n15.4%\n> 13.75%\nThe 2025 data related to our ambitions are included for reference only. For details on last year’s progress under the previous strategy (2021–2025), see\nthe Performance on our strategy chapter.\n1. Excluding ABN AMRO Clearing Bank N.V.\nFinancial targets\n\n≡\nStrategy & performance\nOur strategy\nABN AMRO\n20"
+          },
+          {
+            "id": "abn-amro.pdf:40:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 40,
+            "score": 0.03184121621621622,
+            "text": "Financial performance\nABN AMRO delivered a solid financial performance in\n2025, achieving a net profit of EUR 2.3 billion and a\nreturn on equity of 8.7%. Net interest income was in line\nwith our guidance of more than EUR 6.3 billion for the\nyear. Fee and commission income increased by 12%,\nsupported by the consolidation of Hauck Aufhäuser\nLampe (HAL) and higher fees in asset management and\nsecurities services. Operating costs excluding large\nincidentals and restructuring expenses were at the\nlower end of our EUR 5.4-5.5 billion guidance.\nOur client units made important contributions to our\nprofitable growth. In the mortgage market, our share of\nnew production remained stable at 19%, while Wealth\nManagement grew client assets to over EUR 283 billion.\nWithin Corporate Banking, financing activity increased\nin the energy, digital and mobility sectors.\nFinancial indicators\n(in millions)\n2025\n2024\nChange\nNet interest income\n6,335\n6,504\n -3%\nNet fee and commission income\n2,132\n1,910\n 12%\nOther operating income\n249\n447\n -44%\nOperating income\n8,716\n8,861\n -2%\nPersonnel expenses\n3,104\n2,776\n 12%\nOther expenses\n2,506\n2,691\n -7%\nOperating expenses\n5,610\n5,467\n 3%\nOperating result\n3,106\n3,394\n -8.5%\nImpairment charges on financial instruments\n20\n-21\nProfit/(loss) for the period\n2,252\n2,403\n -6%\nOther indicators\nCommon Equity Tier 1 ratio¹\n 15.4 %\n 14.5 %\nNet interest margin (NIM) (in bps)\n152\n164\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\n1. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 are prepared in accordance\nwith CRR II (Basel III) regulations.\n2. Figures based on bank's profit (or loss) for the year, excluding payments attributable to AT1 capital securities and results attributable to non-controlling interests, divided by\naverage equity attributable to the owners of the company excluding AT1 capital securities.\n3. Figure for 2025 shows proposed dividend, subject to approval by ABN AMRO's Annual General Meeting (AGM).\nFinancial results\nOperating income decreased by 2% to\nEUR 8,716 million in 2025. This was primarily due to\nlower net interest income and other operating income.\nThese effects were partly offset by higher fee and\ncommission income.\nNet interest income (NII) declined by 3% to\nEUR 6,335 million in 2025. Excluding large incidentals,\nNII decreased by EUR 166 million, mainly as a result of\nmargin pressure on deposits due to the interest rate\nenvironment. Margin pressure on corporate loans and\nmortgages also contributed to the reduction. These\npressures were partly compensated by increased\ndeposit and mortgage volumes, improved Treasury\nresults and the positive impact of the integration of HAL.\nNet fee and commission income increased by 12% to\nEUR 2,132 million. This growth was largely attributable\nto higher fee income at Wealth Management, reflecting\nthe integration of HAL and increased fees for asset\nmanagement and securities services. Personal &\nBusiness Banking benefitted from higher payment\nservices fees, driven by increased payment package\npricing and transaction volumes. Corporate Banking\nalso recorded"
+          },
+          {
+            "id": "abn-amro.pdf:24:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 24,
+            "score": 0.028571428571428574,
+            "text": "Our value creation model for 2025\nThe resources we need to operate our activities, ranging from the time, skills and know-how of our employees to the equity provided by the\nbank’s investors. This overview contains a selection of metrics to portray our value creation.\nCommercial\nDeposits, savings and fee payments from clients, financial capital from\nshareholders, offices, IT and intangible assets\n• EUR 256.2 billion due to customers and EUR 6.5 billion in net interest\nincome (NII)\n• EUR 26.1 billion in shareholders’ equity\n• 25 bank branches across the Netherlands\n• EUR 1 billion spent on IT during 2024 and EUR 253 million in\nintangible assets\nSocial\nRelationships with clients, employees, business partners and other\nstakeholders\n• 11 lending clients and 738 companies engaged regarding ESG\nthrough investment services\n• EUR 1.3 million in community investment made through ABN AMRO\nFoundation\nNatural\nOur consumption of energy, water and other natural resources\n• 54 GWh of energy used at our branches, offices and for transportation\nHuman\nEmployees’ time, skills and expertise, as well as investment in\nworkforce training and development\n• 21,976 total number of internal employees in 2024\nThis is our ‘engine room’ – it shows how our activities transform inputs into value for stakeholders\nOur purpose\nBanking for better, for generations to come\nOur business activities\nBanking services\nWe provide banking services to individuals and businesses. Most of our\nrevenue comes from net interest income. We also receive fees and\ncommissions in return for our services.\nFunding and managing risk\nWe fund our loans through deposits, savings and capital markets – and\nactively manage the risks associated with them.\nReinvesting and sharing returns\nFrom our income, we meet our operating costs, reinvest in our business\nand pay out returns to our investors\nOur strategic pillars\nCustomer\nexperience\nSustainability\nFuture-proof\nbank\nThe immediate results of our activities: the loans and mortgages we provide to clients or the salaries and benefits we pay employees\nCommercial\n• EUR 8.0 billion interest paid to clients and counterparties\n• EUR 2.0 billion payments to investors\n• EUR 0.8 billion paid in corporate income tax\n• 99.91% availability of internet banking\n• 90% of affluent & 81% of consumer meetings held via video\nbanking\nSocial\n• 200 Help with Banking Advisers supported clients 174,000 times\nNatural\n• 37% sustainability (acceleration) asset volume\n• EUR 274 million committed to circular economy deals in 2025 in\nmore than 42 deals\n• Progress on our climate targets (see Sustainability Statements)\nHuman\n• EUR 2.3 billion paid to employees in salaries and wages\n• 23,126 total number of internal employees in 2025\nThe effects of our activities on stakeholders – the fact, for example, that our products and services may help clients save and invest, or that,\nthrough home ownership, our mortgages may provide a greater sense of personal financial security\nCommercial\n• EUR 2.45 earnings per share\n• 8.7% return on equity\n• 187 privacy-related client complaints (0 substantiated)\n• 186 client complaints relating to breaches of other regulatory\nor voluntary codes in the Netherlands (2 substantiated)\nSocial\n• 31% women in middle management\n• NPS scores\n•\n    1 Personal Banking\n•\n-27 Business Banking\n•\n 26 Wealth Management\n•\n 21 Corporate Banking\nNatural\nCO2 emissions from our\n• scope 1 own operations 1.3 kton CO2\n• scope 2 own operations 0.9"
+          },
+          {
+            "id": "abn-amro.pdf:94:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 94,
+            "score": 0.028147659854976928,
+            "text": "was residential, with year-on-\nyear capital growth of 6.5% and a total return of 9.9%.\nNew real estate development activity remains inhibited\nby structural bottlenecks, such as electricity grid\ncongestion and nitrogen emission caps.\nOffices\nThe Dutch office market in 2025 was characterised by a\ndual dynamic, as growth in the prime office market\ncontinued while low-quality office locations were\navoided by investors. High-quality offices with solid\nsustainability performance and good access to public\ntransportation are still priced at a premium. There is a\ncontinued trend of falling demand for low-quality\noffices. Overall, the gross reversionary yield remained\nstable at 7.8%, with a total year-on-year return of 5.7%\nfor Q4 2025, which represents an improvement on the\nfigures for Q4 2024. The median rental price per square\nmetre also remained stable at EUR 136. The supply and\nuptake of office space also remained stable and\ncomparable to 2024.\nResidential\nOut of all Dutch CRE asset classes, residential\ninvestments performed best in 2025. The total year-on-\nyear return for Q4 2025 was 9.9% and average year-on-\nyear capital growth was 6.5%. The main causes of the\nprice increase were the relatively low interest rates,\nstable household income growth and the ongoing\nhousing shortage. Moreover, changes in tax regulation\nand the implementation of the Affordable Rent Act\n2025 (Wet Betaalbare Huur 2025) led to an increase in\ntransaction volume, which was predominantly driven by\nsales of rental properties by private investors. In 2025,\ntransaction volume was 16% higher than in 2024.\n\n≡\nRisk, funding & capital\nRisk management\nCredit risk review\nABN AMRO\n94\n2"
+          },
+          {
+            "id": "abn-amro.pdf:24:2",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 24,
+            "score": 0.027579737335834895,
+            "text": "Our value creation model for 2025\nThe resources we need to operate our activities, ranging from the time, skills and know-how of our employees to the equity provided by the\nbank’s investors. This overview contains a selection of metrics to portray our value creation.\nCommercial\nDeposits, savings and fee payments from clients, financial capital from\nshareholders, offices, IT and intangible assets\n• EUR 256.2 billion due to customers and EUR 6.5 billion in net interest\nincome (NII)\n• EUR 26.1 billion in shareholders’ equity\n• 25 bank branches across the Netherlands\n• EUR 1 billion spent on IT during 2024 and EUR 253 million in\nintangible assets\nSocial\nRelationships with clients, employees, business partners and other\nstakeholders\n• 11 lending clients and 738 companies engaged regarding ESG\nthrough investment services\n• EUR 1.3 million in community investment made through ABN AMRO\nFoundation\nNatural\nOur consumption of energy, water and other natural resources\n• 54 GWh of energy used at our branches, offices and for transportation\nHuman\nEmployees’ time, skills and expertise, as well as investment in\nworkforce training and development\n• 21,976 total number of internal employees in 2024\nThis is our ‘engine room’ – it shows how our activities transform inputs into value for stakeholders\nOur purpose\nBanking for better, for generations to come\nOur business activities\nBanking services\nWe provide banking services to individuals and businesses. Most of our\nrevenue comes from net interest income. We also receive fees and\ncommissions in return for our services.\nFunding and managing risk\nWe fund our loans through deposits, savings and capital markets – and\nactively manage the risks associated with them.\nReinvesting and sharing returns\nFrom our income, we meet our operating costs, reinvest in our business\nand pay out returns to our investors\nOur strategic pillars\nCustomer\nexperience\nSustainability\nFuture-proof\nbank\nThe immediate results of our activities: the loans and mortgages we provide to clients or the salaries and benefits we pay employees\nCommercial\n• EUR 8.0 billion interest paid to clients and counterparties\n• EUR 2.0 billion payments to investors\n• EUR 0.8 billion paid in corporate income tax\n• 99.91% availability of internet banking\n• 90% of affluent & 81% of consumer meetings held via video\nbanking\nSocial\n• 200 Help with Banking Advisers supported clients 174,000 times\nNatural\n• 37% sustainability (acceleration) asset volume\n• EUR 274 million committed to circular economy deals in 2025 in\nmore than 42 deals\n• Progress on our climate targets (see Sustainability Statements)\nHuman\n• EUR 2.3 billion paid to employees in salaries and wages\n• 23,126 total number of internal employees in 2025\nThe effects of our activities on stakeholders – the fact, for example, that our products and services may help clients save and invest, or that,\nthrough home ownership, our mortgages may provide a greater sense of personal financial security\nCommercial\n• EUR 2.45 earnings per share\n• 8.7% return on equity\n• 187 privacy-related client complaints (0 substantiated)\n• 186 client complaints relating to breaches of other regulatory\nor voluntary codes in the Netherlands (2 substantiated)\nSocial\n• 31% women in middle management\n• NPS scores\n•\n    1 Personal Banking\n•\n-27 Business Banking\n•\n 26 Wealth Management\n•\n 21 Corporate Banking\nNatural\nCO2 emissions from our\n• scope 1 own operations 1.3 kton CO2\n• scope 2 own operations 0.9"
+          },
+          {
+            "id": "abn-amro.pdf:38:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 38,
+            "score": 0.019672131147540982,
+            "text": "Interview with our Chief Financial Officer\nFerdinand Vaandrager | CFO of ABN AMRO\n“We have created\na solid base for our\n2028 ambitions”\nFerdinand Vaandrager looks back\non 2025 as a year of delivery for\nABN AMRO. The bank already made\nprogress on its three new priorities\n– right-sizing costs, optimising\ncapital allocation and growing\nprofitably – while preparing for the\nnext strategic phase. “We did what\nwe said we would do, and we have\nlaid a solid base for the coming\nthree years.”\nThe bank performed well in 2025. What was the\nhighlight for you?\n“Whether you look at profitable growth, cost\nmanagement or optimising our capital allocation, we\ndelivered on our promises. In the Netherlands, the\nstrong labour market, relatively low interest rates and a\npositive housing market all supported demand for our\nmortgages. Fee income increased strongly and we\nreduced costs by simplifying the bank. We also made\ngood progress on reshaping our balance sheet, so we\ncan grow in a more capital-efficient way.”\nAnother highlight is the intended takeover of\nNIBC. How do you view this deal?\n“The acquisition of NIBC Bank is a unique and very\nattractive opportunity to further strengthen our position\nin the Dutch retail market. We expect a return on\ninvested capital of around 18% by 2029, and it will\nenhance our profitability. The combination strengthens\nour position in the Dutch mortgage and savings\nmarkets. It means welcoming about 325,000 new\nsavers and 200,000 new mortgage clients. It also offers\nus a scalable platform for issuing mortgages that do not\nremain on our balance sheet. Under this ‘originate-to-\nmanage’ model, we provide Dutch mortgages, sell\nthem to institutional investors and manage these loans\nfor them in return for a fee. It fits perfectly with our\nstrategy of growing in a way that uses less of our own\ncapital and makes the bank less dependent on net\ninterest income.\nWhere the NIBC deal will help us grow our Dutch\nmortgage volumes, the acquisition of Hauck Aufhäuser\nLampe (HAL) plays a different but very complementary\nrole. It boosts our fee income and expands our wealth\nmanagement footprint in Germany, which really\nsupports the strong fee momentum we’re seeing across\nthe bank. Excluding HAL, which we consolidated as at\n1 July, our total fee income grew by 6% in 2025. That’s\nwell above the growth ambition we had set of 3% to\n5%, and all three client units played a part in driving this\ngrowth. We saw strong results in payment services,\nasset management, investment products, and advisory\nfees at our corporate bank. Clearing also continued to\nperform well, adding more fees and helping us further\ndiversify our income.”\nHow did reducing risk-weighted assets help\noptimise capital allocation?\n“In 2025, we implemented the Basel IV capital rules,\nsimplified our credit risk models and improved the\nquality of our loan data. As part of our strategy, we are\nreducing capital that is tied up in non-core activities and\nlower-yielding loans so that we can redirect it to areas\nwhere we can grow profitably. We optimised our\nbalance sheet through significant risk transfers, shifting\npart of our credit risk on loan portfolios to investors or\nother financial institutions. Together, these measures\nlowered our risk-weighted assets (RWA). In simple\nterms, RWA reflects the risk level of each loan and\n\n≡\nStrategy & performance\nInterview with our Chief Financial Officer\nABN AMRO\n38"
+          },
+          {
+            "id": "abn-amro.pdf:7:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 7,
+            "score": 0.01935483870967742,
+            "text": "our lending assistant Lenny to streamline\ncredit requests, and introduced a voicebot that\nsimplifies credit-card servicing.\nTechnology helps us to further tailor our propositions,\nprovide advice based on better data insights and deliver\ndigital solutions that make everyday banking smoother.\nAnd by scaling our challengers such as Tikkie, BUUT and\nBUX, we’re strengthening our connection with the next\ngeneration of clients. Ultimately, it’s the combination of\nadvanced technology and the expertise of our people\nthat creates the premium touch experience we want to\ndeliver.”\nYou plan to return more capital to shareholders.\nWhat does that mean for other stakeholders?\n“Investors are important, but so are all our other\nstakeholders. During our Capital Markets Day, we\nannounced our intention to return more capital to\nshareholders. This new capital distribution policy will\nhelp us increase our valuation, allowing us to pursue our\nown path and to continue adding value for our clients,\nemployees and society at large.”\n\n≡\nOur Bank\nInterview with our Chief Executive Officer\nABN AMRO\n7"
+          },
+          {
+            "id": "abn-amro.pdf:30:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 30,
+            "score": 0.01875,
+            "text": "human well-being\nand economic stability.\nBiodiversity\nBy offering financial products to our clients, we help\nthem grow their businesses, which can also affect\nbiodiversity. Our biodiversity approach focuses on\nreducing the negative impact of client activities,\nespecially in sectors such as dairy farming and deep-sea\nshipping.\nOur Nature Statement is informed by the Kunming-\nMontreal Global Biodiversity Framework and sets out\nthe principles guiding the bank’s actions on nature. In\n2025, for example, we advanced a proposal for a\ntransition plan for the dairy farming sector. This takes a\nbroad approach, including nature, and aims to support\nclients in their sustainable development while balancing\nrisks and returns. For more information, please refer to\nthe Biodiversity section in the Sustainability Statements.\nCircular economy\nA key part of our Nature approach is to support clients\nin adopting circular business models. One example of\nour efforts is the growing role of our payment app\nTikkie in the Dutch recycling system. By integrating\nTikkie technology into deposit return machines for cans\nand bottles, the bank facilitated nearly 3 million deposit\nreturn transactions in 2025.\nIn 2025, we provided over EUR 274 million in loans to\nsupport the circular economy. Since 2018, we have\nprovided a total of EUR 2.65 billion in circular loans. Our\nsustainability focus for the new strategic period 2026–\n2028 is to help clients achieve their emission reduction\ntargets, supported by new commercial initiatives. This\nmeans 2025 was the final year for which we measured\nprogress towards our 2027 circular loans target of\nEUR 3.5 billion.\n\n≡\nStrategy & performance\nPerformance on our strategy\nSustainability\nABN AMRO\n30"
+          },
+          {
+            "id": "abn-amro.pdf:47:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 47,
+            "score": 0.01846153846153846,
+            "text": "Due to customers\n(in millions)\n31 December 2025\n31 December 2024\nPersonal & Business Banking\n135,764\n126,626\nWealth Management\n85,846\n66,652\nCorporate Banking\n51,573\n55,801\nGroup Functions\n5,944\n7,108\nTotal due to customers\n279,126\n256,186\nOther information\nTotal bank\n2025\n2024\nNet interest margin (NIM) (in bps)\n152\n164\nCost/income ratio\n 64.4 %\n 61.7 %\nCost of risk (in bps)¹\n1\n-2\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\nEarnings per share (in EUR)4\n2.45\n2.72\nClient assets (end of period, in billions)\n396.9\n344.4\nRisk-weighted assets (end of period, in billions)5\n135.4\n140.9\nNumber of internal employees (end of period, in FTEs)\n23,126\n21,976\nNumber of external employees (end of period, in FTEs)\n2,216\n3,670\n1. Impairment charges on loans and advances customers divided by the average loans and advances customers (excluding at fair value through P&L) on the basis of gross\ncarrying amount and excluding fair value adjustments from hedge accounting.\n2. Profit for the year excluding coupons attributable to AT1 capital securities and results attributable to non-controlling interests divided by the average equity attributable to the\nowners of the company excluding AT1 capital securities.\n3. Final dividend per share for the year as declared/proposed by the company, subject to approval at the Annual General Meeting (AGM). For more information, please refer to\nCapital in the Risk, funding & capital section.\n4. Profit for the year excluding coupons attributable to AT1 capital securities and results attributable to non-controlling interests divided by the average outstanding and paid-up\nordinary shares.\n5. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 were prepared in\naccordance with CRR II (Basel III) regulations.\nReturn on equity for 2025 landed at 8.7%, compared\nwith 10.1% in 2024.\nReturn on assets in 2025 was 0.5% compared with\n0.6% in 2024, mainly due to the lower return and\nhigher average assets this year.\nPersonal & Business Banking\n31 December 2025\n31 December 2024\nLoans and advances customers (in billions)\n170.0\n161.2\n - of which Client loans (in billions)¹\n170.2\n161.5\nDue to customers (in billions)\n135.8\n126.6\nRisk-weighted assets (in billions)²\n40.3\n38.2\nNumber of internal employees (in FTEs)\n4,285\n4,425\nTotal client assets (in billions)\n113.9\n105.4\n - of which Cash\n100.3\n93.3\n - of which Securities\n13.7\n12.1\n1. Gross carrying amount excluding fair value adjustment from hedge accounting.\n2. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 were prepared in\naccordance with CRR II (Basel III) regulations.\nLoans and advances customers increased by\nEUR 8.8 billion"
+          },
+          {
+            "id": "abn-amro.pdf:47:2",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 47,
+            "score": 0.01818181818181818,
+            "text": "Due to customers\n(in millions)\n31 December 2025\n31 December 2024\nPersonal & Business Banking\n135,764\n126,626\nWealth Management\n85,846\n66,652\nCorporate Banking\n51,573\n55,801\nGroup Functions\n5,944\n7,108\nTotal due to customers\n279,126\n256,186\nOther information\nTotal bank\n2025\n2024\nNet interest margin (NIM) (in bps)\n152\n164\nCost/income ratio\n 64.4 %\n 61.7 %\nCost of risk (in bps)¹\n1\n-2\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\nEarnings per share (in EUR)4\n2.45\n2.72\nClient assets (end of period, in billions)\n396.9\n344.4\nRisk-weighted assets (end of period, in billions)5\n135.4\n140.9\nNumber of internal employees (end of period, in FTEs)\n23,126\n21,976\nNumber of external employees (end of period, in FTEs)\n2,216\n3,670\n1. Impairment charges on loans and advances customers divided by the average loans and advances customers (excluding at fair value through P&L) on the basis of gross\ncarrying amount and excluding fair value adjustments from hedge accounting.\n2. Profit for the year excluding coupons attributable to AT1 capital securities and results attributable to non-controlling interests divided by the average equity attributable to the\nowners of the company excluding AT1 capital securities.\n3. Final dividend per share for the year as declared/proposed by the company, subject to approval at the Annual General Meeting (AGM). For more information, please refer to\nCapital in the Risk, funding & capital section.\n4. Profit for the year excluding coupons attributable to AT1 capital securities and results attributable to non-controlling interests divided by the average outstanding and paid-up\nordinary shares.\n5. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 were prepared in\naccordance with CRR II (Basel III) regulations.\nReturn on equity for 2025 landed at 8.7%, compared\nwith 10.1% in 2024.\nReturn on assets in 2025 was 0.5% compared with\n0.6% in 2024, mainly due to the lower return and\nhigher average assets this year.\nPersonal & Business Banking\n31 December 2025\n31 December 2024\nLoans and advances customers (in billions)\n170.0\n161.2\n - of which Client loans (in billions)¹\n170.2\n161.5\nDue to customers (in billions)\n135.8\n126.6\nRisk-weighted assets (in billions)²\n40.3\n38.2\nNumber of internal employees (in FTEs)\n4,285\n4,425\nTotal client assets (in billions)\n113.9\n105.4\n - of which Cash\n100.3\n93.3\n - of which Securities\n13.7\n12.1\n1. Gross carrying amount excluding fair value adjustment from hedge accounting.\n2. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 were prepared in\naccordance with CRR II (Basel III) regulations.\nLoans and advances customers increased by\nEUR 8.8 billion"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What return on equity did ABN AMRO achieve in 2025?",
+        "answer": "ABN AMRO achieved a return on equity of 8.7% in 2025.",
+        "verbatim": "8.7%",
+        "citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 20,
+            "quote": "Return on equity 8.7%"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 4,
+            "quote": "Return on equity 8.7%"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "abn_amro_2025_financial_net_interest_income",
+      "question": "What net interest income did ABN AMRO report for 2025?",
+      "company": "ABN AMRO",
+      "year": 2025,
+      "category": "financial_highlight",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "EUR 6,335 million",
+          "6,335 million",
+          "more than EUR 6.3 billion"
+        ],
+        "answer_contains_all": null,
+        "page": 40,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "abn-amro.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          40,
+          317,
+          319,
+          316,
+          43,
+          299,
+          308,
+          4,
+          295,
+          387,
+          42,
+          309
+        ],
+        "chunks": [
+          {
+            "id": "abn-amro.pdf:40:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 40,
+            "score": 0.0358011634056055,
+            "text": "Financial performance\nABN AMRO delivered a solid financial performance in\n2025, achieving a net profit of EUR 2.3 billion and a\nreturn on equity of 8.7%. Net interest income was in line\nwith our guidance of more than EUR 6.3 billion for the\nyear. Fee and commission income increased by 12%,\nsupported by the consolidation of Hauck Aufhäuser\nLampe (HAL) and higher fees in asset management and\nsecurities services. Operating costs excluding large\nincidentals and restructuring expenses were at the\nlower end of our EUR 5.4-5.5 billion guidance.\nOur client units made important contributions to our\nprofitable growth. In the mortgage market, our share of\nnew production remained stable at 19%, while Wealth\nManagement grew client assets to over EUR 283 billion.\nWithin Corporate Banking, financing activity increased\nin the energy, digital and mobility sectors.\nFinancial indicators\n(in millions)\n2025\n2024\nChange\nNet interest income\n6,335\n6,504\n -3%\nNet fee and commission income\n2,132\n1,910\n 12%\nOther operating income\n249\n447\n -44%\nOperating income\n8,716\n8,861\n -2%\nPersonnel expenses\n3,104\n2,776\n 12%\nOther expenses\n2,506\n2,691\n -7%\nOperating expenses\n5,610\n5,467\n 3%\nOperating result\n3,106\n3,394\n -8.5%\nImpairment charges on financial instruments\n20\n-21\nProfit/(loss) for the period\n2,252\n2,403\n -6%\nOther indicators\nCommon Equity Tier 1 ratio¹\n 15.4 %\n 14.5 %\nNet interest margin (NIM) (in bps)\n152\n164\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\n1. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 are prepared in accordance\nwith CRR II (Basel III) regulations.\n2. Figures based on bank's profit (or loss) for the year, excluding payments attributable to AT1 capital securities and results attributable to non-controlling interests, divided by\naverage equity attributable to the owners of the company excluding AT1 capital securities.\n3. Figure for 2025 shows proposed dividend, subject to approval by ABN AMRO's Annual General Meeting (AGM).\nFinancial results\nOperating income decreased by 2% to\nEUR 8,716 million in 2025. This was primarily due to\nlower net interest income and other operating income.\nThese effects were partly offset by higher fee and\ncommission income.\nNet interest income (NII) declined by 3% to\nEUR 6,335 million in 2025. Excluding large incidentals,\nNII decreased by EUR 166 million, mainly as a result of\nmargin pressure on deposits due to the interest rate\nenvironment. Margin pressure on corporate loans and\nmortgages also contributed to the reduction. These\npressures were partly compensated by increased\ndeposit and mortgage volumes, improved Treasury\nresults and the positive impact of the integration of HAL.\nNet fee and commission income increased by 12% to\nEUR 2,132 million. This growth was largely attributable\nto higher fee income at Wealth Management, reflecting\nthe integration of HAL and increased fees for asset\nmanagement and securities services. Personal &\nBusiness Banking benefitted from higher payment\nservices fees, driven by increased payment package\npricing and transaction volumes. Corporate Banking\nalso recorded"
+          },
+          {
+            "id": "abn-amro.pdf:317:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 317,
+            "score": 0.034432234432234435,
+            "text": "Interest expense\n(in millions)\n 2025\n 2024\nInterest expenses from:\nSecurities financing\n696\n896\nDue to banks\n244\n333\nDue to customers\n4,199\n5,260\nIssued debt\n2,242\n2,139\nSubordinated liabilities\n281\n297\nNon-trading derivatives - hedge accounting - Cash flow hedges\n288\n654\nNon-trading derivatives - hedge accounting - Fair value hedges\n517\n1,283\nOther\n-449\n-330\nInterest expense calculated using the effective interest method\n8,019\n10,532\nFinancial liabilities at fair value through profit or loss\n10\n9\nNon-trading derivatives - no hedge accounting\n72\n43\nOther\n21\n20\nOther interest and similar expense\n103\n72\nTotal interest expense\n8,122\n10,604\n5    Net fee and commission income\nAccounting policy for net fee and commission income\nABN AMRO applies IFRS 15 when recognising revenue from contracts with clients, all of which is included in net\nfee and commission income. After identifying contracts and their performance obligations, revenue is\nrecognised as an amount that reflects the consideration to which the bank expects to be entitled in exchange for\ntransferring promised services to clients. The transaction price is allocated to each performance obligation.\nRevenue is measured at the fair value of the consideration received, taking into account discounts and rebates.\nThe amount of revenue recognised is discounted to the present value of the consideration due, if payment\nextends beyond normal credit terms.\nRevenue is recognised when a promised service is transferred to the client. Fees and commission income are\nrecognised either:\n• at a certain point in time: the fee is a reward for a service provided at a moment in time, or\n• over time (amortised): the fee relates to services on an ongoing basis.\nABN AMRO engages in transactions where more than one party is involved in providing services to a client. In the case\nof these transactions, ABN AMRO assesses whether it is a principal or an agent in the transaction by evaluating the\nnature of its promise to the client.\nThe bank is a principal if it controls the promised goods or services before they are transferred to a client. The bank\nacts as an agent of another party if its service entails transferring goods or services to a client on behalf of that other\nparty and, as a result, the bank does not control the specified goods or services. Control of goods and services refers to\nthe ability to direct the use of, and obtain substantially all the remaining benefits from, the goods and services.\nIf the bank is assessed to be a principal in the transaction, it recognises as revenue the gross amount of the\nconsideration to which it expects to be entitled in exchange for the specified goods or services transferred. If, however,\nthe bank acts as an agent, it recognises as revenue the amount of the fee or commission to which it expects to be\nentitled in exchange for transferring the specified goods or services provided by the other party. The fee or\ncommission may be the net amount of consideration that the bank retains after paying the other party the\nconsideration received in exchange for the goods or services provided by that party.\n(in millions)\n 2025\n 2024\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n2,132\n1,910\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n317"
+          },
+          {
+            "id": "abn-amro.pdf:319:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 319,
+            "score": 0.033535447761194034,
+            "text": "6    Net income from other operating activities\nAccounting policy for other operating income\nOther operating income includes all other banking activities such as operating lease activities as lessor and\nresults on the disposal of assets. It also includes the change in fair value of derivatives used for risk management\npurposes that do not meet the requirements for hedge accounting, ineffectiveness of hedging programmes, fair\nvalue changes relating to assets and liabilities measured at fair value through profit or loss, and changes\nin the value of derivatives related to such instruments. Dividend income from non-trading equity investments is\nrecognised when entitlement is established. Income from operating lease activities is presented separately from\nthe depreciation expense of the related assets.\n(in millions)\n 2025\n 2024\nIncome from lease activities\n87\n101\nDisposal of operating activities and equity-accounted investments\n1\n-22\nResult from financial transactions\n2\n211\nOther\n10\n20\nIncome from other operating activities\n101\n311\n(in millions)\n 2025\n 2024\nExpenses from lease activities\n70\n84\nExpenses from other operating activities\n70\n84\n7    Net trading income\nAccounting policy for net trading income\nIn accordance with IFRS 9, trading positions are held at fair value, and net trading income includes gains and\nlosses arising from changes in the fair value of such financial assets and liabilities. The latter comprises gains and\nlosses from trading financial assets and liabilities, interest income and expenses related to trading financial\nassets and liabilities, and dividends received from trading instruments. Dividend income and dividends from\ntrading instruments are recognised at the dividend announcement date. Net trading income also includes\nchanges in fair value arising from changes in counterparty credit spreads (CVA) and changes in own credit\nspreads (DVA) where these affect the value of our trading assets and liabilities. The funding valuation adjustment\n(FVA) incorporates the incremental cost of funding into the valuation of uncollateralised and partly collateralised\nderivatives.\n(in millions)\n 2025\n 2024\nInterest instruments trading\n118\n133\nEquity and commodity trading\n-12\nForeign exchange transaction results\n113\n151\nTotal net trading income\n219\n283\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n319"
+          },
+          {
+            "id": "abn-amro.pdf:316:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 316,
+            "score": 0.03283179878733438,
+            "text": "4    Net interest income\nAccounting policy for net interest income\nInterest income and expenses on financial instruments are recognised in the income statement on an accrual\nbasis using the effective interest rate method, except where financial instruments are measured at fair value\nthrough profit or loss. The effective interest rate method allocates interest, amortisation of any discount or\npremium or other differences, including transaction costs and qualifying fees and commissions, over\nthe expected lives of the assets and liabilities. The effective interest rate is the rate that exactly discounts\nestimated future cash flows to the net carrying amount of the asset. As a result, this method requires ABN AMRO\nto estimate future cash flows, in some cases based on its experience with client behaviour, considering all\ncontractual terms of the financial instrument, as well as the expected lives of the assets and liabilities. Interest on\nloans and advances measured at fair value through profit or loss is also included in net interest income and\nrecognised using the contractual interest rate. Interest income and expenses on trading balances are included\nin net trading income. Interest paid on assets with a negative interest yield is classified as interest expense.\nInterest received from liabilities with a negative interest yield is classified as interest income.\n(in millions)\n 2025\n 2024\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest income\n14,457\n17,108\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nInterest expense\n8,122\n10,604\nNet interest income\n6,335\n6,504\nInterest income\n(in millions)\n 2025\n 2024\nInterest income from:\nFinancial investments at fair value through other comprehensive income\n1,136\n1,028\nSecurities financing\n1,455\n1,495\nLoans and advances banks\n1,268\n1,917\nLoans and advances customers\n8,840\n9,528\nNon-trading derivatives - hedge accounting - Cash flow hedges\n274\n208\nNon-trading derivatives - hedge accounting - Fair value hedges\n1,073\n2,369\nOther\n159\n213\nInterest income calculated using the effective interest method\n14,205\n16,757\nFinancial assets at fair value through profit or loss\n32\n34\nNon-trading derivatives - no hedge accounting\n95\n55\nOther\n126\n262\nOther interest and similar income\n253\n351\nTotal interest income\n14,457\n17,108\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n316"
+          },
+          {
+            "id": "abn-amro.pdf:43:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 43,
+            "score": 0.03188044831880448,
+            "text": "Wealth Management\n(in millions)\n2025\n2024\nChange\nOperating income\n1,693\n1,568\n 8 %\nOperating expenses\n1,302\n1,092\n 19 %\nOperating result\n391\n476\n -18 %\nImpairment charges on financial instruments\n10\n14\n -24 %\nProfit/(loss) for the period\n267\n325\n -18 %\nNet profit for Wealth Management declined to\nEUR 267 million in 2025 (2024: EUR 325 million).\nOperating income rose by 8% to EUR 1,693 million,\nsupported by higher fee income and other income. Net\ninterest income decreased to EUR 900 million, mainly\nreflecting lower deposit margins. This was partly\ncompensated by higher volumes and the positive\nimpact of the integration of HAL. Fee income increased\nsignificantly to EUR 771 million, driven by that same\nintegration and by higher other fee income, particularly\nfrom asset management and securities services.\nOperating expenses increased to EUR 1,302 million,\nreflecting higher staff levels due to HAL’s integration,\nCLA impacts and restructuring provisions. Impairments\namounted to a EUR 10 million addition, slightly lower\nthan for the previous year.\nCorporate Banking\n(in millions)\n2025\n2024\nChange\nOperating income\n3,160\n3,358\n -6 %\nOperating expenses\n1,776\n1,802\n -1 %\nOperating result\n1,384\n1,556\n -11 %\nImpairment charges on financial instruments\n92\n74\n 23 %\nProfit/(loss) for the period\n989\n1,099\n -10 %\nNet profit for Corporate Banking decreased to\nEUR 989 million in 2025 (2024: EUR 1,099 million),\nmainly because of lower operating income and higher\nimpairments. Operating income decreased by 6% to\nEUR 3,160 million, as net interest income and other\noperating income declined. This was partly offset by a\nfee income increase of 4%. Net interest income\ndropped to EUR 2,117 million, reflecting margin\npressure on liabilities, lower corporate loan volumes\nand reduced Clearing NII. Fee income rose to\nEUR 730 million as increased market volatility added to\nhigher Clearing fees, and client mandates increased\nacross debt capital markets and advisory activities.\nOther operating income decreased to EUR 314 million,\nmainly as a result of lower equity revaluations and the\nwind down of the asset-based finance (ABF) portfolio.\nOperating expenses declined to EUR 1,776 million, led\nby lower external staffing costs in reflection of our cost\ndiscipline, and by VAT rebates. This was offset by\nincreased personnel expenses. Impairments rose to\nEUR 92 million, reflecting stage 3 charges despite\nreleases in stages 1 and 2. Our optimisation efforts\nreduced risk weighted assets by 14% in 2025.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n43"
+          },
+          {
+            "id": "abn-amro.pdf:299:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 299,
+            "score": 0.03072463768115942,
+            "text": "Investing activities\nPurchases of financial investments\n-37,352\n-49,211\nProceeds from sales and redemptions of financial investments\n36,240\n44,645\nAcquisition of subsidiaries (net of cash acquired), associates and joint ventures\n23\n5,955\n-25\nDivestments of subsidiaries (net of cash sold), associates and joint ventures\n23\n45\n183\nPurchases of property and equipment\n-294\n-312\nProceeds from sales of property and equipment\n70\n48\nPurchases of intangible assets\n-98\n-140\nCash flow from investing activities\n4,565\n-4,811\nFinancing activities\nProceeds from the issuance of debt\n29\n49,649\n42,885\nRepayment of issued debt\n29\n-48,161\n-36,980\nProceeds from subordinated liabilities issued\n29\n21\n767\nRepayment of subordinated liabilities issued\n29\n-1,342\n-21\nProceeds/(repayment) from other borrowing\n-249\n1,488\nProceeds/(repayment) from capital securities\n-17\n0\nPurchase of treasury shares\n-250\n-500\nDividends paid to the owners of the parent company\n33\n-1,085\n-1,244\nInterest paid AT1 capital securities\n-217\n-120\nPayment of lease liabilities\n-121\n-112\nCash flow from financing activities\n-1,772\n6,162\nNet increase/(decrease) of cash and cash equivalents\n5,028\n-9,444\nCash and cash equivalents as at 1 January\n45,629\n55,054\nEffect of exchange rate differences on cash and cash equivalents\n-39\n19\nCash and cash equivalents as at 31 December\n50,618\n45,629\nSupplementary disclosure of operating cash flow information\nInterest paid\n8,019\n10,419\nInterest received\n14,457\n17,016\nDividend received excluding associates\n9\n9\n(in millions)\nNote\n 2025\n 2024\n(in millions)\n31 December 2025\n31 December 2024\nCash and balances at central banks\n49,486\n44,464\nLoans and advances banks (less than 3 months)1\n1,132\n1,165\nTotal cash and cash equivalents¹\n50,618\n45,629\n1. Loans and advances banks with an original maturity of 3 months or more is included in loans and advances banks.\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n299"
+          },
+          {
+            "id": "abn-amro.pdf:308:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 308,
+            "score": 0.030465949820788533,
+            "text": "ABN AMRO does not reflect the exchange-traded derivatives cleared on behalf of clients in its financial statements.\nUnder normal circumstances, the guarantee has no fair value and is not recognised in the financial statements. Any\nloss recognised in the event of non-performance of a client is in line with our contingent liabilities policy.\nOffsetting financial assets and liabilities\nFinancial assets and liabilities are offset, and the net amount is reported on the statement of financial position, if there\nis a legally enforceable right to offset the recognised amounts and there is an intention either to settle on a net basis or\nto realise the asset and settle the liability simultaneously. The bank applies netting to debtor and creditor balances\nsuch as current accounts where offsetting is justified by formal agreement with the client, provided the balances meet\nthe applicable criteria.\nEnforceable master netting arrangements are agreements in which the bank has a legally enforceable right to offset in\nthe event of default, but no ability and/or intention to realise the asset and settle the liability simultaneously in the\nnormal course of business. As a result, the criteria to offset are not met. These arrangements include derivative\nclearing agreements, global master repurchase agreements and global master securities lending agreements.\nStatement of cash flows\nFor the purposes of the statement of cash flows, cash and cash equivalents comprise cash in hand, freely available\nbalances with central banks and other banks, and net balances on current accounts with other banks with a maturity\nof less than three months from the date of acquisition. The statement of cash flows, based on the indirect method\nof calculating operating cash flows, gives details of the source of cash and cash equivalents which became available\nduring the year and the application of these cash and cash equivalents over the course of the year. The cash flows are\ncategorised into cash flows from operations, including banking activities, investment activities and financing activities.\nMovements in loans and advances and interbank deposits are included in the cash flow from operating activities.\nInvestment activities are comprised of acquisitions, sales and redemptions in respect of financial investments, as well\nas investments in, and sales of, subsidiaries and associates, property and equipment. The issuing of shares and\nthe borrowing and repayment of long-term funds are treated as financing activities. Cash flows arising from foreign\ncurrency transactions are translated into euros using the exchange rates at the date of the cash flows.\nGovernment grants\nGovernment grants are recognised in the income statement on a systematic basis over the periods that the related\nexpenses, which the grants are intended to compensate, are recognised. In the case of an income-related grant,\nthe grant is deducted from the related expense.\nLevies and other regulatory charges\nABN AMRO recognises a liability arising from levies and similar charges when it becomes legally enforceable (i.e. when\nthe obligating event arises).\n2    Segment reporting\nAccounting policy for segment reporting\nABN AMRO’s segment reporting is in accordance with IFRS 8 Operating Segments and consistent with\nthe internal reporting provided to its Executive Board, which is responsible for allocating resources and assessing\nperformance and has been identified as the chief operating decision-maker. All transactions between segments\nare eliminated as intersegment revenues and expenses in Group Functions. Geographical data are presented\naccording to the management view.\nSegment assets, liabilities, income and results are measured based on our accounting policies and include items\ndirectly attributable to a segment, as well as those that can be allocated on a reasonable basis. Transactions\nbetween segments are conducted on an arm’s length basis. Interest income is reported as net interest income\n(NII) because management relies primarily on net, rather than gross, interest income and expenses as\na performance measure.\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n308"
+          },
+          {
+            "id": "abn-amro.pdf:4:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 4,
+            "score": 0.03009049773755656,
+            "text": "ABN AMRO in 2025\n2,252\n8.7%\n2024: 2,403\n2024: 10.1%\nNet profit (in EUR millions)\nReturn on equity\n64.4%\n152\n2024: 61.7%\n2024: 164\nCost/income ratio\nNet interest margin (in bps)\n1\n397\n2024: -2\n2024: 344\nCost of risk\n(in bps)\nClient assets (in EUR billions)\n2.45\n15.4%\n2024: 2.72\n2024: 14.5%\nEarnings per share (in EUR)\nCET1 ratio\nDefinitions for all performance indicators can be found in the Other information chapter.\nABN AMRO\n4"
+          },
+          {
+            "id": "abn-amro.pdf:295:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 295,
+            "score": 0.02987398072646405,
+            "text": "Consolidated income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nNet interest income\n4\n6,335\n6,504\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n5\n2,132\n1,910\nIncome from other operating activities\n101\n311\nExpenses from other operating activities\n70\n84\nNet income from other operating activities\n6\n30\n226\nNet trading income\n7\n219\n283\nShare of result in equity-accounted investments\n28\n9\nNet gains/(losses) on derecognition of financial assets measured at amortised cost\n8\n-29\n-71\nOperating income\n8,716\n8,861\nExpenses\nPersonnel expenses\n9\n3,104\n2,776\nGeneral and administrative expenses\n10\n2,326\n2,531\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n24\n180\n160\nOperating expenses\n5,610\n5,467\nImpairment charges on financial instruments\n20\n-21\nTotal expenses\n5,630\n5,446\nProfit/(loss) before taxation\n3,086\n3,415\nIncome tax expense\n11\n834\n1,013\nProfit/(loss)\n2,252\n2,403\nAttributable to:\nOwners of the parent company\n2,252\n2,403\nEarnings per share (in EUR)\nBasic earnings per ordinary share (in EUR)¹\n12\n2.45\n2.72\n1. Earnings per share consist of profit for the period, excluding results attributable to non-controlling interests and payments to holders of AT1 instruments, divided by the\naverage outstanding and paid-up ordinary shares (31 December 2025: 829,609,770; 31 December 2024: 840,546,121).\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n295"
+          },
+          {
+            "id": "abn-amro.pdf:387:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 387,
+            "score": 0.029682627040909924,
+            "text": "Company income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income\n21,351\n31,252\nInterest expense\n16,448\n25,990\nNet interest income\n2\n4,903\n5,262\nFee and commission income\n1,571\n1,502\nFee and commission expense\n260\n262\nNet fee and commission income\n1,312\n1,241\nResults from financial transactions\n3\n-197\n-324\nIncome from securities and participating interests\n4\n942\n1,142\nOther operating income\n5\n16\n-20\nOperating income\n6,976\n7,300\nExpenses\nPersonnel expenses\n6\n2,571\n2,339\nGeneral and administrative expenses\n1,499\n1,780\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n146\n143\nOperating expenses\n4,216\n4,262\nImpairment charges on financial instruments\n-42\n10\nTotal expenses\n4,174\n4,272\nProfit/(loss) before taxation\n2,802\n3,029\nIncome tax expense\n551\n626\nProfit/(loss)\n2,252\n2,403\n\n≡\nAnnual Financial Statements 2025\nCompany Annual Financial Statements of ABN AMRO Bank N.V.\nABN AMRO\n387"
+          },
+          {
+            "id": "abn-amro.pdf:42:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 42,
+            "score": 0.029012345679012345,
+            "text": "Large incidentals\nBelow is an overview of the largest incidentals affecting our results for the previous and current year. More\ndetailed information on other large incidentals disclosed can be found in our quarterly reports.\nInterest income provision updates\n2024 included a positive revaluation of EUR 29 million\nfor a DSB claim, recorded in net interest income at\nGroup Functions.\nIn 2025, our provisions related to interest income\ncompensation were updated resulting in an overall\nrelease of EUR 26 million, of which EUR 16 million\nrelated to a variable interest compensation provision\nupdate at Personal & Business Banking and\nEUR 10 million related to a positive revaluation for a\nDSB claim recorded at Group Functions.\nLegal provisions\nIn 2024, legal provisions with a net impact of\nEUR 95 million were recorded in other expenses at\nGroup Functions.\nIn 2025, our legal provisions were updated with\nEUR 55 million recorded under other expenses at\nGroup Functions and Corporate Banking.\nHeld-for-sale adjustment\nIn 2024, the carrying value of assets held for sale was\nimpaired to reflect the fair value less costs to sell. This\nresulted in an impairment of EUR 24 million (including\ndisposal cost) recorded in net income from other\noperating activities, which is included in other income at\nWealth Management.\nRegulatory fines\nIn 2025, the bank paid two administrative fines\ntotalling EUR 29 million. Both payments were\nrecorded under other expenses at Group Functions.\nFinancial performance by client unit\nPersonal & Business Banking\n(in millions)\n2025\n2024\nChange\nOperating income\n3,873\n3,932\n -2 %\nOperating expenses\n2,404\n2,451\n -2 %\nOperating result\n1,469\n1,481\n -1 %\nImpairment charges on financial instruments\n-81\n-108\n 25 %\nProfit/(loss) for the period\n1,139\n1,169\n -3 %\nNet profit for Personal & Business Banking (P&BB)\ndecreased to EUR 1,139 million in 2025 (2024:\nEUR 1,169 million). Operating income declined by 2%\nto EUR 3,873 million, as a result of lower net interest\nincome and other operating income. Net interest\nincome fell marginally to EUR 3,231 million. Excluding\nlarge incidentals, net interest income decreased by\nEUR 47 million, mainly due to lower margins on\ndeposits and mortgages. This was partly offset by\nvolume growth in deposits and mortgages. Fee income\nincreased to EUR 655 million, supported by higher\npayment services fees and rising transaction volumes.\nOther operating income decreased to EUR 14 million\nnegative, largely as the result of negative fair value\nrevaluations on loans versus positive revaluations in the\nprevious year. Operating expenses remained stable at\nEUR 2,404 million, with CLA-driven increases offset by\nlower external staffing and restructuring costs.\nImpairments showed a EUR 81 million release, driven\nby releases across all three impairment stages.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n42"
+          },
+          {
+            "id": "abn-amro.pdf:309:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 309,
+            "score": 0.027104660045836518,
+            "text": "Personal & Business Banking\nThis client unit serves consumer and business clients with banking and partner offerings, providing the convenience\nof digital interactions and access to expertise when it matters most.\nWealth Management\nThe Wealth Management client unit delivers outstanding expertise with tailored value propositions for wealthy clients,\nfocusing on investment advisory, financial planning and real estate financing.\nCorporate Banking\nThis expertise-driven client unit delivers tailored financing, capital structuring and transaction banking solutions for\nmedium sized and large corporate clients and financial institutions. Corporate Banking also offers Entrepreneur &\nEnterprise as a bank-wide service concept for business and wealthy clients, in close collaboration with Wealth\nManagement.\nGroup Functions\nGroup Functions consists of the following support function departments: Finance, Risk Management, Innovation &\nTechnology, Group Economics, Human Resources, Group Audit, Legal & Corporate Office, Brand Marketing &\nCommunications, Strategy & Transformation and a Sustainability Centre of Excellence. Group Functions is not a client\nunit, but part of the reconciliation. The majority of Group Functions’ costs are allocated to the client units.\nSegment income statement for the year 2025\n 2025\n(in millions)\nPersonal &\nBusiness Banking\nWealth\nManagement\nCorporate\nBanking\nGroup\nFunctions\nTotal\nIncome\nNet interest income\n3,231\n900\n2,117\n88\n6,335\nNet fee and commission income\n655\n771\n730\n-23\n2,132\nNet income from other operating activities\n-20\n27\n89\n-66\n30\nNet trading income\n-1\n220\n219\nShare of result in equity-accounted investments\n9\n-2\n19\n2\n28\nNet gains/(losses) on derecognition of financial assets\nmeasured at amortised cost\n-2\n-3\n-14\n-10\n-29\nOperating income\n3,873\n1,693\n3,160\n-9\n8,716\nExpenses\nPersonnel expenses\n510\n555\n690\n1,350\n3,104\nGeneral and administrative expenses\n430\n237\n327\n1,332\n2,326\nDepreciation, amortisation and impairment losses of\ntangible and intangible assets\n5\n49\n22\n104\n180\nIntersegment revenues/expenses\n1,459\n460\n738\n-2,657\nOperating expenses\n2,404\n1,302\n1,776\n128\n5,610\nImpairment charges on financial instruments\n-81\n10\n92\n-1\n20\nTotal expenses\n2,323\n1,312\n1,868\n127\n5,630\nProfit/(loss) before taxation\n1,549\n381\n1,292\n-136\n3,086\nIncome tax expense\n410\n113\n304\n6\n834\nProfit/(loss)\n1,139\n267\n989\n-143\n2,252\nAttributable to:\nOwners of the parent company\n1,139\n267\n989\n-143\n2,252\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n309"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What net interest income did ABN AMRO report for 2025?",
+        "answer": "ABN AMRO reported a net interest income of EUR 6,335 million for 2025, which reflects a decline of 3% compared to the previous year.",
+        "verbatim": "6,335",
+        "citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "Net interest income\n6,335\n6,504\n -3%"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "Net interest income\n6,335\n6,504\n -3%"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "abn_amro_2025_financial_fee_commission_income",
+      "question": "What net fee and commission income did ABN AMRO report in 2025?",
+      "company": "ABN AMRO",
+      "year": 2025,
+      "category": "financial_highlight",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "EUR 2,132 million",
+          "2,132 million",
+          "increased by 12%"
+        ],
+        "answer_contains_all": null,
+        "page": 40,
+        "pages": null,
+        "accepted_pages": null,
+        "source": "abn-amro.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          40,
+          317,
+          43,
+          40,
+          387,
+          295,
+          319,
+          311,
+          310,
+          318,
+          309,
+          316
+        ],
+        "chunks": [
+          {
+            "id": "abn-amro.pdf:40:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 40,
+            "score": 0.0360655737704918,
+            "text": "Financial performance\nABN AMRO delivered a solid financial performance in\n2025, achieving a net profit of EUR 2.3 billion and a\nreturn on equity of 8.7%. Net interest income was in line\nwith our guidance of more than EUR 6.3 billion for the\nyear. Fee and commission income increased by 12%,\nsupported by the consolidation of Hauck Aufhäuser\nLampe (HAL) and higher fees in asset management and\nsecurities services. Operating costs excluding large\nincidentals and restructuring expenses were at the\nlower end of our EUR 5.4-5.5 billion guidance.\nOur client units made important contributions to our\nprofitable growth. In the mortgage market, our share of\nnew production remained stable at 19%, while Wealth\nManagement grew client assets to over EUR 283 billion.\nWithin Corporate Banking, financing activity increased\nin the energy, digital and mobility sectors.\nFinancial indicators\n(in millions)\n2025\n2024\nChange\nNet interest income\n6,335\n6,504\n -3%\nNet fee and commission income\n2,132\n1,910\n 12%\nOther operating income\n249\n447\n -44%\nOperating income\n8,716\n8,861\n -2%\nPersonnel expenses\n3,104\n2,776\n 12%\nOther expenses\n2,506\n2,691\n -7%\nOperating expenses\n5,610\n5,467\n 3%\nOperating result\n3,106\n3,394\n -8.5%\nImpairment charges on financial instruments\n20\n-21\nProfit/(loss) for the period\n2,252\n2,403\n -6%\nOther indicators\nCommon Equity Tier 1 ratio¹\n 15.4 %\n 14.5 %\nNet interest margin (NIM) (in bps)\n152\n164\nReturn on average Equity²\n 8.7 %\n 10.1 %\nDividend per share (in EUR)³\n1.54\n1.35\n1. As of 1 January 2025, the figures in the table are prepared in accordance with CRR III (Basel IV) regulations. The figures up to 31 December 2024 are prepared in accordance\nwith CRR II (Basel III) regulations.\n2. Figures based on bank's profit (or loss) for the year, excluding payments attributable to AT1 capital securities and results attributable to non-controlling interests, divided by\naverage equity attributable to the owners of the company excluding AT1 capital securities.\n3. Figure for 2025 shows proposed dividend, subject to approval by ABN AMRO's Annual General Meeting (AGM).\nFinancial results\nOperating income decreased by 2% to\nEUR 8,716 million in 2025. This was primarily due to\nlower net interest income and other operating income.\nThese effects were partly offset by higher fee and\ncommission income.\nNet interest income (NII) declined by 3% to\nEUR 6,335 million in 2025. Excluding large incidentals,\nNII decreased by EUR 166 million, mainly as a result of\nmargin pressure on deposits due to the interest rate\nenvironment. Margin pressure on corporate loans and\nmortgages also contributed to the reduction. These\npressures were partly compensated by increased\ndeposit and mortgage volumes, improved Treasury\nresults and the positive impact of the integration of HAL.\nNet fee and commission income increased by 12% to\nEUR 2,132 million. This growth was largely attributable\nto higher fee income at Wealth Management, reflecting\nthe integration of HAL and increased fees for asset\nmanagement and securities services. Personal &\nBusiness Banking benefitted from higher payment\nservices fees, driven by increased payment package\npricing and transaction volumes. Corporate Banking\nalso recorded"
+          },
+          {
+            "id": "abn-amro.pdf:317:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 317,
+            "score": 0.035483870967741936,
+            "text": "Interest expense\n(in millions)\n 2025\n 2024\nInterest expenses from:\nSecurities financing\n696\n896\nDue to banks\n244\n333\nDue to customers\n4,199\n5,260\nIssued debt\n2,242\n2,139\nSubordinated liabilities\n281\n297\nNon-trading derivatives - hedge accounting - Cash flow hedges\n288\n654\nNon-trading derivatives - hedge accounting - Fair value hedges\n517\n1,283\nOther\n-449\n-330\nInterest expense calculated using the effective interest method\n8,019\n10,532\nFinancial liabilities at fair value through profit or loss\n10\n9\nNon-trading derivatives - no hedge accounting\n72\n43\nOther\n21\n20\nOther interest and similar expense\n103\n72\nTotal interest expense\n8,122\n10,604\n5    Net fee and commission income\nAccounting policy for net fee and commission income\nABN AMRO applies IFRS 15 when recognising revenue from contracts with clients, all of which is included in net\nfee and commission income. After identifying contracts and their performance obligations, revenue is\nrecognised as an amount that reflects the consideration to which the bank expects to be entitled in exchange for\ntransferring promised services to clients. The transaction price is allocated to each performance obligation.\nRevenue is measured at the fair value of the consideration received, taking into account discounts and rebates.\nThe amount of revenue recognised is discounted to the present value of the consideration due, if payment\nextends beyond normal credit terms.\nRevenue is recognised when a promised service is transferred to the client. Fees and commission income are\nrecognised either:\n• at a certain point in time: the fee is a reward for a service provided at a moment in time, or\n• over time (amortised): the fee relates to services on an ongoing basis.\nABN AMRO engages in transactions where more than one party is involved in providing services to a client. In the case\nof these transactions, ABN AMRO assesses whether it is a principal or an agent in the transaction by evaluating the\nnature of its promise to the client.\nThe bank is a principal if it controls the promised goods or services before they are transferred to a client. The bank\nacts as an agent of another party if its service entails transferring goods or services to a client on behalf of that other\nparty and, as a result, the bank does not control the specified goods or services. Control of goods and services refers to\nthe ability to direct the use of, and obtain substantially all the remaining benefits from, the goods and services.\nIf the bank is assessed to be a principal in the transaction, it recognises as revenue the gross amount of the\nconsideration to which it expects to be entitled in exchange for the specified goods or services transferred. If, however,\nthe bank acts as an agent, it recognises as revenue the amount of the fee or commission to which it expects to be\nentitled in exchange for transferring the specified goods or services provided by the other party. The fee or\ncommission may be the net amount of consideration that the bank retains after paying the other party the\nconsideration received in exchange for the goods or services provided by that party.\n(in millions)\n 2025\n 2024\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n2,132\n1,910\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n317"
+          },
+          {
+            "id": "abn-amro.pdf:43:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 43,
+            "score": 0.033035714285714286,
+            "text": "Wealth Management\n(in millions)\n2025\n2024\nChange\nOperating income\n1,693\n1,568\n 8 %\nOperating expenses\n1,302\n1,092\n 19 %\nOperating result\n391\n476\n -18 %\nImpairment charges on financial instruments\n10\n14\n -24 %\nProfit/(loss) for the period\n267\n325\n -18 %\nNet profit for Wealth Management declined to\nEUR 267 million in 2025 (2024: EUR 325 million).\nOperating income rose by 8% to EUR 1,693 million,\nsupported by higher fee income and other income. Net\ninterest income decreased to EUR 900 million, mainly\nreflecting lower deposit margins. This was partly\ncompensated by higher volumes and the positive\nimpact of the integration of HAL. Fee income increased\nsignificantly to EUR 771 million, driven by that same\nintegration and by higher other fee income, particularly\nfrom asset management and securities services.\nOperating expenses increased to EUR 1,302 million,\nreflecting higher staff levels due to HAL’s integration,\nCLA impacts and restructuring provisions. Impairments\namounted to a EUR 10 million addition, slightly lower\nthan for the previous year.\nCorporate Banking\n(in millions)\n2025\n2024\nChange\nOperating income\n3,160\n3,358\n -6 %\nOperating expenses\n1,776\n1,802\n -1 %\nOperating result\n1,384\n1,556\n -11 %\nImpairment charges on financial instruments\n92\n74\n 23 %\nProfit/(loss) for the period\n989\n1,099\n -10 %\nNet profit for Corporate Banking decreased to\nEUR 989 million in 2025 (2024: EUR 1,099 million),\nmainly because of lower operating income and higher\nimpairments. Operating income decreased by 6% to\nEUR 3,160 million, as net interest income and other\noperating income declined. This was partly offset by a\nfee income increase of 4%. Net interest income\ndropped to EUR 2,117 million, reflecting margin\npressure on liabilities, lower corporate loan volumes\nand reduced Clearing NII. Fee income rose to\nEUR 730 million as increased market volatility added to\nhigher Clearing fees, and client mandates increased\nacross debt capital markets and advisory activities.\nOther operating income decreased to EUR 314 million,\nmainly as a result of lower equity revaluations and the\nwind down of the asset-based finance (ABF) portfolio.\nOperating expenses declined to EUR 1,776 million, led\nby lower external staffing costs in reflection of our cost\ndiscipline, and by VAT rebates. This was offset by\nincreased personnel expenses. Impairments rose to\nEUR 92 million, reflecting stage 3 charges despite\nreleases in stages 1 and 2. Our optimisation efforts\nreduced risk weighted assets by 14% in 2025.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n43"
+          },
+          {
+            "id": "abn-amro.pdf:40:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 40,
+            "score": 0.033016304347826084,
+            "text": "loans and\nmortgages also contributed to the reduction. These\npressures were partly compensated by increased\ndeposit and mortgage volumes, improved Treasury\nresults and the positive impact of the integration of HAL.\nNet fee and commission income increased by 12% to\nEUR 2,132 million. This growth was largely attributable\nto higher fee income at Wealth Management, reflecting\nthe integration of HAL and increased fees for asset\nmanagement and securities services. Personal &\nBusiness Banking benefitted from higher payment\nservices fees, driven by increased payment package\npricing and transaction volumes. Corporate Banking\nalso recorded a rise in fee income on higher clearing\ntransaction volumes, amid elevated market volatility,\nand increased client mandates across debt capital\nmarkets and advisory activities.\nOther operating income decreased by 44% to\nEUR 249 million. Excluding large incidentals, other\noperating income in 2025 was EUR 222 million lower\nthan in 2024. This largely reflects less favourable results\nacross Treasury and Personal & Business Banking.\nCorporate Banking recorded lower other income from\nGlobal Markets and Clearing. These developments were\npartly offset by lower derecognition losses compared\nwith 2024.\n\n≡\nStrategy & performance\nPerformance on our strategy\nFinancial performance\nABN AMRO\n40"
+          },
+          {
+            "id": "abn-amro.pdf:387:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 387,
+            "score": 0.03254604550379198,
+            "text": "Company income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income\n21,351\n31,252\nInterest expense\n16,448\n25,990\nNet interest income\n2\n4,903\n5,262\nFee and commission income\n1,571\n1,502\nFee and commission expense\n260\n262\nNet fee and commission income\n1,312\n1,241\nResults from financial transactions\n3\n-197\n-324\nIncome from securities and participating interests\n4\n942\n1,142\nOther operating income\n5\n16\n-20\nOperating income\n6,976\n7,300\nExpenses\nPersonnel expenses\n6\n2,571\n2,339\nGeneral and administrative expenses\n1,499\n1,780\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n146\n143\nOperating expenses\n4,216\n4,262\nImpairment charges on financial instruments\n-42\n10\nTotal expenses\n4,174\n4,272\nProfit/(loss) before taxation\n2,802\n3,029\nIncome tax expense\n551\n626\nProfit/(loss)\n2,252\n2,403\n\n≡\nAnnual Financial Statements 2025\nCompany Annual Financial Statements of ABN AMRO Bank N.V.\nABN AMRO\n387"
+          },
+          {
+            "id": "abn-amro.pdf:295:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 295,
+            "score": 0.03151515151515152,
+            "text": "Consolidated income statement\n(in millions)\nNote\n 2025\n 2024\nIncome\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nNet interest income\n4\n6,335\n6,504\nFee and commission income\n2,635\n2,414\nFee and commission expense\n502\n504\nNet fee and commission income\n5\n2,132\n1,910\nIncome from other operating activities\n101\n311\nExpenses from other operating activities\n70\n84\nNet income from other operating activities\n6\n30\n226\nNet trading income\n7\n219\n283\nShare of result in equity-accounted investments\n28\n9\nNet gains/(losses) on derecognition of financial assets measured at amortised cost\n8\n-29\n-71\nOperating income\n8,716\n8,861\nExpenses\nPersonnel expenses\n9\n3,104\n2,776\nGeneral and administrative expenses\n10\n2,326\n2,531\nDepreciation, amortisation and impairment losses of tangible and intangible assets\n24\n180\n160\nOperating expenses\n5,610\n5,467\nImpairment charges on financial instruments\n20\n-21\nTotal expenses\n5,630\n5,446\nProfit/(loss) before taxation\n3,086\n3,415\nIncome tax expense\n11\n834\n1,013\nProfit/(loss)\n2,252\n2,403\nAttributable to:\nOwners of the parent company\n2,252\n2,403\nEarnings per share (in EUR)\nBasic earnings per ordinary share (in EUR)¹\n12\n2.45\n2.72\n1. Earnings per share consist of profit for the period, excluding results attributable to non-controlling interests and payments to holders of AT1 instruments, divided by the\naverage outstanding and paid-up ordinary shares (31 December 2025: 829,609,770; 31 December 2024: 840,546,121).\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n295"
+          },
+          {
+            "id": "abn-amro.pdf:319:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 319,
+            "score": 0.030708969839404625,
+            "text": "6    Net income from other operating activities\nAccounting policy for other operating income\nOther operating income includes all other banking activities such as operating lease activities as lessor and\nresults on the disposal of assets. It also includes the change in fair value of derivatives used for risk management\npurposes that do not meet the requirements for hedge accounting, ineffectiveness of hedging programmes, fair\nvalue changes relating to assets and liabilities measured at fair value through profit or loss, and changes\nin the value of derivatives related to such instruments. Dividend income from non-trading equity investments is\nrecognised when entitlement is established. Income from operating lease activities is presented separately from\nthe depreciation expense of the related assets.\n(in millions)\n 2025\n 2024\nIncome from lease activities\n87\n101\nDisposal of operating activities and equity-accounted investments\n1\n-22\nResult from financial transactions\n2\n211\nOther\n10\n20\nIncome from other operating activities\n101\n311\n(in millions)\n 2025\n 2024\nExpenses from lease activities\n70\n84\nExpenses from other operating activities\n70\n84\n7    Net trading income\nAccounting policy for net trading income\nIn accordance with IFRS 9, trading positions are held at fair value, and net trading income includes gains and\nlosses arising from changes in the fair value of such financial assets and liabilities. The latter comprises gains and\nlosses from trading financial assets and liabilities, interest income and expenses related to trading financial\nassets and liabilities, and dividends received from trading instruments. Dividend income and dividends from\ntrading instruments are recognised at the dividend announcement date. Net trading income also includes\nchanges in fair value arising from changes in counterparty credit spreads (CVA) and changes in own credit\nspreads (DVA) where these affect the value of our trading assets and liabilities. The funding valuation adjustment\n(FVA) incorporates the incremental cost of funding into the valuation of uncollateralised and partly collateralised\nderivatives.\n(in millions)\n 2025\n 2024\nInterest instruments trading\n118\n133\nEquity and commodity trading\n-12\nForeign exchange transaction results\n113\n151\nTotal net trading income\n219\n283\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n319"
+          },
+          {
+            "id": "abn-amro.pdf:311:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 311,
+            "score": 0.0300187617260788,
+            "text": "of staff.\nGeneral and administrative expenses decreased by EUR 32 million to EUR 430 million in 2025, mainly due to lower\nexternal staffing costs, reflecting our cost discipline.\nImpairment charges recorded a release of EUR 81 million for 2025 (2024: release of EUR 108 million), driven by\nreleases in all 3 stages.\nWealth Management\nNet interest income decreased by EUR 32 million to EUR 900 million in 2025, compared with EUR 932 million\nin 2024. The decrease was mainly driven by lower deposit margins, partly offset by higher volumes and the positive\nimpact of the integration of HAL.\nNet fee and commission income increased by EUR 139 million to EUR 771 million in 2025, driven mainly by the\nintegration of HAL and higher other fee income, particularly from asset management and securities services.\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n311"
+          },
+          {
+            "id": "abn-amro.pdf:310:1",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 310,
+            "score": 0.028944618599791014,
+            "text": "Clearing also recorded\nhigher fee income, reflecting increased transaction volumes driven by elevated market volatility.\nNet income from other operating activities amounted to EUR 30 million in 2025, compared with EUR 226 million\nin 2024, reflecting a decrease of EUR 196 million. This decrease was mainly attributable to less favourable Treasury\nand Personal & Business Banking results (fair value revaluations on loans). Next to that, a decrease in\nCorporate Banking was mainly driven by lower revaluations of equities and the wind-down of the ABF portfolio, partly\noffset by higher Clearing results. This was partly offset by improved Wealth Management results, mostly reflecting the\nintegration of HAL and the large incidental in 2024.\nNet trading income decreased by EUR 64 million to EUR 219 million in 2025, compared with EUR 283 million\nin 2024, reflecting lower Clearing and Global Markets results at Corporate Banking.\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n310"
+          },
+          {
+            "id": "abn-amro.pdf:318:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 318,
+            "score": 0.028006535947712415,
+            "text": "Fee and commission income\n 2025\n(in millions)\nPersonal &\nBusiness Banking\nWealth\nManagement\nCorporate\nBanking\nGroup\nFunctions\nTotal\nFee and commission income from:\nSecurities and custodian services\n17\n125\n617\n2\n761\nPayment services\n677\n59\n132\n1\n868\nPortfolio management and trust fees\n54\n595\n6\n654\nGuarantees and commitment fees\n44\n8\n57\n1\n110\nInsurance and investment fees\n42\n50\n92\nOther service fees\n32\n26\n90\n1\n150\nTotal fee and commission income\n865\n863\n902\n5\n2,635\nTiming fee and commission income\nRecognised at a point in time\n393\n446\n864\n4\n1,707\nRecognised over time\n472\n417\n38\n1\n927\nTotal fee and commission income\n865\n863\n902\n5\n2,635\n 2024\n(in millions)\nPersonal &\nBusiness Banking\nWealth\nManagement\nCorporate\nBanking\nGroup\nFunctions\nTotal\nFee and commission income from:\nSecurities and custodian services\n15\n54\n577\n3\n649\nPayment services\n642\n39\n147\n827\nPortfolio management and trust fees\n48\n556\n4\n608\nGuarantees and commitment fees\n36\n7\n56\n1\n101\nInsurance and investment fees\n39\n45\n84\nOther service fees\n33\n18\n93\n145\nTotal fee and commission income\n813\n719\n877\n5\n2,414\nTiming fee and commission income\nRecognised at a point in time\n372\n371\n843\n4\n1,590\nRecognised over time\n440\n348\n35\n1\n823\nTotal fee and commission income\n813\n719\n877\n5\n2,414\nFee and commission expense\n(in millions)\n 2025\n 2024\nFee and commission expenses from:\nSecurities and custodian services\n170\n159\nPayment services\n201\n218\nPortfolio management and trust fees\n56\n63\nGuarantees and commitment fees\n41\n29\nInsurance and investment fees\n20\n21\nOther service fees\n15\n14\nTotal fee and commission expense\n502\n504\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n318"
+          },
+          {
+            "id": "abn-amro.pdf:309:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 309,
+            "score": 0.02798459563543004,
+            "text": "Personal & Business Banking\nThis client unit serves consumer and business clients with banking and partner offerings, providing the convenience\nof digital interactions and access to expertise when it matters most.\nWealth Management\nThe Wealth Management client unit delivers outstanding expertise with tailored value propositions for wealthy clients,\nfocusing on investment advisory, financial planning and real estate financing.\nCorporate Banking\nThis expertise-driven client unit delivers tailored financing, capital structuring and transaction banking solutions for\nmedium sized and large corporate clients and financial institutions. Corporate Banking also offers Entrepreneur &\nEnterprise as a bank-wide service concept for business and wealthy clients, in close collaboration with Wealth\nManagement.\nGroup Functions\nGroup Functions consists of the following support function departments: Finance, Risk Management, Innovation &\nTechnology, Group Economics, Human Resources, Group Audit, Legal & Corporate Office, Brand Marketing &\nCommunications, Strategy & Transformation and a Sustainability Centre of Excellence. Group Functions is not a client\nunit, but part of the reconciliation. The majority of Group Functions’ costs are allocated to the client units.\nSegment income statement for the year 2025\n 2025\n(in millions)\nPersonal &\nBusiness Banking\nWealth\nManagement\nCorporate\nBanking\nGroup\nFunctions\nTotal\nIncome\nNet interest income\n3,231\n900\n2,117\n88\n6,335\nNet fee and commission income\n655\n771\n730\n-23\n2,132\nNet income from other operating activities\n-20\n27\n89\n-66\n30\nNet trading income\n-1\n220\n219\nShare of result in equity-accounted investments\n9\n-2\n19\n2\n28\nNet gains/(losses) on derecognition of financial assets\nmeasured at amortised cost\n-2\n-3\n-14\n-10\n-29\nOperating income\n3,873\n1,693\n3,160\n-9\n8,716\nExpenses\nPersonnel expenses\n510\n555\n690\n1,350\n3,104\nGeneral and administrative expenses\n430\n237\n327\n1,332\n2,326\nDepreciation, amortisation and impairment losses of\ntangible and intangible assets\n5\n49\n22\n104\n180\nIntersegment revenues/expenses\n1,459\n460\n738\n-2,657\nOperating expenses\n2,404\n1,302\n1,776\n128\n5,610\nImpairment charges on financial instruments\n-81\n10\n92\n-1\n20\nTotal expenses\n2,323\n1,312\n1,868\n127\n5,630\nProfit/(loss) before taxation\n1,549\n381\n1,292\n-136\n3,086\nIncome tax expense\n410\n113\n304\n6\n834\nProfit/(loss)\n1,139\n267\n989\n-143\n2,252\nAttributable to:\nOwners of the parent company\n1,139\n267\n989\n-143\n2,252\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n309"
+          },
+          {
+            "id": "abn-amro.pdf:316:0",
+            "source": "abn-amro.pdf",
+            "company": "ABN AMRO",
+            "year": 2025,
+            "page": 316,
+            "score": 0.027984344422700584,
+            "text": "4    Net interest income\nAccounting policy for net interest income\nInterest income and expenses on financial instruments are recognised in the income statement on an accrual\nbasis using the effective interest rate method, except where financial instruments are measured at fair value\nthrough profit or loss. The effective interest rate method allocates interest, amortisation of any discount or\npremium or other differences, including transaction costs and qualifying fees and commissions, over\nthe expected lives of the assets and liabilities. The effective interest rate is the rate that exactly discounts\nestimated future cash flows to the net carrying amount of the asset. As a result, this method requires ABN AMRO\nto estimate future cash flows, in some cases based on its experience with client behaviour, considering all\ncontractual terms of the financial instrument, as well as the expected lives of the assets and liabilities. Interest on\nloans and advances measured at fair value through profit or loss is also included in net interest income and\nrecognised using the contractual interest rate. Interest income and expenses on trading balances are included\nin net trading income. Interest paid on assets with a negative interest yield is classified as interest expense.\nInterest received from liabilities with a negative interest yield is classified as interest income.\n(in millions)\n 2025\n 2024\nInterest income calculated using the effective interest method\n14,205\n16,757\nOther interest and similar income\n253\n351\nInterest income\n14,457\n17,108\nInterest expense calculated using the effective interest method\n8,019\n10,532\nOther interest and similar expense\n103\n72\nInterest expense\n8,122\n10,604\nNet interest income\n6,335\n6,504\nInterest income\n(in millions)\n 2025\n 2024\nInterest income from:\nFinancial investments at fair value through other comprehensive income\n1,136\n1,028\nSecurities financing\n1,455\n1,495\nLoans and advances banks\n1,268\n1,917\nLoans and advances customers\n8,840\n9,528\nNon-trading derivatives - hedge accounting - Cash flow hedges\n274\n208\nNon-trading derivatives - hedge accounting - Fair value hedges\n1,073\n2,369\nOther\n159\n213\nInterest income calculated using the effective interest method\n14,205\n16,757\nFinancial assets at fair value through profit or loss\n32\n34\nNon-trading derivatives - no hedge accounting\n95\n55\nOther\n126\n262\nOther interest and similar income\n253\n351\nTotal interest income\n14,457\n17,108\n\n≡\nAnnual Financial Statements 2025\nConsolidated Annual Financial Statements 2025\nABN AMRO\n316"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What net fee and commission income did ABN AMRO report in 2025?",
+        "answer": "ABN AMRO reported a net fee and commission income of EUR 2,132 million in 2025, which represents a 12% increase from the previous year.",
+        "verbatim": "2,132",
+        "citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "Net fee and commission income increased by 12% to EUR 2,132 million."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "abn-amro.pdf",
+            "page": 40,
+            "quote": "Net fee and commission income increased by 12% to EUR 2,132 million."
+          }
+        ],
+        "grounding_drops": []
+      }
+    }
+  ]
+}

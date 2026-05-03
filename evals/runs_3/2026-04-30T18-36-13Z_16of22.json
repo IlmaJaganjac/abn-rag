@@ -1,0 +1,3674 @@
+{
+  "timestamp": "2026-04-30T18:36:13+00:00",
+  "questions_path": "evals/questions.yaml",
+  "eval_set": {
+    "source": "asml.pdf",
+    "company": "ASML",
+    "year": 2025,
+    "n_questions": 22
+  },
+  "config": {
+    "company": "ASML",
+    "year": 2025,
+    "top_k": 12,
+    "answer_model": "gpt-4o-mini",
+    "embedding_model": "text-embedding-3-small",
+    "chroma_collection": "annual_reports",
+    "chroma_persist_dir": "backend/data/chroma"
+  },
+  "summary": {
+    "total": 22,
+    "passed": 16,
+    "pct": 72.7,
+    "by_category": {
+      "esg_datapoint": {
+        "passed": 0,
+        "total": 2,
+        "pct": 0.0
+      },
+      "hallucination_check": {
+        "passed": 3,
+        "total": 3,
+        "pct": 100.0
+      },
+      "operational_datapoint": {
+        "passed": 2,
+        "total": 3,
+        "pct": 66.7
+      },
+      "pre_extracted_fact": {
+        "passed": 3,
+        "total": 5,
+        "pct": 60.0
+      },
+      "sustainability_target": {
+        "passed": 4,
+        "total": 4,
+        "pct": 100.0
+      },
+      "verbatim_financial": {
+        "passed": 4,
+        "total": 5,
+        "pct": 80.0
+      }
+    }
+  },
+  "outcomes": [
+    {
+      "id": "asml_fte_2025_rounded",
+      "question": "What total payroll and temporary employees in FTE did ASML report as of December 31, 2025?",
+      "category": "pre_extracted_fact",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "44,209"
+        ],
+        "answer_contains_all": null,
+        "page": 301,
+        "accepted_pages": [
+          227,
+          301
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          227,
+          227,
+          227,
+          227,
+          301,
+          5,
+          301,
+          227,
+          228,
+          229,
+          230,
+          230
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:227:37",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.07163778298204528,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:43",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.06733640552995393,
+            "text": "Metric: Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 43,520\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:40",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.06502574002574002,
+            "text": "Metric: Less: Temporary employees reported in the Consolidated financial statements (Note 18) (non-employees as defined by ESRS) (in FTE)\nPeriod: 2025\nValue: 689\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:46",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.062073863636363635,
+            "text": "Metric: Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\nPeriod: 2025\nValue: 44,175\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:301:43",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.05912720156555773,
+            "text": "Metric: Less: Temporary employees\nPeriod: 2025\nValue: 689\nUnit: in FTE"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.05699122807017543,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:301:47",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.05689146644573322,
+            "text": "Metric: Payroll employees\nPeriod: 2025\nValue: 43,520\nUnit: in FTE"
+          },
+          {
+            "id": "asml.pdf:227:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.04707692307692308,
+            "text": "Metric: Total number of employees – headcount by gender (as of December 31)\nPeriod: 2025\nValue: 34,844"
+          },
+          {
+            "id": "asml.pdf:228:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 228,
+            "score": 0.04672727272727273,
+            "text": "Metric: Percentage of total employees covered by collective bargaining agreements (as of December 31)\nPeriod: 2025\nValue: 62"
+          },
+          {
+            "id": "asml.pdf:229:18",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 229,
+            "score": 0.04638805970149254,
+            "text": "Metric: Total employees\nPeriod: 2025\nValue: 44,175\nUnit: in headcount as of December 31"
+          },
+          {
+            "id": "asml.pdf:230:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.04605882352941176,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees by gender\nPeriod: 2025\nValue: 95%"
+          },
+          {
+            "id": "asml.pdf:230:19",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.04573913043478261,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees eligible for a review by gender\nPeriod: 2025\nValue: 96%"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What total payroll and temporary employees in FTE did ASML report as of December 31, 2025?",
+        "answer": "ASML reported a total of 44,209 payroll and temporary employees in FTE as of December 31, 2025.",
+        "verbatim": "44,209",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 227,
+            "quote": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_fte_2025_payroll_avg",
+      "question": "In ASML's pay-ratio/remuneration table, what was the average number of payroll employees in FTEs for 2025?",
+      "category": "pre_extracted_fact",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "43,267"
+        ],
+        "answer_contains_all": null,
+        "page": 131,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": true,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "none of ['43,267'] found in answer",
+        "no citation page within ±1 of 131 (got [301])"
+      ],
+      "retrieval": {
+        "pages": [
+          131,
+          5,
+          301,
+          131,
+          131,
+          227,
+          227,
+          227,
+          230,
+          232,
+          131,
+          131
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:131:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.07957717692143923,
+            "text": "Metric: Average number of payroll employees in FTEs\nPeriod: 2025\nValue: 43,267\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.057239130434782605,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:301:47",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.055638888888888884,
+            "text": "Metric: Payroll employees\nPeriod: 2025\nValue: 43,520\nUnit: in FTE"
+          },
+          {
+            "id": "asml.pdf:131:91",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.048193548387096774,
+            "text": "Metric: Internal pay ratio (CEO versus employee remuneration based on US GAAP)⁵\nPeriod: 2025\nValue: 46\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:131:97",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04780952380952381,
+            "text": "Metric: Internal pay ratio (CEO versus employee remuneration based on EU-IFRS)⁵\nPeriod: 2025\nValue: 46\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:227:37",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.0474375,
+            "text": "Metric: Total number of payroll and temporary employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 44,209\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:43",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.04707692307692308,
+            "text": "Metric: Total number of payroll employees reported in the Consolidated financial statements (Note 18) (in FTE)\nPeriod: 2025\nValue: 43,520\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:227:46",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 227,
+            "score": 0.04672727272727273,
+            "text": "Metric: Total number of payroll employees reported in the Consolidated financial statements – converted to headcount unit of measure (in headcount)\nPeriod: 2025\nValue: 44,175\nUnit: as of December 31"
+          },
+          {
+            "id": "asml.pdf:230:19",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.04638805970149254,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees eligible for a review by gender\nPeriod: 2025\nValue: 96%"
+          },
+          {
+            "id": "asml.pdf:232:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 232,
+            "score": 0.04605882352941176,
+            "text": "Metric: Annual total remuneration ratio\nPeriod: 2025\nValue: 53\nUnit: pay gap and total remuneration"
+          },
+          {
+            "id": "asml.pdf:131:79",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04442857142857143,
+            "text": "Metric: Average remuneration per FTE based on US GAAP\nPeriod: 2025\nValue: 153\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:131:85",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04412676056338028,
+            "text": "Metric: Average remuneration per FTE based on EU-IFRS\nPeriod: 2025\nValue: 153\nUnit: €, in thousands"
+          }
+        ]
+      },
+      "answer": {
+        "question": "In ASML's pay-ratio/remuneration table, what was the average number of payroll employees in FTEs for 2025?",
+        "answer": "The average number of payroll employees in FTEs for 2025 was 43,520.",
+        "verbatim": "43,520",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Metric: Payroll employees\nPeriod: 2025\nValue: 43,520\nUnit: in FTE"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 301,
+            "quote": "Metric: Payroll employees\nPeriod: 2025\nValue: 43,520\nUnit: in FTE"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_ceo_2025",
+      "question": "Who is the CEO of ASML?",
+      "category": "pre_extracted_fact",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": [
+          "Christophe",
+          "Fouquet"
+        ],
+        "page": 7,
+        "accepted_pages": [
+          7,
+          143
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          232,
+          234,
+          143,
+          29,
+          107,
+          80,
+          81,
+          62,
+          330,
+          81,
+          179,
+          179
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:232:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 232,
+            "score": 0.019672131147540982,
+            "text": "This ratio is reported on our global operations in accordance with the ESRS and therefore subject to currency volatility and purchasing-power differences between countries. The increase in our reported ratio is mainly driven by the remuneration of the CEO compared to 2024. Read more in Corporate governance – Remuneration Report – Remuneration at a glance.\n\nWe aim to attract, retain and motivate highly educated talent who are critical to deliver upon our strategy and growth ambitions. In pursuit of this ambition, we continually monitor the competitiveness of our remuneration packages. Therefore, our annual total remuneration ratio is influenced by external market trends across the world."
+          },
+          {
+            "id": "asml.pdf:234:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 234,
+            "score": 0.01935483870967742,
+            "text": "Employee turnover is reported based on the headcount of employees who leave ASML voluntarily or due to dismissal, retirement or death in service. The rate of employee turnover for the period is calculated on a headcount basis as a monthly average across the reporting period."
+          },
+          {
+            "id": "asml.pdf:143:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 143,
+            "score": 0.019047619047619046,
+            "text": "The BoM and SB are considered our administrative, management and supervisory bodies. They do not include workforce representatives. Our Chief Executive Officer (CEO), Christophe Fouquet, is the BoM’s representative focusing on ESG sustainability. Our Head of ESG Sustainability is responsible, on behalf of the BoM, for preparing and monitoring the progress of the ESG sustainability strategy.\n\nThe ESG Progress Review Meeting, comprising various participants including the CEO and CFO, is the delegated body responsible for oversight of impacts, risks and opportunities. Meeting at least once every two months, it reviews the progress of our ESG sustainability strategy, including related actions."
+          },
+          {
+            "id": "asml.pdf:29:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 29,
+            "score": 0.01875,
+            "text": "At ASML, customer trust is a guiding principle woven into the daily work of engineers like Edison Alameda. As a second-line customer support engineer for EUV in Chandler, Arizona, Edison’s job is to ensure the smooth operation of some of the world’s most advanced semiconductor manufacturing equipment and serve as a bridge to the customers who depend on them.\n\nRead more"
+          },
+          {
+            "id": "asml.pdf:107:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 107,
+            "score": 0.01846153846153846,
+            "text": "In addition to its members, the CEO and the EVP HR&#x26;O are regularly invited to attend (parts of) its meetings. An external adviser is also invited to attend the meetings when deemed necessary."
+          },
+          {
+            "id": "asml.pdf:80:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 80,
+            "score": 0.01818181818181818,
+            "text": "Terri Kelly has been a member of the Supervisory Board since 2018. Previously, she was President and CEO at W.L. Gore &#x26; Associates from 2005 until 2018, having worked at Gore since 1983 in various management roles. She also served on Gore’s Board of Directors through July 2018. Terri is a Trustee of the Alfred I. Dupont Charitable Trust, which provides oversight of the Nemours Foundation. She is the Chair of the Board of Trustees of the University of Delaware and a member of the Board of Directors of United Rentals, Inc.\n\nD. Mark Durcan was appointed as a member of the Supervisory Board in 2020. He is Chair of the Board of Directors at Cencora since October 1, 2025. He is also a member of the Board of Trustees for Rice University (Texas) and as Director at Natural Intelligence Systems CA, a private AI startup company. From 2012 to 2017, he was CEO of Micron Technology, Inc., having joined the company in 1984 and having held various management positions before being appointed CEO. Furthermore, Mark was a non-executive director of Advanced Micro Devices, Inc., and a director at Freescale Semiconductor, MWI Veterinary Supply, Veoneer, Inc. and St Luke’s Health System (Idaho)."
+          },
+          {
+            "id": "asml.pdf:81:15",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 81,
+            "score": 0.01791044776119403,
+            "text": "D. Warren A. East: An Steegen joined the Supervisory Board in 2022. She is CEO and member of the Board of Directors of Barco N.V. since September 1, 2024, after having served as a co-CEO and member of the Board of Directors since October 1, 2021. Prior to that, An was R&D director at IBM Semiconductor and Executive Vice President at the research institute imec in Belgium. Furthermore, An was CTO and Executive Vice President Electronic and Electro-Optical Materials at Umicore."
+          },
+          {
+            "id": "asml.pdf:62:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 62,
+            "score": 0.01764705882352941,
+            "text": "The Internal Control Committee is chaired by the Corporate Chief Accountant and advises the Disclosure Committee, CEO and CFO in their assessment of our internal control over financial reporting and related disclosures, under section 404 of the Sarbanes-Oxley Act. The Chair of the Internal Control Committee updates..."
+          },
+          {
+            "id": "asml.pdf:330:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 330,
+            "score": 0.017391304347826087,
+            "text": "As used herein, the term ‘United States Holder’ means a beneficial owner of ordinary shares for US federal income tax purposes whose holding of such ordinary shares does not form part of the business property or assets of a permanent establishment or fixed base in the Netherlands, who is fully entitled to the benefits of the treaty in respect of such ordinary shares; and is:\n\n- An individual citizen or tax resident of the US;\n- A corporation or other entity treated as a corporation for US federal income tax purposes created or organized in or under the laws of the US or of any political subdivision thereof; or\n- An estate of which the income is subject to US federal income taxation regardless of its source; or\n- A trust whose administration is subject to the primary supervision of a court within the US and which has one or more US persons who have the authority to control all of its substantial decisions.\n\nIf an entity treated as a partnership for US federal income tax purposes owns ordinary shares, the US federal income tax treatment of a partner in such partnership will generally depend upon the status and tax residency of the partner and the activities of the partnership."
+          },
+          {
+            "id": "asml.pdf:81:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 81,
+            "score": 0.017142857142857144,
+            "text": "D. Warren A. East: Warren East became a member of the Supervisory Board in 2020 and is currently a Non-Executive Board member at Tokamak Energy plc. Furthermore, he is also currently the Chair of the Board of Directors of NATS Holdings Ltd., the UK’s National Air Traffic Service. In October 2025, Warren joined ITM Power plc as a Non-Executive Director. Warren was CEO of Royce Group Plc from 2015 until December 2022. He spent his early career at Texas Instruments Ltd. from 1985 to 1994 before joining ARM Holdings, Plc., where he held various management positions and was appointed CEO from 2001 to 2013."
+          },
+          {
+            "id": "asml.pdf:179:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 179,
+            "score": 0.016901408450704224,
+            "text": "Purchase 100% renewable electricity for our own operations worldwide by 2025. This target is measured as the percentage of renewable electricity purchased (including energy attribute certificates) versus our total electricity consumption. It pertains exclusively to scope 2 emissions, for which we use market-based emission factors.\n\nGet commitment from our top 80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030. This target is calculated as the percentage of our suppliers (based on CO₂e emissions) who signed a letter of commitment or made a public statement to reduce their CO₂e footprint by 2030. Our top 80% suppliers are those who, according to spend-based emission calculations, together account for 80% of our total supplier emissions and is updated on a yearly basis. Progress is monitored as of 2024, when the program started. In 2025, we updated our calculation methodology to introduce greater granularity in categorizing the different types of GHG reduction commitments set by our suppliers."
+          },
+          {
+            "id": "asml.pdf:179:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 179,
+            "score": 0.016666666666666666,
+            "text": "Purchase 100% renewable electricity for our own operations worldwide by 2025. This target is measured as the percentage of renewable electricity purchased (including energy attribute certificates) versus our total electricity consumption. It pertains exclusively to scope 2 emissions, for which we use market-based emission factors.\n\nGet commitment from our top 80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030. This target is calculated as the percentage of our suppliers (based on CO₂e emissions) who signed a letter of commitment or made a public statement to reduce their CO₂e footprint by 2030. Our top 80% suppliers are those who, according to spend-based emission calculations, together account for 80% of our total supplier emissions and is updated on a yearly basis. Progress is monitored as of 2024, when the program started. In 2025, we updated our calculation methodology to introduce greater granularity in categorizing the different types of GHG reduction commitments set by our suppliers."
+          }
+        ]
+      },
+      "answer": {
+        "question": "Who is the CEO of ASML?",
+        "answer": "The CEO of ASML is Christophe Fouquet.",
+        "verbatim": null,
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 143,
+            "quote": "Our Chief Executive Officer (CEO), Christophe Fouquet, is the BoM’s representative focusing on ESG sustainability."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 143,
+            "quote": "Our Chief Executive Officer (CEO), Christophe Fouquet, is the BoM’s representative focusing on ESG sustainability."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_net_zero_year",
+      "question": "By what year does ASML aim to be greenhouse gas neutral across its full value chain?",
+      "category": "sustainability_target",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "2040"
+        ],
+        "answer_contains_all": null,
+        "page": 178,
+        "accepted_pages": [
+          38,
+          153,
+          156,
+          178
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          38,
+          153,
+          165,
+          156,
+          152,
+          38,
+          156,
+          165,
+          153,
+          152,
+          4,
+          260
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:38:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 38,
+            "score": 0.03492063492063492,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers. We are reducing the energy use and emissions of the systems we design and sell and those we have already installed at our customer sites. Each of our product families has a long-term energy saving roadmap – from enabling hydrogen reuse, to sleep modes, to high-temperature cooling water. These solutions have the potential to make a meaningful difference when scaled by customer adoption."
+          },
+          {
+            "id": "asml.pdf:153:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 153,
+            "score": 0.03459750428186934,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040\n\nKey On track / achieved\n\nOff track / not achieved"
+          },
+          {
+            "id": "asml.pdf:165:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03377609108159393,
+            "text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers."
+          },
+          {
+            "id": "asml.pdf:156:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 156,
+            "score": 0.03139416207389263,
+            "text": "In 2021, we presented our roadmap to GHG neutrality across the value chain by 2040. We defined targets for each of the material categories related to energy efficiency and climate action. Definitions have been updated in line with the European Sustainability Reporting Standards (ESRS), and gross reduction targets will be presented in the following sections to explain how we aim to maximize our emission reduction activities to achieve our ambitions by 2040.\n\nThe diagram to the left illustrates our journey to GHG neutrality across our value chain by 2040 for our most material emission categories.\n\nWe define GHG neutrality as having our remaining emissions – following efforts to reach our gross GHG emission reduction targets – compensated for by the same amount of tonnes (metric tons) of carbon credits, verified against recognized quality standards.\n\nWe acknowledge that, to successfully achieve our targets, we need to work closely together with our customers, suppliers and other partners in our ecosystem. We have already intensified collaboration across the industry value chain and will continue on this path to drive ambitious climate action in our industry."
+          },
+          {
+            "id": "asml.pdf:152:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 152,
+            "score": 0.030656660412757972,
+            "text": "We aim to reduce our climate impacts, working closely with our partners and peers in the entire semiconductor value chain – in our own operations, together with our suppliers, in our customers’ production processes and through reducing the energy used by semiconductors in operation by enabling scaling.\n\n- Manufacturing and buildings\n- Purchased goods and services\n- Logistics\n- Business travel\n- Employee commuting\n- Product use\n\nWe aim to be greenhouse gas neutral across our value chain by 2040. Read more on page 153 >\n\nOur Climate Transition Plan is our strategic roadmap that underpins our ambition to align with the goals of the Paris Agreement. With our SBTi-validated emission reduction targets, we commit to taking ambitious action by driving our Climate Transition Plan in each of the emission categories.\n\nWe also report on our resilience analysis of our strategy and business model in relation to climate change, using a climate scenario analysis. Read more on page 182 >"
+          },
+          {
+            "id": "asml.pdf:38:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 38,
+            "score": 0.030244252873563218,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers. We are reducing the energy use and emissions of the systems we design and sell and those we have already installed at our customer sites. Each of our product families has a long-term energy saving roadmap – from enabling hydrogen reuse, to sleep modes, to high-temperature cooling water. These solutions have the potential to make a meaningful difference when scaled by customer adoption."
+          },
+          {
+            "id": "asml.pdf:156:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 156,
+            "score": 0.03018018018018018,
+            "text": "In 2021, we presented our roadmap to GHG neutrality across the value chain by 2040. We defined targets for each of the material categories related to energy efficiency and climate action. Definitions have been updated in line with the European Sustainability Reporting Standards (ESRS), and gross reduction targets will be presented in the following sections to explain how we aim to maximize our emission reduction activities to achieve our ambitions by 2040.\n\nThe diagram to the left illustrates our journey to GHG neutrality across our value chain by 2040 for our most material emission categories.\n\nWe define GHG neutrality as having our remaining emissions – following efforts to reach our gross GHG emission reduction targets – compensated for by the same amount of tonnes (metric tons) of carbon credits, verified against recognized quality standards.\n\nWe acknowledge that, to successfully achieve our targets, we need to work closely together with our customers, suppliers and other partners in our ecosystem. We have already intensified collaboration across the industry value chain and will continue on this path to drive ambitious climate action in our industry."
+          },
+          {
+            "id": "asml.pdf:165:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.02875494071146245,
+            "text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers."
+          },
+          {
+            "id": "asml.pdf:153:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 153,
+            "score": 0.01935483870967742,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040\n\nKey On track / achieved\n\nOff track / not achieved"
+          },
+          {
+            "id": "asml.pdf:152:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 152,
+            "score": 0.01818181818181818,
+            "text": "We aim to reduce our climate impacts, working closely with our partners and peers in the entire semiconductor value chain – in our own operations, together with our suppliers, in our customers’ production processes and through reducing the energy used by semiconductors in operation by enabling scaling.\n\n- Manufacturing and buildings\n- Purchased goods and services\n- Logistics\n- Business travel\n- Employee commuting\n- Product use\n\nWe aim to be greenhouse gas neutral across our value chain by 2040. Read more on page 153 >\n\nOur Climate Transition Plan is our strategic roadmap that underpins our ambition to align with the goals of the Paris Agreement. With our SBTi-validated emission reduction targets, we commit to taking ambitious action by driving our Climate Transition Plan in each of the emission categories.\n\nWe also report on our resilience analysis of our strategy and business model in relation to climate change, using a climate scenario analysis. Read more on page 182 >"
+          },
+          {
+            "id": "asml.pdf:4:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 4,
+            "score": 0.01791044776119403,
+            "text": "and actual results may differ materially from projected results as a result of certain risks and uncertainties. These risks and uncertainties include, without limitation, those described under the section entitled “How we manage risk – Risk factors”. These forward-looking statements are made only as of the date of this Annual Report. We do not undertake to update or revise the forward-looking statements, whether as a result of new information, future events or otherwise.\n\nGiven that such data in the Sustainability statements is derived from various sources, is processed differently across our operating subsidiaries and departments, and depends on certain estimates and assumptions, there is an inherent degree of uncertainty in the estimations of such data. You are cautioned not to give undue weight to such data.\n\nForward-looking information concerning greenhouse gas emissions and greenhouse gas neutrality are subject to qualifications and the uncertainties as set forth under “Special note regarding forward-looking statements—General” in this Annual Report.\n\nReferences related to “greenhouse gas neutral” for scope 1, 2 and categories 6 and 7 (our own activities) of scope 3 mean remaining emissions, after ASML’s efforts to reach its GHG emission reduction targets, are compensated for by the same amount of metric tons of carbon credits that are verified against recognized quality standards. Compensation of emissions outside our own activities is dependent on the value chain.\n\nThis Annual Report contains statements relating to our approach to and progress on achieving certain energy efficiency and greenhouse gas emissions reduction targets, including our ambition to achieve greenhouse gas neutrality."
+          },
+          {
+            "id": "asml.pdf:260:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 260,
+            "score": 0.017142857142857144,
+            "text": "We depend on building strong, sustainable relationships with all of our stakeholders across the value chain. We aim to be viewed as a top performer on ESG sustainability by our stakeholders.\n\nWe’ll do this by engaging with the following stakeholder groups:\n\n- Customers\n- Employees\n- Suppliers\n- Shareholders\n- Society\n\nOn the following pages, we set out our approach and progress to date. Read more in Strategic report – Our business – Engaged stakeholders."
+          }
+        ]
+      },
+      "answer": {
+        "question": "By what year does ASML aim to be greenhouse gas neutral across its full value chain?",
+        "answer": "ASML aims to be greenhouse gas neutral across its full value chain by 2040.",
+        "verbatim": null,
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 38,
+            "quote": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 38,
+            "quote": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_scope12_neutral_target",
+      "question": "By when did ASML aim to be greenhouse gas neutral for scope 1 and 2 emissions?",
+      "category": "sustainability_target",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "2025"
+        ],
+        "answer_contains_all": null,
+        "page": 145,
+        "accepted_pages": [
+          145,
+          156,
+          163,
+          178
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          156,
+          156,
+          165,
+          38,
+          153,
+          167,
+          163,
+          178,
+          178,
+          163,
+          165,
+          176
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:156:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 156,
+            "score": 0.034854981084489284,
+            "text": "- Become GHG neutral for scope 1 and 2 emissions, and scope 3 emissions from business travel and commuting by 2025.\n- Become GHG neutral for scope 3 emissions from supply chain by 2030.\n- Become GHG neutral for scope 3 emissions from product use by 2040.\n\nSince 2019, we have reduced our scope 1 and 2 emissions from our manufacturing and buildings from 60 kt to 26 kt, and we have reduced our emissions from business travel and commuting (scope 3 categories 6 and 7) from 139 kt to 78 kt. The residual emissions for each of these categories in scope 1, 2 and 3 have been compensated for, meaning we have achieved our 2025 GHG neutrality target."
+          },
+          {
+            "id": "asml.pdf:156:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 156,
+            "score": 0.033566433566433566,
+            "text": "- Become GHG neutral for scope 1 and 2 emissions, and scope 3 emissions from business travel and commuting by 2025.\n- Become GHG neutral for scope 3 emissions from supply chain by 2030.\n- Become GHG neutral for scope 3 emissions from product use by 2040.\n\nSince 2019, we have reduced our scope 1 and 2 emissions from our manufacturing and buildings from 60 kt to 26 kt, and we have reduced our emissions from business travel and commuting (scope 3 categories 6 and 7) from 139 kt to 78 kt. The residual emissions for each of these categories in scope 1, 2 and 3 have been compensated for, meaning we have achieved our 2025 GHG neutrality target."
+          },
+          {
+            "id": "asml.pdf:165:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.033061962912709186,
+            "text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers."
+          },
+          {
+            "id": "asml.pdf:38:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 38,
+            "score": 0.032561132561132564,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers. We are reducing the energy use and emissions of the systems we design and sell and those we have already installed at our customer sites. Each of our product families has a long-term energy saving roadmap – from enabling hydrogen reuse, to sleep modes, to high-temperature cooling water. These solutions have the potential to make a meaningful difference when scaled by customer adoption."
+          },
+          {
+            "id": "asml.pdf:153:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 153,
+            "score": 0.032492643968053805,
+            "text": "We aim to be greenhouse gas neutral across our value chain by 2040\n\nKey On track / achieved\n\nOff track / not achieved"
+          },
+          {
+            "id": "asml.pdf:167:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 167,
+            "score": 0.03209718670076726,
+            "text": "We have one target for our scope 3 emissions related to logistics (category 4): Become GHG neutral for scope 3 emissions related to logistics by 2030."
+          },
+          {
+            "id": "asml.pdf:163:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 163,
+            "score": 0.0317134478424801,
+            "text": "Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025. We have reduced our scope 1 and 2 emissions from 60 kt to 26 kt between 2019 and 2025 by deploying our energy savings master plans and purchasing more renewable electricity. The residual emissions (26 kt) have been compensated for to reach our GHG neutrality target.\n\nWe have defined two additional targets related to manufacturing and buildings:\n\n- Achieve energy savings of 100 TJ from energy-saving projects in our own operations worldwide by 2025."
+          },
+          {
+            "id": "asml.pdf:178:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 178,
+            "score": 0.031625,
+            "text": "GHG neutrality targets\n\n- Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025.\n- Become GHG neutral for scope 3 emissions related to purchased goods and services including capital goods (categories 1 &#x26; 2) and related to logistics (category 4) by 2030.\n\nIn this section, we elaborate on the methodology and assumptions used in formulating our targets and indicators related to our ESG theme Energy efficiency and climate action.\n\nAs part of our climate ambitions, we have developed net and gross emissions-reduction targets. Net targets may include carbon offsets or credits, and align with our ambitions to become GHG neutral by 2025, 2030 and 2040 for different emission categories. Gross emissions reduction targets do not include carbon offsets or credits and provide insight into emissions reductions achieved by reducing energy usage and switching to renewables.\n\nAs of 2024, we report on all buildings owned or leased by ASML. The baseline value has been updated accordingly. To calculate scope 2 GHG emissions we use the market-based method. This target is measured in kilotonnes (kt) CO₂e."
+          },
+          {
+            "id": "asml.pdf:178:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 178,
+            "score": 0.030714846818538886,
+            "text": "GHG neutrality targets\n\n- Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025.\n- Become GHG neutral for scope 3 emissions related to purchased goods and services including capital goods (categories 1 &#x26; 2) and related to logistics (category 4) by 2030.\n\nIn this section, we elaborate on the methodology and assumptions used in formulating our targets and indicators related to our ESG theme Energy efficiency and climate action.\n\nAs part of our climate ambitions, we have developed net and gross emissions-reduction targets. Net targets may include carbon offsets or credits, and align with our ambitions to become GHG neutral by 2025, 2030 and 2040 for different emission categories. Gross emissions reduction targets do not include carbon offsets or credits and provide insight into emissions reductions achieved by reducing energy usage and switching to renewables.\n\nAs of 2024, we report on all buildings owned or leased by ASML. The baseline value has been updated accordingly. To calculate scope 2 GHG emissions we use the market-based method. This target is measured in kilotonnes (kt) CO₂e."
+          },
+          {
+            "id": "asml.pdf:163:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 163,
+            "score": 0.029469122426868905,
+            "text": "Become GHG neutral for scope 1 and 2 emissions from our manufacturing and buildings by 2025. We have reduced our scope 1 and 2 emissions from 60 kt to 26 kt between 2019 and 2025 by deploying our energy savings master plans and purchasing more renewable electricity. The residual emissions (26 kt) have been compensated for to reach our GHG neutrality target.\n\nWe have defined two additional targets related to manufacturing and buildings:\n\n- Achieve energy savings of 100 TJ from energy-saving projects in our own operations worldwide by 2025."
+          },
+          {
+            "id": "asml.pdf:165:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.02914131169709263,
+            "text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers."
+          },
+          {
+            "id": "asml.pdf:176:51",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.027590163934426228,
+            "text": "Metric: Total GHG emissions from scope 1, 2 and 3 (market-based) per net revenue (tCOeq/(€m revenue)\nPeriod: 2024\nValue: 424\nUnit: continued"
+          }
+        ]
+      },
+      "answer": {
+        "question": "By when did ASML aim to be greenhouse gas neutral for scope 1 and 2 emissions?",
+        "answer": "ASML aimed to be greenhouse gas neutral for scope 1 and 2 emissions by 2025. This includes emissions from their manufacturing and buildings, as well as scope 3 emissions from business travel and commuting by the same year.",
+        "verbatim": null,
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 156,
+            "quote": "Become GHG neutral for scope 1 and 2 emissions, and scope 3 emissions from business travel and commuting by 2025."
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 156,
+            "quote": "Become GHG neutral for scope 1 and 2 emissions, and scope 3 emissions from business travel and commuting by 2025."
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_total_net_sales_2025",
+      "question": "What were ASML's total net sales in 2025?",
+      "category": "verbatim_financial",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "32.7",
+          "32,667",
+          "32,667.3",
+          "€32.7 billion"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": [
+          5,
+          8,
+          53,
+          54,
+          276
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          54,
+          276,
+          287,
+          54,
+          276,
+          276,
+          54,
+          54,
+          131,
+          176,
+          276
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.0935155370687546,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:54:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.07819354838709677,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: 32,667.3"
+          },
+          {
+            "id": "asml.pdf:276:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.07780952380952381,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: 32,667.3\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:287:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.07144715667500479,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:54:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.0564375,
+            "text": "Metric: Total net sales\nPeriod: 2024\nValue: 28,262.9"
+          },
+          {
+            "id": "asml.pdf:276:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.05607692307692308,
+            "text": "Metric: Total net sales\nPeriod: 2023\nValue: 27,558.5\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:276:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.05572727272727273,
+            "text": "Metric: Total net sales\nPeriod: 2024\nValue: 28,262.9\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:54:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04538805970149254,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3"
+          },
+          {
+            "id": "asml.pdf:54:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04505882352941176,
+            "text": "Metric: Net service and field option sales\nPeriod: 2025\nValue: 8,193.0"
+          },
+          {
+            "id": "asml.pdf:131:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04473913043478261,
+            "text": "Metric: Net sales\nPeriod: 2025\nValue: 32,667,251\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:176:52",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04442857142857143,
+            "text": "Metric: Total GHG emissions from scope 1, 2 and 3 (market-based) per net revenue (tCOeq/(€m revenue)\nPeriod: 2025\nValue: 356\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:276:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.04412676056338028,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3\nUnit: €, in millions, except per share data"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What were ASML's total net sales in 2025?",
+        "answer": "ASML's total net sales in 2025 were €32.7 billion.",
+        "verbatim": "€32.7bn",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_rd_spend_2025",
+      "question": "How much did ASML spend financially on Research and Development in 2025?",
+      "category": "verbatim_financial",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "4.7",
+          "€4.7 billion",
+          "4,699"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": [
+          5,
+          30,
+          55
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          301,
+          230,
+          230,
+          54,
+          54,
+          137,
+          137,
+          137,
+          137,
+          176,
+          176
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.07637126721998802,
+            "text": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:301:35",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 301,
+            "score": 0.06573302107728338,
+            "text": "Metric: Research and Development\nPeriod: 2025\nValue: 16,448\nUnit: in FTE"
+          },
+          {
+            "id": "asml.pdf:230:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.04680952380952381,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees by gender\nPeriod: 2025\nValue: 95%"
+          },
+          {
+            "id": "asml.pdf:230:19",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.0464375,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees eligible for a review by gender\nPeriod: 2025\nValue: 96%"
+          },
+          {
+            "id": "asml.pdf:54:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.045076923076923084,
+            "text": "Metric: Net service and field option sales\nPeriod: 2025\nValue: 8,193.0"
+          },
+          {
+            "id": "asml.pdf:54:23",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04472727272727273,
+            "text": "Metric: Interest and other, net\nPeriod: 2025\nValue: 104.7"
+          },
+          {
+            "id": "asml.pdf:137:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04438805970149254,
+            "text": "Metric: Value chain and ecosystem overview\nPeriod: 2025\nValue: 145\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04405882352941177,
+            "text": "Metric: Environmental and human rights due diligence\nPeriod: 2025\nValue: 146\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.043739130434782614,
+            "text": "Metric: Impact, risk and opportunity management\nPeriod: 2025\nValue: 149\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04342857142857143,
+            "text": "Metric: Energy efficiency and climate action\nPeriod: 2025\nValue: 153\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:176:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04312676056338029,
+            "text": "Metric: (2) Fuel consumption from crude oil and petroleum products\nPeriod: 2025\nValue: 38\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.042833333333333334,
+            "text": "Metric: (5) Consumption of purchased or acquired electricity, heat, steam and cooling from fossil sources\nPeriod: 2025\nValue: 3,251\nUnit: continued"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How much did ASML spend financially on Research and Development in 2025?",
+        "answer": "ASML spent €4.7 billion on Research and Development in 2025.",
+        "verbatim": "€4.7bn",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_gross_margin_2025",
+      "question": "What reported gross margin percentage did ASML state for 2025?",
+      "category": "verbatim_financial",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "52.8",
+          "52.8%"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": [
+          5,
+          8,
+          51,
+          53,
+          55
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "no final answer produced: No gross margin percentage for 2025 is mentioned in the context."
+      ],
+      "retrieval": {
+        "pages": [
+          199,
+          230,
+          134,
+          137,
+          137,
+          159,
+          159,
+          176,
+          176,
+          176,
+          176,
+          199
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:199:59",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 199,
+            "score": 0.04759016393442623,
+            "text": "Metric: Percentage of non-recycled waste (including preparation for reuse)\nPeriod: 2025\nValue: 26.3%\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:230:19",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 230,
+            "score": 0.04719354838709677,
+            "text": "Metric: Percentage of employees that completed an annual performance and career development review against the total number of employees eligible for a review by gender\nPeriod: 2025\nValue: 96%"
+          },
+          {
+            "id": "asml.pdf:134:28",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 134,
+            "score": 0.045809523809523814,
+            "text": "Metric: For each meeting that involves intercontinental travel.\nPeriod: 2025\nValue: €5,000"
+          },
+          {
+            "id": "asml.pdf:137:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.045437500000000006,
+            "text": "Metric: Basis for preparation\nPeriod: 2025\nValue: 138\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.045076923076923084,
+            "text": "Metric: Attractive workplace for all\nPeriod: 2025\nValue: 209\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:159:24",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 159,
+            "score": 0.04472727272727273,
+            "text": "Metric: Actual gross emissions (Mt CO₂e)\nPeriod: 2025\nValue: 11.6"
+          },
+          {
+            "id": "asml.pdf:159:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 159,
+            "score": 0.04438805970149254,
+            "text": "Metric: Emission intensity (kt CO₂e per €m gross profit)\nPeriod: 2025\nValue: 0.67"
+          },
+          {
+            "id": "asml.pdf:176:19",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04405882352941177,
+            "text": "Metric: Percentage share of fossil sources in total energy consumption\nPeriod: 2025\nValue: 17.5%\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:25",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.043739130434782614,
+            "text": "Metric: Percentage share of consumption from nuclear sources in total energy consumption\nPeriod: 2025\nValue: 0.0%\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:38",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04342857142857143,
+            "text": "Metric: Percentage share of renewable sources in total energy consumption\nPeriod: 2025\nValue: 82.5%\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:55",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04312676056338029,
+            "text": "Metric: Total GHG emissions from scope 3 (market-based) per gross profit (tCOeq/(€m gross profit)\nPeriod: 2025\nValue: 669\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:199:56",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 199,
+            "score": 0.042833333333333334,
+            "text": "Metric: Non-recycled waste (including preparation for reuse)\nPeriod: 2025\nValue: 7,548\nUnit: continued"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What reported gross margin percentage did ASML state for 2025?",
+        "answer": "The reported gross margin percentage for ASML in 2025 is not available in the provided context.",
+        "verbatim": null,
+        "citations": [],
+        "refused": true,
+        "refusal_reason": "No gross margin percentage for 2025 is mentioned in the context.",
+        "raw_citations": [],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_net_income_2025",
+      "question": "What was ASML's net income based on US GAAP in 2025?",
+      "category": "verbatim_financial",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "9,609",
+          "9.6 billion",
+          "9,609,432"
+        ],
+        "answer_contains_all": null,
+        "page": 131,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          131,
+          131,
+          54,
+          131,
+          276,
+          54,
+          54,
+          131,
+          176,
+          276,
+          276,
+          277
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:131:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.06926229508196721,
+            "text": "Metric: Net income based on US GAAP\nPeriod: 2025\nValue: 9,609,432\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:131:79",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.0624375,
+            "text": "Metric: Average remuneration per FTE based on US GAAP\nPeriod: 2025\nValue: 153\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:54:36",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.06243452380952381,
+            "text": "Metric: Net income\nPeriod: 2025\nValue: 9,609.4"
+          },
+          {
+            "id": "asml.pdf:131:91",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.060194570135746604,
+            "text": "Metric: Internal pay ratio (CEO versus employee remuneration based on US GAAP)⁵\nPeriod: 2025\nValue: 46\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:276:46",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.0567516960651289,
+            "text": "Metric: Net income\nPeriod: 2025\nValue: 9,609.4\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:54:30",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.052417968168972186,
+            "text": "Metric: Income after income taxes\nPeriod: 2025\nValue: 9,392.7"
+          },
+          {
+            "id": "asml.pdf:54:26",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.05234087569791361,
+            "text": "Metric: Income before income taxes\nPeriod: 2025\nValue: 11,406.1"
+          },
+          {
+            "id": "asml.pdf:131:20",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.048193548387096774,
+            "text": "Metric: Net income based on EU-IFRS\nPeriod: 2025\nValue: 10,212,993\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:176:52",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04572727272727273,
+            "text": "Metric: Total GHG emissions from scope 1, 2 and 3 (market-based) per net revenue (tCOeq/(€m revenue)\nPeriod: 2025\nValue: 356\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:276:50",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.04505882352941176,
+            "text": "Metric: Basic net income per ordinary share\nPeriod: 2025\nValue: 24.73\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:276:54",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 276,
+            "score": 0.04473913043478261,
+            "text": "Metric: Diluted net income per ordinary share\nPeriod: 2025\nValue: 24.71\nUnit: €, in millions, except per share data"
+          },
+          {
+            "id": "asml.pdf:277:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 277,
+            "score": 0.04442857142857143,
+            "text": "Metric: Net income\nPeriod: 2025\nValue: 9,609.4\nUnit: €, in millions"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What was ASML's net income based on US GAAP in 2025?",
+        "answer": "ASML's net income based on US GAAP in 2025 was €9,609,432,000.",
+        "verbatim": "9,609,432",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 131,
+            "quote": "Metric: Net income based on US GAAP\nPeriod: 2025\nValue: 9,609,432\nUnit: €, in thousands"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 131,
+            "quote": "Metric: Net income based on US GAAP\nPeriod: 2025\nValue: 9,609,432\nUnit: €, in thousands"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_returned_to_shareholders_2025",
+      "question": "How much did ASML return to shareholders in 2025?",
+      "category": "verbatim_financial",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "8.5",
+          "€8.5 billion"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          272,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          6,
+          6
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.061515537068754594,
+            "text": "Metric: Returned to shareholders\nPeriod: 2025\nValue: €8.5bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:272:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 272,
+            "score": 0.04619354838709677,
+            "text": "Metric: Consolidated statements of shareholders’ equity\nPeriod: 2025\nValue: 279\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04480952380952381,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.044437500000000005,
+            "text": "Metric: Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04407692307692308,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.043727272727272726,
+            "text": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04338805970149254,
+            "text": "Metric: Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04305882352941177,
+            "text": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04273913043478261,
+            "text": "Metric: Nationalities\nPeriod: 2025\nValue: 535\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04242857142857143,
+            "text": "Metric: System sales in units\nPeriod: 2025\nValue: 143\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:6:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 6,
+            "score": 0.042126760563380286,
+            "text": "Metric: Amount invested in communities (per employee), including employee giving\nPeriod: 2025\nValue: €1,750\nUnit: EUR\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:6:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 6,
+            "score": 0.041833333333333333,
+            "text": "Metric: Continents\nPeriod: 2025\nValue: 3\nPresentation: highlight"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How much did ASML return to shareholders in 2025?",
+        "answer": "ASML returned €8.5 billion to shareholders in 2025.",
+        "verbatim": "€8.5bn",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Returned to shareholders\nPeriod: 2025\nValue: €8.5bn\nUnit: EUR billion"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Returned to shareholders\nPeriod: 2025\nValue: €8.5bn\nUnit: EUR billion"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_system_sales_units_2025",
+      "question": "How many lithography systems did ASML sell in 2025?",
+      "category": "operational_datapoint",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "535"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": true,
+      "answer_correct": false,
+      "citation_grounded": true,
+      "reasons": [
+        "none of ['535'] found in answer"
+      ],
+      "retrieval": {
+        "pages": [
+          287,
+          287,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          6
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:287:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.060479052823315116,
+            "text": "Metric: New systems\nPeriod: 2025\nValue: 23,898.6\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:287:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.05795825426944971,
+            "text": "Metric: Used systems\nPeriod: 2025\nValue: 575.7\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04480952380952381,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.044437500000000005,
+            "text": "Metric: Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04407692307692308,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.043727272727272726,
+            "text": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04338805970149254,
+            "text": "Metric: Returned to shareholders\nPeriod: 2025\nValue: €8.5bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04305882352941177,
+            "text": "Metric: Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04273913043478261,
+            "text": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04242857142857143,
+            "text": "Metric: Nationalities\nPeriod: 2025\nValue: 535\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.042126760563380286,
+            "text": "Metric: System sales in units\nPeriod: 2025\nValue: 143\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:6:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 6,
+            "score": 0.041833333333333333,
+            "text": "Metric: Amount invested in communities (per employee), including employee giving\nPeriod: 2025\nValue: €1,750\nUnit: EUR\nPresentation: highlight"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many lithography systems did ASML sell in 2025?",
+        "answer": "ASML sold 143 lithography systems in 2025.",
+        "verbatim": "143",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: System sales in units\nPeriod: 2025\nValue: 143\nPresentation: highlight"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: System sales in units\nPeriod: 2025\nValue: 143\nPresentation: highlight"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_suppliers_count",
+      "question": "How many total suppliers does ASML have?",
+      "category": "operational_datapoint",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "5,100",
+          "5100"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          242,
+          33,
+          242,
+          32,
+          46,
+          242,
+          242,
+          5,
+          5,
+          54,
+          54
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.058881830601092894,
+            "text": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:242:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 242,
+            "score": 0.03354037267080745,
+            "text": "| 272 | critical suppliers | generate 89% of related spend       |\n| --- | ------------------ | ----------------------------------- |\n| 153 | critical suppliers | generate 19% of Total related spend |"
+          },
+          {
+            "id": "asml.pdf:33:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 33,
+            "score": 0.03234524847428073,
+            "text": "In the dynamic landscape of semiconductor manufacturing, ASML’s supply chain serves as the foundation of our operations, enabling us to push the boundaries of technology while meeting the evolving demands of our customers. With approximately 80% of our bill of materials sourced from a global network of suppliers, close collaboration and joint innovation have always been at the heart of our strategy. We believe this partnership model not only supports the reliability and quality of our products but also fosters a shared commitment to advancing Moore’s Law, which remains essential for the industry’s continued progress.\n\nWayne Allan, EVP and Chief Strategic Sourcing &#x26; Procurement Officer, explains how his organization is strengthening ASML’s ecosystem relationships.\n\nRead more"
+          },
+          {
+            "id": "asml.pdf:242:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 242,
+            "score": 0.03157051282051282,
+            "text": "272: 153\ncritical suppliers: critical suppliers\ngenerate 89% of related spend: generate 19% of Total related spend"
+          },
+          {
+            "id": "asml.pdf:32:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 32,
+            "score": 0.031339712918660285,
+            "text": "We trust our supply chain to manufacture most system parts and modules, and many partners to play a crucial role in developing our new technology. We aim to foster even closer relationships with our suppliers and broader ecosystem, based on shared goals and responsibility for cost, quality and sustainability."
+          },
+          {
+            "id": "asml.pdf:46:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 46,
+            "score": 0.03094098883572568,
+            "text": "The semiconductor market is cyclical, so the world of our suppliers is turbulent at times. In recent years, geopolitical events and inflationary pressures have added to macroeconomic uncertainty. Suppliers are expected to build capacity for steep growth in the long run, while being flexible enough to manage peaks and troughs in the short run. Our future growth – and that of our customers – can only happen if our suppliers are able to keep up. Furthermore, ASML aims to continually raise the bar for the quality, affordability and sustainability of what we buy from suppliers."
+          },
+          {
+            "id": "asml.pdf:242:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 242,
+            "score": 0.030507162214479286,
+            "text": "| suppliers | 1,450 |\n| --------- | ----- |"
+          },
+          {
+            "id": "asml.pdf:242:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 242,
+            "score": 0.02747304266291608,
+            "text": "| 5,100                         | Suppliers |\n| ----------------------------- | --------- |\n| Product-related suppliers     | 900       |\n| Non-product-related suppliers | 4,200     |"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.025193548387096774,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.02480952380952381,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:54:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.0244375,
+            "text": "Metric: Total net sales\nPeriod: 2024\nValue: 28,262.9"
+          },
+          {
+            "id": "asml.pdf:54:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.02407692307692308,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: 32,667.3"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many total suppliers does ASML have?",
+        "answer": "ASML has a total of 5,100 suppliers.",
+        "verbatim": "5,100",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_customer_satisfaction",
+      "question": "What was ASML's customer satisfaction survey score in 2025?",
+      "category": "operational_datapoint",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "88%"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          218,
+          5,
+          218,
+          44,
+          233,
+          44,
+          42,
+          233,
+          216,
+          122,
+          234
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04426229508196721,
+            "text": "Metric: Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:218:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 218,
+            "score": 0.03413461538461539,
+            "text": "Achieved 2025 target: 80%\n\nThis was a new target set for 2025 with a 2024 baseline figure of 86.5%. In 2025, a learning satisfaction score of 83.8% was reached, exceeding our target score. This reflects our ongoing efforts to create relevant, engaging learner centric solutions to support people in their daily work and growth."
+          },
+          {
+            "id": "asml.pdf:5:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.03380681818181818,
+            "text": "| €32.7bn     | Total net sales                                                                      | 88%    | Customer satisfaction survey score | > 44,000 | Total employees (FTEs)             |\n| ----------- | ------------------------------------------------------------------------------------ | ------ | ---------------------------------- | -------- | ---------------------------------- |\n| Our purpose | Unlocking the potential of people and society by pushing technology to new limits.   |        |                                    |          |                                    |\n| Our vision  | We enable groundbreaking technology to solve some of humanity’s toughest challenges. |        |                                    |          |                                    |\n| €4.7bn      | Research & Development                                                               | €8.5bn | Returned to shareholders           | 21%      | Women in our workforce (headcount) |\n| 5,100       | Total number of suppliers                                                            | 535    | Nationalities                      | 143      | System sales in units              |"
+          },
+          {
+            "id": "asml.pdf:218:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 218,
+            "score": 0.033520074696545284,
+            "text": "Achieve a learning satisfaction score of 80% or higher for 2025"
+          },
+          {
+            "id": "asml.pdf:44:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 44,
+            "score": 0.033271889400921656,
+            "text": "- Regular technology review meetings between senior management and customers\n- Executive review meetings to discuss business and operational strategies with customers\n- Operational meetings to discuss various topics, including technology roadmaps, quality, costs and ESG matters\n- Annual customer feedback survey\n- Voice of the Customer program to provide firsthand feedback about our customers’ needs\n- Various technology symposia and special events\n\nSurvey results showed high and increasing levels of trust in ASML, mainly driven by our transparency and commitment to fairness and mutual success. Customers ask us to listen closely to their feedback, resolve issues in a timely manner, provide them with shorter delivery times for good-quality products, and continue pushing our technology forward to meet their current and future needs.\n\nOur customers are why we exist. We collaborate with customers at all levels of the organization – from CEO-to-CEO interaction right through to on-the-ground support at individual fabs. We help our customers achieve their goals and ensure our solutions fit their requirements.\n\n88% Customer satisfaction survey score\n\nJim Koonmen\n\nExecutive Vice President and Chief Customer Officer"
+          },
+          {
+            "id": "asml.pdf:233:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 233,
+            "score": 0.03182678158503258,
+            "text": "This score reflects the percentage of trainings rated as favorable by participating employees and non-employees for the period."
+          },
+          {
+            "id": "asml.pdf:44:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 44,
+            "score": 0.03147581139007961,
+            "text": "At each stage of the customer relationship, we aim to foster trust – with the goal of achieving high customer satisfaction and loyalty. By placing customer success at the center of our work, we can leverage our innovations and develop even more sophisticated solutions alongside them.\n\nWhat’s happening in their world: Macroeconomic uncertainty, caused by but not limited to technological sovereignty and export controls, continued to lead certain customers to remain cautious and carefully control capital expenditure and cash flow in 2025. Market growth was mainly dominated by AI, which led to increased demand for AI-related Memory and specific advanced Logic chips."
+          },
+          {
+            "id": "asml.pdf:42:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 42,
+            "score": 0.03139329805996473,
+            "text": "| 535                   | 21%                                | 88%                                | 4.1%           | 3.8%                                                                   | 100%       |\n| --------------------- | ---------------------------------- | ---------------------------------- | -------------- | ---------------------------------------------------------------------- | ---------- |\n| System sales in units | Women in our workforce (headcount) | Customer satisfaction survey score | Attrition rate | Suppliers with overall high risk evaluated and follow-up agreed (in %) | 2024: 100% |\n| 2024: 583             | 2024: 21%                          | 2024: 86%                          | 2024: 3.8%     | 2024: 91%                                                              |            |"
+          },
+          {
+            "id": "asml.pdf:233:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 233,
+            "score": 0.03137254901960784,
+            "text": "Every year we ask employees to complete our employee engagement survey. We use a validated survey from an external provider, with the employee engagement score derived from a subset of five questions."
+          },
+          {
+            "id": "asml.pdf:216:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 216,
+            "score": 0.03015151515151515,
+            "text": "| China                                                                                                                                                                                                                                                                                                                                                                                                                        | n/a   | By 2025, be within 2 percentage points of (or higher than) the benchmark employee engagement score achieved by the top 25% of companies |\n| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------- |\n| 2024                                                                                                                                                                                                                                                                                                                                                                                                                         | 109   | 2025 target: Top 100                                                                                                                    |\n| In 2025, Universum discontinued its syndicated report for China. We commissioned a custom survey, which measured ASML’s employer brand against a group of 15 companies consisting of peers in the semiconductor industry and other companies with which we compete for talent. Among this group, we ranked fifth. Due to the different composition of the benchmark, this result is not comparable with previous years.      |       |                                                                                                                                         |\n| NL                                                                                                                                                                                                                                                                                                                                                                                                                           | 1     | 2024: 1                                                                                                                                 |\n| 2025 target                                                                                                                                                                                                                                                                                                                                                                                                                  | Top 5 | Not achieved                                                                                                                            |\n| In 2025, 88.3% (2024: 88.0%) of our employees participated in our annual employee engagement survey, returning an engagement score (three-year rolling average) of 78.9% (2024: 78.9%). With this, we fell short of our 2 percentage point (pp) target range, measuring 2.3 pp below (2024: 2.1 pp below) the top 25% external global benchmark of 81.2% (2024: 81.0%), also representative of a three-year rolling average. |       |                                                                                                                                         |"
+          },
+          {
+            "id": "asml.pdf:122:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 122,
+            "score": 0.02995864053227837,
+            "text": "| Customer Orientation  |                                                                                                                                                                   | Performance assessment by SB |\n| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |\n| Annual plan 2025      | Performance metrics selected                                                                                                                                      | Customer Orientation         |\n| EBIT %                | Measuring ASML’s positioning in the market and its performance in terms of customer experience, customer satisfaction and quality.                                |                              |\n| Sub-targets:          | Adoption of multibeam within Metrology & Inspection; DUV Cost and Competitiveness; EUV 0.33 NA maturity; EUV 0.55 NA insertion; and ASML’s Customer Trust Survey. |                              |\n| Strategic Orientation |                                                                                                                                                                   |                              |\n| Sub-targets:          | Enterprise Resource Planning; High Productivity Platform; New Product Quality; and Global Supply Chain Development.                                               |                              |"
+          },
+          {
+            "id": "asml.pdf:234:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 234,
+            "score": 0.028716216216216218,
+            "text": "By 2025, be within 2 percentage points of (or higher than) the benchmark well-being score achieved by the top 25% of companies. This target is based on our annual employee engagement survey. The well-being score is derived from a subset of eight related questions."
+          }
+        ]
+      },
+      "answer": {
+        "question": "What was ASML's customer satisfaction survey score in 2025?",
+        "answer": "ASML's customer satisfaction survey score in 2025 was 88%.",
+        "verbatim": "88%",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_gross_scope12_2025",
+      "question": "What were ASML's gross scope 1 and 2 CO2e emissions in 2025?",
+      "category": "esg_datapoint",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "26 kt",
+          "26 kilotonnes",
+          "26"
+        ],
+        "answer_contains_all": null,
+        "page": 145,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": false,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "no retrieved chunk page within ±1 of 145 and source='asml.pdf'",
+        "none of ['26 kt', '26 kilotonnes', '26'] found in answer",
+        "no citation page within ±1 of 145 (got [159])"
+      ],
+      "retrieval": {
+        "pages": [
+          176,
+          176,
+          159,
+          54,
+          54,
+          137,
+          137,
+          137,
+          137,
+          159,
+          176,
+          176
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:176:52",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04859016393442623,
+            "text": "Metric: Total GHG emissions from scope 1, 2 and 3 (market-based) per net revenue (tCOeq/(€m revenue)\nPeriod: 2025\nValue: 356\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:55",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.048193548387096774,
+            "text": "Metric: Total GHG emissions from scope 3 (market-based) per gross profit (tCOeq/(€m gross profit)\nPeriod: 2025\nValue: 669\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:159:24",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 159,
+            "score": 0.04680952380952381,
+            "text": "Metric: Actual gross emissions (Mt CO₂e)\nPeriod: 2025\nValue: 11.6"
+          },
+          {
+            "id": "asml.pdf:54:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.045437500000000006,
+            "text": "Metric: Net service and field option sales\nPeriod: 2025\nValue: 8,193.0"
+          },
+          {
+            "id": "asml.pdf:54:23",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.045076923076923084,
+            "text": "Metric: Interest and other, net\nPeriod: 2025\nValue: 104.7"
+          },
+          {
+            "id": "asml.pdf:137:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04472727272727273,
+            "text": "Metric: Value chain and ecosystem overview\nPeriod: 2025\nValue: 145\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04438805970149254,
+            "text": "Metric: Environmental and human rights due diligence\nPeriod: 2025\nValue: 146\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.04405882352941177,
+            "text": "Metric: Impact, risk and opportunity management\nPeriod: 2025\nValue: 149\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:137:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.043739130434782614,
+            "text": "Metric: Energy efficiency and climate action\nPeriod: 2025\nValue: 153\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:159:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 159,
+            "score": 0.04342857142857143,
+            "text": "Metric: Emission intensity (kt CO₂e per €m gross profit)\nPeriod: 2025\nValue: 0.67"
+          },
+          {
+            "id": "asml.pdf:176:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04312676056338029,
+            "text": "Metric: (2) Fuel consumption from crude oil and petroleum products\nPeriod: 2025\nValue: 38\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.042833333333333334,
+            "text": "Metric: (5) Consumption of purchased or acquired electricity, heat, steam and cooling from fossil sources\nPeriod: 2025\nValue: 3,251\nUnit: continued"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What were ASML's gross scope 1 and 2 CO2e emissions in 2025?",
+        "answer": "ASML's gross scope 1 and 2 CO2e emissions in 2025 were 11.6 Mt CO₂e.",
+        "verbatim": "11.6",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 159,
+            "quote": "Metric: Actual gross emissions (Mt CO₂e)\nPeriod: 2025\nValue: 11.6"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 159,
+            "quote": "Metric: Actual gross emissions (Mt CO₂e)\nPeriod: 2025\nValue: 11.6"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_scope3_2025",
+      "question": "What were ASML's net scope 3 CO2e emissions in 2025?",
+      "category": "esg_datapoint",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": [
+          "11.5 Mt",
+          "11.5"
+        ],
+        "answer_contains_all": null,
+        "page": 6,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": true,
+      "answer_correct": false,
+      "citation_grounded": false,
+      "reasons": [
+        "none of ['11.5 Mt', '11.5'] found in answer",
+        "no citation page within ±1 of 6 (got [176])"
+      ],
+      "retrieval": {
+        "pages": [
+          176,
+          176,
+          5,
+          54,
+          54,
+          54,
+          54,
+          54,
+          57,
+          131,
+          131,
+          131
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:176:52",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04859016393442623,
+            "text": "Metric: Total GHG emissions from scope 1, 2 and 3 (market-based) per net revenue (tCOeq/(€m revenue)\nPeriod: 2025\nValue: 356\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:176:55",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 176,
+            "score": 0.04719354838709677,
+            "text": "Metric: Total GHG emissions from scope 3 (market-based) per gross profit (tCOeq/(€m gross profit)\nPeriod: 2025\nValue: 669\nUnit: continued"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.045809523809523814,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:54:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.045437500000000006,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3"
+          },
+          {
+            "id": "asml.pdf:54:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.045076923076923084,
+            "text": "Metric: Net service and field option sales\nPeriod: 2025\nValue: 8,193.0"
+          },
+          {
+            "id": "asml.pdf:54:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04472727272727273,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: 32,667.3"
+          },
+          {
+            "id": "asml.pdf:54:23",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04438805970149254,
+            "text": "Metric: Interest and other, net\nPeriod: 2025\nValue: 104.7"
+          },
+          {
+            "id": "asml.pdf:54:36",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.04405882352941177,
+            "text": "Metric: Net income\nPeriod: 2025\nValue: 9,609.4"
+          },
+          {
+            "id": "asml.pdf:57:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 57,
+            "score": 0.043739130434782614,
+            "text": "Metric: Net cash provided by (used in) operating activities\nPeriod: 2025\nValue: 12,658.5\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:131:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04342857142857143,
+            "text": "Metric: Net sales\nPeriod: 2025\nValue: 32,667,251\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:131:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.04312676056338029,
+            "text": "Metric: Net income based on US GAAP\nPeriod: 2025\nValue: 9,609,432\nUnit: €, in thousands"
+          },
+          {
+            "id": "asml.pdf:131:20",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 131,
+            "score": 0.042833333333333334,
+            "text": "Metric: Net income based on EU-IFRS\nPeriod: 2025\nValue: 10,212,993\nUnit: €, in thousands"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What were ASML's net scope 3 CO2e emissions in 2025?",
+        "answer": "ASML's net scope 3 CO2e emissions in 2025 were 669 tCOeq/(€m gross profit).",
+        "verbatim": "669",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 176,
+            "quote": "Metric: Total GHG emissions from scope 3 (market-based) per gross profit (tCOeq/(€m gross profit)"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 176,
+            "quote": "Metric: Total GHG emissions from scope 3 (market-based) per gross profit (tCOeq/(€m gross profit)"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_supplier_target",
+      "question": "What percentage commitment target did ASML set for its top-80% suppliers to reduce CO2e footprint by 2026?",
+      "category": "sustainability_target",
+      "difficulty": "hard",
+      "expected": {
+        "answer_contains_any": [
+          "top 80",
+          "top-80",
+          "top 80%",
+          "top-80%"
+        ],
+        "answer_contains_all": [
+          "75%",
+          "2026"
+        ],
+        "page": 145,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          153,
+          145,
+          179,
+          153,
+          179,
+          165,
+          145,
+          165,
+          166,
+          160,
+          160,
+          165
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:153:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 153,
+            "score": 0.035441061670569866,
+            "text": "Commitment from top-80% suppliers to reduce their CO₂e footprint by 2030\n\n32% 5.5 kWh\n\n2024: 17% 75% 2024: 5.9 kWh\n\n2026 target: 2025 target: 5.1 kWh"
+          },
+          {
+            "id": "asml.pdf:145:22",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 145,
+            "score": 0.034823646299056134,
+            "text": "Target: Commitment from our top-80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030 75% commitment from top 80% suppliers by 2026\nPerformance: 32%"
+          },
+          {
+            "id": "asml.pdf:179:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 179,
+            "score": 0.034590570719602975,
+            "text": "Purchase 100% renewable electricity for our own operations worldwide by 2025. This target is measured as the percentage of renewable electricity purchased (including energy attribute certificates) versus our total electricity consumption. It pertains exclusively to scope 2 emissions, for which we use market-based emission factors.\n\nGet commitment from our top 80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030. This target is calculated as the percentage of our suppliers (based on CO₂e emissions) who signed a letter of commitment or made a public statement to reduce their CO₂e footprint by 2030. Our top 80% suppliers are those who, according to spend-based emission calculations, together account for 80% of our total supplier emissions and is updated on a yearly basis. Progress is monitored as of 2024, when the program started. In 2025, we updated our calculation methodology to introduce greater granularity in categorizing the different types of GHG reduction commitments set by our suppliers."
+          },
+          {
+            "id": "asml.pdf:153:17",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 153,
+            "score": 0.03413461538461539,
+            "text": "Commitment from top-80% suppliers to reduce their CO₂e footprint by 2030\n\n32% 5.5 kWh\n\n2024: 17% 75% 2024: 5.9 kWh\n\n2026 target: 2025 target: 5.1 kWh"
+          },
+          {
+            "id": "asml.pdf:179:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 179,
+            "score": 0.03405483405483405,
+            "text": "Purchase 100% renewable electricity for our own operations worldwide by 2025. This target is measured as the percentage of renewable electricity purchased (including energy attribute certificates) versus our total electricity consumption. It pertains exclusively to scope 2 emissions, for which we use market-based emission factors.\n\nGet commitment from our top 80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030. This target is calculated as the percentage of our suppliers (based on CO₂e emissions) who signed a letter of commitment or made a public statement to reduce their CO₂e footprint by 2030. Our top 80% suppliers are those who, according to spend-based emission calculations, together account for 80% of our total supplier emissions and is updated on a yearly basis. Progress is monitored as of 2024, when the program started. In 2025, we updated our calculation methodology to introduce greater granularity in categorizing the different types of GHG reduction commitments set by our suppliers."
+          },
+          {
+            "id": "asml.pdf:165:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03327205882352941,
+            "text": "We asked suppliers to sign our letter of commitment (LOC) to commit to and collaborate with us to achieve our ESG ambitions. By signing, they agree to:\n\n- Measure and share their CO2e emission data with ecosystem partners;\n- Set ambitious targets to reduce or compensate for CO2e emissions;\n- Collaborate with ASML and ecosystem partners to remanufacture used system parts, tools, packaging and other materials, to maximize reuse.\n\nFor the estimated emission reduction of this action, we refer to our Climate Transition Plan. Since 2024, we continuously focus on suppliers’ data quality and informing and training them on calculation methodologies for their scope 1, 2 and 3 emissions. In 2025, we focused on strategies to reduce the."
+          },
+          {
+            "id": "asml.pdf:145:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 145,
+            "score": 0.032341851696690405,
+            "text": "Target: Commitment from our top-80% suppliers (based on CO₂e emissions) to reduce their CO₂e footprint by 2030 75% commitment from top 80% suppliers by 2026\nPerformance: 32%"
+          },
+          {
+            "id": "asml.pdf:165:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.03231667748215444,
+            "text": "We asked suppliers to sign our letter of commitment (LOC) to commit to and collaborate with us to achieve our ESG ambitions. By signing, they agree to:\n\n- Measure and share their CO2e emission data with ecosystem partners;\n- Set ambitious targets to reduce or compensate for CO2e emissions;\n- Collaborate with ASML and ecosystem partners to remanufacture used system parts, tools, packaging and other materials, to maximize reuse.\n\nFor the estimated emission reduction of this action, we refer to our Climate Transition Plan. Since 2024, we continuously focus on suppliers’ data quality and informing and training them on calculation methodologies for their scope 1, 2 and 3 emissions. In 2025, we focused on strategies to reduce the."
+          },
+          {
+            "id": "asml.pdf:166:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 166,
+            "score": 0.029705882352941176,
+            "text": "In the coming years, we will stay focused on the following activities to reduce emissions in our supply chain:\n\n- We are actively engaging with the top-80% of our suppliers. We stimulate our Tier 1 suppliers to engage with their own suppliers to extend decarbonization efforts upstream. In cases where these suppliers are also our direct suppliers, we work together to maximize our joint leverage and accelerate impact.\n- We are further expanding our training curriculum to support both internal teams and suppliers in better understanding and calculating scope 3 emissions.\n\nHowever, we experience that many suppliers are not yet equipped to report emissions in line with the GHG Protocol Corporate Standard, partly due to the relief provided by the EU Omnibus Regulation, which delays their CSRD reporting obligations. To maintain consistency, we continued to apply the spend-based method in 2025. Meanwhile, we actively collaborate with suppliers to build readiness and support future data maturity."
+          },
+          {
+            "id": "asml.pdf:160:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 160,
+            "score": 0.029247087463049902,
+            "text": "For scope 3, (as shown on page 159) we have the following SBTi-validated and approved intensity targets (against the 2019 absolute baseline value of 7.6 Mt):\n\n- Reduce scope 3 GHG emissions per €m gross profit by 35.3% by 2025: This target represents an intensity reduction from our baseline value of 1.44 kt CO2e per €m gross profit to a target level of 0.93 kt CO2e per €m gross profit.\n- Reduce scope 3 GHG emissions per €m gross profit by 55% by 2030: This translates to lowering our CO2 emissions to below 19.5 Mt by 2030.\n- Reduce scope 3 GHG emissions per €m gross profit by 97% by 2040: This translates to lowering our emissions to below 2.3 Mt by 2040."
+          },
+          {
+            "id": "asml.pdf:160:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 160,
+            "score": 0.028431372549019607,
+            "text": "For scope 3, (as shown on page 159) we have the following SBTi-validated and approved intensity targets (against the 2019 absolute baseline value of 7.6 Mt):\n\n- Reduce scope 3 GHG emissions per €m gross profit by 35.3% by 2025: This target represents an intensity reduction from our baseline value of 1.44 kt CO2e per €m gross profit to a target level of 0.93 kt CO2e per €m gross profit.\n- Reduce scope 3 GHG emissions per €m gross profit by 55% by 2030: This translates to lowering our CO2 emissions to below 19.5 Mt by 2030.\n- Reduce scope 3 GHG emissions per €m gross profit by 97% by 2040: This translates to lowering our emissions to below 2.3 Mt by 2040."
+          },
+          {
+            "id": "asml.pdf:165:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 165,
+            "score": 0.027975899690604135,
+            "text": "We aim to reduce emissions in our supply chain by working closely with suppliers to embed low-carbon practices and drive systemic change toward a GHG neutral supply chain by 2030.\n\n- Become GHG neutral for scope 3 emissions related to purchased goods and services by 2030\n- Reaching GHG neutrality by 2030 requires strong collaboration with our suppliers."
+          }
+        ]
+      },
+      "answer": {
+        "question": "What percentage commitment target did ASML set for its top-80% suppliers to reduce CO2e footprint by 2026?",
+        "answer": "ASML set a commitment target of 75% for its top-80% suppliers to reduce their CO₂e footprint by 2026.",
+        "verbatim": "75%",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 145,
+            "quote": "75% commitment from top 80% suppliers by 2026"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 145,
+            "quote": "75% commitment from top 80% suppliers by 2026"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_gender_diversity_target",
+      "question": "What is ASML's gender diversity target for inflow of women across all job grades?",
+      "category": "sustainability_target",
+      "difficulty": "medium",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": [
+          "24%",
+          "2025"
+        ],
+        "page": 145,
+        "accepted_pages": [
+          82,
+          145,
+          210,
+          220
+        ],
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          82,
+          210,
+          233,
+          210,
+          220,
+          210,
+          220,
+          82,
+          210,
+          220,
+          210,
+          220
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:82:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 82,
+            "score": 0.03459750428186934,
+            "text": "| Gender diversity: % | Women in our workforce | Inflow of women (all job grades) | Representation of women in job grade 13+ |     |     |\n| ------------------- | ---------------------- | -------------------------------- | ---------------------------------------- | --- | --- |\n|                     |                        |                                  | 29%                                      | 16% | 21% |"
+          },
+          {
+            "id": "asml.pdf:210:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.03293650793650793,
+            "text": "| Attrition rate   | Gender diversity: % inflow of women (all job grades) |\n| ---------------- | ---------------------------------------------------- |\n| 4.1%             | 29%                                                  |\n| 2024: 3.8%       | 2024: 26%                                            |\n| 2025 target: <7% | 2025 target: 24%                                     |"
+          },
+          {
+            "id": "asml.pdf:233:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 233,
+            "score": 0.03256738842244808,
+            "text": "This target is based on all employees in senior leadership roles (job grade 13+) as at the end of the reporting period."
+          },
+          {
+            "id": "asml.pdf:210:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.03219616204690832,
+            "text": "| Gender diversity: % representation of women in job grade 13+ | Gender diversity: % inflow of women to job grade 9+ |\n| ------------------------------------------------------------ | --------------------------------------------------- |\n| 16%                                                          | 28%                                                 |\n| 2024: 12%                                                    | 2024: 30%                                           |\n| 2026 target: 14%                                             | 2025 target: 24%                                    |"
+          },
+          {
+            "id": "asml.pdf:220:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.032182916307161344,
+            "text": "We aim to foster inclusion, diversity and sense of belonging in a safe environment for all ASML workers, where everyone is valued, respected and can fully contribute. Our baseline figure, reported in 2022, is 24%. In 2025 there was a 29% inflow of women, reaching our 2025 target.\n\nGlobally, women comprise between 20%-29% of the semiconductor workforce, with representation in technical roles ranging from 10% to 19%. We continue to take a multifaceted approach, setting challenging yet feasible and steady inflow targets that are within these ranges to ultimately facilitate reaching our women representation goals."
+          },
+          {
+            "id": "asml.pdf:210:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.032175351530190244,
+            "text": "Attrition rate: 2025 target: <7%\nGender diversity: % inflow of women (all job grades): 2025 target: 24%"
+          },
+          {
+            "id": "asml.pdf:220:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.031625,
+            "text": "Having reached our 2025 target, we continue progressing on our long-term I&#x26;D journey to promote equal development opportunities. To support this, we have set a more ambitious target, 26% inflow of women to middle management and above (job grades 9+) in 20261."
+          },
+          {
+            "id": "asml.pdf:82:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 82,
+            "score": 0.03136773136773137,
+            "text": "Representation of women in job grade 13+: 29%"
+          },
+          {
+            "id": "asml.pdf:210:17",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.031339712918660285,
+            "text": "Gender diversity: % representation of women in job grade 13+: 2026 target: 14%\nGender diversity: % inflow of women to job grade 9+: 2025 target: 24%"
+          },
+          {
+            "id": "asml.pdf:220:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.03125763125763126,
+            "text": "2025 target: 24%\n\nOur baseline figure, reported in 2023, is 25%. In 2025, there was a 28% inflow of women to middle management roles and above, reaching our 2025 target."
+          },
+          {
+            "id": "asml.pdf:210:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.03125,
+            "text": "Attrition rate: 4.1%\nGender diversity: % inflow of women (all job grades): 29%"
+          },
+          {
+            "id": "asml.pdf:220:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.030476190476190476,
+            "text": "Achieve 24% inflow of women (all job grades) by 2025: 2024\n0%: 2025\n10%: 29%\n20%: Achieved\n30%: 2025 target: 24%"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What is ASML's gender diversity target for inflow of women across all job grades?",
+        "answer": "ASML's gender diversity target for inflow of women across all job grades is 24% by 2025.",
+        "verbatim": "24%",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 210,
+            "quote": "2025 target: 24%"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 210,
+            "quote": "2025 target: 24%"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_women_workforce",
+      "question": "What percentage of ASML's workforce were women in 2025?",
+      "category": "pre_extracted_fact",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "21%"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": true,
+      "retrieval_hit": true,
+      "answer_correct": true,
+      "citation_grounded": true,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          5,
+          220,
+          82,
+          82,
+          220,
+          210,
+          232,
+          233,
+          210,
+          210,
+          267,
+          42
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04293617540576822,
+            "text": "Metric: Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:220:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.03514344262295082,
+            "text": "We aim to foster inclusion, diversity and sense of belonging in a safe environment for all ASML workers, where everyone is valued, respected and can fully contribute. Our baseline figure, reported in 2022, is 24%. In 2025 there was a 29% inflow of women, reaching our 2025 target.\n\nGlobally, women comprise between 20%-29% of the semiconductor workforce, with representation in technical roles ranging from 10% to 19%. We continue to take a multifaceted approach, setting challenging yet feasible and steady inflow targets that are within these ranges to ultimately facilitate reaching our women representation goals."
+          },
+          {
+            "id": "asml.pdf:82:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 82,
+            "score": 0.03337076128452728,
+            "text": "| Gender diversity: % | Women in our workforce | Inflow of women (all job grades) | Representation of women in job grade 13+ |     |     |\n| ------------------- | ---------------------- | -------------------------------- | ---------------------------------------- | --- | --- |\n|                     |                        |                                  | 29%                                      | 16% | 21% |"
+          },
+          {
+            "id": "asml.pdf:82:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 82,
+            "score": 0.03182678158503258,
+            "text": "Representation of women in job grade 13+: 29%"
+          },
+          {
+            "id": "asml.pdf:220:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 220,
+            "score": 0.03076317859952793,
+            "text": "2025 target: 24%\n\nOur baseline figure, reported in 2023, is 25%. In 2025, there was a 28% inflow of women to middle management roles and above, reaching our 2025 target."
+          },
+          {
+            "id": "asml.pdf:210:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.030300751879699248,
+            "text": "| Gender diversity: % representation of women in job grade 13+ | Gender diversity: % inflow of women to job grade 9+ |\n| ------------------------------------------------------------ | --------------------------------------------------- |\n| 16%                                                          | 28%                                                 |\n| 2024: 12%                                                    | 2024: 30%                                           |\n| 2026 target: 14%                                             | 2025 target: 24%                                    |"
+          },
+          {
+            "id": "asml.pdf:232:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 232,
+            "score": 0.029895755770662696,
+            "text": "We report our gender pay gap in accordance with ESRS. This metric is determined as the difference of average gross hourly pay levels between female and male employees, expressed as a percentage of the average gross hourly pay level of male employees. The gender pay gap calculation as described in the additional disclosures for S1-16 Remuneration metrics refers to the ‘unadjusted’ pay gap. This means that while we provided raw statistics around this topic, it does not account for objective factors for pay differences such as job level, performance, location, job family or tenure. Consequently, we cannot attribute the pay gap with pay equity issues per se.\n\nOur average hourly pay gap for 2025 stands at 9.3% which is 0.9% lower than that of 2024 (10.2%). We believe this result was driven by an increase in the concentration of women in higher-earning roles, specifically in stronger economic locations, combined with a favorable movement in the average exchange rates observed for some of these locations. The combined effect resulted in a 6.6% increase in the average gross hourly pay of women versus the 5.5% for men, compared to 2024.\n\nThe main driver of the reported gender pay gap remains the underrepresentation of female employees in higher paying roles (generally more senior positions). There is a higher proportion of men across all levels of the organization (79% (2024: 79% men, 21% (2024: 21%) women) with the highest proportion in senior management (84% (2024: 88%) men, 16% (2024:12%) women). Roles within senior management typically command higher market salaries and opportunities for larger financial incentives. In contrast, there is a high proportion of women in lower employee bands.\n\nCompanies such as ASML, that operate within the technology industry, have traditionally faced challenges attracting women due to their underrepresentation in the STEM talent pool itself. We continue to invest in the promotion of STEM subjects in primary and secondary school levels and will continue to do so to help further diversify the talent pool. Read more in Sustainability statements – Social – Valued partner in our communities – Investing in STEM education. We have also set targets to increase the representation of female employees overall and in leadership positions specifically. Read more in Sustainability statements – Social – Attractive workplace for all – Inclusion and diversity.\n\nAdditionally, we intend to further evaluate and assess pay and to consider objective factors that can impact an employee’s pay. We aim to close unjustified pay differences between men and women, if any are identified, adhering to local legislation at a minimum. We are preparing for compliance with the EU Pay Transparency Directive and have taken steps intended to support our readiness for this."
+          },
+          {
+            "id": "asml.pdf:233:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 233,
+            "score": 0.029826504245108895,
+            "text": "This target is based on all employees in senior leadership roles (job grade 13+) as at the end of the reporting period."
+          },
+          {
+            "id": "asml.pdf:210:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.027306616961789376,
+            "text": "| Attrition rate   | Gender diversity: % inflow of women (all job grades) |\n| ---------------- | ---------------------------------------------------- |\n| 4.1%             | 29%                                                  |\n| 2024: 3.8%       | 2024: 26%                                            |\n| 2025 target: <7% | 2025 target: 24%                                     |"
+          },
+          {
+            "id": "asml.pdf:210:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.026309067688378034,
+            "text": "Attrition rate: 2025 target: <7%\nGender diversity: % inflow of women (all job grades): 2025 target: 24%"
+          },
+          {
+            "id": "asml.pdf:267:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 267,
+            "score": 0.020626003210272872,
+            "text": "Metric: Number of complaints filed through channels for own workforce\nPeriod: 2025\nValue: 77"
+          },
+          {
+            "id": "asml.pdf:42:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 42,
+            "score": 0.019047619047619046,
+            "text": "535: System sales in units\n21%: Women in our workforce (headcount)\n88%: Customer satisfaction survey score\n4.1%: Attrition rate\n3.8%: Suppliers with overall high risk evaluated and follow-up agreed (in %)\n100%: 2024: 100%"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What percentage of ASML's workforce were women in 2025?",
+        "answer": "In 2025, 21% of ASML's workforce were women.",
+        "verbatim": "21%",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "asml_nationalities",
+      "question": "How many nationalities are represented in ASML's workforce?",
+      "category": "pre_extracted_fact",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": [
+          "143"
+        ],
+        "answer_contains_all": null,
+        "page": 5,
+        "accepted_pages": null,
+        "source": "asml.pdf",
+        "behavior": null
+      },
+      "passed": false,
+      "retrieval_hit": true,
+      "answer_correct": false,
+      "citation_grounded": true,
+      "reasons": [
+        "none of ['143'] found in answer"
+      ],
+      "retrieval": {
+        "pages": [
+          5,
+          5,
+          209,
+          34,
+          213,
+          210,
+          198,
+          267,
+          267,
+          270,
+          5,
+          270
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:5:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.05720661494487546,
+            "text": "Metric: Nationalities\nPeriod: 2025\nValue: 535\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04202852009880979,
+            "text": "Metric: Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:209:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 209,
+            "score": 0.03235042735042735,
+            "text": "We strive to create a culture that empowers our workforce to deliver on our vision by ensuring people are proud to be part of ASML and engaged with our ambitions. We aim to attract and retain a healthy, diverse and engaged workforce.\n\nRead more on page 210 >"
+          },
+          {
+            "id": "asml.pdf:34:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 34,
+            "score": 0.027844123192960403,
+            "text": "To deliver on our growth plans and address the shifts in our competitive landscape, we need to further build a scalable and sustainable organization, based on a clear and transparent operating model, using our principles of clarity, agility and scalability. This includes empowering decision-making at the right levels, aligning roles and responsibilities, and improving coordination across departments.\n\nStrategic workforce planning and knowledge management are central to this effort. We are identifying the critical capabilities needed to deliver on our business goals and know-how through proactive collaboration and learning. To scale responsibly, we are expanding our global talent pipeline and improving the speed and quality of recruitment.\n\nOur approach to internal mobility helps employees navigate across ASML, bringing key talents to where they can have the most impact and building a holistic understanding of our value chain."
+          },
+          {
+            "id": "asml.pdf:213:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 213,
+            "score": 0.02782051282051282,
+            "text": "We are dedicated to building a safe and inclusive environment where everyone feels valued, respected and can fully contribute. We believe unique and diverse teams are essential to our success, fueling innovation and creativity across our organization.\n\nWe’re committed to treating everyone fairly and equally, to being an equal-opportunity employer, and to cultivating an inclusive and diverse workforce. Aligning with our Code of Conduct, we do not tolerate any form of discrimination, harassment, bullying or retaliation. We aim to hire, promote and compensate our workforce without regard to age, race, color, religion, sex, gender, gender identity or expression, sexual orientation, national origin and/or other characteristics. We make reasonable accommodations to enable everyone – including employees who are neurodiverse, or who have special needs or disabilities – to effectively perform their jobs."
+          },
+          {
+            "id": "asml.pdf:210:0",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 210,
+            "score": 0.027134146341463414,
+            "text": "We aim to attract and retain a healthy, diverse and engaged workforce"
+          },
+          {
+            "id": "asml.pdf:198:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 198,
+            "score": 0.02480952380952381,
+            "text": "Metric: Biological materials used to manufacture products and services that are sustainably sourced\nPeriod: 2024\nValue: 1,920"
+          },
+          {
+            "id": "asml.pdf:267:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 267,
+            "score": 0.0244375,
+            "text": "Metric: Number of complaints filed through channels for own workforce\nPeriod: 2024\nValue: 93"
+          },
+          {
+            "id": "asml.pdf:267:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 267,
+            "score": 0.02407692307692308,
+            "text": "Metric: Number of complaints filed through channels for own workforce\nPeriod: 2025\nValue: 77"
+          },
+          {
+            "id": "asml.pdf:270:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 270,
+            "score": 0.019672131147540982,
+            "text": "Related ESRS disclosure requirements: S1-4 – Taking action on material impacts on own workforce, and approaches to managing material risks and pursuing material opportunities related to own workforce, and effectiveness of those actions\nReference: • Sustainability statements – Social – Attractive Workplace for all – How we are managing attractive workplace for all • Sustainability statements – Social – Attractive workplace for all – Our actions and resources"
+          },
+          {
+            "id": "asml.pdf:5:1",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.019047619047619046,
+            "text": "| €32.7bn     | Total net sales                                                                      | 88%    | Customer satisfaction survey score | > 44,000 | Total employees (FTEs)             |\n| ----------- | ------------------------------------------------------------------------------------ | ------ | ---------------------------------- | -------- | ---------------------------------- |\n| Our purpose | Unlocking the potential of people and society by pushing technology to new limits.   |        |                                    |          |                                    |\n| Our vision  | We enable groundbreaking technology to solve some of humanity’s toughest challenges. |        |                                    |          |                                    |\n| €4.7bn      | Research & Development                                                               | €8.5bn | Returned to shareholders           | 21%      | Women in our workforce (headcount) |\n| 5,100       | Total number of suppliers                                                            | 535    | Nationalities                      | 143      | System sales in units              |"
+          },
+          {
+            "id": "asml.pdf:270:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 270,
+            "score": 0.01875,
+            "text": "Related ESRS disclosure requirements: S1-2 – Processes for engaging with own workforce and workers’ representatives about impacts\nReference: • Sustainability statements – Social – Attractive Workplace for all – How we are managing attractive workplace for all • Strategic report – Our business – Engaged stakeholders – Employees"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many nationalities are represented in ASML's workforce?",
+        "answer": "ASML's workforce represents 535 nationalities.",
+        "verbatim": "535",
+        "citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Nationalities\nPeriod: 2025\nValue: 535"
+          }
+        ],
+        "refused": false,
+        "refusal_reason": null,
+        "raw_citations": [
+          {
+            "source": "asml.pdf",
+            "page": 5,
+            "quote": "Metric: Nationalities\nPeriod: 2025\nValue: 535"
+          }
+        ],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "refusal_future_actual_net_sales",
+      "question": "What were ASML's actual reported net sales in 2028?",
+      "category": "hallucination_check",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": null,
+        "page": null,
+        "accepted_pages": null,
+        "source": null,
+        "behavior": "refuse"
+      },
+      "passed": true,
+      "retrieval_hit": null,
+      "answer_correct": null,
+      "citation_grounded": null,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          287,
+          287,
+          287,
+          5,
+          287,
+          286,
+          286,
+          286,
+          286,
+          286,
+          54,
+          54
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:287:13",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.05290679619888003,
+            "text": "Metric: Net system sales\nPeriod: 2024\nValue: 21,768.7\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:287:12",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.052673635307781644,
+            "text": "Metric: Net system sales\nPeriod: 2023\nValue: 21,938.6\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:287:14",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.05147657605552342,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.03821807091117042,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:287:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 287,
+            "score": 0.0305019305019305,
+            "text": "Year ended December 31 (€, in millions): Net system sales\n2023: 21,938.6\n2024: 21,768.7\n2025: 24,474.3"
+          },
+          {
+            "id": "asml.pdf:286:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 286,
+            "score": 0.029513513513513515,
+            "text": "2023: in units\n2024: in units\n2025: in units"
+          },
+          {
+            "id": "asml.pdf:286:33",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 286,
+            "score": 0.028484848484848484,
+            "text": "Metric: Total\nPeriod: 2025\nValue: 535"
+          },
+          {
+            "id": "asml.pdf:286:31",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 286,
+            "score": 0.02812911725955204,
+            "text": "Metric: Total\nPeriod: 2023\nValue: 600"
+          },
+          {
+            "id": "asml.pdf:286:35",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 286,
+            "score": 0.02798459563543004,
+            "text": "2023: in units\n2024: in units\n2025: in units"
+          },
+          {
+            "id": "asml.pdf:286:32",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 286,
+            "score": 0.02630365888792855,
+            "text": "Metric: Total\nPeriod: 2024\nValue: 583"
+          },
+          {
+            "id": "asml.pdf:54:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.026193548387096775,
+            "text": "Metric: Net system sales\nPeriod: 2024\nValue: 21,768.7"
+          },
+          {
+            "id": "asml.pdf:54:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 54,
+            "score": 0.02580952380952381,
+            "text": "Metric: Net system sales\nPeriod: 2025\nValue: 24,474.3"
+          }
+        ]
+      },
+      "answer": {
+        "question": "What were ASML's actual reported net sales in 2028?",
+        "answer": "The actual reported net sales for ASML in 2028 are not available in the provided context.",
+        "verbatim": null,
+        "citations": [],
+        "refused": true,
+        "refusal_reason": "No data for 2028 is present in the context.",
+        "raw_citations": [],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "refusal_out_of_corpus_company",
+      "question": "How many employees does Tesla have?",
+      "category": "hallucination_check",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": null,
+        "page": null,
+        "accepted_pages": null,
+        "source": null,
+        "behavior": "refuse"
+      },
+      "passed": true,
+      "retrieval_hit": null,
+      "answer_correct": null,
+      "citation_grounded": null,
+      "reasons": [],
+      "retrieval": {
+        "pages": [],
+        "chunks": []
+      },
+      "answer": {
+        "question": "How many employees does Tesla have?",
+        "answer": "",
+        "verbatim": null,
+        "citations": [],
+        "refused": true,
+        "refusal_reason": "Question mentions TESLA, but the active company filter is ASML.",
+        "raw_citations": [],
+        "grounding_drops": []
+      }
+    },
+    {
+      "id": "refusal_unsupported_metric",
+      "question": "How many company cars did ASML own in 2025?",
+      "category": "hallucination_check",
+      "difficulty": "easy",
+      "expected": {
+        "answer_contains_any": null,
+        "answer_contains_all": null,
+        "page": null,
+        "accepted_pages": null,
+        "source": null,
+        "behavior": "refuse"
+      },
+      "passed": true,
+      "retrieval_hit": null,
+      "answer_correct": null,
+      "citation_grounded": null,
+      "reasons": [],
+      "retrieval": {
+        "pages": [
+          296,
+          137,
+          267,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "chunks": [
+          {
+            "id": "asml.pdf:296:25",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 296,
+            "score": 0.06485714285714286,
+            "text": "Metric: Cars\nPeriod: 2025\nValue: 9.4\nUnit: €, in millions"
+          },
+          {
+            "id": "asml.pdf:137:11",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 137,
+            "score": 0.046590163934426235,
+            "text": "Metric: Other disclosures: Water management in our own operations\nPeriod: 2025\nValue: 208\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:267:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 267,
+            "score": 0.04619354838709677,
+            "text": "Metric: Number of complaints filed through channels for own workforce\nPeriod: 2025\nValue: 77"
+          },
+          {
+            "id": "asml.pdf:5:2",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.044437500000000005,
+            "text": "Metric: Total net sales\nPeriod: 2025\nValue: €32.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:3",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04407692307692308,
+            "text": "Metric: Customer satisfaction survey score\nPeriod: 2025\nValue: 88%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:4",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.043727272727272726,
+            "text": "Metric: Total employees (FTEs)\nPeriod: 2025\nValue: > 44,000\nUnit: FTEs\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:5",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04338805970149254,
+            "text": "Metric: Research & Development\nPeriod: 2025\nValue: €4.7bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:6",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04305882352941177,
+            "text": "Metric: Returned to shareholders\nPeriod: 2025\nValue: €8.5bn\nUnit: EUR billion\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:7",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04273913043478261,
+            "text": "Metric: Women in our workforce (headcount)\nPeriod: 2025\nValue: 21%\nUnit: %\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:8",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.04242857142857143,
+            "text": "Metric: Total number of suppliers\nPeriod: 2025\nValue: 5,100\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:9",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.042126760563380286,
+            "text": "Metric: Nationalities\nPeriod: 2025\nValue: 535\nPresentation: highlight"
+          },
+          {
+            "id": "asml.pdf:5:10",
+            "source": "asml.pdf",
+            "company": "ASML",
+            "year": 2025,
+            "page": 5,
+            "score": 0.041833333333333333,
+            "text": "Metric: System sales in units\nPeriod: 2025\nValue: 143\nPresentation: highlight"
+          }
+        ]
+      },
+      "answer": {
+        "question": "How many company cars did ASML own in 2025?",
+        "answer": "The context does not provide information on the number of company cars owned by ASML in 2025. It only mentions a monetary value related to cars.",
+        "verbatim": null,
+        "citations": [],
+        "refused": true,
+        "refusal_reason": "No relevant data on the number of company cars.",
+        "raw_citations": [],
+        "grounding_drops": []
+      }
+    }
+  ]
+}

@@ -3,10 +3,14 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import random
 import re
 import sys
+import time
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Any
 
 import chromadb
 import tiktoken
@@ -14,8 +18,12 @@ import tiktoken
 from backend.app._openai import openai_client
 from backend.app.chunking import build_semantic_chunks
 from backend.app.config import settings
+from backend.app.openai_table_vision import PageTableExtraction, enhance_page_tables, tables_to_text
+from backend.app.extracted_datapoints import deduplicate_datapoints, normalize_llamaextract_result
+from backend.app.openai_extract_datapoints import extract_annual_report_datapoints_openai
 from backend.app.parsers import as_page_tuples, parse_pdf_pages
 from backend.app.schemas import Chunk
+from backend.app.vision_page_selection import classify_table_complexity
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +39,48 @@ _SUSTAINABILITY_PATTERNS = [
     re.compile(r"\b(net[-\s]?zero|greenhouse gas|ghg|co2e|co₂e|scope [123])\b", re.IGNORECASE),
     re.compile(r"\b20\d{2}\b", re.IGNORECASE),
 ]
+_ESG_PATTERNS = [
+    re.compile(r"\b(ESG|environmental|social|governance)\b", re.IGNORECASE),
+    re.compile(r"\b(climate|carbon|emission|biodiversity|water|waste|diversity|inclusion)\b", re.IGNORECASE),
+]
+_FINANCIAL_HIGHLIGHT_PATTERNS = [
+    re.compile(r"\b(revenue|net income|profit|loss|EBITDA|operating income|earnings|return on equity|ROE|ROA|NII|net interest income)\b", re.IGNORECASE),
+]
+_BUSINESS_PERFORMANCE_PATTERNS = [
+    re.compile(r"\b(segment|business line|performance|growth|market share|volumes?|loans?|deposits?|assets under management|AuM|client)\b", re.IGNORECASE),
+]
+_SHAREHOLDER_RETURN_PATTERNS = [
+    re.compile(r"\b(dividend|EPS|earnings per share|share buyback|repurchase|total shareholder return|TSR|capital return|payout)\b", re.IGNORECASE),
+]
+_CATEGORY_MAX_PAGES: dict[str, int] = {
+    "sustainability": 30,
+    "fte": 20,
+    "esg": 20,
+    "financial_highlight": 20,
+    "business_performance": 20,
+    "shareholder_return": 20,
+}
+_CATEGORY_PATTERNS: dict[str, list[re.Pattern]] = {
+    "fte": _FTE_PATTERNS,
+    "sustainability": _SUSTAINABILITY_PATTERNS,
+    "esg": _ESG_PATTERNS,
+    "financial_highlight": _FINANCIAL_HIGHLIGHT_PATTERNS,
+    "business_performance": _BUSINESS_PERFORMANCE_PATTERNS,
+    "shareholder_return": _SHAREHOLDER_RETURN_PATTERNS,
+}
+_DATAPOINT_CATEGORIES = (
+    "fte",
+    "sustainability",
+    "esg",
+    "financial_highlight",
+    "business_performance",
+    "shareholder_return",
+)
+_VISION_MAX_PAGES = 20
+_VISION_MAX_ATTEMPTS = 2
+_VISION_DETAIL = "high"
+_VISION_DPI = 180
+_VISION_WORKERS = 6
 
 
 def _count_tokens(text: str) -> int:
@@ -50,6 +100,11 @@ def parse_pdf(path: Path) -> Iterator[tuple[int, str]]:
 def _processed_pages_path(source: str, processed_dir: Path | None = None) -> Path:
     root = processed_dir or settings.get_processed_path()
     return root / "pages" / f"{Path(source).stem}.jsonl"
+
+
+def _processed_pages_enhanced_path(source: str, processed_dir: Path | None = None) -> Path:
+    root = processed_dir or settings.get_processed_path()
+    return root / "pages_enhanced" / f"{Path(source).stem}.jsonl"
 
 
 def persist_parsed_pages(
@@ -76,6 +131,20 @@ def persist_parsed_pages(
                 "char_count": len(text),
                 "token_count": _count_tokens(text),
             }
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return out_path
+
+
+def persist_enhanced_pages(
+    records: list[dict[str, Any]],
+    *,
+    source: str,
+    processed_dir: Path | None = None,
+) -> Path:
+    out_path = _processed_pages_enhanced_path(source, processed_dir)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
+        for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return out_path
 
@@ -182,15 +251,262 @@ def extract_datapoint_candidates(
 
 
 def persist_datapoints(
-    datapoints: list[dict[str, str | int | None]],
+    datapoints: list[object],
     *,
     source: str,
     processed_dir: Path | None = None,
 ) -> Path:
     out_path = _processed_datapoints_path(source, processed_dir)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(datapoints, ensure_ascii=False, indent=2), encoding="utf-8")
+    serializable: list[object] = []
+    for datapoint in datapoints:
+        model_dump = getattr(datapoint, "model_dump", None)
+        if callable(model_dump):
+            serializable.append(model_dump())
+        else:
+            serializable.append(datapoint)
+    out_path.write_text(json.dumps(serializable, ensure_ascii=False, indent=2), encoding="utf-8")
     return out_path
+
+
+def extract_categorized_datapoints(
+    pages: list[tuple[int, str]],
+    *,
+    source: str,
+    company: str | None,
+    year: int | None,
+) -> list[object]:
+    page_records = [
+        {
+            "source": source,
+            "company": company,
+            "year": year,
+            "page": page,
+            "text": text,
+        }
+        for page, text in pages
+        if text.strip()
+    ]
+    def _extract_category(category: str) -> list[object]:
+        max_pages = _CATEGORY_MAX_PAGES.get(category, 20)
+        patterns = _CATEGORY_PATTERNS.get(category, [])
+        if patterns:
+            scored = [
+                (p, sum(len(pat.findall(p["text"])) for pat in patterns))
+                for p in page_records
+            ]
+            scored = [(p, s) for p, s in scored if s > 0]
+            scored.sort(key=lambda x: x[1], reverse=True)
+            candidate_pages = [p for p, _ in scored[:max_pages]] or page_records[:max_pages]
+        else:
+            candidate_pages = page_records[:max_pages]
+        logger.info("category %s: %d/%d pages selected by regex", category, len(candidate_pages), len(page_records))
+
+        def _extract_page(page_record: dict) -> list[object]:
+            result = extract_annual_report_datapoints_openai(
+                pages=[page_record],
+                company=company,
+                year=year,
+                category=category,
+            )
+            return normalize_llamaextract_result(result, source=source, company=company, year=year, extractor="openai")
+
+        category_results: list[object] = []
+        with ThreadPoolExecutor(max_workers=3) as page_executor:
+            page_futures = [page_executor.submit(_extract_page, p) for p in candidate_pages]
+            for f in as_completed(page_futures):
+                category_results.extend(f.result())
+        return category_results
+
+    extracted = []
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {executor.submit(_extract_category, cat): cat for cat in _DATAPOINT_CATEGORIES}
+        for future in as_completed(futures):
+            extracted.extend(future.result())
+    return deduplicate_datapoints(extracted)
+
+
+def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
+    try:
+        import fitz
+    except ImportError as exc:
+        raise RuntimeError("PyMuPDF not installed: pip install pymupdf") from exc
+    doc = fitz.open(str(pdf_path))
+    try:
+        page = doc[page_1based - 1]
+        mat = fitz.Matrix(dpi / 72, dpi / 72)
+        pix = page.get_pixmap(matrix=mat)
+        return pix.tobytes("png")
+    finally:
+        doc.close()
+
+
+def _strip_markdown_tables(text: str) -> str:
+    out_lines: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2:
+            continue
+        out_lines.append(line)
+    cleaned: list[str] = []
+    blank = False
+    for line in out_lines:
+        if line.strip():
+            cleaned.append(line)
+            blank = False
+        elif not blank:
+            cleaned.append(line)
+            blank = True
+    return "\n".join(cleaned).strip()
+
+
+def _apply_vision_enhancement(record: dict[str, Any], extraction: PageTableExtraction, model: str) -> dict[str, Any]:
+    tables_dicts = [table.model_dump() for table in extraction.tables]
+    out = dict(record)
+    out["tables"] = tables_dicts
+    out["table_enhanced"] = extraction.has_tables and bool(tables_dicts)
+    out["table_enhancement_model"] = model if out["table_enhanced"] else None
+    out["table_enhancement_error"] = None
+    if out["table_enhanced"] and tables_dicts:
+        summary = tables_to_text(tables_dicts).strip()
+        if summary:
+            narrative = _strip_markdown_tables(record.get("text") or "")
+            out["enhanced_text"] = (narrative + "\n\n" + summary).strip() if narrative else summary
+    return out
+
+
+def _apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
+    out = dict(record)
+    out["tables"] = []
+    out["table_enhanced"] = False
+    out["table_enhancement_model"] = None
+    out["table_enhancement_error"] = None
+    return out
+
+
+def _apply_enhancement_error(record: dict[str, Any], error: str) -> dict[str, Any]:
+    out = _apply_empty_enhancement(record)
+    out["table_enhancement_error"] = error
+    return out
+
+
+def _enhance_page_record_with_retry(
+    *,
+    pdf_path: Path,
+    record: dict[str, Any],
+    company: str | None,
+    year: int | None,
+    source_name: str | None,
+    model: str,
+    detail: str,
+    dpi: int,
+    max_attempts: int,
+) -> PageTableExtraction:
+    page_num = int(record["page"])
+    last_exc: Exception | None = None
+    token_limit_phrases = ("length limit was reached", "max_tokens", "finish_reason")
+    for attempt in range(max_attempts):
+        try:
+            image_bytes = _render_page(pdf_path, page_num, dpi)
+            return enhance_page_tables(
+                image_bytes=image_bytes,
+                page=page_num,
+                company=company or record.get("company"),
+                year=year or record.get("year"),
+                source=source_name or record.get("source"),
+                page_text=record.get("text"),
+                model=model,
+                detail=detail,
+            )
+        except Exception as exc:
+            last_exc = exc
+            if any(phrase in str(exc) for phrase in token_limit_phrases):
+                raise
+            if attempt < max_attempts - 1:
+                delay = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(delay)
+    raise last_exc  # type: ignore[misc]
+
+
+def enhance_pages_with_vision(
+    *,
+    pdf_path: Path,
+    pages: list[tuple[int, str]],
+    source: str,
+    company: str | None,
+    year: int | None,
+    parser: str | None = None,
+    processed_dir: Path | None = None,
+    model: str | None = None,
+) -> list[tuple[int, str]]:
+    vision_model = model or settings.openai_table_vision_model
+    records = [
+        {
+            "id": f"{source}:{page}",
+            "source": source,
+            "company": company,
+            "year": year,
+            "page": page,
+            "parser": parser,
+            "text": text,
+            "char_count": len(text),
+            "token_count": _count_tokens(text),
+        }
+        for page, text in pages
+    ]
+    scored_candidates: list[tuple[int, str, float]] = []
+    page_map = {int(record["page"]): record for record in records}
+    for record in records:
+        kind, score = classify_table_complexity(record.get("text", ""))
+        if kind != "skip":
+            scored_candidates.append((int(record["page"]), kind, score))
+    scored_candidates.sort(key=lambda item: item[2], reverse=True)
+    selected = [page for page, _, _ in scored_candidates[:_VISION_MAX_PAGES]]
+    selected_set = set(selected)
+
+    results: dict[int, dict[str, Any]] = {}
+    max_workers = max(1, min(_VISION_WORKERS, len(selected))) if selected else 1
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(
+                _enhance_page_record_with_retry,
+                pdf_path=pdf_path,
+                record=page_map[page_num],
+                company=company,
+                year=year,
+                source_name=source,
+                model=vision_model,
+                detail=_VISION_DETAIL,
+                dpi=_VISION_DPI,
+                max_attempts=_VISION_MAX_ATTEMPTS,
+            ): page_num
+            for page_num in selected
+        }
+        for future in as_completed(futures):
+            page_num = futures[future]
+            try:
+                extraction = future.result()
+                results[page_num] = _apply_vision_enhancement(page_map[page_num], extraction, vision_model)
+            except Exception as exc:
+                results[page_num] = _apply_enhancement_error(page_map[page_num], str(exc))
+
+    enhanced_records: list[dict[str, Any]] = []
+    enhanced_pages: list[tuple[int, str]] = []
+    for record in records:
+        page_num = int(record["page"])
+        if page_num in selected_set:
+            row = results.get(page_num) or _apply_enhancement_error(record, "no result returned")
+        else:
+            row = _apply_empty_enhancement(record)
+        enhanced_records.append(row)
+        enhanced_pages.append((page_num, str(row.get("enhanced_text") or row.get("text") or "")))
+
+    persist_enhanced_pages(
+        enhanced_records,
+        source=source,
+        processed_dir=processed_dir,
+    )
+    return enhanced_pages
 
 
 def persist_chunks(
@@ -379,8 +695,10 @@ def build_datapoint_chunks(
         page = int(datapoint["page"] or 1)
         idx = next_idx_by_page.get(page, 0)
         next_idx_by_page[page] = idx + 1
-        datapoint_type = str(datapoint["datapoint_type"])
-        text = str(datapoint["verbatim_text"]).strip()
+        datapoint_type = str(datapoint.get("datapoint_type") or "datapoint")
+        text = str(datapoint.get("verbatim_text") or datapoint.get("quote") or "").strip()
+        if not text:
+            continue
         section_path = datapoint.get("section_path")
         embedding_parts = [
             company,
@@ -454,6 +772,10 @@ def ingest_pdf(
     source_name: str | None = None,
     enhanced_jsonl: Path | None = None,
     pages_jsonl: Path | None = None,
+    extract_datapoints: bool = True,
+    enhance_vision: bool = True,
+    datapoints_json: Path | None = None,
+    skip_embed: bool = False,
 ) -> int:
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
@@ -491,6 +813,17 @@ def ingest_pdf(
         processed_dir=processed_dir,
     )
     logger.info("wrote parsed pages to %s", pages_path)
+    if pages_jsonl is None and enhanced_jsonl is None and enhance_vision:
+        pages = enhance_pages_with_vision(
+            pdf_path=pdf_path,
+            pages=pages,
+            source=source,
+            company=company,
+            year=year,
+            parser=parser_name,
+            processed_dir=processed_dir,
+        )
+        logger.info("applied automatic vision enhancement to difficult table pages")
     chunks = build_chunks(
         iter(pages),
         source=source,
@@ -504,22 +837,49 @@ def ingest_pdf(
     chunks = deduplicate_chunks(chunks)
     logger.info("kept %d semantic chunks after exact deduplication", len(chunks))
 
-    datapoints = extract_datapoint_candidates(chunks, parser=parser_name)
-    datapoints_path = persist_datapoints(
-        datapoints,
-        source=source,
-        processed_dir=processed_dir,
-    )
-    logger.info(
-        "wrote %d pre-extracted candidate datapoints to %s",
-        len(datapoints),
-        datapoints_path,
-    )
+    raw_datapoints: list[dict] = []
+    if extract_datapoints:
+        datapoints = extract_categorized_datapoints(
+            pages,
+            source=source,
+            company=company,
+            year=year,
+        )
+        datapoints_path = persist_datapoints(
+            datapoints,
+            source=source,
+            processed_dir=processed_dir,
+        )
+        logger.info(
+            "wrote %d categorized LLM-extracted datapoints to %s",
+            len(datapoints),
+            datapoints_path,
+        )
+        raw_datapoints = [dp if isinstance(dp, dict) else dp.model_dump() for dp in datapoints]
+    elif datapoints_json is not None:
+        raw_datapoints = json.loads(datapoints_json.read_text(encoding="utf-8"))
+        logger.info("loaded %d datapoints from %s", len(raw_datapoints), datapoints_json)
+
+    if raw_datapoints:
+        dp_chunks = build_datapoint_chunks(
+            raw_datapoints,
+            source=source,
+            company=company,
+            year=year,
+            parser=parser_name,
+            existing_chunks=chunks,
+        )
+        chunks.extend(dp_chunks)
+        logger.info("added %d datapoint chunks", len(dp_chunks))
 
     chunks = deduplicate_chunks(chunks)
     logger.info("kept %d chunks after exact deduplication", len(chunks))
     chunks_path = persist_chunks(chunks, source=source, processed_dir=processed_dir)
     logger.info("wrote debug chunks to %s", chunks_path)
+
+    if skip_embed:
+        logger.info("skip_embed=True: skipping embedding and ChromaDB upsert")
+        return len(chunks)
 
     embeddings = embed_texts([c.embedding_text or c.text for c in chunks])
     if len(embeddings) != len(chunks):
@@ -588,6 +948,30 @@ def _cli(argv: list[str] | None = None) -> int:
         default=None,
         help="path to parsed pages JSONL to ingest directly without running the PDF parser",
     )
+    parser.add_argument(
+        "--no-extract-datapoints",
+        action="store_false",
+        dest="extract_datapoints",
+        help="skip categorized LLM datapoint extraction",
+    )
+    parser.add_argument(
+        "--no-vision-enhancement",
+        action="store_false",
+        dest="enhance_vision",
+        help="skip automatic vision enhancement of difficult table pages after parsing",
+    )
+    parser.add_argument(
+        "--datapoints-json",
+        type=Path,
+        default=None,
+        help="path to existing datapoints JSON to embed without re-extracting",
+    )
+    parser.add_argument(
+        "--skip-embed",
+        action="store_true",
+        help="skip embedding and ChromaDB upsert (parse, vision and datapoint extraction only)",
+    )
+    parser.set_defaults(extract_datapoints=True, enhance_vision=True, skip_embed=False)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -601,6 +985,10 @@ def _cli(argv: list[str] | None = None) -> int:
             source_name=args.source_name,
             enhanced_jsonl=args.enhanced_jsonl,
             pages_jsonl=args.pages_jsonl,
+            extract_datapoints=args.extract_datapoints,
+            enhance_vision=args.enhance_vision,
+            datapoints_json=args.datapoints_json,
+            skip_embed=args.skip_embed,
         )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
