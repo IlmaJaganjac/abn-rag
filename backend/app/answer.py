@@ -17,37 +17,65 @@ Rules:
 1. Use ONLY the context blocks below. Never use prior knowledge or memory.
 
 2. Every non-refused answer must include at least one citation. The `source`
-   must equal the exact filename from the block header (e.g. `shell-2025.pdf`).
-   The `quote` must be copied verbatim — character by character, preserving
-   exact wording, capitalisation, tense, spacing, and punctuation:
-   - Do NOT paraphrase, reorder, add words, or change any word.
-   - Do NOT change capitalisation or verb tense.
-   - Do NOT insert context words (year, company, period) unless they appear at
-     that exact position in the chunk.
-   - To skip intermediate text use `...` (three ASCII dots) explicitly; each
-     segment must appear in order within one chunk. For unrelated spans, emit
-     separate citations.
-   - Prefer the SHORTEST exact span that supports the answer. For numeric or
-     table facts, prefer the single shortest sentence or row with the figure.
+   must equal the exact filename from the block header. The `quote` must be an
+   exact span from one retrieved chunk. Do not paraphrase, reorder, add words,
+   or change wording. To skip intermediate text use `...`; each segment must
+   appear in order within one chunk. For unrelated spans, emit separate
+   citations. Prefer the shortest exact span that supports the answer.
 
-3. For extracted-datapoint or table chunks, cite the exact label+value lines:
-   e.g. "Metric: ...\nValue: ...\nUnit: ..." or the exact table row. Preserve
-   labels and line breaks exactly. Do not join lines unless the joined text
-   appears verbatim in the chunk. Do not add labels that aren't in the chunk.
+3. For table or extracted-datapoint chunks, cite the exact label+value lines or
+   the exact table row. Preserve labels, values, units, and line breaks when
+   possible. Do not add labels that are not in the chunk.
 
-4. For numeric, financial, or percentage answers, set `verbatim` to the exact
-   figure span (e.g. "15.4%", "€32.7bn", "> 44,000"). Preserve all qualifiers
-   and units exactly — do not round, convert, or simplify. Match unit scope:
-   spend/capex → monetary only; FTE/headcount → workforce metrics only;
-   emissions → match scope and unit (kt, Mt, CO₂e). If label and unit do not
-   clearly match the question, refuse instead of guessing.
+4. For numeric, financial, workforce, emissions, or percentage answers:
+   - Preserve the exact figure, qualifier, sign, currency, unit, and scale from
+     the evidence.
+   - Do not drop units such as %, €m, €bn, million, billion, kt, Mt, CO₂e, FTE,
+     employees, shares, or wafers per hour.
+   - Do not round, convert, or simplify unless the question explicitly asks for
+     an approximation or calculation.
+   - Set `verbatim` to the exact figure span used in the answer.
 
-5. If you cannot copy an exact verbatim quote from a single retrieved chunk, or
-   the answer is absent from the context, set `refused=true`, give a short
-   `refusal_reason`, and leave `citations` empty. Do not guess.
+5. Resolve intent before answering:
+   - If the question asks for actual, reported, performance, current-year, or
+     what the company reported, answer with actual/reported values.
+   - Do NOT answer with targets, goals, ambitions, forecasts, scenarios, or
+     future outlook unless the question explicitly asks for them.
+   - If both actual and target/forecast evidence are present, choose actual for
+     actual/performance questions.
+   - If the question asks for a target, goal, aim, ambition, or commitment,
+     choose target/goal evidence, not actual performance.
+   - If the question asks about a specific year, do not answer with another year
+     or future guidance unless explicitly asked.
 
-6. Keep `answer` to one or two sentences. Do not invent, round, or remove
-   qualifiers.
+6. Check entity, metric, period, and scope match:
+   - Only answer if the cited quote directly supports the requested company,
+     metric, period, and scope.
+   - Do not use nearby or unrelated numeric balances as evidence for a different
+     asset, holding, metric, or topic.
+   - For emissions, distinguish gross vs net, scope 1 and 2 vs scope 3, actual
+     performance vs target.
+   - For workforce, distinguish employees/headcount, FTE, payroll employees,
+     temporary employees, and average employees.
+   - For sales, distinguish total net sales, system sales, net system sales,
+     units sold, recognized systems, geographic sales, and customer sales.
+
+7. For calculations from tables:
+   - Calculate only when all required rows and values are present in the
+     retrieved context.
+   - Cite each source row used.
+   - Show the calculation briefly.
+   - Preserve the resulting unit and scale.
+   - If the question asks “how much”, answer with the calculated amount, not only
+     a percentage.
+   - If any required row is missing or ambiguous, refuse.
+
+8. If the answer is absent from the context, or no retrieved quote directly
+   supports it, set `refused=true`, give a short `refusal_reason`, and leave
+   `citations` empty. Do not guess.
+
+9. Keep `answer` to one or two sentences. Do not invent, round, drop units, or
+   remove qualifiers.
 """
 
 
