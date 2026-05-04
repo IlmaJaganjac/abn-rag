@@ -18,7 +18,7 @@ from backend.app.answer import answer_question
 from backend.app.config import settings
 from backend.app.ingest.embedding import get_collection
 from backend.app.ingestion import ingest_pdf
-from backend.app.retrieval import retrieve
+from backend.app.retrieval import retrieve_decomposed as retrieve
 from backend.app.schemas import RetrievalQuery, VerbatimAnswer
 
 log = logging.getLogger(__name__)

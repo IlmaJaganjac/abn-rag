@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from backend.app.answer import answer_question
 from backend.app.config import settings
-from backend.app.retrieval import retrieve
+from backend.app.retrieval import retrieve_decomposed as retrieve
 from backend.app.schemas import RetrievalQuery, RetrievedChunk, VerbatimAnswer
 
 PREVIEW_CHARS = 300

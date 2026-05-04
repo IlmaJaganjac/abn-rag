@@ -8,6 +8,13 @@ import re
 from collections import Counter
 from typing import Any
 
+_DECOMPOSE_SYSTEM = (
+    "You decompose user questions for a RAG system over annual reports. "
+    "Split the question into 1–4 atomic sub-questions that can each be answered independently. "
+    "Return ONLY a JSON array of strings, no explanation. "
+    "If the question is already atomic, return a single-element array."
+)
+
 logger = logging.getLogger(__name__)
 
 from backend.app.config import settings
@@ -285,4 +292,48 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     return RetrievalResult(query=query, chunks=chunks)
 
 
-__all__ = ["retrieve", "settings"]
+def decompose_query(question: str) -> list[str]:
+    """Use an LLM to split a compound question into atomic sub-questions."""
+    from backend.app.config import openai_client
+    client = openai_client()
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        temperature=0,
+        messages=[
+            {"role": "system", "content": _DECOMPOSE_SYSTEM},
+            {"role": "user", "content": question},
+        ],
+    )
+    raw = (resp.choices[0].message.content or "").strip()
+    try:
+        parts = json.loads(raw)
+        if isinstance(parts, list) and parts:
+            return [str(q) for q in parts]
+    except Exception:
+        pass
+    return [question]
+
+
+def _merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[RetrievedChunk]:
+    """Deduplicate chunks from multiple retrievals, keeping highest score per id."""
+    best: dict[str, RetrievedChunk] = {}
+    for chunks in chunk_lists:
+        for chunk in chunks:
+            if chunk.id not in best or chunk.score > best[chunk.id].score:
+                best[chunk.id] = chunk
+    return sorted(best.values(), key=lambda c: c.score, reverse=True)[:top_k]
+
+
+def retrieve_decomposed(query: RetrievalQuery) -> RetrievalResult:
+    """Decompose the query into sub-questions, retrieve for each, and merge results."""
+    sub_questions = decompose_query(query.question)
+    logger.debug("decomposed %r into %d sub-questions: %s", query.question, len(sub_questions), sub_questions)
+    chunk_lists = [
+        retrieve(query.model_copy(update={"question": q})).chunks
+        for q in sub_questions
+    ]
+    chunks = _merge_chunks(chunk_lists, query.top_k)
+    return RetrievalResult(query=query, chunks=chunks)
+
+
+__all__ = ["retrieve", "retrieve_decomposed", "decompose_query", "settings"]
