@@ -568,7 +568,7 @@ def test_llamaextract_blank_quote_not_rejected():
 # Raw audit payload
 # ---------------------------------------------------------------------------
 
-from scripts.run_pre_extraction import _build_raw_audit_payload  # noqa: E402
+from utils.scripts.run_pre_extraction import _build_raw_audit_payload  # noqa: E402
 
 
 def test_raw_audit_payload_structure():

@@ -5,6 +5,8 @@ from pathlib import Path
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
@@ -17,11 +19,11 @@ class Settings(BaseSettings):
     openai_validate_model: str = "gpt-5.4-mini"
     openai_table_vision_model: str = "gpt-5.4-mini"
 
-    chroma_persist_dir: Path = Path("backend/data/chroma")
+    chroma_persist_dir: Path = PROJECT_ROOT / "backend/data/chroma"
     chroma_collection: str = "annual_reports"
-    processed_dir: Path = Path("backend/data/processed")
+    processed_dir: Path = PROJECT_ROOT / "backend/data/processed"
 
-    reports_dir: Path = Path("backend/data/reports")
+    reports_dir: Path = PROJECT_ROOT / "backend/data/reports"
     pdf_parser: str = "llamaparse"
 
     chunk_size_tokens: int = 800
