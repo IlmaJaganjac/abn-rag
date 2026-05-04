@@ -53,7 +53,7 @@ function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase
   );
 }
 
-function AnswerBlock({ ans, caveat }: { ans: VerbatimAnswer; caveat?: string }) {
+function AnswerBlock({ ans, caveat, sourceLabel }: { ans: VerbatimAnswer; caveat?: string; sourceLabel: (src: string) => string }) {
   if (ans.refused) {
     return (
       <div className="msg-assistant">
@@ -87,7 +87,7 @@ function AnswerBlock({ ans, caveat }: { ans: VerbatimAnswer; caveat?: string }) 
               <div className="cite-num">[{i + 1}]</div>
               <div className="cite-body">
                 <div className="cite-source">
-                  <span>{c.source}</span>
+                  <span>{sourceLabel(c.source)}</span>
                   <span className="cite-page-tag">p.{c.page}</span>
                 </div>
                 <div className="cite-quote">&ldquo;{c.quote}&rdquo;</div>
@@ -155,9 +155,24 @@ export function ChatView() {
     })();
   }, []);
 
-  const companies = useMemo(() => {
-    const s = new Set(docs.map(d => d.company).filter((c): c is string => !!c));
-    return Array.from(s).sort();
+  const reports = useMemo(() =>
+    docs
+      .filter(d => d.company)
+      .map(d => ({
+        source: d.source,
+        company: d.company!,
+        year: d.year,
+        label: [d.company, d.year ? String(d.year) : null].filter(Boolean).join(' '),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
+    [docs]);
+
+  const sourceLabel = useMemo(() => {
+    const m = new Map(docs.map(d => [
+      d.source,
+      [d.company, d.year ? String(d.year) : null].filter(Boolean).join(' ') || d.source,
+    ]));
+    return (src: string) => m.get(src) ?? src;
   }, [docs]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages, busy, phase]);
@@ -172,8 +187,10 @@ export function ChatView() {
     setPhaseDetail('');
 
     try {
+      const selected = reports.find(r => r.source === scope);
       const ans = await api.ask(q, {
-        company: scope === 'all' ? null : scope,
+        company: selected?.company ?? null,
+        year: selected?.year ?? null,
         onPhase: (p, detail) => {
           setPhase(p);
           setPhaseDetail(detail ?? '');
@@ -247,7 +264,7 @@ export function ChatView() {
                     {m.content}
                   </div>
                 ) : (
-                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} />
+                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} sourceLabel={sourceLabel} />
                 )}
               </div>
             ))
@@ -278,8 +295,8 @@ export function ChatView() {
               <span className="scope-pill">
                 <span style={{ color: 'var(--ink-3)' }}>Scope</span>
                 <select value={scope} onChange={e => setScope(e.target.value)}>
-                  <option value="all">All documents</option>
-                  {companies.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="all">All reports</option>
+                  {reports.map(r => <option key={r.source} value={r.source}>{r.label}</option>)}
                 </select>
               </span>
               <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>

@@ -1,37 +1,57 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Datapoint, DatapointType } from '../types';
+import type { Datapoint, DatapointType, Document } from '../types';
 import { api } from '../api/client';
 
 function typeLabel(t: string): string {
   return t.replace(/_/g, ' ').toUpperCase();
 }
 
+function reportLabel(doc: { company: string | null; year: number | null; source: string }): string {
+  const parts = [doc.company, doc.year ? String(doc.year) : null].filter(Boolean);
+  return parts.length ? parts.join(' ') : doc.source;
+}
+
 export function DatapointsView() {
   const [type, setType] = useState<DatapointType | 'all'>('all');
-  const [company, setCompany] = useState<string>('all');
+  const [report, setReport] = useState<string>('all');
   const [allDatapoints, setAllDatapoints] = useState<Datapoint[]>([]);
   const [rows, setRows] = useState<Datapoint[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      try { setAllDatapoints(await api.listDatapoints()); } catch {}
-    })();
-  }, []);
+  const [docs, setDocs] = useState<Document[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const filter: { company?: string; type?: string } = {};
-        if (company !== 'all') filter.company = company;
-        if (type !== 'all') filter.type = type;
-        setRows(await api.listDatapoints(filter));
+        const [dps, ds] = await Promise.all([api.listDatapoints(), api.listDocuments()]);
+        setAllDatapoints(dps);
+        setDocs(ds);
       } catch {}
     })();
-  }, [type, company]);
+  }, []);
 
-  const companies = useMemo(() =>
-    Array.from(new Set(allDatapoints.map(d => d.company))).sort(),
-    [allDatapoints]);
+  const docBySource = useMemo(() => {
+    const m = new Map<string, Document>();
+    for (const d of docs) m.set(d.source, d);
+    return m;
+  }, [docs]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const filter: { type?: string } = {};
+        if (type !== 'all') filter.type = type;
+        let data = await api.listDatapoints(filter);
+        if (report !== 'all') data = data.filter(d => d.source === report);
+        setRows(data);
+      } catch {}
+    })();
+  }, [type, report]);
+
+  const reports = useMemo(() => {
+    const sources = new Set(allDatapoints.map(d => d.source));
+    return docs
+      .filter(d => sources.has(d.source))
+      .sort((a, b) => reportLabel(a).localeCompare(reportLabel(b)));
+  }, [allDatapoints, docs]);
 
   const types = useMemo(() =>
     Array.from(new Set(allDatapoints.map(d => d.type))).sort(),
@@ -42,7 +62,7 @@ export function DatapointsView() {
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  useEffect(() => { setPage(0); }, [type, company]);
+  useEffect(() => { setPage(0); }, [type, report]);
 
   return (
     <div className="view">
@@ -67,17 +87,14 @@ export function DatapointsView() {
             >{typeLabel(t)}</button>
           ))}
           <span style={{ width: 1, background: 'var(--line)', margin: '0 4px' }} />
-          <button
-            className={`filter-chip ${company === 'all' ? 'active' : ''}`}
-            onClick={() => setCompany('all')}
-          >All companies</button>
-          {companies.map(c => (
-            <button
-              key={c}
-              className={`filter-chip ${company === c ? 'active' : ''}`}
-              onClick={() => setCompany(c)}
-            >{c}</button>
-          ))}
+          <span className="scope-pill">
+            <select value={report} onChange={e => setReport(e.target.value)}>
+              <option value="all">All reports</option>
+              {reports.map(r => (
+                <option key={r.source} value={r.source}>{reportLabel(r)}</option>
+              ))}
+            </select>
+          </span>
         </div>
 
         <div className="dp-table">
@@ -100,7 +117,10 @@ export function DatapointsView() {
               <div className="value">{d.value}</div>
               <div className="page-ref">{d.period}</div>
               <div className="source-ref">
-                {d.source}
+                {(() => {
+                  const doc = docBySource.get(d.source);
+                  return doc ? reportLabel(doc) : d.source;
+                })()}
                 <div>p.{d.page} · {d.section}</div>
               </div>
             </div>

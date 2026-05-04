@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Document, DocStatus } from '../types';
 import { api, AlreadyIndexedError } from '../api/client';
-import { IUpload, IDoc, ITrash, IUsers, ILeaf } from './Icons';
+import { IUpload, IDoc, ITrash } from './Icons';
 
 type Stage = 'parsing' | 'embedding' | 'done';
 interface Ingest { id: string; name: string; stage: Stage; pct: number; }
@@ -109,7 +109,6 @@ export function DocumentsView() {
     }
   };
 
-  const totalChunks = docs.reduce((sum, d) => sum + (d.chunks ?? 0), 0);
   const totalMb = docs.reduce((sum, d) => sum + (d.size_mb ?? 0), 0);
 
   return (
@@ -118,7 +117,7 @@ export function DocumentsView() {
         <div className="docs-hd">
           <h2>Documents</h2>
           <div className="docs-count">
-            {docs.length} indexed · {totalChunks.toLocaleString()} chunks · {totalMb.toFixed(1)} MB
+            {docs.length} indexed · {totalMb.toFixed(1)} MB
           </div>
         </div>
 
@@ -130,7 +129,7 @@ export function DocumentsView() {
         >
           <div style={{ marginBottom: 8, opacity: 0.5 }}><IUpload size={22} /></div>
           <div className="dz-title">Drop annual reports here</div>
-          <div className="dz-sub">PDF · up to ~500 pages · parsed with Docling, chunked, embedded into Postgres pgvector</div>
+          <div className="dz-sub">PDF only</div>
           <input
             ref={fileInputRef}
             type="file"
@@ -174,9 +173,9 @@ export function DocumentsView() {
                 <div className="doc-icon"><IDoc size={18} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="doc-title">{d.title}</div>
-                  <div className="doc-meta">{d.source} · {d.pages}pp · {d.size_mb.toFixed(1)} MB</div>
+                  <div className="doc-meta">{d.pages}pp · {d.size_mb.toFixed(1)} MB</div>
                   <div className={`doc-status ready`} style={{ marginTop: 6, color: 'var(--ink-3)' }}>
-                    <span className="dot" /> {d.status} · {d.chunks.toLocaleString()} chunks · {d.parser}
+                    <span className="dot" /> {d.status}
                   </div>
                 </div>
                 <button
@@ -187,16 +186,6 @@ export function DocumentsView() {
                 >
                   <ITrash />
                 </button>
-              </div>
-              <div className="doc-stats">
-                <div>
-                  <div className="doc-stat-label"><IUsers /> FTE (extracted)</div>
-                  <div className="doc-stat-value">{d.fte ?? '—'}</div>
-                </div>
-                <div>
-                  <div className="doc-stat-label"><ILeaf /> Net-zero year</div>
-                  <div className="doc-stat-value">{d.net_zero_year ?? '—'}</div>
-                </div>
               </div>
             </div>
           ))}

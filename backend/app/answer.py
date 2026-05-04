@@ -416,13 +416,30 @@ def answer_question(
             grounding_drops=drops,
         )
 
+    citations = _trim_citations(grounded, question)
+
     return VerbatimAnswer(
         question=question,
         answer=parsed.answer,
         verbatim=parsed.verbatim,
-        citations=grounded,
+        citations=citations,
         refused=False,
         refusal_reason=None,
         raw_citations=parsed.citations,
         grounding_drops=drops,
     )
+
+
+_MULTI_TOPIC_RE = re.compile(
+    r"\b(compare|comparison|versus|vs\.?|both|all|each|difference|between|and|multiple|across)\b",
+    re.IGNORECASE,
+)
+
+
+def _trim_citations(citations: list[Citation], question: str) -> list[Citation]:
+    if len(citations) <= 1:
+        return citations
+    unique_sources = {c.source for c in citations}
+    if len(unique_sources) > 1 and _MULTI_TOPIC_RE.search(question):
+        return citations
+    return citations[:1]

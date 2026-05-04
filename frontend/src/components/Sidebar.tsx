@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { IChat, IDoc, ITable } from './Icons';
 
 export type ViewKey = 'chat' | 'docs' | 'datapoints';
@@ -10,31 +10,7 @@ interface Props {
   datapointCount: number;
 }
 
-interface Pull {
-  company: string;
-  year: number;
-  page: number;
-  quote: string;
-  topic: string;
-}
-
-const PULLS: Pull[] = [
-  { company: 'ABN AMRO', year: 2025, page: 174, topic: 'Workforce',
-    quote: 'A net workforce reduction of around 5,200 FTE by year-end 2028.' },
-  { company: 'ASML', year: 2025, page: 145, topic: 'Climate',
-    quote: 'Net Scope 1 & 2 GHG-neutral by 2025 — achieved.' },
-  { company: 'Shell', year: 2025, page: 122, topic: 'People',
-    quote: 'Approximately 96,000 employees at the end of 2025.' },
-  { company: 'Heineken', year: 2024, page: 88, topic: 'Headcount',
-    quote: '85,870 full-time equivalents across more than 70 markets.' },
-  { company: 'ABN AMRO', year: 2025, page: 25, topic: 'Sustainability',
-    quote: 'Our climate strategy targets a net-zero economy by 2050.' },
-];
-
 export function Sidebar({ view, onChange, docCount, datapointCount }: Props) {
-  const [idx, setIdx] = useState(() => Math.floor(Math.random() * PULLS.length));
-  const pull = PULLS[idx];
-  const next = () => setIdx((idx + 1) % PULLS.length);
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -61,34 +37,7 @@ export function Sidebar({ view, onChange, docCount, datapointCount }: Props) {
       </nav>
 
       <div className="sidebar-spacer" />
-
-      <div className="pull-card" onClick={() => { onChange('chat'); next(); }} role="button" tabIndex={0}>
-        <div className="pull-eyebrow">
-          <span className="pull-kicker">From the index</span>
-          <span className="pull-topic">{pull.topic}</span>
-        </div>
-        <div className="pull-quote">
-          <span className="pull-mark" aria-hidden="true">&ldquo;</span>
-          {pull.quote}
-        </div>
-        <div className="pull-meta">
-          <span className="pull-source">{pull.company} · {pull.year}</span>
-          <span className="pull-page">p.{pull.page}</span>
-        </div>
-        <button
-          className="pull-shuffle"
-          aria-label="Show another quote"
-          onClick={(e) => { e.stopPropagation(); next(); }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="16 3 21 3 21 8" />
-            <line x1="4" y1="20" x2="21" y2="3" />
-            <polyline points="21 16 21 21 16 21" />
-            <line x1="15" y1="15" x2="21" y2="21" />
-            <line x1="4" y1="4" x2="9" y2="9" />
-          </svg>
-        </button>
-      </div>
+      <div className="sidebar-footer">Annualyzer 2026 V1</div>
     </aside>
   );
 }
