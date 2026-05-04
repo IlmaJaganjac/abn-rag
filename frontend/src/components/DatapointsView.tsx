@@ -1,32 +1,48 @@
-import React, { useState, useMemo } from 'react';
-import { MOCK_DATAPOINTS } from '../mock';
-import type { DatapointType } from '../types';
-import { IExternal } from './Icons';
-import { PdfViewer } from './PdfViewer';
+import React, { useState, useMemo, useEffect } from 'react';
+import type { Datapoint, DatapointType } from '../types';
+import { api } from '../api/client';
 
-const TYPES: { key: DatapointType | 'all'; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'fte', label: 'FTE / Workforce' },
-  { key: 'esg', label: 'ESG / Climate' },
-  { key: 'financial', label: 'Financial' },
-];
+function typeLabel(t: string): string {
+  return t.replace(/_/g, ' ').toUpperCase();
+}
 
 export function DatapointsView() {
   const [type, setType] = useState<DatapointType | 'all'>('all');
   const [company, setCompany] = useState<string>('all');
-  const [viewer, setViewer] = useState<{ source: string; page: number; quote: string } | null>(null);
+  const [allDatapoints, setAllDatapoints] = useState<Datapoint[]>([]);
+  const [rows, setRows] = useState<Datapoint[]>([]);
 
-  const companies = useMemo(() => {
-    return Array.from(new Set(MOCK_DATAPOINTS.map(d => d.company))).sort();
+  useEffect(() => {
+    (async () => {
+      try { setAllDatapoints(await api.listDatapoints()); } catch {}
+    })();
   }, []);
 
-  const rows = useMemo(() => {
-    return MOCK_DATAPOINTS.filter(d => {
-      if (type !== 'all' && d.type !== type) return false;
-      if (company !== 'all' && d.company !== company) return false;
-      return true;
-    });
+  useEffect(() => {
+    (async () => {
+      try {
+        const filter: { company?: string; type?: string } = {};
+        if (company !== 'all') filter.company = company;
+        if (type !== 'all') filter.type = type;
+        setRows(await api.listDatapoints(filter));
+      } catch {}
+    })();
   }, [type, company]);
+
+  const companies = useMemo(() =>
+    Array.from(new Set(allDatapoints.map(d => d.company))).sort(),
+    [allDatapoints]);
+
+  const types = useMemo(() =>
+    Array.from(new Set(allDatapoints.map(d => d.type))).sort(),
+    [allDatapoints]);
+
+  const PAGE_SIZE = 15;
+  const [page, setPage] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  useEffect(() => { setPage(0); }, [type, company]);
 
   return (
     <div className="view">
@@ -39,12 +55,16 @@ export function DatapointsView() {
         </div>
 
         <div className="dp-filters">
-          {TYPES.map(t => (
+          <button
+            className={`filter-chip ${type === 'all' ? 'active' : ''}`}
+            onClick={() => setType('all')}
+          >All</button>
+          {types.map(t => (
             <button
-              key={t.key}
-              className={`filter-chip ${type === t.key ? 'active' : ''}`}
-              onClick={() => setType(t.key)}
-            >{t.label}</button>
+              key={t}
+              className={`filter-chip ${type === t ? 'active' : ''}`}
+              onClick={() => setType(t)}
+            >{typeLabel(t)}</button>
           ))}
           <span style={{ width: 1, background: 'var(--line)', margin: '0 4px' }} />
           <button
@@ -63,29 +83,25 @@ export function DatapointsView() {
         <div className="dp-table">
           <div className="dp-row header">
             <div>Company</div>
-            <div>Metric</div>
+            <div>Datapoint</div>
             <div>Value</div>
-            <div>Period</div>
+            <div>Year</div>
             <div>Source</div>
           </div>
-          {rows.map((d, i) => (
-            <div key={i} className="dp-row" onClick={() => setViewer({ source: d.source, page: d.page, quote: d.verbatim })}
-              role="button" tabIndex={0}
-              style={{ cursor: 'pointer' }}
-              onKeyDown={e => { if (e.key === 'Enter') setViewer({ source: d.source, page: d.page, quote: d.verbatim }); }}>
+          {pageRows.map((d, i) => (
+            <div key={i} className="dp-row">
               <div>
                 <div className="company">{d.company}</div>
-                <span className="type-tag">{d.type}</span>
               </div>
               <div className="metric">
-                {d.metric}
-                <div className="verbatim">&ldquo;{d.verbatim}&rdquo;</div>
+                <span className="type-tag" style={{ marginBottom: 4, display: 'inline-block' }}>{typeLabel(d.type)}</span>
+                <div>{d.metric}</div>
               </div>
               <div className="value">{d.value}</div>
               <div className="page-ref">{d.period}</div>
               <div className="source-ref">
                 {d.source}
-                <div>p.{d.page} · {d.section} <IExternal size={11} /></div>
+                <div>p.{d.page} · {d.section}</div>
               </div>
             </div>
           ))}
@@ -95,14 +111,14 @@ export function DatapointsView() {
             </div>
           )}
         </div>
+        {totalPages > 1 && (
+          <div className="dp-pager">
+            <button className="pager-btn" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>←</button>
+            <span className="pager-count">{page + 1} / {totalPages}</span>
+            <button className="pager-btn" onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}>→</button>
+          </div>
+        )}
       </div>
-      <PdfViewer
-        open={!!viewer}
-        source={viewer?.source ?? null}
-        page={viewer?.page ?? null}
-        quote={viewer?.quote ?? null}
-        onClose={() => setViewer(null)}
-      />
     </div>
   );
 }

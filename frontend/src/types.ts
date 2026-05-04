@@ -93,7 +93,7 @@ export interface Document {
   net_zero_year: string | null;
 }
 
-export type DatapointType = 'fte' | 'esg' | 'financial' | 'other';
+export type DatapointType = string;
 
 export interface Datapoint {
   company: string;

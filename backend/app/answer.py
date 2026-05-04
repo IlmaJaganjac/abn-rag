@@ -238,6 +238,20 @@ def _table_grounding_fallback(
     )
 
 
+def _clean_citation_quote(raw: str) -> str:
+    """Strip serialized datapoint metadata; collapse table rows to a hint."""
+    if not raw:
+        return raw
+    text = raw.strip()
+    # Datapoint chunks are formatted "Metric: ...\n...\nQuote: <real>".
+    if "Quote:" in text:
+        text = text.split("Quote:", 1)[1].strip()
+    # If pipe-separated table content remains, replace with table hint.
+    if text.count("|") >= 2:
+        return "Refer to the table on this page."
+    return text
+
+
 def _ground_citations(
     citations: list[Citation],
     chunks: list[RetrievedChunk],
@@ -334,7 +348,7 @@ def _ground_citations(
         grounded.append(Citation(
             source=best.source,
             page=best.page,
-            quote=cite.quote,
+            quote=_clean_citation_quote(cite.quote),
         ))
 
     if not grounded:

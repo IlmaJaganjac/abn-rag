@@ -10,9 +10,19 @@ import type {
   Datapoint,
   VerbatimAnswer,
   ThinkingPhase,
+  DocStatus,
 } from '../types';
 
 const BASE = '/api';
+
+export class AlreadyIndexedError extends Error {
+  document: Document;
+  constructor(message: string, document: Document) {
+    super(message);
+    this.name = 'AlreadyIndexedError';
+    this.document = document;
+  }
+}
 
 async function jsonOrThrow<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -20,6 +30,13 @@ async function jsonOrThrow<T>(res: Response): Promise<T> {
     throw new Error(`${res.status} ${res.statusText}${body ? ` — ${body}` : ''}`);
   }
   return res.json() as Promise<T>;
+}
+
+export interface DocumentStatusResponse {
+  id: string;
+  status: DocStatus;
+  error: string | null;
+  document: Document | null;
 }
 
 export const api = {
@@ -35,7 +52,22 @@ export const api = {
     fd.append('file', file);
     if (meta.company) fd.append('company', meta.company);
     if (meta.year != null) fd.append('year', String(meta.year));
-    return jsonOrThrow(await fetch(`${BASE}/documents`, { method: 'POST', body: fd }));
+    const res = await fetch(`${BASE}/documents`, { method: 'POST', body: fd });
+    if (res.status === 409) {
+      let payload: any = null;
+      try { payload = await res.json(); } catch {}
+      const detail = payload?.detail ?? {};
+      const doc = detail.document as Document;
+      const message = detail.message ?? `${file.name} is already indexed.`;
+      throw new AlreadyIndexedError(message, doc);
+    }
+    return jsonOrThrow(res);
+  },
+
+  async getDocumentStatus(id: string): Promise<DocumentStatusResponse> {
+    return jsonOrThrow(
+      await fetch(`${BASE}/documents/${encodeURIComponent(id)}/status`),
+    );
   },
 
   async deleteDocument(id: string): Promise<void> {
@@ -79,7 +111,7 @@ export const api = {
         question,
         company: opts.company ?? null,
         year: opts.year ?? null,
-        top_k: opts.top_k ?? 8,
+        top_k: opts.top_k ?? 12,
       }),
       signal: opts.signal,
     });

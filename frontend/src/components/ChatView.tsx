@@ -1,8 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import type { ChatMessage, ThinkingPhase, VerbatimAnswer, Citation } from '../types';
-import { SAMPLE_ANSWERS, SUGGESTED_QUESTIONS, MOCK_DOCS } from '../mock';
-import { ISend, IExternal } from './Icons';
-import { PdfViewer } from './PdfViewer';
+import type { ChatMessage, ThinkingPhase, VerbatimAnswer, Document } from '../types';
+import { api } from '../api/client';
+import { ISend } from './Icons';
+
+const SUGGESTED_QUESTIONS = [
+  'How many total employees did ASML have at the end of 2025?',
+  'When does ASML aim to be GHG neutral across its value chain?',
+  'What were ASML’s total Scope 1 and 2 emissions in 2025?',
+  'What is ASML’s climate transition plan?',
+];
 
 const PHASE_LABELS: Record<ThinkingPhase, string> = {
   queued: 'Queued',
@@ -16,23 +22,6 @@ const PHASE_LABELS: Record<ThinkingPhase, string> = {
 
 const PHASE_ORDER: ThinkingPhase[] = ['embedding', 'searching', 'reading', 'drafting', 'citing'];
 
-function pickMockAnswer(q: string): VerbatimAnswer & { caveat?: string } {
-  const lower = q.toLowerCase();
-  if (lower.includes('asml') && (lower.includes('employee') || lower.includes('fte'))) return SAMPLE_ANSWERS.asml_fte;
-  if (lower.includes('shell') && (lower.includes('climate') || lower.includes('adapt'))) return SAMPLE_ANSWERS.shell_climate;
-  if (lower.includes('abn') || lower.includes('workforce')) return SAMPLE_ANSWERS.abn_workforce;
-  if (lower.includes('car') || lower.includes('vehicle')) return SAMPLE_ANSWERS.refusal;
-  // default: a synthesized answer
-  return {
-    question: q,
-    answer: 'I searched across 5 indexed reports but couldn\u2019t find a verbatim figure that directly answers this. The closest matches discuss adjacent topics. Try narrowing to a specific company or year, or rephrase using language likely to appear in the report.',
-    verbatim: null,
-    citations: [
-      { source: 'asml.pdf', page: 178, quote: 'We aim to be greenhouse gas neutral across our value chain by 2040.' },
-    ],
-    refused: false, refusal_reason: null, raw_citations: [], grounding_drops: [],
-  };
-}
 
 function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase; detail?: string; retrievedCount: number }) {
   const idx = PHASE_ORDER.indexOf(phase);
@@ -48,7 +37,7 @@ function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase
         const state = i < idx ? 'done' : i === idx ? 'active' : 'pending';
         const detailText =
           p === 'embedding' && state !== 'pending' ? 'text-embedding-3-small · 1536d' :
-          p === 'searching' && state !== 'pending' ? `${retrievedCount} chunks · k=8` :
+          p === 'searching' && state !== 'pending' ? `${retrievedCount} chunks · k=12` :
           p === 'reading' && state !== 'pending' ? `${Math.min(retrievedCount, 8)} pages` :
           p === 'drafting' && state !== 'pending' ? 'gpt-4o-mini' :
           p === 'citing' && state !== 'pending' ? 'verbatim match' : '';
@@ -64,7 +53,7 @@ function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase
   );
 }
 
-function AnswerBlock({ ans, caveat, onCite }: { ans: VerbatimAnswer; caveat?: string; onCite: (c: Citation) => void }) {
+function AnswerBlock({ ans, caveat }: { ans: VerbatimAnswer; caveat?: string }) {
   if (ans.refused) {
     return (
       <div className="msg-assistant">
@@ -94,8 +83,7 @@ function AnswerBlock({ ans, caveat, onCite }: { ans: VerbatimAnswer; caveat?: st
         <div className="citations">
           <div className="citations-label">Sources · {ans.citations.length}</div>
           {ans.citations.map((c, i) => (
-            <div key={i} className="cite-card" onClick={() => onCite(c)} role="button" tabIndex={0}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCite(c); } }}>
+            <div key={i} className="cite-card">
               <div className="cite-num">[{i + 1}]</div>
               <div className="cite-body">
                 <div className="cite-source">
@@ -104,7 +92,6 @@ function AnswerBlock({ ans, caveat, onCite }: { ans: VerbatimAnswer; caveat?: st
                 </div>
                 <div className="cite-quote">&ldquo;{c.quote}&rdquo;</div>
               </div>
-              <div className="cite-action"><IExternal /></div>
             </div>
           ))}
         </div>
@@ -158,14 +145,20 @@ export function ChatView() {
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<ThinkingPhase>('queued');
   const [phaseDetail, setPhaseDetail] = useState<string>('');
-  const [viewer, setViewer] = useState<{ source: string; page: number; quote: string } | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const [docs, setDocs] = useState<Document[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try { setDocs(await api.listDocuments()); } catch {}
+    })();
+  }, []);
 
   const companies = useMemo(() => {
-    const s = new Set(MOCK_DOCS.map(d => d.company).filter((c): c is string => !!c));
+    const s = new Set(docs.map(d => d.company).filter((c): c is string => !!c));
     return Array.from(s).sort();
-  }, []);
+  }, [docs]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages, busy, phase]);
 
@@ -175,31 +168,48 @@ export function ChatView() {
     setMessages(m => [...m, userMsg]);
     setInput('');
     setBusy(true);
+    setPhase('queued');
+    setPhaseDetail('');
 
-    // Simulated phase progression. Real call would use api.ask() with onPhase.
-    const phaseTimings: [ThinkingPhase, string, number][] = [
-      ['embedding', '', 350],
-      ['searching', 'k=8 · cosine', 600],
-      ['reading', '', 700],
-      ['drafting', '', 1100],
-      ['citing', '', 500],
-    ];
-    for (const [p, d, ms] of phaseTimings) {
-      setPhase(p); setPhaseDetail(d);
-      await new Promise(r => setTimeout(r, ms));
+    try {
+      const ans = await api.ask(q, {
+        company: scope === 'all' ? null : scope,
+        onPhase: (p, detail) => {
+          setPhase(p);
+          setPhaseDetail(detail ?? '');
+        },
+      });
+      const aMsg: ChatMessage = {
+        id: `a-${Date.now()}`,
+        role: 'assistant',
+        content: ans.answer,
+        answer: ans,
+        ts: Date.now(),
+      };
+      setMessages(m => [...m, aMsg]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const aMsg: ChatMessage = {
+        id: `a-${Date.now()}`,
+        role: 'assistant',
+        content: '',
+        answer: {
+          question: q,
+          answer: '',
+          verbatim: null,
+          citations: [],
+          refused: true,
+          refusal_reason: `Request failed: ${msg}`,
+          raw_citations: [],
+          grounding_drops: [],
+        },
+        ts: Date.now(),
+      };
+      setMessages(m => [...m, aMsg]);
+    } finally {
+      setBusy(false);
+      setPhase('queued');
     }
-
-    const ans = pickMockAnswer(q);
-    const aMsg: ChatMessage = {
-      id: `a-${Date.now()}`,
-      role: 'assistant',
-      content: ans.answer,
-      answer: ans,
-      caveat: (ans as VerbatimAnswer & { caveat?: string }).caveat,
-      ts: Date.now(),
-    };
-    setMessages(m => [...m, aMsg]);
-    setBusy(false); setPhase('queued');
   };
 
   const onKey = (e: React.KeyboardEvent) => {
@@ -237,7 +247,7 @@ export function ChatView() {
                     {m.content}
                   </div>
                 ) : (
-                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} onCite={c => setViewer({ source: c.source, page: c.page, quote: c.quote })} />
+                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} />
                 )}
               </div>
             ))
@@ -285,13 +295,6 @@ export function ChatView() {
           </div>
         </div>
       </div>
-      <PdfViewer
-        open={!!viewer}
-        source={viewer?.source ?? null}
-        page={viewer?.page ?? null}
-        quote={viewer?.quote ?? null}
-        onClose={() => setViewer(null)}
-      />
     </>
   );
 }

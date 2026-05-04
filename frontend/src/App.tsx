@@ -4,7 +4,7 @@ import { ChatView } from './components/ChatView';
 import { DocumentsView } from './components/DocumentsView';
 import { DatapointsView } from './components/DatapointsView';
 import { Tour, TourStep } from './components/Tour';
-import { MOCK_DOCS, MOCK_DATAPOINTS } from './mock';
+import { api } from './api/client';
 
 const TOUR_KEY = 'annualyzer.tour.seen.v1';
 
@@ -113,6 +113,27 @@ export function App() {
   const [tweaks, setTweaks] = useState<Tweaks>(TWEAK_DEFAULTS);
   const [tweaksOpen, setTweaksOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [docCount, setDocCount] = useState(0);
+  const [datapointCount, setDatapointCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const [docs, dps] = await Promise.all([
+          api.listDocuments(),
+          api.listDatapoints(),
+        ]);
+        if (!cancelled) {
+          setDocCount(docs.length);
+          setDatapointCount(dps.length);
+        }
+      } catch {}
+    };
+    refresh();
+    const id = setInterval(refresh, 5000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
 
   // First-run tour
   useEffect(() => {
@@ -168,8 +189,8 @@ export function App() {
       <Sidebar
         view={view}
         onChange={setView}
-        docCount={MOCK_DOCS.length}
-        datapointCount={MOCK_DATAPOINTS.length}
+        docCount={docCount}
+        datapointCount={datapointCount}
       />
       <main className="main">
         <header className="topbar">

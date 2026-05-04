@@ -602,6 +602,8 @@ input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
 
 /* ----- Datapoints ----- */
 .dp-wrap { max-width: 1200px; margin: 0 auto; padding: 28px; }
+.dp-pager { display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 16px; }
+.dp-pager .pager-btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 .dp-hd { display: flex; gap: 12px; align-items: end; margin-bottom: 24px; }
 .dp-hd h2 { font-family: 'Newsreader', serif; font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.015em; }
 .dp-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }

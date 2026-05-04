@@ -1,56 +1,125 @@
-import React, { useState } from 'react';
-import { MOCK_DOCS } from '../mock';
-import type { Document } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import type { Document, DocStatus } from '../types';
+import { api, AlreadyIndexedError } from '../api/client';
 import { IUpload, IDoc, ITrash, IUsers, ILeaf } from './Icons';
 
-interface Ingest { id: string; name: string; stage: 'parsing' | 'embedding' | 'done'; pct: number; }
+type Stage = 'parsing' | 'embedding' | 'done';
+interface Ingest { id: string; name: string; stage: Stage; pct: number; }
 
-interface Toast { id: string; }
+type ToastKind = 'indexing' | 'already' | 'ready';
+interface Toast { id: string; kind: ToastKind; filename?: string; }
+
+function statusToStage(s: DocStatus): Stage {
+  if (s === 'parsing' || s === 'queued') return 'parsing';
+  if (s === 'ready') return 'done';
+  return 'embedding';
+}
+
+function stageToPct(stage: Stage): number {
+  if (stage === 'parsing') return 25;
+  if (stage === 'embedding') return 70;
+  return 100;
+}
 
 export function DocumentsView() {
-  const [docs] = useState<Document[]>(MOCK_DOCS);
+  const [docs, setDocs] = useState<Document[]>([]);
   const [over, setOver] = useState(false);
   const [ingest, setIngest] = useState<Ingest[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const showToast = () => {
-    const id = `t-${Date.now()}`;
-    setToasts(arr => [...arr, { id }]);
-    setTimeout(() => setToasts(arr => arr.filter(t => t.id !== id)), 7000);
+  const refresh = async () => {
+    try { setDocs(await api.listDocuments()); } catch {}
   };
-  const dismissToast = (id: string) => setToasts(arr => arr.filter(t => t.id !== id));
 
-  const simulate = (name: string) => {
-    showToast();
-    const id = `ing-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    setIngest(arr => [...arr, { id, name, stage: 'parsing', pct: 6 }]);
-    let pct = 6;
-    const tick = setInterval(() => {
-      pct += 4 + Math.random() * 8;
-      setIngest(arr => arr.map(j => {
-        if (j.id !== id) return j;
-        if (pct >= 100) return { ...j, pct: 100, stage: 'done' };
-        if (pct > 55) return { ...j, pct, stage: 'embedding' };
-        return { ...j, pct };
-      }));
-      if (pct >= 100) {
-        clearInterval(tick);
-        setTimeout(() => setIngest(arr => arr.filter(j => j.id !== id)), 1400);
+  useEffect(() => { refresh(); }, []);
+
+  const dismissToast = (id: string) =>
+    setToasts(arr => arr.filter(t => t.id !== id));
+
+  const showToast = (kind: ToastKind, filename?: string) => {
+    const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setToasts(arr => [...arr, { id, kind, filename }]);
+    const ttl = kind === 'already' ? 6000 : kind === 'ready' ? 8000 : 7000;
+    setTimeout(() => dismissToast(id), ttl);
+  };
+
+  const pollStatus = (jobId: string, docId: string) => {
+    const tick = setInterval(async () => {
+      try {
+        const s = await api.getDocumentStatus(docId);
+        const stage = statusToStage(s.status);
+        setIngest(arr =>
+          arr.map(j => (j.id === jobId ? { ...j, stage, pct: stageToPct(stage) } : j)),
+        );
+        if (s.status === 'ready' || s.status === 'error') {
+          clearInterval(tick);
+          await refresh();
+          if (s.status === 'ready') showToast('ready', s.document?.source ?? docId);
+          setTimeout(() => {
+            setIngest(arr => arr.filter(j => j.id !== jobId));
+          }, 1200);
+        }
+      } catch {
+        // network blip — keep polling
       }
-    }, 220);
+    }, 2000);
+  };
+
+  const handleFiles = async (files: File[]) => {
+    for (const file of files) {
+      try {
+        const doc = await api.uploadDocument(file);
+        showToast('indexing');
+        const jobId = `ing-${doc.id}-${Date.now()}`;
+        const initialStage = statusToStage(doc.status);
+        setIngest(arr => [
+          ...arr,
+          { id: jobId, name: file.name, stage: initialStage, pct: stageToPct(initialStage) },
+        ]);
+        pollStatus(jobId, doc.id);
+      } catch (err) {
+        if (err instanceof AlreadyIndexedError) {
+          showToast('already', file.name);
+        } else {
+          // surface other errors via the indexing toast for now
+          console.error(err);
+        }
+      }
+    }
   };
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault(); setOver(false);
-    Array.from(e.dataTransfer.files).forEach(f => simulate(f.name));
+    handleFiles(Array.from(e.dataTransfer.files));
   };
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) handleFiles(files);
+    e.target.value = '';
+  };
+
+  const onDelete = async (id: string) => {
+    try {
+      await api.deleteDocument(id);
+      setDocs(arr => arr.filter(d => d.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const totalChunks = docs.reduce((sum, d) => sum + (d.chunks ?? 0), 0);
+  const totalMb = docs.reduce((sum, d) => sum + (d.size_mb ?? 0), 0);
 
   return (
     <div className="view">
       <div className="docs-wrap">
         <div className="docs-hd">
           <h2>Documents</h2>
-          <div className="docs-count">{docs.length} indexed · 22,265 chunks · 100.4 MB</div>
+          <div className="docs-count">
+            {docs.length} indexed · {totalChunks.toLocaleString()} chunks · {totalMb.toFixed(1)} MB
+          </div>
         </div>
 
         <div
@@ -62,7 +131,15 @@ export function DocumentsView() {
           <div style={{ marginBottom: 8, opacity: 0.5 }}><IUpload size={22} /></div>
           <div className="dz-title">Drop annual reports here</div>
           <div className="dz-sub">PDF · up to ~500 pages · parsed with Docling, chunked, embedded into Postgres pgvector</div>
-          <button className="btn" onClick={() => simulate(`upload-${Date.now() % 1000}.pdf`)}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+            style={{ display: 'none' }}
+            onChange={onPick}
+          />
+          <button className="btn" onClick={() => fileInputRef.current?.click()}>
             <IUpload /> Choose file
           </button>
         </div>
@@ -102,7 +179,12 @@ export function DocumentsView() {
                     <span className="dot" /> {d.status} · {d.chunks.toLocaleString()} chunks · {d.parser}
                   </div>
                 </div>
-                <button className="btn" style={{ padding: '6px 8px' }} aria-label="Remove">
+                <button
+                  className="btn"
+                  style={{ padding: '6px 8px' }}
+                  aria-label="Remove"
+                  onClick={() => onDelete(d.id)}
+                >
                   <ITrash />
                 </button>
               </div>
@@ -133,8 +215,24 @@ export function DocumentsView() {
               </svg>
             </div>
             <div className="toast-body">
-              <div className="toast-title">Hang tight — we&rsquo;re indexing your document</div>
-              <div className="toast-text">This can take a minute. Grab a quick coffee, or feel free to keep asking questions — we&rsquo;ll let you know when it&rsquo;s ready.</div>
+              {t.kind === 'already' ? (
+                <>
+                  <div className="toast-title">Already indexed</div>
+                  <div className="toast-text">
+                    <code>{t.filename}</code> is already in your index — no need to re-upload.
+                  </div>
+                </>
+              ) : t.kind === 'ready' ? (
+                <>
+                  <div className="toast-title">Ready to query</div>
+                  <div className="toast-text"><code>{t.filename}</code> is indexed and available in chat.</div>
+                </>
+              ) : (
+                <>
+                  <div className="toast-title">Hang tight — we&rsquo;re indexing your document</div>
+                  <div className="toast-text">This can take a minute. Grab a quick coffee, or feel free to keep asking questions — we&rsquo;ll let you know when it&rsquo;s ready.</div>
+                </>
+              )}
             </div>
             <button className="toast-close" aria-label="Dismiss" onClick={() => dismissToast(t.id)}>×</button>
           </div>
