@@ -22,8 +22,6 @@ function stageToPct(stage: Stage): number {
   return 100;
 }
 
-const TOUR_KEY = 'annualyzer.tour.seen.v1';
-
 const TOUR_STEPS: TourStep[] = [
   {
     selector: '',
@@ -58,13 +56,6 @@ const TOUR_STEPS: TourStep[] = [
     placement: 'bottom',
     title: 'Add reports',
     body: 'Drop a PDF here. We parse it with Docling, chunk by section, embed into pgvector, and extract key datapoints automatically. A friendly toast lets you know it can take a minute.',
-  },
-  {
-    selector: '.pull-card',
-    view: 'chat',
-    placement: 'right',
-    title: 'From the index',
-    body: 'A rotating quote pulled from your indexed reports. Click it to start a fresh thread, or hover and shuffle to find a different one.',
   },
   {
     selector: '.help-btn',
@@ -172,19 +163,14 @@ export function App() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // First-run tour
+  // Open the tour on every load so the instructions are immediately visible.
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(TOUR_KEY)) {
-        // tiny delay so layout settles
-        setTimeout(() => setTourOpen(true), 400);
-      }
-    } catch {}
+    const id = setTimeout(() => setTourOpen(true), 400);
+    return () => clearTimeout(id);
   }, []);
 
   const closeTour = () => {
     setTourOpen(false);
-    try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
   };
   const openTour = () => setTourOpen(true);
 

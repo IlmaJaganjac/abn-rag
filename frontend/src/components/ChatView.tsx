@@ -5,9 +5,9 @@ import { ISend } from './Icons';
 
 const SUGGESTED_QUESTIONS = [
   'How many total employees did ASML have at the end of 2025?',
-  'When does ASML aim to be GHG neutral across its value chain?',
-  'What were ASML’s total Scope 1 and 2 emissions in 2025?',
-  'What is ASML’s climate transition plan?',
+  'What were ASML’s total net sales in 2025?',
+  'What was ABN AMRO’s CET1 ratio in 2025?',
+  'Who was ABN AMRO’s CEO in 2025?',
 ];
 
 const PHASE_LABELS: Record<ThinkingPhase, string> = {
