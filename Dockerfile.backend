@@ -1,4 +1,10 @@
+# syntax=docker/dockerfile:1.6
 FROM python:3.11-slim
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_INPUT=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
@@ -6,10 +12,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# 1) Heavy deps cached on pyproject.toml only.
+#    Stub package so hatchling can build a wheel without needing real source yet.
 COPY pyproject.toml README.md ./
-COPY backend/ backend/
+RUN mkdir -p backend && touch backend/__init__.py
 
-RUN pip install --no-cache-dir .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install .
+
+# 2) Pre-download reranker model so first request doesn't pay the ~2.3GB download cost.
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('BAAI/bge-reranker-v2-m3')"
+
+# 3) Real source. Reinstall is cheap: deps already satisfied, only the project wheel rebuilds.
+COPY backend/ backend/
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-deps --force-reinstall .
 
 EXPOSE 8000
 

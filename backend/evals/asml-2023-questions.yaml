@@ -1,0 +1,353 @@
+questions:
+  # ASML 2023 - RAGAS context questions
+
+  - id: asml_2023_fte_total_workforce
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many FTEs did ASML report for its workforce in 2023?"
+    reference: "ASML reported that its workforce grew to 42,416 FTE in 2023."
+
+  - id: asml_2023_fte_new_payroll_hires
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many new payroll employees did ASML hire in 2023?"
+    reference: "ASML hired 4,129 new payroll employees in 2023."
+
+  - id: asml_2023_fte_new_hires_rate
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What new hires rate did ASML report in 2023?"
+    reference: "ASML reported a new hires rate of 11% in 2023."
+
+  - id: asml_2023_fte_women_new_hires
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What percentage of ASML's new hires were women in 2023?"
+    reference: "ASML reported that 27% of new hires were women in 2023."
+
+  - id: asml_2023_fte_women_leadership
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What representation of women at leadership level did ASML report in 2023?"
+    reference: "ASML reported that women represented 11% of leadership in 2023."
+
+  - id: asml_2023_fte_employee_engagement
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What employee engagement score did ASML report in 2023?"
+    reference: "ASML reported an employee engagement survey score of 80.3% in 2023."
+
+  - id: asml_2023_financial_total_net_sales
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What total net sales did ASML report in 2023?"
+    reference: "ASML reported total net sales of €27.6 billion in 2023."
+
+  - id: asml_2023_financial_sales_growth
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "By what percentage did ASML grow sales in 2023?"
+    reference: "ASML grew sales by 30% in 2023."
+
+  - id: asml_2023_financial_gross_margin
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What gross margin did ASML report in 2023?"
+    reference: "ASML reported a gross margin of 51.3% in 2023."
+
+  - id: asml_2023_financial_net_income
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What net income did ASML report in 2023?"
+    reference: "ASML reported net income of €7.8 billion in 2023."
+
+  - id: asml_2023_financial_rd_investment
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How much did ASML invest in research and development in 2023?"
+    reference: "ASML invested €4.0 billion in research and development in 2023."
+
+  - id: asml_2023_financial_backlog
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What backlog did ASML report at the end of 2023?"
+    reference: "ASML reported a backlog of €39.0 billion at the end of 2023."
+
+  - id: asml_2023_business_total_net_sales_increase
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "By how much did ASML's total net sales increase in 2023?"
+    reference: "ASML's total net sales increased by €6.4 billion in 2023."
+
+  - id: asml_2023_business_net_system_sales_growth
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "By what percentage did ASML's net system sales increase in 2023?"
+    reference: "ASML's net system sales increased by 42.2% in 2023."
+
+  - id: asml_2023_business_service_field_option_sales
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How did ASML's service and field option sales change in 2023 compared with 2022?"
+    reference: "ASML's service and field option sales decreased by 2.1% in 2023 compared with 2022."
+
+  - id: asml_2023_business_euv_systems_revenue_recognized
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "For how many EUV systems did ASML recognize revenue in 2023?"
+    reference: "ASML recognized revenue for 53 EUV systems in 2023."
+
+  - id: asml_2023_business_duv_systems_sales
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many DUV systems did ASML sell in 2023?"
+    reference: "ASML reported that DUV system sales increased to 396 units in 2023."
+
+  - id: asml_2023_business_logic_sales
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What Logic revenue value did ASML show for 2023 in its revenue growth chart?"
+    reference: "ASML showed Logic revenue of €16 billion for 2023 in its revenue growth chart."
+
+  - id: asml_2023_business_memory_sales
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What Memory revenue value did ASML show for 2023 in its revenue growth chart?"
+    reference: "ASML showed Memory revenue of €5.9 billion for 2023 in its revenue growth chart."
+
+  - id: asml_2023_business_service_field_options_value
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What service and field option revenue value did ASML show for 2023?"
+    reference: "ASML showed service and field option revenue of €5.6 billion for 2023."
+
+  - id: asml_2023_business_high_na_euv_development
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What High NA EUV development did ASML report in 2023?"
+    reference: "ASML reported that it shipped the first modules of the first High NA EUV system, EXE:5000, to a customer before the end of 2023."
+
+  - id: asml_2023_strategy_priorities
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    eval_subtype: completeness
+    user_input: "What strategy priorities did ASML describe in its 2023 annual report?"
+    reference: "ASML's 2023 strategy priorities were to grow its holistic lithography business, secure unique supply chain capabilities to ensure business continuity, move toward adjacent business opportunities, and deliver on ESG sustainability commitments."
+
+  - id: asml_2023_strategy_purpose
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What purpose did ASML describe in its 2023 annual report?"
+    reference: "ASML described its purpose as unlocking the potential of people and society by pushing technology to new limits."
+
+  - id: asml_2023_strategy_vision
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What vision did ASML describe in its 2023 annual report?"
+    reference: "ASML described its vision as enabling ground-breaking technology to solve some of humanity's toughest challenges."
+
+  - id: asml_2023_general_business_model
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How did ASML describe its business model in 2023?"
+    reference: "ASML described its business model as creating sustainable long-term value through holistic lithography."
+
+  - id: asml_2023_general_holistic_lithography
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What does ASML's holistic lithography approach integrate?"
+    reference: "ASML's holistic lithography approach integrates lithography systems with computational tools, metrology and inspection systems, and process control software solutions."
+
+  - id: asml_2023_sustainability_net_zero_value_chain
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "By what year did ASML aim to achieve net zero emissions across its value chain?"
+    reference: "ASML aimed to achieve net zero emissions across its value chain by 2040."
+
+  - id: asml_2023_sustainability_scope_1_2_target
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What target did ASML report for scope 1 and 2 emissions from its own operations?"
+    reference: "ASML reported a target of net zero scope 1 and 2 emissions from its own operations by 2025."
+
+  - id: asml_2023_sustainability_scope_1_2_emissions
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What net scope 1 and 2 CO₂ emissions did ASML report in 2023?"
+    reference: "ASML reported net scope 1 and 2 CO₂ emissions of 35.1 kt in 2023."
+
+  - id: asml_2023_sustainability_renewable_electricity
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What renewable electricity share did ASML report in 2023?"
+    reference: "ASML reported that the share of renewable electricity was around 91.4% in 2023."
+
+  - id: asml_2023_sustainability_energy_savings
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What annual energy savings did ASML report from key projects in 2023?"
+    reference: "ASML reported around 16 TJ of annual energy savings from key projects in 2023."
+
+  - id: asml_2023_sustainability_scope_3_total
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What total scope 3 emissions did ASML report in 2023?"
+    reference: "ASML reported total scope 3 emissions of 15.0 Mt in 2023."
+
+  - id: asml_2023_sustainability_scope_3_intensity
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What scope 3 emissions intensity did ASML report in 2023?"
+    reference: "ASML reported scope 3 emissions intensity of 1,060 tonnes CO₂e per € million gross profit in 2023."
+
+  - id: asml_2023_sustainability_business_travel_emissions
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What scope 3 business travel emissions did ASML report in 2023 after Sustainable Aviation Fuel purchases?"
+    reference: "ASML reported 70 kt CO₂e of scope 3 business travel emissions in 2023 after taking Sustainable Aviation Fuel purchases into account."
+
+  - id: asml_2023_sustainability_commuting_emissions
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What scope 3 commuting emissions did ASML report in 2023?"
+    reference: "ASML reported 54 kt CO₂e of scope 3 commuting emissions in 2023."
+
+  - id: asml_2023_sustainability_upstream_emissions
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What upstream scope 3 emissions excluding business travel and commuting did ASML report in 2023?"
+    reference: "ASML reported 5,458 kt CO₂e of upstream scope 3 emissions excluding business travel and commuting in 2023."
+
+  - id: asml_2023_sustainability_supply_chain_target
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What target did ASML report for scope 3 emissions from its supply chain including logistics?"
+    reference: "ASML reported a target of net zero emissions by 2030 for scope 3 emissions from its supply chain, including logistics."
+
+  - id: asml_2023_sustainability_product_use_target
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What target did ASML report for scope 3 emissions from product use at customers?"
+    reference: "ASML reported a target of net zero emissions by 2040 for scope 3 emissions from product use at customers."
+
+  - id: asml_2023_supply_chain_total_sourcing_spend
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What total sourcing spend did ASML report in 2023?"
+    reference: "ASML reported total sourcing spend of €15.5 billion in 2023."
+
+  - id: asml_2023_supply_chain_total_suppliers
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many suppliers did ASML report in its total supplier base in 2023?"
+    reference: "ASML reported around 5,100 suppliers in its total supplier base in 2023."
+
+  - id: asml_2023_supply_chain_product_related_suppliers
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What share of ASML's procurement volume did product-related suppliers account for in 2023?"
+    reference: "ASML reported that product-related suppliers accounted for 69% of its procurement volume in 2023."
+
+  - id: asml_2023_governance_code_of_conduct_training
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "What share of ASML employees had completed online Code of Conduct training by the end of 2023?"
+    reference: "By the end of 2023, 87% of ASML employees had completed online Code of Conduct training."
+
+  - id: asml_2023_governance_speak_up_reports
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many Speak Up reports did ASML receive in 2023?"
+    reference: "ASML received 613 Speak Up reports in 2023."
+
+  - id: asml_2023_governance_human_rights_grievances
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How many grievances about breaches of human rights did ASML receive in 2023?"
+    reference: "ASML received no grievances about breaches of human rights in 2023."
+
+  - id: asml_2023_stakeholder_groups
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    eval_subtype: completeness
+    user_input: "Which stakeholder groups did ASML describe engaging with in 2023?"
+    reference: "ASML described engaging with customers, employees, suppliers, shareholders and society in 2023."
+
+  - id: asml_2023_shareholder_return_total
+    company: ASML
+    year: 2023
+    eval_type: ragas_context
+    user_input: "How much did ASML return to shareholders through dividends and share buybacks in 2023?"
+    reference: "ASML returned €3.3 billion to shareholders through dividends and share buybacks in 2023."
+
+  - id: asml_2023_hallucination_future_actual_2028_sales
+    company: ASML
+    year: 2023
+    eval_type: refusal_rule
+    user_input: "What were ASML's actual reported net sales in 2028 according to the 2023 annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Future actual not in the 2023 annual report."
+
+  - id: asml_2023_hallucination_heineken_volume
+    company: ASML
+    year: 2023
+    eval_type: refusal_rule
+    user_input: "What beer volume did Heineken report according to ASML's 2023 annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Wrong-company question."
+
+  - id: asml_2023_hallucination_bitcoin_holdings
+    company: ASML
+    year: 2023
+    eval_type: refusal_rule
+    user_input: "How much Bitcoin did ASML hold at year-end 2023?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Unsupported/non-applicable metric."

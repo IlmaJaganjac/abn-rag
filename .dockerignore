@@ -1,7 +1,17 @@
 frontend/
 .git/
+.venv/
+.env
+.DS_Store
+.claude/
+.ruff_cache/
+.pytest_cache/
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/
 backend/evals/runs/
+backend/evals/ragas_runs/
+backend/evals/latest_runs/
 backend/data/
+node_modules/
+package-lock.json

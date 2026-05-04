@@ -1,0 +1,274 @@
+questions:
+  # ABN AMRO Bank 2025 - RAGAS context questions
+
+  - id: abn_amro_2025_fte_employee_reduction
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "By about how many FTEs did ABN AMRO's employee numbers decrease in 2025?"
+    reference: "ABN AMRO's employee numbers decreased by about 1,500 FTEs in 2025."
+
+  - id: abn_amro_2025_fte_total_employees
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What internal and external employee FTE counts did ABN AMRO report at year-end 2025?"
+    reference: "ABN AMRO reported 23,126 internal employee FTEs and 2,216 external employee FTEs at year-end 2025."
+
+  - id: abn_amro_2025_fte_strategy_right_sizing
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Which strategic priority explains ABN AMRO's reduction in employee numbers?"
+    reference: "ABN AMRO linked the reduction in employee numbers to its 2026 to 2028 strategy, including simplifying the organisation, right-sizing the cost base and reducing global staff."
+
+  - id: abn_amro_2025_fte_ceo_change
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Who succeeded Robert Swaak as CEO of ABN AMRO in 2025?"
+    reference: "Marguerite Bérard succeeded Robert Swaak as Chief Executive Officer of ABN AMRO in 2025."
+
+  - id: abn_amro_2025_sustainability_transition_role
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What transition-related role does ABN AMRO describe for its banking activities?"
+    reference: "ABN AMRO says it can support the sustainability transition through its banking activities, including lending and asset management, and by supporting the transition to a net-zero emissions economy."
+
+  - id: abn_amro_2025_sustainability_long_term_value
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What long-term value aim does ABN AMRO describe in its value creation model?"
+    reference: "ABN AMRO aims to create sustainable long-term value for all stakeholders by increasing its positive impact and reducing adverse effects."
+
+  - id: abn_amro_2025_sustainability_strategy_business_model
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How does ABN AMRO describe the relationship between sustainability, strategy and the business model?"
+    reference: "ABN AMRO says its Sustainability Statements explain how its strategy and business model relate to sustainability and how sustainability is incorporated into the bank's positioning."
+
+  - id: abn_amro_2025_sustainability_esg_scenarios
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "What ESG scenario type does ABN AMRO mention in relation to financial materiality?"
+    reference: "ABN AMRO mentions climate-related transition scenarios in relation to its financial materiality assessment."
+
+  - id: abn_amro_2025_sustainability_ethics_integrity
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What does ABN AMRO say is required to maintain trust in the bank?"
+    reference: "ABN AMRO says maintaining trust requires high standards of ethics and integrity and compliance with relevant laws and regulations."
+
+  - id: abn_amro_2025_sustainability_stakeholder_value
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "For whom does ABN AMRO say it aims to create long-term value?"
+    reference: "ABN AMRO aims to create long-term value for stakeholders including clients, employees, investors and society."
+
+  - id: abn_amro_2025_esg_cet1_ratio
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What CET1 ratio did ABN AMRO report for 2025?"
+    reference: "ABN AMRO reported a CET1 ratio of 15.4% for 2025."
+
+  - id: abn_amro_2025_esg_cost_of_risk
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What full-year cost of risk did ABN AMRO report for 2025?"
+    reference: "ABN AMRO reported a full-year cost of risk of 1 basis point, or 1 bps, for 2025."
+
+  - id: abn_amro_2025_esg_rwa
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What were ABN AMRO's total risk-weighted assets in 2025?"
+    reference: "ABN AMRO reported total risk-weighted assets of EUR 135.4 billion, or EUR 135,398 million, in 2025."
+
+  - id: abn_amro_2025_esg_rwa_decrease
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "From what amount to what amount did ABN AMRO's total RWA decrease in 2025?"
+    reference: "ABN AMRO's total RWA decreased from EUR 140.9 billion to EUR 135.4 billion in 2025."
+
+  - id: abn_amro_2025_esg_stakeholder_engagement_sources
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: completeness
+    user_input: "What sources did ABN AMRO use for stakeholder engagement input in its sustainability materiality process?"
+    reference: "ABN AMRO used sources such as transcripts, meeting summaries, website search queries, employee works councils, investor relations and dialogues with senior management for stakeholder engagement input."
+
+  - id: abn_amro_2025_financial_net_profit
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What net profit did ABN AMRO report in 2025?"
+    reference: "ABN AMRO reported profit for the period of EUR 2,252 million, approximately EUR 2.3 billion, in 2025."
+
+  - id: abn_amro_2025_financial_roe
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What return on equity did ABN AMRO achieve in 2025?"
+    reference: "ABN AMRO achieved a return on equity of 8.7% in 2025."
+
+  - id: abn_amro_2025_financial_net_interest_income
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What net interest income did ABN AMRO report for 2025?"
+    reference: "ABN AMRO reported net interest income of EUR 6,335 million in 2025."
+
+  - id: abn_amro_2025_financial_fee_commission_income
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What net fee and commission income did ABN AMRO report in 2025?"
+    reference: "ABN AMRO reported net fee and commission income of EUR 2,132 million in 2025."
+
+  - id: abn_amro_2025_business_mortgage_production
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What market share of new mortgage production did ABN AMRO report in 2025?"
+    reference: "ABN AMRO reported a 19% market share of new mortgage production in 2025."
+
+  - id: abn_amro_2025_business_assets_held_for_sale_reclassification
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What amount did ABN AMRO reclassify to assets held for sale in 2025?"
+    reference: "ABN AMRO referred to a EUR 1.2 billion reclassification to assets held for sale in 2025."
+
+  - id: abn_amro_2025_business_clearing_fee_income
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Why did ABN AMRO's Clearing business record higher fee income in 2025?"
+    reference: "ABN AMRO's Clearing business recorded higher fee income in 2025 due to increased transaction volumes and elevated market volatility."
+
+  - id: abn_amro_2025_business_operating_activities_income
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What net income from other operating activities did ABN AMRO report in 2025?"
+    reference: "ABN AMRO reported EUR 30 million of net income from other operating activities in 2025."
+
+  - id: abn_amro_2025_business_priorities
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What were ABN AMRO's strategic priorities for 2026 to 2028 as presented in the 2025 report?"
+    reference: "ABN AMRO's strategic priorities for 2026 to 2028 were profitable growth, right-sizing the bank's cost base, and deploying capital where it generates the highest returns."
+
+  - id: abn_amro_2025_shareholder_additional_distribution
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What additional capital distribution did ABN AMRO announce for 2025?"
+    reference: "ABN AMRO announced an additional capital distribution of EUR 500 million for 2025."
+
+  - id: abn_amro_2025_shareholder_final_dividend
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What final dividend per share did ABN AMRO propose for 2025?"
+    reference: "ABN AMRO proposed a final dividend of EUR 0.70 per share for 2025."
+
+  - id: abn_amro_2025_shareholder_capital_metric
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Which capital metric supported ABN AMRO's additional capital distribution in 2025?"
+    reference: "ABN AMRO's additional capital distribution was supported by its CET1 ratio of 15.4%."
+
+  - id: abn_amro_2025_general_purpose_strategy
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "What was ABN AMRO's stated purpose or strategic positioning in the 2025 report?"
+    reference: "ABN AMRO described its purpose or positioning as Banking for better, for generations to come, and as being there for everyone with a drive to move forward."
+
+  - id: abn_amro_2025_general_ceo_execution_phrase
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What phrase did ABN AMRO's CEO use to describe the importance of execution?"
+    reference: "ABN AMRO's CEO used the phrase: Strategy is the first 20%. Execution is the rest."
+
+  - id: abn_amro_2025_general_risk_governance
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "How did ABN AMRO's Supervisory Board monitor key risks in 2025?"
+    reference: "ABN AMRO's Supervisory Board monitored key financial and non-financial risks through internal risk management reporting and CRO memoranda."
+
+  - id: abn_amro_2025_general_business_model_clients
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "What does ABN AMRO say it does for clients?"
+    reference: "ABN AMRO says it supports clients in their financial decisions, provides financial solutions and advice, and helps clients manage their finances and achieve their goals."
+
+  - id: abn_amro_2025_general_major_development_ceo
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What CEO change did ABN AMRO report in 2025?"
+    reference: "ABN AMRO reported that Marguerite Bérard succeeded Robert Swaak as Chief Executive Officer on 23 April 2025."
+
+  - id: abn_amro_2025_general_client_segments
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "Which main client groups does ABN AMRO describe serving?"
+    reference: "ABN AMRO describes serving personal clients, business clients, wealth clients and corporate clients."
+
+  - id: abn_amro_2025_general_sustainability_positioning
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: ragas_context
+    eval_subtype: narrative
+    user_input: "How is sustainability incorporated into ABN AMRO's positioning?"
+    reference: "ABN AMRO says sustainability is incorporated into the bank's positioning and linked to its strategy and business model."
+
+  - id: abn_amro_2025_hallucination_future_actual_2028_roe
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "What was ABN AMRO's actual return on equity in 2028?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Future actual not in the 2025 annual report."
+
+  - id: abn_amro_2025_hallucination_shell_emissions
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "What were Shell plc's total corporate Scope 1 emissions according to Shell's own 2025 annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Wrong-company and out-of-corpus question for ABN AMRO."
+
+  - id: abn_amro_2025_hallucination_unreported_chip_systems
+    company: ABN AMRO Bank
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "How many lithography systems did ABN AMRO sell in 2025?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Unsupported and non-applicable metric."

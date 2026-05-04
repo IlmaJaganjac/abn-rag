@@ -1,0 +1,251 @@
+questions:
+  - id: asml_2025_fte_total_employees_esrs_headcount
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many total employees did ASML report on an ESRS headcount basis as of December 31, 2025?"
+    reference: "ASML reported 44,175 total employees on an ESRS headcount basis as of December 31, 2025."
+
+  - id: asml_2025_fte_payroll_employees_fte
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many payroll employees in FTE did ASML report in 2025?"
+    reference: "ASML reported 43,520 payroll employees in FTE as of December 31, 2025."
+
+  - id: asml_2025_fte_average_payroll_employees
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What was ASML's average number of payroll employees worldwide in FTEs in 2025?"
+    reference: "ASML's average number of payroll employees worldwide, including the Netherlands, was 43,267 FTEs in 2025."
+
+  - id: asml_2025_fte_employees_by_gender_total
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What total employee number did ASML use in its employee headcount by gender table for 2025?"
+    reference: "ASML used 44,175 as the total number of employees in its employee headcount by gender table for 2025."
+
+  - id: asml_2025_fte_temporary_employees_esrs_headcount
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many temporary employees were included in ASML's ESRS employee headcount table in 2025?"
+    reference: "ASML included 2,238 temporary employees in its ESRS employee headcount table for 2025."
+
+  - id: asml_2025_sustainability_goal_value_chain_ghg_neutral
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "By what year does ASML aim to be greenhouse gas neutral across its value chain?"
+    reference: "ASML aims to be greenhouse gas neutral across its value chain by 2040."
+
+  - id: asml_2025_sustainability_goal_scope_1_2_neutral
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What is ASML's goal for scope 1 and scope 2 emissions?"
+    reference: "ASML's goal is to become GHG neutral for scope 1 and 2 emissions by 2025."
+
+  - id: asml_2025_sustainability_goal_scope_3_upstream
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What is ASML's ambition for scope 3 emissions related to purchased goods, capital goods and logistics?"
+    reference: "ASML aims to become GHG neutral by 2030 for scope 3 emissions related to purchased goods and services, including capital goods, and logistics."
+
+  - id: asml_2025_sustainability_goal_roadmap_year
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "In what year did ASML present its roadmap to GHG neutrality across the value chain?"
+    reference: "ASML presented its roadmap to GHG neutrality across the value chain in 2021."
+
+  - id: asml_2025_sustainability_goal_energy_efficiency_climate_action
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Which ESG theme contains ASML's GHG targets and indicators?"
+    reference: "ASML places its GHG targets and indicators under the ESG strategy theme Energy efficiency and climate action."
+
+  - id: asml_2025_sustainability_goal_supplier_climate
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What commitment does ASML seek from its top 80% suppliers by CO₂e emissions by 2030?"
+    reference: "ASML seeks a commitment from its top 80% suppliers, based on CO₂e emissions, to reduce their CO₂e footprint by 2030."
+
+  - id: asml_2025_esg_datapoint_scope_1_2_actual
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What 2025 performance value did ASML report for gross scope 1 and 2 CO₂e emissions?"
+    reference: "ASML reported 26 kt of gross scope 1 and 2 CO₂e emissions in 2025."
+
+  - id: asml_2025_esg_datapoint_reuse_returned_parts
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What reuse rate of returned parts did ASML report in 2025?"
+    reference: "ASML reported a 90% reuse rate of parts returned from the field and factory in 2025."
+
+  - id: asml_2025_esg_datapoint_training_hours
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What average number of training hours per employee headcount did ASML report for 2025?"
+    reference: "ASML reported an average of 40 training hours per employee headcount in 2025."
+
+  - id: asml_2025_esg_datapoint_performance_review_completion
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What percentage of ASML employees eligible for an annual performance and career development review completed one in 2025?"
+    reference: "ASML reported that 96% of employees eligible for an annual performance and career development review completed one in 2025."
+
+  - id: asml_2025_esg_datapoint_lithography_systems_active
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What percentage of lithography systems sold in the past 30 years did ASML report were still active in the field?"
+    reference: "ASML reported that 95% of the lithography systems it sold in the past 30 years were still active in the field."
+
+  - id: asml_2025_financial_total_net_sales
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What total net sales did ASML report in 2025?"
+    reference: "ASML reported total net sales of €32.7 billion, or €32,667.3 million, in 2025."
+
+  - id: asml_2025_financial_gross_margin
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What gross margin did ASML report in 2025?"
+    reference: "ASML reported a gross margin of 52.8% in 2025."
+
+  - id: asml_2025_financial_net_income
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What net income did ASML report in 2025?"
+    reference: "ASML reported net income of €9.6 billion, or €9,609.4 million, in 2025."
+
+  - id: asml_2025_financial_rd_spend
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How much did ASML report for research and development in 2025?"
+    reference: "ASML reported research and development costs of €4.7 billion, or €4,698.8 million, in 2025."
+
+  - id: asml_2025_business_system_sales_units
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What value did ASML report for System sales in units in its 2025 overview?"
+    reference: "ASML reported 535 system sales in units in its 2025 overview."
+
+  - id: asml_2025_business_sales_by_region_asia_rows
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Which Asian geographic rows did ASML report in its 2025 total net sales table, and what were their 2025 values?"
+    reference: "ASML reported 2025 total net sales of €1,420.9 million for Japan, €8,159.6 million for South Korea, €608.4 million for Singapore, €8,337.9 million for Taiwan, €9,519.7 million for China, and €2.7 million for Rest of Asia."
+
+  - id: asml_2025_business_sales_by_region_us
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What 2025 total net sales value did ASML report for the United States in the geographic sales table?"
+    reference: "ASML reported €4,089.1 million of 2025 total net sales for the United States in the geographic sales table."
+
+  - id: asml_2025_business_ai_demand
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What demand driver did ASML cite for Logic net sales in 2025?"
+    reference: "ASML cited positive momentum in AI-related demand, including demand for advanced Logic, as a driver for Logic net sales in 2025."
+
+  - id: asml_2025_shareholder_total_returned
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How much did ASML return to shareholders through dividends and share buybacks in 2025?"
+    reference: "ASML returned €8.5 billion to shareholders through dividends and share buybacks in 2025."
+
+  - id: asml_2025_shareholder_eps_basic
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What basic earnings per share did ASML report in 2025?"
+    reference: "ASML reported basic earnings per share of €24.73 in 2025."
+
+  - id: asml_2025_shareholder_buybacks_and_dividends
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What mechanisms did ASML use to return capital to shareholders in 2025?"
+    reference: "ASML returned capital to shareholders in 2025 through dividend payments and share buybacks."
+
+  - id: asml_2025_general_strategy
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "Which six strategic themes did ASML describe in its 2025 annual report?"
+    reference: "ASML described six strategic themes: Deepen customer trust, Extend our technology and holistic product leadership, Strengthen ecosystem relationships, Create an exceptional workplace, Drive operational excellence, and Deliver on ESG sustainability."
+
+  - id: asml_2025_general_risk_categories
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How does ASML group the risk categories in its 2025 annual report?"
+    reference: "ASML groups its risk universe into 31 risk categories under four risk types: strategic, operational, compliance and financial."
+
+  - id: asml_2025_general_business_model
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What is ASML's business model focused on?"
+    reference: "ASML's business model is focused on creating sustainable long-term value by providing holistic lithography systems, software and services that help customers create powerful, affordable and energy-efficient microchips."
+
+  - id: asml_2025_general_ceo_message_ai_growth
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What major market theme did ASML's 2025 annual report associate with growth?"
+    reference: "ASML associated growth with artificial intelligence, including strong AI-related demand for advanced Logic and DRAM."
+
+  - id: asml_2025_general_major_sales_development
+    company: ASML
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What major business development did ASML report regarding 2025 sales?"
+    reference: "ASML reported that 2025 total net sales increased by €4.4 billion, or 15.6%, to €32.7 billion."
+
+  - id: asml_2025_hallucination_future_actual_2028_sales
+    company: ASML
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "What were ASML's actual reported net sales in 2028?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. This is a deterministic refusal test: future actual not in the 2025 report."
+
+  - id: asml_2025_hallucination_tesla_employees
+    company: ASML
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "How many employees did Tesla report in 2025 according to ASML's annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. This is an out-of-corpus company question."
+
+  - id: asml_2025_hallucination_unreported_crypto_holdings
+    company: ASML
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "How much Bitcoin did ASML hold at year-end 2025?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. This is an unsupported/non-applicable metric."

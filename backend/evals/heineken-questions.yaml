@@ -1,0 +1,330 @@
+questions:
+  # Heineken N.V. 2024 - RAGAS context questions
+
+  - id: heineken_2024_company_profile_employees
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How many employees did Heineken say it had in 2024?"
+    reference: "Heineken had around 85,000 employees in 2024."
+
+  - id: heineken_2024_company_profile_brands
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How many brands did Heineken say were in its portfolio in 2024?"
+    reference: "Heineken said it had more than 300 brands in more than 70 countries in 2024."
+
+  - id: heineken_2024_company_profile_countries
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "In how many countries did Heineken operate production facilities in 2024?"
+    reference: "Heineken operated breweries, malteries, cider plants and other production facilities in more than 70 countries in 2024."
+
+  - id: heineken_2024_growth_beer_volume
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's beer volume perform in 2024?"
+    reference: "Heineken's beer volume grew organically by 1.6% in 2024."
+
+  - id: heineken_2024_growth_consolidated_volume
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's total consolidated volume perform in 2024?"
+    reference: "Heineken's total consolidated volume increased by 1.4% in 2024."
+
+  - id: heineken_2024_growth_heineken_volume
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken® volume perform in 2024?"
+    reference: "Heineken® volume grew by 9% in 2024."
+
+  - id: heineken_2024_growth_premium_volume
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's premium volume perform in 2024?"
+    reference: "Heineken's premium volume grew by 5% in 2024, led globally by Heineken®."
+
+  - id: heineken_2024_growth_net_revenue_beia
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's net revenue beia perform in 2024?"
+    reference: "Heineken's net revenue beia increased organically by 5.0% to EUR 30.0 billion in 2024."
+
+  - id: heineken_2024_growth_net_revenue_per_hl
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's net revenue beia per hectolitre perform in 2024?"
+    reference: "Heineken's net revenue beia per hectolitre increased organically by 3.5% in 2024."
+
+  - id: heineken_2024_growth_price_mix
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What underlying price-mix did Heineken report in 2024?"
+    reference: "Heineken reported underlying price-mix on a constant geographic basis of 4.1% in 2024."
+
+  - id: heineken_2024_growth_market_share
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What did Heineken report about market share performance in 2024?"
+    reference: "Heineken reported that it gained or held volume market share in more than half of its markets in 2024."
+
+  - id: heineken_2024_profitability_gross_savings
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What gross savings did Heineken report in 2024?"
+    reference: "Heineken reported EUR 600 million of gross savings in 2024."
+
+  - id: heineken_2024_profitability_operating_profit_beia
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How did Heineken's operating profit beia perform in 2024?"
+    reference: "Heineken's operating profit beia grew organically by 8.3% in 2024."
+
+  - id: heineken_2024_profitability_net_profit_beia
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What net profit beia did Heineken report in 2024?"
+    reference: "Heineken reported net profit beia of EUR 2.7 billion in 2024."
+
+  - id: heineken_2024_profitability_eps_beia
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What diluted earnings per share beia did Heineken report in 2024?"
+    reference: "Heineken reported diluted earnings per share beia of EUR 4.91 in 2024."
+
+  - id: heineken_2024_cash_flow_free_operating_cash_flow
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What free operating cash flow did Heineken report in 2024?"
+    reference: "Heineken reported free operating cash flow of EUR 2.6 billion in 2024."
+
+  - id: heineken_2024_cash_conversion_ratio
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What cash conversion ratio did Heineken report in 2024?"
+    reference: "Heineken reported a cash conversion ratio of 88% in 2024."
+
+  - id: heineken_2024_roic
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What ROIC did Heineken report in 2024?"
+    reference: "Heineken reported ROIC of 22.1% in 2024."
+
+  - id: heineken_2024_shareholder_buyback
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What share buyback programme did Heineken announce for 2024?"
+    reference: "Heineken announced a EUR 1.5 billion share buyback programme in 2024."
+
+  - id: heineken_2024_shareholder_dividend
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What dividend per share did Heineken propose for 2024?"
+    reference: "Heineken proposed a dividend of EUR 1.86 per share for 2024."
+
+  - id: heineken_2024_strategy_evergreen
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What strategy did Heineken say continued to shape operations in 2024?"
+    reference: "Heineken said its EverGreen strategy continued to shape operations in 2024."
+
+  - id: heineken_2024_strategy_premium_growth
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What premiumisation performance did Heineken report in 2024?"
+    reference: "Heineken reported that premium volume grew by 5% in 2024, led globally by Heineken®."
+
+  - id: heineken_2024_strategy_regional_volume_growth
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What did Heineken report about regional beer volume growth in 2024?"
+    reference: "Heineken reported that beer volume expanded in all four regions in 2024, across both developed and emerging markets."
+
+  - id: heineken_2024_strategy_largest_growth_markets
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "Which large operating companies supported Heineken's net revenue growth in 2024?"
+    reference: "Heineken said its net revenue growth in 2024 was supported by strong growth in large operating companies including Brazil, Mexico, Nigeria, South Africa, Vietnam and India."
+
+  - id: heineken_2024_sustainability_net_zero_value_chain
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "By what year does Heineken aim to reach net zero across its value chain?"
+    reference: "Heineken aims to reach net zero across its value chain by 2040."
+
+  - id: heineken_2024_sustainability_scope_1_2_net_zero
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "By what year does Heineken aim to reach net zero in Scope 1 and 2?"
+    reference: "Heineken aims to reach net zero in Scope 1 and 2 by 2030."
+
+  - id: heineken_2024_sustainability_scope_1_2_progress
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What Scope 1 and 2 emissions progress did Heineken report for 2024?"
+    reference: "Heineken reported a 34% CO2 reduction versus the 2022 baseline in Scope 1 and 2 emissions, and 84% electricity from renewable sources in Scope 1 and 2 in production."
+
+  - id: heineken_2024_sustainability_value_chain_progress
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report towards net zero across its value chain in 2024?"
+    reference: "Heineken reported a 16% CO2 reduction versus the 2022 baseline in Scope 1, 2 and 3 emissions."
+
+  - id: heineken_2024_sustainability_scope_3_targets
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What Scope 3 FLAG and non-FLAG emissions reduction targets did Heineken set for 2030?"
+    reference: "Heineken set targets to reduce Scope 3 FLAG emissions by 30% and Scope 3 non-FLAG emissions by 25% by 2030."
+
+  - id: heineken_2024_sustainability_scope_3_progress
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What Scope 3 FLAG and non-FLAG emissions progress did Heineken report for 2024?"
+    reference: "Heineken reported a 23% CO2 reduction in Scope 3 FLAG emissions and an 11% CO2 reduction in Scope 3 non-FLAG emissions versus the 2022 baseline."
+
+  - id: heineken_2024_sustainability_reusable_format
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What reusable format ambition and 2024 progress did Heineken report?"
+    reference: "Heineken aims for 43% of volumes sold in reusable format by 2030 and reported 39% of volumes sold in reusable format in 2024."
+
+  - id: heineken_2024_sustainability_recycled_content
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What recycled content target and 2024 progress did Heineken report for bottles and cans?"
+    reference: "Heineken aims for 50% recycled content in bottles and cans by 2030 and reported 44% recycled content in bottles and cans in 2024."
+
+  - id: heineken_2024_sustainability_packaging_recyclable
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What recyclable packaging target and 2024 progress did Heineken report?"
+    reference: "Heineken aims for 99% of all packaging to be recyclable by design by 2030 and reported 98% of packaging recyclable by design in 2024."
+
+  - id: heineken_2024_sustainability_water_usage
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What average water usage did Heineken report in 2024?"
+    reference: "Heineken reported average water usage of 3.0 hl/hl in water-stressed areas and 3.1 hl/hl worldwide in 2024."
+
+  - id: heineken_2024_sustainability_water_balancing
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What water balancing progress did Heineken report in 2024?"
+    reference: "Heineken reported that 29% of sites in water-stressed areas reached 100% water balancing in 2024."
+
+  - id: heineken_2024_sustainability_sustainably_sourced_ingredients
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What sustainably sourced ingredients target and 2024 progress did Heineken report?"
+    reference: "Heineken aims for 100% sustainably sourced ingredients, hops and barley, by 2030 and reported 75% sustainably sourced ingredients in 2024."
+
+  - id: heineken_2024_sustainability_women_senior_management
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What gender balance target and 2024 progress did Heineken report for senior management?"
+    reference: "Heineken targeted 30% women in senior management by 2025 and 40% by 2030, and reported 30% women in senior management positions in 2024."
+
+  - id: heineken_2024_sustainability_equal_pay
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What equal pay progress did Heineken report in 2024?"
+    reference: "Heineken reported that 100% of operating companies were assessed for equal pay for equal work and that 100% had action plans to close any gaps."
+
+  - id: heineken_2024_sustainability_fair_wage
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What fair wage progress did Heineken report in 2024?"
+    reference: "Heineken reported that 99.2% of employees were assessed for fair wages and that 99.7% of assessed employees earned a fair wage according to the Fair Wage Network."
+
+  - id: heineken_2024_sustainability_third_party_workers
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report on fair living and working standards for third-party employees and Brand Promoters in 2024?"
+    reference: "Heineken reported that 43% of operating companies were assessed for fair living and working standards for third-party employees and Brand Promoters in 2024."
+
+  - id: heineken_2024_sustainability_zero_alcohol_option
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report on zero alcohol options in 2024?"
+    reference: "Heineken reported that markets with a zero alcohol option for at least one strategic brand represented 91% of its beer and cider volumes in 2024."
+
+  - id: heineken_2024_sustainability_responsible_consumption_spend
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "What media spend did Heineken invest in responsible consumption campaigns in 2024?"
+    reference: "Heineken invested 18% of Heineken® media spend in responsible consumption campaigns in 2024."
+
+  - id: heineken_2024_sustainability_responsible_consumption_reach
+    company: Heineken N.V.
+    year: 2024
+    eval_type: ragas_context
+    user_input: "How many consumers did Heineken reach with responsible consumption campaigns in 2024?"
+    reference: "Heineken reached 1.3 billion unique consumers with responsible consumption campaigns in 2024."
+
+  - id: heineken_2024_hallucination_future_actual_2028_revenue
+    company: Heineken N.V.
+    year: 2024
+    eval_type: refusal_rule
+    user_input: "What was Heineken's actual reported net revenue in 2028?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Future actual not in the 2024 annual report."
+
+  - id: heineken_2024_hallucination_asml_system_sales
+    company: Heineken N.V.
+    year: 2024
+    eval_type: refusal_rule
+    user_input: "How many lithography systems did ASML sell according to Heineken's 2024 annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Wrong-company question."
+
+  - id: heineken_2024_hallucination_bitcoin_holdings
+    company: Heineken N.V.
+    year: 2024
+    eval_type: refusal_rule
+    user_input: "How much Bitcoin did Heineken hold at year-end 2024?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Unsupported/non-applicable metric."

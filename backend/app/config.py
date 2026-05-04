@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     chunk_size_tokens: int = 800
     chunk_overlap_tokens: int = 120
     top_k: int = 12
+    rerank_top_n: int = 20
+    enable_rerank: bool = True
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     embedding_batch_size: int = 64
 
     def get_chroma_path(self) -> Path:

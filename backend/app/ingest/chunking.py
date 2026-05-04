@@ -20,7 +20,6 @@ from backend.app.ingest.chunking_heuristics import (
     parse_table_cells,
     remove_boilerplate,
     starts_with_value,
-    unit_from_text,
     year_period,
 )
 from backend.app.schemas import Chunk
@@ -61,7 +60,6 @@ def build_semantic_chunks(
                 heading_stack=heading_stack,
                 company=company,
                 year=year,
-                parser=parser,
                 boilerplate=boilerplate,
                 max_tokens=max_tokens,
                 overlap=overlap,
@@ -100,7 +98,6 @@ def _page_drafts(
     heading_stack: list[tuple[int, str]],
     company: str | None,
     year: int | None,
-    parser: str | None,
     boilerplate: set[str],
     max_tokens: int,
     overlap: int,
@@ -137,7 +134,7 @@ def _page_drafts(
                     section_path=section_path(),
                     company=company,
                     year=year,
-                    parser=parser,
+
                     boilerplate=boilerplate,
                 )
             )
@@ -156,12 +153,10 @@ def _page_drafts(
                 section_path=section_path(),
                 company=company,
                 year=year,
-                parser=parser,
+
                 boilerplate=boilerplate,
                 max_tokens=max_tokens,
-                overlap=overlap,
                 token_counter=token_counter,
-                split_oversize=split_oversize,
             )
         )
 
@@ -209,12 +204,9 @@ def _table_drafts(
     section_path: str | None,
     company: str | None,
     year: int | None,
-    parser: str | None,
     boilerplate: set[str],
     max_tokens: int,
-    overlap: int,
     token_counter: Callable[[str], int],
-    split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
     """Build draft chunks for one table, including row- and metric-level variants."""
     drafts: list[ChunkDraft] = []
@@ -235,7 +227,7 @@ def _table_drafts(
                     section_path=section_path,
                     company=company,
                     year=year,
-                    parser=parser,
+
                     boilerplate=boilerplate,
                     extra_embedding_context=table_context,
                 )
@@ -258,29 +250,11 @@ def _table_drafts(
                     section_path=section_path,
                     company=company,
                     year=year,
-                    parser=parser,
+
                     boilerplate=boilerplate,
                     extra_embedding_context=_table_context(section_path, rows, table_kind),
                 )
             )
-            for metric_text in _financial_metric_texts_from_header_row(
-                headers,
-                cells,
-                section_path=section_path,
-            ):
-                drafts.append(
-                    _draft(
-                        page=page,
-                        text=metric_text,
-                        chunk_kind="metric",
-                        section_path=section_path,
-                        company=company,
-                        year=year,
-                        parser=parser,
-                        boilerplate=boilerplate,
-                        extra_embedding_context=_table_context(section_path, rows, table_kind),
-                    )
-                )
     return drafts
 
 
@@ -338,7 +312,6 @@ def _draft(
     section_path: str | None,
     company: str | None,
     year: int | None,
-    parser: str | None,
     boilerplate: set[str],
     extra_embedding_context: str | None = None,
 ) -> ChunkDraft:
@@ -347,7 +320,6 @@ def _draft(
     context = _embedding_context(
         company=company,
         year=year,
-        parser=parser,
         section_path=section_path,
         extra=extra_embedding_context,
     )
@@ -365,7 +337,6 @@ def _embedding_context(
     *,
     company: str | None,
     year: int | None,
-    parser: str | None,
     section_path: str | None,
     extra: str | None = None,
 ) -> str:
@@ -443,34 +414,6 @@ def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
             i += 1
     return pairs
 
-
-def _financial_metric_texts_from_header_row(
-    headers: list[str] | None,
-    cells: list[str],
-    *,
-    section_path: str | None,
-) -> list[str]:
-    """Create metric text blocks from header-driven financial rows and return them as strings."""
-    if headers is None or len(headers) != len(cells) or len(cells) < 2:
-        return []
-    label_idx = next((i for i, cell in enumerate(cells) if cell.strip()), None)
-    if label_idx is None:
-        return []
-    metric = cells[label_idx].strip()
-    if looks_like_value(metric):
-        return []
-    unit = unit_from_text(headers[0]) or unit_from_text(section_path or "")
-    metrics: list[str] = []
-    for header, cell in zip(headers[label_idx + 1:], cells[label_idx + 1:], strict=False):
-        period = year_period(header)
-        value = cell.strip()
-        if period is None or not value or not looks_like_value(value):
-            continue
-        lines = [f"Metric: {metric}", f"Period: {period}", f"Value: {value}"]
-        if unit:
-            lines.append(f"Unit: {unit}")
-        metrics.append("\n".join(lines))
-    return metrics
 
 
 def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:

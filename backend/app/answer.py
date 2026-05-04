@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import html
+import logging
 import re
+import time
 import unicodedata
 
 from backend.app.config import openai_client, settings
-from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
+from backend.app.schemas import Citation, LLMAnswer, RetrievedChunk, VerbatimAnswer
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """
 You answer questions about annual reports using only the provided context blocks.
@@ -74,6 +78,8 @@ Rules:
 8. If the answer is absent from the context, or no retrieved quote directly
    supports it, set `refused=true`, give a short `refusal_reason`, and leave
    `citations` empty. Do not guess.
+   - Never answer a question unless the retrieved context contains the information needed
+    to answer that question and set `refused=true`.
    - If the question asks for an actual result but only a target/forecast is
      available, set `refused=true`. Do not report the target as a proxy.
    - If the question asks about company A but retrieved chunks are from company
@@ -270,49 +276,24 @@ def _ground_citations(
     chunks: list[RetrievedChunk],
     question: str | None = None,
     verbatim: str | None = None,
-) -> tuple[list[Citation], list[GroundingDrop], str | None]:
-    """Return (grounded_citations, drops, failure_reason).
-
-    Grounding rules:
-    - The quote must appear verbatim (modulo Unicode/whitespace normalization)
-      in a retrieved chunk. The quote may be split on `...`; each fragment
-      must appear in order within a single chunk's text, with fragments
-      shorter than _MIN_FRAGMENT_LEN rejected to prevent trivial matches.
-    - The LLM sometimes mislabels the citation's `source` (using the report
-      title from the page footer) or `page` (off-by-a-few when the same name
-      appears on adjacent pages). When the quote matches a retrieved chunk,
-      we rewrite the citation's `source` and `page` to that chunk's metadata.
-      The grounding guarantee ("the cited evidence is in the retrieved set")
-      still holds; we just trust the chunk over the LLM's labelling.
-    - Preference order when multiple chunks contain the quote: same page+
-      source as cited, then same page, then any retrieved chunk.
-    """
+) -> tuple[list[Citation], str | None]:
+    """Return (grounded_citations, failure_reason)."""
     if not citations:
-        return [], [], "no citations returned"
+        return [], "no citations returned"
 
     indexed_strict: list[tuple[RetrievedChunk, str]] = [
         (c, _normalize_for_grounding(html.unescape(c.text))) for c in chunks
     ]
-    # Computed lazily only when the strict pass misses
     indexed_layout: list[tuple[RetrievedChunk, str]] | None = None
 
     grounded: list[Citation] = []
-    drops: list[GroundingDrop] = []
     for cite in citations:
         needle = _normalize_for_grounding(html.unescape(cite.quote))
         if not needle:
-            drops.append(GroundingDrop(
-                source=cite.source, page=cite.page, quote=cite.quote,
-                reason="empty_quote",
-            ))
             continue
 
         fragments = _split_on_ellipsis(needle)
         if not fragments or any(len(f) < _MIN_FRAGMENT_LEN for f in fragments):
-            drops.append(GroundingDrop(
-                source=cite.source, page=cite.page, quote=cite.quote,
-                reason="quote_not_found_verbatim",
-            ))
             continue
 
         matches = [
@@ -321,7 +302,6 @@ def _ground_citations(
         ]
 
         if not matches:
-            # Fallback: strip PDF layout artifacts (footnote markers, bullet chars)
             if indexed_layout is None:
                 indexed_layout = [
                     (c, _normalize_for_grounding_layout(html.unescape(c.text)))
@@ -341,14 +321,6 @@ def _ground_citations(
                 matches = [table_chunk]
 
         if not matches:
-            page_in_set = any(chunk.page == cite.page for chunk, _ in indexed_strict)
-            drops.append(GroundingDrop(
-                source=cite.source, page=cite.page, quote=cite.quote,
-                reason=(
-                    "quote_not_found_verbatim" if page_in_set
-                    else "source_page_not_in_retrieved_set"
-                ),
-            ))
             continue
 
         best = next(
@@ -359,12 +331,6 @@ def _ground_citations(
         ) or matches[0]
 
         if len(citations) == 1 and not _citation_contains_verbatim_number(cite, verbatim):
-            drops.append(GroundingDrop(
-                source=cite.source,
-                page=cite.page,
-                quote=cite.quote,
-                reason="quote_not_found_verbatim",
-            ))
             continue
 
         grounded.append(Citation(
@@ -374,8 +340,8 @@ def _ground_citations(
         ))
 
     if not grounded:
-        return [], drops, "no citations could be grounded in the retrieved chunks"
-    return grounded, drops, None
+        return [], "no citations could be grounded in the retrieved chunks"
+    return grounded, None
 
 
 def _refuse(question: str, reason: str) -> VerbatimAnswer:
@@ -399,7 +365,6 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
     context = _format_context(chunks)
     user_msg = f"Question: {question}\n\nContext:\n{context}"
     model = settings.openai_answer_model
-    supports_temp_zero = "gpt-5" not in model
 
     messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
     for h in (history or [])[-3:]:
@@ -407,12 +372,13 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
         messages.append({"role": "assistant", "content": h["answer"]})
     messages.append({"role": "user", "content": user_msg})
 
+    t0 = time.perf_counter()
     completion = client.beta.chat.completions.parse(
         model=model,
-        **( {"temperature": 0} if supports_temp_zero else {}),
         messages=messages,
         response_format=LLMAnswer,
     )
+    logger.info("TIMING answer_llm(%s): %.2fs", model, time.perf_counter() - t0)
     parsed = completion.choices[0].message.parsed
     if parsed is None:
         return _refuse(question, "LLM returned no parsed output")
@@ -425,10 +391,9 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
             citations=[],
             refused=True,
             refusal_reason=parsed.refusal_reason or "model declined to answer",
-            raw_citations=parsed.citations,
         )
 
-    grounded, drops, failure = _ground_citations(parsed.citations, chunks, question=question, verbatim=parsed.verbatim)
+    grounded, failure = _ground_citations(parsed.citations, chunks, question=question, verbatim=parsed.verbatim)
     if failure is not None:
         return VerbatimAnswer(
             question=question,
@@ -437,8 +402,6 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
             citations=[],
             refused=True,
             refusal_reason=f"ungrounded citation: {failure}",
-            raw_citations=parsed.citations,
-            grounding_drops=drops,
         )
 
     return VerbatimAnswer(
@@ -448,6 +411,4 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
         citations=grounded,
         refused=False,
         refusal_reason=None,
-        raw_citations=parsed.citations,
-        grounding_drops=drops,
     )

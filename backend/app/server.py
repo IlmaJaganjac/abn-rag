@@ -22,6 +22,7 @@ from backend.app.ingestion import ingest_pdf
 from backend.app.retrieval import retrieve_decomposed
 from backend.app.schemas import RetrievalQuery, VerbatimAnswer
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
 
 app = FastAPI(title="Annualyzer API")
@@ -30,6 +31,13 @@ app = FastAPI(title="Annualyzer API")
 @app.on_event("startup")
 def _startup() -> None:
     init_db()
+    if settings.enable_rerank:
+        from backend.app.retrieval import _get_reranker, rerank
+        from backend.app.schemas import RetrievedChunk
+        _get_reranker()
+        # Warm MPS kernels with one tiny forward pass so user request 1 is fast.
+        rerank("warmup", [RetrievedChunk(id="w", source="w", page=1, text="warmup", token_count=1, score=0.0)], 1)
+        log.info("reranker warmed")
 
 
 app.add_middleware(
@@ -217,10 +225,6 @@ def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
             if doc.get("net_zero_year") is None and "net" in metric and "zero" in metric:
                 ty = dp.get("target_year") or dp.get("period")
                 doc["net_zero_year"] = str(ty) if ty else None
-
-
-def _load_datapoints() -> list[dict[str, Any]]:
-    return query_datapoints()
 
 
 # ---------- documents ----------

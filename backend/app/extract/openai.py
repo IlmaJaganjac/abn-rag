@@ -163,7 +163,6 @@ def extract_annual_report_datapoints_openai(
 
     client = openai_client()
     model = settings.openai_extract_model
-    supports_temp_zero = "gpt-5" not in model
     prompt = category_prompt(category)
     user_msg = (
         f"Company: {company or ''}\n"
@@ -173,7 +172,7 @@ def extract_annual_report_datapoints_openai(
     )
     completion = client.beta.chat.completions.parse(
         model=model,
-        **({"temperature": 0} if supports_temp_zero else {}),
+
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": user_msg},
@@ -245,12 +244,11 @@ def validate_datapoints_openai(
     )
 
     model = settings.openai_validate_model
-    supports_temp_zero = "gpt-5" not in model
 
     client = openai_client()
     completion = client.beta.chat.completions.parse(
         model=model,
-        **({"temperature": 0} if supports_temp_zero else {}),
+
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_msg},

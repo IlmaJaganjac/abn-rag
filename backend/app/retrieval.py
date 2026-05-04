@@ -4,7 +4,9 @@ import json
 import logging
 import math
 import re
+import time
 from collections import Counter
+from contextlib import contextmanager
 from typing import Any
 
 _REWRITE_SYSTEM = (
@@ -17,13 +19,45 @@ _REWRITE_SYSTEM = (
 
 logger = logging.getLogger(__name__)
 
+
+@contextmanager
+def _timed(label: str):
+    t0 = time.perf_counter()
+    try:
+        yield
+    finally:
+        logger.info("TIMING %s: %.2fs", label, time.perf_counter() - t0)
+
 from backend.app.config import settings
 from backend.app.ingestion import embed_texts, get_collection
 from backend.app.schemas import RetrievalQuery, RetrievalResult, RetrievedChunk
 
 RRF_K = 60
-DENSE_TOP_N = 30
-BM25_TOP_N = 30
+DENSE_TOP_N = 40
+BM25_TOP_N = 40
+
+_reranker = None
+
+
+def _get_reranker():
+    global _reranker
+    if _reranker is None:
+        import os
+        # Skip ~25 HF HEAD requests on every cold load when model is already cached.
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+        from sentence_transformers import CrossEncoder
+        _reranker = CrossEncoder(settings.reranker_model)
+    return _reranker
+
+
+def rerank(query: str, chunks: list[RetrievedChunk], top_k: int) -> list[RetrievedChunk]:
+    with _timed(f"rerank({len(chunks)} chunks)"):
+        reranker = _get_reranker()
+        pairs = [(query, c.text) for c in chunks]
+        scores = reranker.predict(pairs)
+        ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
+        return [c.model_copy(update={"score": float(s)}) for s, c in ranked[:top_k]]
 
 
 _FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
@@ -114,8 +148,26 @@ def _chunk_search_text(record: dict[str, Any]) -> str:
     return "\n".join(str(part) for part in parts if part)
 
 
+_BM25_CACHE: dict[str, Any] = {"sig": None, "records": [], "tokens": []}
+
+
+def _chunks_dir_signature() -> tuple[tuple[str, float, int], ...]:
+    """Return a signature of the chunks dir so cache invalidates on file changes."""
+    chunks_dir = settings.get_processed_path() / "chunks"
+    if not chunks_dir.exists():
+        return ()
+    return tuple(
+        (p.name, p.stat().st_mtime, p.stat().st_size)
+        for p in sorted(chunks_dir.glob("*.jsonl"))
+    )
+
+
 def _iter_processed_chunk_records() -> list[dict[str, Any]]:
-    """Load all persisted chunk records from disk and return them as dictionaries."""
+    """Load all persisted chunk records from disk; cached until files change."""
+    sig = _chunks_dir_signature()
+    if _BM25_CACHE["sig"] == sig:
+        return _BM25_CACHE["records"]
+
     chunks_dir = settings.get_processed_path() / "chunks"
     records: list[dict[str, Any]] = []
     for path in sorted(chunks_dir.glob("*.jsonl")):
@@ -125,6 +177,10 @@ def _iter_processed_chunk_records() -> list[dict[str, Any]]:
                 if not line:
                     continue
                 records.append(json.loads(line))
+
+    _BM25_CACHE["sig"] = sig
+    _BM25_CACHE["records"] = records
+    _BM25_CACHE["tokens"] = [_tokenize(_chunk_search_text(r)) for r in records]
     return records
 
 
@@ -139,12 +195,19 @@ def _passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
 
 def _bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
     """Score persisted chunks with BM25-style ranking and return candidate chunks."""
-    records = [record for record in _iter_processed_chunk_records() if _passes_filters(record, query)]
+    all_records = _iter_processed_chunk_records()
+    all_tokens = _BM25_CACHE["tokens"]
+    pairs = [
+        (rec, toks)
+        for rec, toks in zip(all_records, all_tokens, strict=True)
+        if _passes_filters(rec, query)
+    ]
     query_terms = _tokenize(query.question)
-    if not records or not query_terms:
+    if not pairs or not query_terms:
         return []
 
-    doc_tokens = [_tokenize(_chunk_search_text(record)) for record in records]
+    records = [p[0] for p in pairs]
+    doc_tokens = [p[1] for p in pairs]
     doc_freq: Counter[str] = Counter()
     for tokens in doc_tokens:
         doc_freq.update(set(tokens))
@@ -214,15 +277,17 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     collection = get_collection()
     retrieval_text = expand_query_for_retrieval(query.question)
 
-    [embedding] = embed_texts([retrieval_text])
+    with _timed("embed_question"):
+        [embedding] = embed_texts([retrieval_text])
 
     where = _build_where(query.company, query.year)
-    raw = collection.query(
-        query_embeddings=[embedding],
-        n_results=max(query.top_k, DENSE_TOP_N),
-        where=where,
-        include=["documents", "metadatas", "distances"],
-    )
+    with _timed("chroma_query"):
+        raw = collection.query(
+            query_embeddings=[embedding],
+            n_results=max(query.top_k, DENSE_TOP_N),
+            where=where,
+            include=["documents", "metadatas", "distances"],
+        )
 
     ids = (raw.get("ids") or [[]])[0]
     docs = (raw.get("documents") or [[]])[0]
@@ -236,9 +301,11 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
 
     retrieval_query = query.model_copy(update={"question": retrieval_text}) if retrieval_text != query.question else query
 
+    with _timed("bm25"):
+        bm25_chunks = _bm25_candidates(retrieval_query)
     chunks = _rrf_merge(
         dense_chunks=dense_chunks,
-        bm25_chunks=_bm25_candidates(retrieval_query),
+        bm25_chunks=bm25_chunks,
         top_k=query.top_k,
     )
 
@@ -285,13 +352,22 @@ def _merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[R
 
 def retrieve_decomposed(query: RetrievalQuery, history: list[dict] | None = None) -> RetrievalResult:
     """Decompose the query (with optional history), retrieve for each sub-question, merge results."""
-    sub_questions = rewrite_and_decompose(query.question, history or [])
-    logger.debug("rewritten into %d sub-questions: %s", len(sub_questions), sub_questions)
-    chunk_lists = [
-        retrieve(query.model_copy(update={"question": q})).chunks
-        for q in sub_questions
-    ]
-    chunks = _merge_chunks(chunk_lists, query.top_k)
+    if history:
+        with _timed("decompose"):
+            sub_questions = rewrite_and_decompose(query.question, history)
+        logger.info("decomposed into %d sub-questions", len(sub_questions))
+    else:
+        sub_questions = [query.question]
+    with _timed(f"retrieve_all({len(sub_questions)} sub)"):
+        chunk_lists = [
+            retrieve(query.model_copy(update={"question": q})).chunks
+            for q in sub_questions
+        ]
+    candidates = _merge_chunks(chunk_lists, settings.rerank_top_n)
+    if settings.enable_rerank:
+        chunks = rerank(query.question, candidates, query.top_k)
+    else:
+        chunks = candidates[: query.top_k]
     return RetrievalResult(query=query, chunks=chunks)
 
 

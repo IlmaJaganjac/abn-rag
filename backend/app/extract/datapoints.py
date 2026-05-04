@@ -8,30 +8,15 @@ from pydantic import BaseModel
 
 from backend.app.extract.schemas import AnnualReportDatapoints
 from backend.app.extract.signals import (
-    ACTUAL_METRIC,
-    BIZ_SIGNAL,
-    ESG_SIGNAL,
-    FIN_SIGNAL,
     FTE_AVG_PAYROLL,
     FTE_COMPANY_WIDE,
     FTE_HEADCOUNT,
-    FTE_NON_EMPLOYEE,
-    FTE_SIGNAL,
     FTE_SPECIFIC,
     PLACEHOLDER_VALUE,
     PUNCT_RE,
-    SCOPE_CUSTOMER_SIGNAL,
-    SCOPE_GEOGRAPHY_SIGNAL,
-    SCOPE_PRODUCT_SIGNAL,
-    SCOPE_SEGMENT_SIGNAL,
-    SH_SIGNAL,
     SPACE_RE,
     STATUS_ONLY_VALUE,
-    SUST_BUSINESS_ONLY,
-    SUST_SIGNAL,
-    SUST_TARGET_SIGNAL,
     SYMBOL_SPACE_RE,
-    TOTAL_COMPANY_SIGNAL,
 )
 
 
@@ -131,22 +116,6 @@ def _esg_priority(quote: str | None, period: str | None) -> int:
     return 70
 
 
-def _combined_dp_text(dp: NormalizedDatapoint) -> str:
-    """Concatenate the key fields of one datapoint into one searchable text string."""
-    return " ".join(
-        part for part in (
-            dp.datapoint_type,
-            dp.metric,
-            dp.value,
-            dp.unit,
-            dp.period,
-            dp.quote,
-            dp.basis,
-            dp.scope,
-            dp.target_year,
-        )
-        if part
-    )
 
 
 def _normalized_contains_value(quote: str, value: str) -> bool:
@@ -164,74 +133,19 @@ def _normalized_contains_value(quote: str, value: str) -> bool:
     return bool(numeric_value and numeric_value in numeric_quote)
 
 
-def _is_scoped_total(dp: NormalizedDatapoint) -> bool:
-    """Return whether a datapoint is a scoped subtotal rather than a true company-wide total."""
-    text = _combined_dp_text(dp)
-    return bool(
-        TOTAL_COMPANY_SIGNAL.search(dp.metric or "")
-        and (
-            SCOPE_CUSTOMER_SIGNAL.search(text)
-            or SCOPE_SEGMENT_SIGNAL.search(text)
-            or SCOPE_GEOGRAPHY_SIGNAL.search(text)
-            or SCOPE_PRODUCT_SIGNAL.search(text)
-            or FTE_SPECIFIC.search(text)
-        )
-    )
-
 
 def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
-    """Reject placeholder, mis-scoped, or category-inconsistent datapoints."""
-    text = _combined_dp_text(dp)
+    """Reject obvious placeholders and ungrounded values; leave category checks to the LLM validator."""
+    if dp.extractor != "openai":
+        return True
     value = (dp.value or "").strip()
     quote = dp.quote or ""
-    metric = dp.metric or ""
-    strict_openai = dp.extractor == "openai"
-    if strict_openai:
-        if not quote:
-            return False
-        if value and (PLACEHOLDER_VALUE.fullmatch(value) or STATUS_ONLY_VALUE.fullmatch(value)):
-            return False
-        if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
-            return False
-    if dp.datapoint_type == "fte":
-        if strict_openai and dp.fact_kind != "actual":
-            return False
-        return bool(FTE_SIGNAL.search(text)) and not bool(FTE_NON_EMPLOYEE.search(text))
-
-    if dp.datapoint_type == "sustainability_goal":
-        if strict_openai and dp.fact_kind not in {"target", "forecast"}:
-            return False
-        if strict_openai and ACTUAL_METRIC.search(metric):
-            return False
-        has_sust_signal = bool(SUST_SIGNAL.search(text))
-        has_target_signal = bool(SUST_TARGET_SIGNAL.search(text) or dp.target_year)
-        business_only = bool(SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
-        return has_sust_signal and has_target_signal and not business_only
-
-    if dp.datapoint_type == "esg_datapoint":
-        if strict_openai and dp.fact_kind != "actual":
-            return False
-        return bool(ESG_SIGNAL.search(text)) and not bool(SUST_TARGET_SIGNAL.search(text))
-
-    if dp.datapoint_type == "financial_highlight":
-        if strict_openai and dp.fact_kind != "actual":
-            return False
-        if SH_SIGNAL.search(text) or FTE_SIGNAL.search(text) or SUST_SIGNAL.search(text):
-            return False
-        return bool(FIN_SIGNAL.search(text))
-
-    if dp.datapoint_type == "business_performance":
-        if strict_openai and dp.fact_kind != "actual":
-            return False
-        if FTE_SIGNAL.search(text) or SH_SIGNAL.search(text):
-            return False
-        if SUST_SIGNAL.search(text) and SUST_TARGET_SIGNAL.search(text):
-            return False
-        return bool(BIZ_SIGNAL.search(text))
-
-    if dp.datapoint_type == "shareholder_return":
-        return bool(SH_SIGNAL.search(text))
-
+    if not quote:
+        return False
+    if value and (PLACEHOLDER_VALUE.fullmatch(value) or STATUS_ONLY_VALUE.fullmatch(value)):
+        return False
+    if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
+        return False
     return True
 
 

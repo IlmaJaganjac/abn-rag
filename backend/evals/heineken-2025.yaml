@@ -1,0 +1,330 @@
+questions:
+  # Heineken N.V. 2025 - RAGAS context questions
+
+  - id: heineken_2025_company_profile_employees
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many employees did Heineken say it had in 2025?"
+    reference: "Heineken said it had over 85,000 employees in 2025."
+
+  - id: heineken_2025_company_profile_brands
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many brands did Heineken say were in its portfolio in 2025?"
+    reference: "Heineken said its portfolio included more than 340 international, regional, local and specialty beers and ciders in 2025."
+
+  - id: heineken_2025_company_profile_countries
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "In how many countries did Heineken operate production facilities in 2025?"
+    reference: "Heineken operated breweries, malteries, cider plants and other production facilities in more than 70 countries in 2025."
+
+  - id: heineken_2025_growth_total_volume
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How did Heineken's total volume perform in 2025?"
+    reference: "Heineken's total volume declined by 1.2% in 2025, with consolidated volume down 2.1% and licensed volume up 17.8%."
+
+  - id: heineken_2025_growth_heineken_volume
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How did Heineken® volume perform in 2025?"
+    reference: "Heineken® volume grew by 2.7% in 2025."
+
+  - id: heineken_2025_growth_global_brands_volume
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How did Heineken's global brands volume perform in 2025?"
+    reference: "Heineken's global brands volume grew by 1.9% in 2025."
+
+  - id: heineken_2025_growth_net_revenue
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How did Heineken's net revenue perform in 2025?"
+    reference: "Heineken's net revenue grew by 1.6% in 2025, and net revenue per hectolitre increased by 3.8%."
+
+  - id: heineken_2025_growth_market_share
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What did Heineken report about market share performance in 2025?"
+    reference: "Heineken reported that over 60% of its markets, including over 80% of priority growth markets, gained or held share in 2025."
+
+  - id: heineken_2025_profitability_gross_savings
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What gross savings did Heineken report in 2025?"
+    reference: "Heineken reported gross savings in excess of EUR 500 million in 2025."
+
+  - id: heineken_2025_profitability_operating_profit
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How did Heineken's operating profit perform in 2025?"
+    reference: "Heineken's operating profit grew by 4.4% in 2025, with operating profit margin expanding by 41 basis points to 15.2%."
+
+  - id: heineken_2025_profitability_eps
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What diluted earnings per share did Heineken report in 2025?"
+    reference: "Heineken reported diluted earnings per share of EUR 4.78 in 2025."
+
+  - id: heineken_2025_cash_flow_free_operating_cash_flow
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What free operating cash flow did Heineken report in 2025?"
+    reference: "Heineken reported free operating cash flow of EUR 2.6 billion in 2025."
+
+  - id: heineken_2025_cash_conversion_ratio
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What cash conversion ratio did Heineken report in 2025?"
+    reference: "Heineken reported a cash conversion ratio of 87% in 2025."
+
+  - id: heineken_2025_roic
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What ROIC did Heineken report in 2025?"
+    reference: "Heineken reported ROIC of 22.7% in 2025, an absolute increase of 57 basis points."
+
+  - id: heineken_2025_shareholder_buyback
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What share buyback programme did Heineken describe in 2025?"
+    reference: "Heineken completed the first tranche of its EUR 1.5 billion share buyback programme and said the second EUR 750 million tranche would start shortly."
+
+  - id: heineken_2025_shareholder_dividend
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What dividend per share did Heineken propose for 2025?"
+    reference: "Heineken proposed a dividend of EUR 1.90 per share for 2025."
+
+  - id: heineken_2025_shareholder_payout_policy
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What dividend payout policy range did Heineken describe for 2025?"
+    reference: "Heineken said its dividend payout policy would be expanded to a range of 30% to 50%."
+
+  - id: heineken_2025_strategy_evergreen_2030
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What strategy did Heineken say it was accelerating in 2026?"
+    reference: "Heineken said it was accelerating the disciplined execution of EverGreen 2030."
+
+  - id: heineken_2025_strategy_role_reduction
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What operating model change involving roles did Heineken announce for the next two years?"
+    reference: "Heineken announced operating model changes that would reduce 5,000 to 6,000 roles over the next two years."
+
+  - id: heineken_2025_strategy_fifco
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What did Heineken report about FIFCO in its 2025 results?"
+    reference: "Heineken reported that it was integrating FIFCO's beverage and retail businesses in Central America, and that the completed acquisition was expected to be circa 2% to 3% accretive to EPS."
+
+  - id: heineken_2025_sustainability_net_zero_value_chain
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "By what year does Heineken aim to reach net zero across its value chain?"
+    reference: "Heineken aims to reach net zero across its value chain by 2040."
+
+  - id: heineken_2025_sustainability_scope_1_2_net_zero
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "By what year does Heineken aim to reach net zero in Scope 1 and 2?"
+    reference: "Heineken aims to reach net zero in Scope 1 and 2 by 2030."
+
+  - id: heineken_2025_sustainability_scope_1_2_progress
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What Scope 1 and 2 emissions progress did Heineken report for 2025?"
+    reference: "Heineken reported a 38% CO2 reduction versus the 2022 baseline in Scope 1 and 2 emissions, and 88% electricity from renewable sources."
+
+  - id: heineken_2025_sustainability_value_chain_progress
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report towards net zero across its value chain in 2025?"
+    reference: "Heineken reported a 19% CO2 reduction versus the 2022 baseline in Scope 1, 2 and 3 emissions."
+
+  - id: heineken_2025_sustainability_scope_3_targets
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What Scope 3 FLAG and non-FLAG emissions reduction targets did Heineken set for 2030?"
+    reference: "Heineken set targets to reduce Scope 3 FLAG emissions by 30% and Scope 3 non-FLAG emissions by 25% by 2030."
+
+  - id: heineken_2025_sustainability_scope_3_progress
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What Scope 3 FLAG and non-FLAG emissions progress did Heineken report for 2025?"
+    reference: "Heineken reported a 23% CO2 reduction in Scope 3 FLAG emissions and a 15% CO2 reduction in Scope 3 non-FLAG emissions versus the 2022 baseline."
+
+  - id: heineken_2025_sustainability_reusable_format
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What reusable format ambition and 2025 progress did Heineken report?"
+    reference: "Heineken aims for 43% of volumes sold in reusable format by 2030 and reported 39% of volumes sold in reusable format in 2025."
+
+  - id: heineken_2025_sustainability_recycled_content
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What recycled content target and 2025 progress did Heineken report for bottles and cans?"
+    reference: "Heineken aims for 50% recycled content in bottles and cans by 2030 and reported 48% recycled content in bottles and cans in 2025."
+
+  - id: heineken_2025_sustainability_packaging_recyclable
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What recyclable packaging target and 2025 progress did Heineken report?"
+    reference: "Heineken aims for 99% of all packaging to be recyclable by design by 2030 and reported 98% of packaging recyclable by design in 2025."
+
+  - id: heineken_2025_sustainability_water_balancing
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What water balancing progress did Heineken report in 2025?"
+    reference: "Heineken reported that 43% of sites in water-stressed areas reached 100% water balancing in 2025."
+
+  - id: heineken_2025_sustainability_water_usage
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What average water usage did Heineken report in 2025?"
+    reference: "Heineken reported average water usage of 2.9 hl/hl in water-stressed areas and 2.9 hl/hl worldwide in 2025."
+
+  - id: heineken_2025_sustainability_sustainably_sourced_ingredients
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What sustainably sourced ingredients target and 2025 progress did Heineken report?"
+    reference: "Heineken aims for 100% sustainably sourced ingredients, hops and barley, by 2030 and reported 78% sustainably sourced ingredients in 2025."
+
+  - id: heineken_2025_sustainability_women_senior_management
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What gender balance target and 2025 progress did Heineken report for senior management?"
+    reference: "Heineken targeted 30% women in senior management by 2025 and 40% by 2030, and reported 31% women in senior management positions in 2025."
+
+  - id: heineken_2025_sustainability_equal_pay
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What equal pay progress did Heineken report in 2025?"
+    reference: "Heineken reported that 100% of operating companies were assessed for equal pay for equal work and that 100% had action plans to close any gaps."
+
+  - id: heineken_2025_sustainability_fair_wage
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What fair wage progress did Heineken report in 2025?"
+    reference: "Heineken reported that 99.5% of employees were assessed for fair wages and that 100% of assessed employees earned a fair wage according to the Fair Wage Network."
+
+  - id: heineken_2025_sustainability_third_party_workers
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report on fair living and working standards for third-party employees and Brand Promoters in 2025?"
+    reference: "Heineken reported that 98% of operating companies were assessed for fair living and working standards for third-party employees and Brand Promoters in 2025."
+
+  - id: heineken_2025_sustainability_safety_fatalities
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What work-related fatality result did Heineken report in 2025?"
+    reference: "Heineken reported zero work-related fatalities as a result of work-related accidents in 2025."
+
+  - id: heineken_2025_sustainability_social_impact
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What social impact initiative progress did Heineken report in 2025?"
+    reference: "Heineken reported that 100% of operating companies had a social impact initiative in 2025."
+
+  - id: heineken_2025_sustainability_zero_alcohol_option
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report on zero alcohol options in 2025?"
+    reference: "Heineken reported that markets with a zero alcohol option for at least one strategic brand represented 91% of its beer and cider volumes."
+
+  - id: heineken_2025_sustainability_consumer_information_labels
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What consumer information label progress did Heineken report in 2025?"
+    reference: "Heineken reported that 100% of products in scope had fully compliant labels by the end of Q1 2025."
+
+  - id: heineken_2025_sustainability_alcohol_harm_partnerships
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What progress did Heineken report on partnerships to address alcohol-related harm in 2025?"
+    reference: "Heineken reported that 100% of operating companies in scope had a partnership to address alcohol-related harm in 2025."
+
+  - id: heineken_2025_sustainability_responsible_consumption_spend
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "What media spend did Heineken invest in responsible consumption campaigns in 2025?"
+    reference: "Heineken invested 26% of Heineken® media spend in responsible consumption campaigns in 2025."
+
+  - id: heineken_2025_sustainability_responsible_consumption_reach
+    company: HEINEKEN
+    year: 2025
+    eval_type: ragas_context
+    user_input: "How many consumers did Heineken reach with responsible consumption campaigns in 2025?"
+    reference: "Heineken reached 1.4 billion unique consumers with responsible consumption campaigns in 2025."
+
+  - id: heineken_2025_hallucination_future_actual_2028_revenue
+    company: HEINEKEN
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "What was Heineken's actual reported net revenue in 2028?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Future actual not in the 2025 annual report."
+
+  - id: heineken_2025_hallucination_asml_system_sales
+    company: HEINEKEN
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "How many lithography systems did ASML sell according to Heineken's 2025 annual report?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Wrong-company question."
+
+  - id: heineken_2025_hallucination_bitcoin_holdings
+    company: HEINEKEN
+    year: 2025
+    eval_type: refusal_rule
+    user_input: "How much Bitcoin did Heineken hold at year-end 2025?"
+    expected_behavior: refuse
+    reference: null
+    notes: "Do not include in RAGAS context recall/precision. Unsupported/non-applicable metric."
