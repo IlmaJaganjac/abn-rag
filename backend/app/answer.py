@@ -3,13 +3,12 @@ from __future__ import annotations
 import html
 import re
 import unicodedata
-from collections import defaultdict
 
 from backend.app._openai import openai_client
 from backend.app.config import settings
 from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT = """\ka
 You answer questions about annual reports using only the provided context blocks.
 
 Rules:
@@ -37,7 +36,8 @@ Rules:
 
 5. Resolve intent before answering:
    - If the question asks for actual, reported, performance, current-year, or
-     what the company reported, answer with actual/reported values.
+     what the c
+     ompany reported, answer with actual/reported values.
    - Do NOT answer with targets, goals, ambitions, forecasts, scenarios, or
      future outlook unless the question explicitly asks for them.
    - If both actual and target/forecast evidence are present, choose actual for

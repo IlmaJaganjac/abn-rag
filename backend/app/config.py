@@ -15,13 +15,13 @@ class Settings(BaseSettings):
     openai_answer_model: str = "gpt-5.4-mini"
     openai_extract_model: str = "gpt-5.4-mini"
     openai_validate_model: str = "gpt-5.4-mini"
-    openai_table_vision_model: str = "gpt-5-mini"
+    openai_table_vision_model: str = "gpt-5.4-mini"
 
     chroma_persist_dir: Path = Path("backend/data/chroma")
     chroma_collection: str = "annual_reports"
     processed_dir: Path = Path("backend/data/processed")
 
-    reports_dir: Path = Path("reports")
+    reports_dir: Path = Path("backend/data/reports")
     pdf_parser: str = "llamaparse"
 
     chunk_size_tokens: int = 800

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.extracted_datapoints import (
+from backend.app.extract.datapoints import (
     NormalizedDatapoint,
     NormalizedDatapointSet,
     deduplicate_datapoints,
     normalize_llamaextract_result,
 )
-from backend.app.datapoint_schemas import (
+from backend.app.extract.schemas import (
     AnnualReportDatapoints,
     ExtractedBusinessPerformance,
     ExtractedESGDatapoint,

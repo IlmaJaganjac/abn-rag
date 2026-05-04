@@ -1,0 +1,2343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Annualyzer — ABN AMRO RAG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>/* Global styles + design tokens. Original "Dutch banking editorial" palette. */
+
+:root {
+  --bg: oklch(98% 0.005 90);
+  --bg-2: oklch(96% 0.008 90);
+  --paper: oklch(99.5% 0.003 90);
+  --ink: oklch(18% 0.02 155);
+  --ink-2: oklch(38% 0.02 155);
+  --ink-3: oklch(58% 0.015 155);
+  --line: oklch(90% 0.012 155);
+  --line-2: oklch(85% 0.015 155);
+  --primary: oklch(35% 0.06 155);
+  --primary-hover: oklch(30% 0.07 155);
+  --primary-ink: oklch(98% 0.01 155);
+  --primary-tint: oklch(94% 0.025 155);
+  --accent: oklch(85% 0.15 95);
+  --accent-ink: oklch(28% 0.05 95);
+  --danger: oklch(50% 0.16 30);
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow-sm: 0 1px 0 oklch(0% 0 0 / 0.04), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow: 0 1px 0 oklch(0% 0 0 / 0.05), 0 8px 24px -8px oklch(0% 0 0 / 0.08);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.editorial { font-family: 'Newsreader', Georgia, serif; font-feature-settings: 'lnum'; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+button { font-family: inherit; font-size: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+input, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 8px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+/* App shell */
+.app { display: grid; grid-template-columns: 248px 1fr; height: 100%; min-height: 0; }
+.sidebar {
+  background: var(--paper);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  padding: 18px 14px;
+  gap: 18px;
+  min-height: 0;
+  overflow: hidden;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px; }
+.brand-mark {
+  width: 28px; height: 32px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 4px; overflow: hidden;
+}
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.brand-mark svg { display: block; width: 100%; height: 100%; }
+.brand-name { font-weight: 600; letter-spacing: -0.01em; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.brand-tag {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+  color: #009286; background: oklch(96% 0.04 175);
+  padding: 1px 5px; border-radius: 3px;
+  text-transform: uppercase;
+}
+.brand-sub { font-size: 11px; color: var(--ink-3); margin-top: -2px; }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-section { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); padding: 8px 8px 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 6px;
+  color: var(--ink-2); text-align: left;
+  transition: background 120ms ease;
+  width: 100%;
+}
+.nav-item:hover { background: var(--bg-2); color: var(--ink); }
+.nav-item.active { background: var(--primary-tint); color: var(--primary); font-weight: 500; }
+.nav-item .badge {
+  margin-left: auto; font-size: 11px; color: var(--ink-3);
+  background: var(--bg-2); padding: 1px 7px; border-radius: 10px;
+}
+.nav-item.active .badge { background: var(--paper); color: var(--primary); }
+
+.sidebar-spacer { flex: 1; min-height: 16px; }
+
+/* Pull-quote card — "from the index" */
+.pull-card {
+  position: relative;
+  margin-top: 16px;
+  padding: 14px 14px 12px;
+  background: linear-gradient(180deg, var(--primary-tint) 0%, var(--paper) 100%);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease;
+  overflow: hidden;
+}
+.pull-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-left: 2px solid var(--primary);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  pointer-events: none;
+}
+.pull-card:hover { border-color: var(--primary); }
+.pull-card:active { transform: scale(0.995); }
+.pull-eyebrow {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.pull-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--primary);
+}
+.pull-topic {
+  font-size: 10px;
+  color: var(--ink-3);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 1px 6px; border-radius: 10px;
+  letter-spacing: 0.02em;
+}
+.pull-quote {
+  font-family: 'Newsreader', serif;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: pretty;
+  position: relative;
+  margin-bottom: 10px;
+}
+.pull-mark {
+  font-family: 'Newsreader', serif;
+  font-size: 28px;
+  font-style: normal;
+  line-height: 0;
+  color: var(--primary);
+  margin-right: 2px;
+  vertical-align: -0.2em;
+  opacity: 0.55;
+}
+.pull-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+.pull-source { color: var(--ink-2); font-weight: 500; }
+.pull-page { opacity: 0.8; }
+.pull-shuffle {
+  position: absolute; top: 10px; right: 10px;
+  width: 22px; height: 22px;
+  display: none;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--ink-3);
+  background: transparent;
+}
+.pull-card:hover .pull-shuffle { display: grid; }
+.pull-shuffle:hover { background: var(--paper); color: var(--primary); }
+
+/* Help button in topbar */
+.help-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.help-btn:hover { color: var(--primary); border-color: var(--primary); }
+.help-btn svg { opacity: 0.7; }
+.help-btn:hover svg { opacity: 1; }
+
+/* Guided tour */
+.tour-root {
+  position: fixed; inset: 0; z-index: 100;
+  pointer-events: auto;
+  opacity: 1;
+}
+@keyframes tour-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.tour-mask {
+  position: fixed; inset: 0;
+  pointer-events: auto;
+}
+.tour-ring {
+  filter: drop-shadow(0 0 0 4px var(--primary-tint));
+  animation: tour-pulse 1800ms ease-in-out infinite;
+}
+@keyframes tour-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.tour-card {
+  position: fixed;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 24px 48px -16px rgba(15, 23, 30, 0.32), 0 4px 12px rgba(15, 23, 30, 0.08);
+  z-index: 101;
+  opacity: 1;
+}
+@keyframes tour-card-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* center-placement: no override needed; opacity already 1 */
+@keyframes tour-card-center-in {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.tour-step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.tour-title {
+  font-family: 'Newsreader', serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.tour-body {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+  margin-bottom: 16px;
+}
+.tour-actions {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.tour-skip {
+  font-size: 12px;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-2);
+}
+.tour-skip:hover { color: var(--ink-2); text-decoration-color: var(--ink-3); }
+.tour-back, .tour-next { font-size: 12px; padding: 6px 12px; }
+.tour-progress {
+  display: flex; gap: 5px; justify-content: center;
+}
+.tour-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--line-2);
+  transition: background 200ms ease, width 200ms ease;
+}
+.tour-dot.done { background: var(--primary); opacity: 0.4; }
+.tour-dot.on { background: var(--primary); width: 16px; border-radius: 3px; }
+.sidebar-foot {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 11px; color: var(--ink-3);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.sidebar-foot .dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: oklch(60% 0.12 155); margin-right: 6px;
+}
+
+/* Main */
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.topbar h1 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.topbar .crumb { color: var(--ink-3); font-size: 13px; }
+.topbar-spacer { flex: 1; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 6px;
+  background: var(--paper); color: var(--ink-2);
+  border: 1px solid var(--line);
+  transition: all 120ms ease;
+  font-size: 13px;
+}
+.btn:hover { border-color: var(--ink-3); color: var(--ink); }
+.btn-primary {
+  background: var(--primary); color: var(--primary-ink); border-color: var(--primary);
+}
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+
+.view { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* ----- Chat ----- */
+.chat-wrap { max-width: 820px; margin: 0 auto; padding: 32px 28px 180px; }
+.chat-empty { text-align: left; padding: 40px 0; }
+.chat-empty h2 { font-family: 'Newsreader', serif; font-weight: 500; font-size: 32px; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 8px; }
+.chat-empty p { color: var(--ink-3); margin: 0 0 28px; max-width: 560px; }
+.suggested { display: flex; flex-direction: column; gap: 10px; }
+.suggested-head { display: flex; align-items: center; justify-content: space-between; }
+.suggested-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.suggested-pager { display: flex; align-items: center; gap: 4px; }
+.pager-btn {
+  width: 24px; height: 24px; border-radius: 4px;
+  border: 1px solid var(--line); background: var(--paper);
+  color: var(--ink-2); font-size: 12px; line-height: 1;
+  display: grid; place-items: center;
+  transition: all 120ms ease;
+}
+.pager-btn:hover { border-color: var(--ink-3); color: var(--ink); background: var(--bg-2); }
+.pager-count { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; padding: 0 6px; }
+.suggested-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.suggested-btn {
+  text-align: left; padding: 14px 16px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  font-size: 13px; color: var(--ink-2);
+  transition: all 120ms ease;
+}
+.suggested-btn:hover { border-color: var(--ink-3); color: var(--ink); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.suggested-btn-empty { background: transparent; border-color: transparent; pointer-events: none; box-shadow: none; }
+.suggested-btn-empty:hover { transform: none; box-shadow: none; }
+.suggested-btn .arrow { float: right; opacity: 0.4; }
+
+.msg { margin-bottom: 28px; }
+.msg-user {
+  background: var(--primary-tint);
+  border-left: 2px solid var(--primary);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  color: var(--ink);
+}
+.msg-meta { font-size: 11px; color: var(--ink-3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.msg-assistant { padding: 4px 0; }
+.msg-assistant .answer-text {
+  font-family: 'Newsreader', serif; font-size: 19px; line-height: 1.55;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+.verbatim-block {
+  margin-top: 16px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  padding: 16px 18px;
+  position: relative;
+}
+.verbatim-block::before {
+  content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px;
+  background: var(--accent);
+}
+.verbatim-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 6px; }
+.verbatim-text { font-family: 'Newsreader', serif; font-style: italic; font-size: 16px; line-height: 1.5; color: var(--ink); }
+
+.citations { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.citations-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.cite-card {
+  display: flex; gap: 12px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.cite-card:hover { border-color: var(--ink-3); background: var(--bg-2); }
+.cite-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--primary); flex-shrink: 0; padding-top: 1px; min-width: 18px; }
+.cite-body { min-width: 0; flex: 1; }
+.cite-source { font-weight: 500; color: var(--ink); margin-bottom: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cite-page-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--bg-2); color: var(--ink-2); padding: 1px 6px; border-radius: 3px; }
+.cite-quote { color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+.cite-action { color: var(--ink-3); padding-top: 2px; flex-shrink: 0; }
+
+.caveat {
+  margin-top: 12px;
+  display: flex; gap: 10px;
+  background: oklch(95% 0.05 95); border: 1px solid oklch(85% 0.08 95);
+  border-radius: 6px; padding: 10px 12px; font-size: 13px; color: var(--accent-ink);
+}
+.refusal {
+  border-left: 2px solid var(--ink-3);
+  padding: 12px 16px; background: var(--bg-2); border-radius: 0 6px 6px 0;
+  color: var(--ink-2);
+}
+.refusal-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 4px; }
+
+/* Thinking indicator */
+.thinking {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.thinking-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.thinking-row .pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ink-3);
+  flex-shrink: 0;
+}
+.thinking-row.active .pulse { background: var(--primary); animation: pulse 1.2s ease-in-out infinite; }
+.thinking-row.done .pulse { background: oklch(60% 0.12 155); }
+.thinking-row.done { color: var(--ink-3); }
+.thinking-row.pending { color: var(--ink-3); opacity: 0.6; }
+.thinking-row .detail { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); margin-left: auto; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+.thinking-bars {
+  display: flex; gap: 3px; align-items: end; height: 14px;
+}
+.thinking-bars span {
+  display: block; width: 3px; background: var(--primary); border-radius: 2px;
+  animation: bar 1s ease-in-out infinite;
+}
+.thinking-bars span:nth-child(1) { height: 60%; animation-delay: 0s; }
+.thinking-bars span:nth-child(2) { height: 100%; animation-delay: 0.15s; }
+.thinking-bars span:nth-child(3) { height: 40%; animation-delay: 0.3s; }
+.thinking-bars span:nth-child(4) { height: 80%; animation-delay: 0.45s; }
+@keyframes bar {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.4); }
+}
+
+/* Composer */
+.composer-dock {
+  position: sticky; bottom: 0;
+  margin-top: auto;
+  padding: 16px 28px 24px;
+  background: linear-gradient(to bottom, transparent, var(--bg) 30%);
+  pointer-events: none;
+}
+.composer-dock-inner { max-width: 820px; margin: 0 auto; pointer-events: auto; }
+.composer {
+  background: var(--paper); border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 160ms ease;
+}
+.composer:focus-within { border-color: var(--primary); }
+.composer textarea {
+  width: 100%; resize: none; border: 0; outline: 0; background: transparent;
+  font-size: 14px; line-height: 1.5;
+  min-height: 24px; max-height: 200px;
+  padding: 4px 2px;
+}
+.composer textarea::placeholder { color: var(--ink-3); }
+.composer-row { display: flex; align-items: center; gap: 8px; }
+.scope-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 16px;
+  background: var(--bg-2); border: 1px solid var(--line);
+  font-size: 12px; color: var(--ink-2);
+}
+.scope-pill select {
+  border: 0; background: transparent; color: inherit; font-size: 12px;
+  outline: 0; padding: 0; cursor: pointer;
+}
+.send-btn {
+  margin-left: auto;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--primary); color: var(--primary-ink);
+  display: grid; place-items: center;
+  transition: background 120ms ease;
+}
+.send-btn:hover:not(:disabled) { background: var(--primary-hover); }
+.send-btn:disabled { background: var(--line-2); color: var(--ink-3); cursor: not-allowed; }
+
+/* ----- Documents ----- */
+.docs-wrap { max-width: 1100px; margin: 0 auto; padding: 28px; }
+.docs-hd { display: flex; align-items: end; gap: 16px; margin-bottom: 24px; }
+.docs-hd h2 { font-family: 'Newsreader', serif; font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.015em; }
+.docs-hd .docs-count { color: var(--ink-3); font-size: 13px; }
+.dropzone {
+  border: 1.5px dashed var(--line-2); border-radius: 12px;
+  padding: 24px; text-align: center;
+  background: var(--paper);
+  transition: all 160ms ease;
+  margin-bottom: 24px;
+}
+.dropzone.over { border-color: var(--primary); background: var(--primary-tint); }
+.dropzone .dz-title { font-family: 'Newsreader', serif; font-size: 18px; margin-bottom: 4px; }
+.dropzone .dz-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 12px; }
+
+.docs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.doc-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  transition: all 120ms ease;
+  position: relative;
+}
+.doc-card:hover { border-color: var(--ink-3); box-shadow: var(--shadow-sm); }
+.doc-card-hd { display: flex; gap: 12px; align-items: start; }
+.doc-icon {
+  width: 38px; height: 46px; flex-shrink: 0; border-radius: 4px;
+  background: var(--primary-tint); color: var(--primary);
+  display: grid; place-items: center;
+  position: relative;
+}
+.doc-icon::after {
+  content: ''; position: absolute; top: 0; right: 0; width: 10px; height: 10px;
+  background: var(--paper);
+  border-left: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.doc-title { font-weight: 500; font-size: 14px; line-height: 1.3; letter-spacing: -0.005em; }
+.doc-meta { font-size: 11px; color: var(--ink-3); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+.doc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.doc-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 2px; }
+.doc-stat-value { font-family: 'Newsreader', serif; font-size: 18px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+.doc-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; }
+.doc-status .dot { width: 6px; height: 6px; border-radius: 50%; }
+.doc-status.ready .dot { background: oklch(60% 0.12 155); }
+.doc-status.parsing .dot { background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+
+/* Ingestion job (inline progress) */
+.ingest-row {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px;
+}
+.ingest-row .name { font-weight: 500; font-size: 13px; }
+.ingest-row .stages { display: flex; gap: 8px; font-size: 11px; color: var(--ink-3); }
+.ingest-row .stages span.active { color: var(--primary); font-weight: 500; }
+.progress-bar { flex: 1; height: 4px; background: var(--bg-2); border-radius: 2px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 200ms ease; }
+
+/* Upload toast */
+.toast-stack {
+  position: fixed; right: 24px; bottom: 24px; z-index: 60;
+  display: flex; flex-direction: column; gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 380px; max-width: calc(100vw - 48px);
+  padding: 14px 14px 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 30, 0.18), 0 2px 6px rgba(15, 23, 30, 0.06);
+  animation: toast-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-icon {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--primary-tint);
+  color: var(--primary);
+  display: grid; place-items: center;
+}
+.toast-body { flex: 1; min-width: 0; }
+.toast-title {
+  font-family: 'Newsreader', serif;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.toast-text {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.toast-close {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 4px;
+  color: var(--ink-3);
+  font-size: 18px; line-height: 1;
+  display: grid; place-items: center;
+  margin-top: -2px;
+}
+.toast-close:hover { background: var(--bg-2); color: var(--ink); }
+
+/* ----- Datapoints ----- */
+.dp-wrap { max-width: 1200px; margin: 0 auto; padding: 28px; }
+.dp-hd { display: flex; gap: 12px; align-items: end; margin-bottom: 24px; }
+.dp-hd h2 { font-family: 'Newsreader', serif; font-weight: 500; font-size: 28px; margin: 0; letter-spacing: -0.015em; }
+.dp-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-chip {
+  padding: 5px 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--paper);
+  font-size: 12px; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filter-chip.active { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+
+.dp-table {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden;
+}
+.dp-row {
+  display: grid;
+  grid-template-columns: 110px 1.6fr 0.9fr 90px 1fr;
+  gap: 16px; padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  align-items: start;
+  font-size: 13px;
+}
+.dp-row:last-child { border-bottom: 0; }
+.dp-row:not(.header):hover { background: var(--bg-2); }
+.dp-row.header { background: var(--bg-2); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); padding: 10px 18px; }
+.dp-row .company { font-weight: 600; font-size: 12px; color: var(--ink); }
+.dp-row .company .type-tag { display: block; font-size: 10px; font-weight: 400; color: var(--ink-3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.dp-row .metric { color: var(--ink); }
+.dp-row .metric .verbatim { color: var(--ink-3); font-size: 12px; line-height: 1.4; margin-top: 4px; font-style: italic; }
+.dp-row .value { font-family: 'Newsreader', serif; font-size: 18px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; }
+.dp-row .page-ref { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); }
+.dp-row .source-ref { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-3); word-break: break-all; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/plain" id="src-tsx">const { useState, useEffect, useRef, useMemo } = React;
+/* ===== frontend/src/types.ts ===== */
+/**
+ * Types mirroring backend/app/schemas.py (Pydantic v2).
+ * Keep in sync with the Python source of truth.
+ */
+
+
+
+
+
+
+
+
+/* --- UI-side types (frontend only) --- */
+
+
+
+
+
+/* ===== frontend/src/mock.ts ===== */
+/* Mock data shaped to match backend schemas — used when API is offline. */
+const MOCK_DOCS: Document[] = [
+  { id: 'asml-2025', source: 'asml.pdf', company: 'ASML', year: 2025, title: 'ASML Annual Report 2025', pages: 332, size_mb: 18.4, ingested_at: '2026-04-22T14:31:00Z', chunks: 4128, parser: 'docling', status: 'ready', fte: '44,209', net_zero_year: '2040' },
+  { id: 'asml-2024', source: 'asml-2024.pdf', company: 'ASML', year: 2024, title: 'ASML Annual Report 2024', pages: 304, size_mb: 16.1, ingested_at: '2026-04-22T14:18:00Z', chunks: 3811, parser: 'docling', status: 'ready', fte: '41,697', net_zero_year: '2040' },
+  { id: 'abn-amro-2025', source: 'abn-amro-2025.pdf', company: 'ABN AMRO', year: 2025, title: 'ABN AMRO Annual Report 2025', pages: 412, size_mb: 22.7, ingested_at: '2026-04-23T09:02:00Z', chunks: 5240, parser: 'llamaparse', status: 'ready', fte: '23,126', net_zero_year: '2050' },
+  { id: 'shell-2025', source: 'shell-annual-report-2025.pdf', company: 'SHELL', year: 2025, title: 'Shell Annual Report 2025', pages: 446, size_mb: 28.9, ingested_at: '2026-04-23T11:47:00Z', chunks: 5872, parser: 'llamaparse', status: 'ready', fte: '~96,000', net_zero_year: '2050' },
+  { id: 'heineken-2024', source: 'heineken-2024.pdf', company: 'HEINEKEN', year: 2024, title: 'Heineken Annual Report 2024', pages: 268, size_mb: 14.3, ingested_at: '2026-04-23T13:10:00Z', chunks: 3214, parser: 'docling', status: 'ready', fte: '85,870', net_zero_year: '2040' },
+];
+/*
+ * MOCK_DATAPOINTS shape mirrors backend/app/extracted_datapoints.py::NormalizedDatapoint
+ * (the JSON written to backend/data/processed/datapoints/<source-stem>.json by
+ * `persist_datapoints`). Field names match what the real API returns 1:1, so when
+ * `GET /api/datapoints` is wired up the same render code consumes both.
+ *
+ *   datapoint_type ∈ { fte | sustainability_goal | esg_datapoint
+ *                    | financial_highlight | business_performance
+ *                    | shareholder_return }
+ *   fact_kind      ∈ { actual | target | progress | forecast }
+ *   scope_type     ∈ { company_wide | segment | scope_1_2 | scope_3 | … }
+ *   quote          : verbatim evidence snippet from the page
+ *   section_path   : nearest heading (e.g. "Note 18 — Employees")
+ *   target_year    : present on sustainability_goal rows
+ *   unit / basis   : reported alongside value (e.g. "FTEs", "Mt CO₂e", "%")
+ */
+const MOCK_DATAPOINTS: Datapoint[] = [
+  // FTE / Workforce ---------------------------------------------------------
+  { company: 'ASML', source: 'asml.pdf', page: 301, datapoint_type: 'fte', metric: 'Total payroll & temporary employees (FTE, year-end)', value: '44,209', unit: 'FTEs', basis: 'FTE', period: '2025', section_path: 'Note 18 — Employees', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.97, quote: 'Total payroll and temporary employees in FTE as of December 31, 2025: 44,209.' },
+  { company: 'ASML', source: 'asml.pdf', page: 131, datapoint_type: 'fte', metric: 'Average payroll employees (FTE)', value: '43,267', unit: 'FTEs', basis: 'FTE', period: '2025', section_path: 'Remuneration / pay-ratio table', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.95, quote: 'Average number of payroll employees in FTEs — 2025: 43,267.' },
+  { company: 'ASML', source: 'asml.pdf', page: 131, datapoint_type: 'fte', metric: 'Average payroll employees (FTE)', value: '41,697', unit: 'FTEs', basis: 'FTE', period: '2024', section_path: 'Remuneration / pay-ratio table', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.95, quote: 'Average number of payroll employees in FTEs — 2024: 41,697.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 47, datapoint_type: 'fte', metric: 'Internal employees (FTE, year-end)', value: '23,126', unit: 'FTEs', basis: 'FTE', period: '2025', section_path: 'Other information', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.96, quote: 'Total bank: Number of internal employees (end of period, in FTEs) — 2025: 23,126 — 2024: 21,976' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 47, datapoint_type: 'fte', metric: 'External employees (FTE, year-end)', value: '2,216', unit: 'FTEs', basis: 'FTE', period: '2025', section_path: 'Other information', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.94, quote: 'Total bank: Number of external employees (end of period, in FTEs) — 2025: 2,216 — 2024: 3,670' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 174, datapoint_type: 'fte', metric: 'Net workforce reduction', value: '−5,200', unit: 'FTEs', basis: 'FTE', period: '2024→2028', section_path: 'New strategy', fact_kind: 'target', scope_type: 'company_wide', confidence: 0.91, quote: '…a net total reduction of the global workforce by 5,200 FTEs by 2028 compared with year-end 2024. Around half of the reductions are expected to take place through attrition.' },
+  { company: 'SHELL', source: 'shell-annual-report-2025.pdf', page: 122, datapoint_type: 'fte', metric: 'Total employees', value: '~96,000', unit: 'employees', basis: 'headcount', period: '2025', section_path: 'People', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.92, quote: 'At the end of 2025, Shell employed approximately 96,000 people in more than 70 countries.' },
+  { company: 'HEINEKEN', source: 'heineken-2024.pdf', page: 88, datapoint_type: 'fte', metric: 'Total employees (FTE)', value: '85,870', unit: 'FTEs', basis: 'FTE', period: '2024', section_path: 'Our people', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.96, quote: 'Total full-time equivalent employees as of 31 December 2024: 85,870.' },
+
+  // Sustainability goals (forward-looking targets / commitments) ------------
+  { company: 'ASML', source: 'asml.pdf', page: 178, datapoint_type: 'sustainability_goal', metric: 'GHG neutral across value chain', value: 'GHG neutral', target_year: '2040', section_path: 'Climate Transition Plan', fact_kind: 'target', scope_type: 'supply_chain', scope: 'value chain', confidence: 0.95, quote: 'We aim to be greenhouse gas neutral across our value chain by 2040, working in close partnership with customers and suppliers.' },
+  { company: 'ASML', source: 'asml.pdf', page: 145, datapoint_type: 'sustainability_goal', metric: 'Net Scope 1 & 2 GHG-neutral target', value: 'GHG neutral', target_year: '2025', section_path: 'Our business strategy', fact_kind: 'target', scope_type: 'scope_1_2', scope: 'Scope 1 and 2', confidence: 0.96, quote: 'Target: Net scope 1 and 2 CO₂e emissions GHG neutral by 2025.' },
+  { company: 'ASML', source: 'asml.pdf', page: 145, datapoint_type: 'sustainability_goal', metric: 'Top-80% supplier commitment target', value: '75% commitment', target_year: '2026', section_path: 'Climate strategy', fact_kind: 'target', scope_type: 'supply_chain', scope: 'top-80% suppliers', confidence: 0.92, quote: 'Target: 75% commitment from top 80% suppliers by 2026.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 25, datapoint_type: 'sustainability_goal', metric: 'Net-zero economy alignment', value: 'net-zero', target_year: '2050', section_path: 'Sustainability pillar', fact_kind: 'target', scope_type: 'company_wide', scope: 'portfolio', confidence: 0.93, quote: 'Our climate strategy supports the transition to a net-zero economy by 2050 by aligning our portfolio with the Paris Agreement.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 19, datapoint_type: 'sustainability_goal', metric: 'Climate strategy alignment', value: 'well-below-2°C', period: 'announced Nov 2025', section_path: 'Help clients achieve climate targets', fact_kind: 'target', scope_type: 'company_wide', confidence: 0.88, quote: 'In November 2025, we announced our intention to update our climate strategy to align with a well-below-2°C pathway.' },
+  { company: 'SHELL', source: 'shell-annual-report-2025.pdf', page: 5, datapoint_type: 'sustainability_goal', metric: 'Net-zero emissions energy business', value: 'net-zero', target_year: '2050', section_path: 'Chair\u2019s message', fact_kind: 'target', scope_type: 'company_wide', confidence: 0.96, quote: 'We have a target to become a net-zero emissions energy business by 2050.' },
+  { company: 'SHELL', source: 'shell-annual-report-2025.pdf', page: 13, datapoint_type: 'sustainability_goal', metric: 'Methane emissions intensity target', value: 'below 0.2%', target_year: '2030', unit: '%', section_path: 'Less emissions', fact_kind: 'target', scope_type: 'scope_1_2', confidence: 0.94, quote: 'Maintain methane emissions intensity below 0.2% and achieve near-zero methane emissions intensity by 2030.' },
+  { company: 'SHELL', source: 'shell-annual-report-2025.pdf', page: 13, datapoint_type: 'sustainability_goal', metric: 'Halve Scope 1 & 2 emissions target', value: '50% reduction', target_year: '2030', section_path: 'Our strategy', fact_kind: 'target', scope_type: 'scope_1_2', confidence: 0.92, quote: 'Halve Scope 1 and 2 emissions by 2030 from 2016 baseline.' },
+
+  // ESG actuals -------------------------------------------------------------
+  { company: 'ASML', source: 'asml.pdf', page: 145, datapoint_type: 'esg_datapoint', metric: 'Gross Scope 1 & 2 emissions', value: '26', unit: 'kt CO₂e', period: '2025', section_path: 'Our business strategy', fact_kind: 'actual', scope_type: 'scope_1_2', scope: 'Scope 1 and 2', confidence: 0.94, quote: 'Gross scope 1 and 2 CO₂e emissions: 26 kt (target 45 kt by 2025).' },
+  { company: 'ASML', source: 'asml.pdf', page: 6, datapoint_type: 'esg_datapoint', metric: 'Net Scope 3 emissions', value: '11.5', unit: 'Mt CO₂e', period: '2025', section_path: 'At a glance', fact_kind: 'actual', scope_type: 'scope_3', scope: 'Scope 3', confidence: 0.93, quote: 'Net scope 3 CO₂e emissions: 11.5 Mt in 2025.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 31, datapoint_type: 'esg_datapoint', metric: 'Office energy use', value: '93', unit: 'kWh/m²', period: '2025', section_path: 'Own operations', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.95, quote: 'Office energy use dropped from 184 kWh/m² in 2018 to 93 kWh/m² in 2025.' },
+  { company: 'SHELL', source: 'shell-annual-report-2025.pdf', page: 90, datapoint_type: 'esg_datapoint', metric: 'Total Scope 1+2 emissions (net)', value: '53', unit: 'Mt CO₂e', period: '2025', section_path: 'Less emissions', fact_kind: 'actual', scope_type: 'scope_1_2', confidence: 0.96, quote: 'In 2025, total combined Scope 1 and 2 GHG emissions (net) were 53 million tonnes of CO₂e.' },
+
+  // Financial highlights ----------------------------------------------------
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 8, datapoint_type: 'financial_highlight', metric: 'Net interest income', value: '6,438', unit: '€m', period: '2025', section_path: 'Financial highlights', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.97, quote: 'Net interest income (€m) — 2025: 6,438 — 2024: 6,202.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 8, datapoint_type: 'financial_highlight', metric: 'Cost/income ratio', value: '60.4%', unit: '%', period: '2025', section_path: 'Financial highlights', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.94, quote: 'Cost/income ratio: 60.4% in 2025 (61.0% in 2024).' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 8, datapoint_type: 'financial_highlight', metric: 'CET1 ratio', value: '14.7%', unit: '%', period: '2025', section_path: 'Capital position', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.96, quote: 'CET1 ratio at 31 December 2025: 14.7%.' },
+  { company: 'ASML', source: 'asml.pdf', page: 4, datapoint_type: 'financial_highlight', metric: 'Total net sales', value: '32.4', unit: '€bn', period: '2025', section_path: 'At a glance', fact_kind: 'actual', scope_type: 'company_wide', confidence: 0.97, quote: 'Total net sales of €32.4 billion in 2025.' },
+
+  // Business performance ---------------------------------------------------
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 9, datapoint_type: 'business_performance', metric: 'Client assets', value: '610', unit: '€bn', period: '2025', section_path: 'Wealth Management', fact_kind: 'actual', scope_type: 'segment', confidence: 0.93, quote: 'Total client assets reached €610 billion at year-end 2025.' },
+  { company: 'ASML', source: 'asml.pdf', page: 5, datapoint_type: 'business_performance', metric: 'Lithography systems sold', value: '413', unit: 'units', period: '2025', section_path: 'At a glance', fact_kind: 'actual', scope_type: 'segment', confidence: 0.95, quote: 'Net systems sold in 2025: 413 (new + used).' },
+
+  // Shareholder returns ----------------------------------------------------
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 12, datapoint_type: 'shareholder_return', metric: 'Proposed dividend per share', value: '0.95', unit: '€/share', period: '2025', section_path: 'Capital distribution', fact_kind: 'target', scope_type: 'company_wide', confidence: 0.94, quote: 'Proposed final dividend of €0.95 per share for 2025.' },
+  { company: 'ABN AMRO', source: 'abn-amro-2025.pdf', page: 12, datapoint_type: 'shareholder_return', metric: 'Share buyback announced', value: '500', unit: '€m', period: '2025', section_path: 'Capital distribution', fact_kind: 'target', scope_type: 'company_wide', confidence: 0.92, quote: 'A €500 million share buyback programme is proposed to commence in Q1 2026.' },
+];
+const SAMPLE_ANSWERS: Record<string, VerbatimAnswer & { caveat?: string }> = {
+  asml_fte: {
+    question: 'How many total employees did ASML have at the end of 2025?',
+    answer: 'ASML reported 44,209 total payroll and temporary employees (in FTE) as of December 31, 2025.',
+    verbatim: 'Total payroll and temporary employees in FTE as of December 31, 2025: 44,209.',
+    citations: [
+      { source: 'asml.pdf', page: 301, quote: 'Total payroll and temporary employees in FTE as of December 31, 2025: 44,209.' },
+      { source: 'asml.pdf', page: 5, quote: 'Total employees (FTEs) — 2025 — > 44,000 (highlight).' },
+    ],
+    refused: false,
+    refusal_reason: null,
+    raw_citations: [],
+    grounding_drops: [],
+  },
+  shell_climate: {
+    question: 'How much did SHELL spend on climate change adaption in 2025?',
+    answer: 'Shell does not publish a single line item labelled "climate change adaptation" in 2025. The closest disclosed figure is R&D on decarbonisation projects: ~$485 million (about 41% of total R&D spend).',
+    verbatim: 'In 2025, our R&D expenditure on projects that aim to contribute to decarbonisation was around $485 million, representing about 41% of our total R&D spend, compared with around 45% in 2024.',
+    citations: [
+      { source: 'shell-annual-report-2025.pdf', page: 87, quote: 'In 2025, our R&D expenditure on projects that aim to contribute to decarbonisation was around $485 million, representing about 41% of our total R&D spend.' },
+      { source: 'shell-annual-report-2025.pdf', page: 13, quote: 'We plan cash capital expenditure within the range of $20–22 billion per year between 2025 and 2028, with $21 billion in 2025.' },
+    ],
+    refused: false,
+    refusal_reason: null,
+    raw_citations: [],
+    grounding_drops: [],
+    caveat: 'No verbatim "climate adaptation spend" exists in the report — figure shown is decarbonisation R&D, the nearest reported proxy.',
+  },
+  abn_workforce: {
+    question: 'What is ABN AMRO\u2019s plan for workforce reduction?',
+    answer: 'ABN AMRO announced in November 2025 a net reduction of 5,200 FTE by 2028 compared with year-end 2024. About half of the reductions are expected to occur through attrition. By end of 2025, around 1,500 FTE had already been reduced.',
+    verbatim: '…a net total reduction of the global workforce by 5,200 FTEs by 2028 compared with year-end 2024. Around half of the reductions are expected to take place through attrition. In 2025, a reduction of approximately 1,500 FTEs was realised.',
+    citations: [
+      { source: 'abn-amro-2025.pdf', page: 174, quote: 'ABN AMRO announced it would rightsize the organisation, resulting in a net total reduction of the global workforce by 5,200 FTEs by 2028 compared with year-end 2024.' },
+      { source: 'abn-amro-2025.pdf', page: 15, quote: 'The plan includes a net reduction of the workforce by 5,200 full-time equivalents (FTEs) by 2028 compared with 2024, with half of the reductions expected to occur through attrition.' },
+    ],
+    refused: false,
+    refusal_reason: null,
+    raw_citations: [],
+    grounding_drops: [],
+  },
+  refusal: {
+    question: 'How many company cars did ASML own in 2025?',
+    answer: '',
+    verbatim: null,
+    refused: true,
+    refusal_reason: 'Number of company-owned vehicles is not disclosed in the ASML 2025 annual report. The report covers fleet-related emissions intensity but not a vehicle count.',
+    citations: [],
+    raw_citations: [],
+    grounding_drops: [],
+  },
+};
+const SUGGESTED_QUESTIONS = [
+  'How many total employees did ASML have at the end of 2025?',
+  'How much did SHELL spend on climate change adaption in 2025?',
+  'What is ABN AMRO\u2019s plan for workforce reduction?',
+  'When does ASML aim to be GHG neutral across its value chain?',
+  'What were Shell\u2019s total Scope 1 and 2 emissions in 2025?',
+  'How many company cars did ASML own in 2025?',
+];
+
+window.MOCK_DOCS = MOCK_DOCS;
+window.MOCK_DATAPOINTS = MOCK_DATAPOINTS;
+window.SAMPLE_ANSWERS = SAMPLE_ANSWERS;
+window.SUGGESTED_QUESTIONS = SUGGESTED_QUESTIONS;
+
+/* ===== frontend/src/api/datapoints.ts =====
+ * Live loader for datapoints. Calls `GET /api/datapoints` (the contract in
+ * BACKEND_HANDOFF.md) and falls back to MOCK_DATAPOINTS when the API is offline
+ * or returns an empty list.
+ *
+ * Backend writes records via `persist_datapoints()` in
+ * backend/app/ingestion.py — each item is a `NormalizedDatapoint.model_dump()`,
+ * so the field names match exactly: `datapoint_type`, `quote`, `section_path`,
+ * `fact_kind`, `scope_type`, `unit`, `target_year`, `confidence`, `extractor`.
+ *
+ * If the API ever exposes the raw legacy shape (`type`, `verbatim`, `section`)
+ * we normalize it on the way in so the UI stays in one shape.
+ */
+async function loadDatapoints(opts?: { company?: string; type?: string; signal?: AbortSignal }): Promise<Datapoint[]> {
+  const params = new URLSearchParams();
+  if (opts?.company && opts.company !== 'all') params.set('company', opts.company);
+  if (opts?.type && opts.type !== 'all') params.set('type', opts.type);
+  const qs = params.toString();
+  const url = `/api/datapoints${qs ? `?${qs}` : ''}`;
+  try {
+    const res = await fetch(url, { signal: opts?.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw: any[] = await res.json();
+    if (!Array.isArray(raw) || raw.length === 0) throw new Error('empty');
+    return raw.map(normalizeDatapoint);
+  } catch {
+    // Filter the mock list locally so the UI behaves the same offline.
+    return MOCK_DATAPOINTS.filter(d => {
+      if (opts?.company && opts.company !== 'all' && d.company !== opts.company) return false;
+      if (opts?.type && opts.type !== 'all' && d.datapoint_type !== opts.type) return false;
+      return true;
+    });
+  }
+}
+
+function normalizeDatapoint(raw: any): Datapoint {
+  // Tolerate older `type`/`verbatim`/`section` shapes alongside the canonical
+  // NormalizedDatapoint shape so nothing breaks if the backend lags.
+  return {
+    company: raw.company ?? null,
+    source: raw.source,
+    page: raw.page ?? null,
+    datapoint_type: raw.datapoint_type ?? raw.type ?? 'other',
+    metric: raw.metric ?? '',
+    value: raw.value ?? null,
+    unit: raw.unit ?? null,
+    basis: raw.basis ?? null,
+    period: raw.period ?? null,
+    section_path: raw.section_path ?? raw.section ?? null,
+    quote: raw.quote ?? raw.verbatim ?? '',
+    fact_kind: raw.fact_kind ?? null,
+    scope_type: raw.scope_type ?? null,
+    scope: raw.scope ?? null,
+    target_year: raw.target_year ?? null,
+    confidence: raw.confidence ?? null,
+    extractor: raw.extractor ?? null,
+    year: raw.year ?? null,
+  };
+}
+
+window.loadDatapoints = loadDatapoints;
+
+/* ===== frontend/src/components/Icons.tsx ===== */
+
+const base = (size: number, stroke: number) => ({
+  width: size, height: size,
+  viewBox: '0 0 24 24', fill: 'none',
+  stroke: 'currentColor', strokeWidth: stroke,
+  strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
+});
+const IChat = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+);
+const IDoc = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+);
+const ITable = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><rect x="3" y="3" width="18" height="18" rx="1.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+);
+const ISearch = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+);
+const ISend = ({ size = 16, stroke = 1.8, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+);
+const IUpload = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+);
+const IExternal = ({ size = 14, stroke = 1.8, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+);
+const ITrash = ({ size = 14, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+);
+const IInfo = ({ size = 14, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+);
+const ISettings = ({ size = 16, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+);
+const ILeaf = ({ size = 14, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M2 22c1.5-2 4-3 7-3 4 0 7-2 9-5 2-3 3-7 3-12-5 0-9 1-12 3-3 2-5 5-5 9 0 3-1 5-3 7"/><path d="M2 22c4-7 8-10 16-12"/></svg>
+);
+const IUsers = ({ size = 14, stroke = 1.7, className }: IconProps) => (
+  <svg {...base(size, stroke)} className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+);
+
+window.IChat = IChat;
+window.IDoc = IDoc;
+window.ITable = ITable;
+window.ISearch = ISearch;
+window.ISend = ISend;
+window.IUpload = IUpload;
+window.IExternal = IExternal;
+window.ITrash = ITrash;
+window.IInfo = IInfo;
+window.ISettings = ISettings;
+window.ILeaf = ILeaf;
+window.IUsers = IUsers;
+
+/* ===== frontend/src/components/PdfViewer.tsx ===== */
+
+
+/**
+ * Slide-in PDF viewer. Uses pdf.js (loaded from CDN on first open) to render
+ * the cited page on a canvas. When the real backend is connected, set the
+ * `pdfUrl` prop to e.g. `/api/documents/${source}/pdf` so the file streams
+ * from the server. Until then, it renders a stylized placeholder for the
+ * cited page so the user can see the citation context.
+ */
+
+
+const PDFJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs';
+const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
+
+let pdfjsPromise: Promise<any> | null = null;
+function loadPdfjs(): Promise<any> {
+  if ((window as any).pdfjsLib) return Promise.resolve((window as any).pdfjsLib);
+  if (pdfjsPromise) return pdfjsPromise;
+  pdfjsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      const lib = window.pdfjsLib;
+      if (!lib) return reject(new Error('pdfjsLib missing'));
+      lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      resolve(lib);
+    };
+    s.onerror = () => reject(new Error('pdfjs load failed'));
+    document.head.appendChild(s);
+  });
+  return pdfjsPromise;
+}
+function PdfViewer({ open, source, page, quote, onClose }: PdfViewerProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'rendered' | 'no-source' | 'error'>('idle');
+  const [errMsg, setErrMsg] = useState<string>('');
+  const [pageNum, setPageNum] = useState<number>(page ?? 1);
+  const [totalPages, setTotalPages] = useState<number>(0);
+
+  useEffect(() => { if (open && page) setPageNum(page); }, [open, page, source]);
+
+  useEffect(() => {
+    if (!open || !source) return;
+    let cancelled = false;
+
+    const url = `/api/documents/${encodeURIComponent(source)}/pdf`;
+
+    (async () => {
+      setStatus('loading');
+      try {
+        // Probe whether backend serves the file. In demo mode we expect a 404 → fallback.
+        const probe = await fetch(url, { method: 'HEAD' }).catch(() => null);
+        if (!probe || !probe.ok) {
+          if (!cancelled) { setStatus('no-source'); }
+          return;
+        }
+        const lib = await loadPdfjs();
+        const doc = await lib.getDocument(url).promise;
+        if (cancelled) return;
+        setTotalPages(doc.numPages);
+        const target = Math.min(Math.max(pageNum, 1), doc.numPages);
+        const p = await doc.getPage(target);
+        const canvas = canvasRef.current; if (!canvas) return;
+        const ctx = canvas.getContext('2d')!;
+        const viewport = p.getViewport({ scale: 1.4 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await p.render({ canvasContext: ctx, viewport }).promise;
+        if (!cancelled) setStatus('rendered');
+      } catch (e: any) {
+        if (!cancelled) { setStatus('error'); setErrMsg(String(e?.message ?? e)); }
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [open, source, pageNum]);
+
+  // Keyboard nav
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft' && pageNum > 1) setPageNum(n => n - 1);
+      if (e.key === 'ArrowRight' && (totalPages === 0 || pageNum < totalPages)) setPageNum(n => n + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, pageNum, totalPages, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, background: 'oklch(15% 0.01 155 / 0.4)',
+          zIndex: 80, animation: 'fade-in 160ms ease',
+        }}
+      />
+      <aside
+        role="dialog"
+        aria-label={`Source ${source} page ${pageNum}`}
+        style={{
+          position: 'fixed', top: 0, right: 0, bottom: 0, width: 'min(640px, 92vw)',
+          background: 'var(--paper)', borderLeft: '1px solid var(--line)',
+          boxShadow: '-12px 0 40px -12px oklch(0% 0 0 / 0.18)',
+          zIndex: 81, display: 'flex', flexDirection: 'column',
+          animation: 'slide-in 200ms cubic-bezier(0.2, 0.7, 0.2, 1)',
+        }}
+      >
+        <header style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '14px 18px', borderBottom: '1px solid var(--line)',
+        }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--ink-3)' }}>
+              SOURCE
+            </div>
+            <div style={{ fontWeight: 500, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {source ?? '—'}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--ink-2)' }}>
+            <button className="btn" style={{ padding: '4px 8px' }} onClick={() => setPageNum(n => Math.max(1, n - 1))} aria-label="Previous page">‹</button>
+            <span className="mono" style={{ minWidth: 56, textAlign: 'center' }}>
+              p.{pageNum}{totalPages ? ` / ${totalPages}` : ''}
+            </span>
+            <button className="btn" style={{ padding: '4px 8px' }}
+              onClick={() => setPageNum(n => totalPages ? Math.min(totalPages, n + 1) : n + 1)} aria-label="Next page">›</button>
+          </div>
+          <button className="btn" onClick={onClose} aria-label="Close" style={{ padding: '4px 10px' }}>✕</button>
+        </header>
+
+        {quote && (
+          <div style={{
+            padding: '12px 18px', borderBottom: '1px solid var(--line)',
+            background: 'oklch(98% 0.025 95)',
+            fontFamily: "'Newsreader', serif", fontStyle: 'italic',
+            fontSize: 14, color: 'var(--ink)', lineHeight: 1.5,
+            borderLeft: '2px solid var(--accent)',
+          }}>
+            &ldquo;{quote}&rdquo;
+          </div>
+        )}
+
+        <div style={{
+          flex: 1, overflow: 'auto', background: 'var(--bg-2)',
+          padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+        }}>
+          {status === 'loading' && (
+            <div style={{ color: 'var(--ink-3)', padding: 60, fontSize: 13 }}>Loading PDF…</div>
+          )}
+          {status === 'error' && (
+            <div style={{ color: 'var(--danger)', padding: 60, fontSize: 13, textAlign: 'center' }}>
+              Failed to render PDF<br /><span className="mono" style={{ fontSize: 11 }}>{errMsg}</span>
+            </div>
+          )}
+          {status === 'no-source' && (
+            <PlaceholderPage source={source} pageNum={pageNum} quote={quote} />
+          )}
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: status === 'rendered' ? 'block' : 'none',
+              maxWidth: '100%', height: 'auto',
+              background: 'white',
+              boxShadow: '0 4px 24px -8px oklch(0% 0 0 / 0.18)',
+              borderRadius: 4,
+            }}
+          />
+        </div>
+
+        <footer style={{
+          padding: '10px 18px', borderTop: '1px solid var(--line)',
+          fontSize: 11, color: 'var(--ink-3)',
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <span>← / → page · Esc to close</span>
+          <div style={{ flex: 1 }} />
+          <a
+            href={source ? `/api/documents/${encodeURIComponent(source)}/pdf#page=${pageNum}` : '#'}
+            target="_blank" rel="noreferrer"
+            style={{ color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+          >
+            Open in tab <IExternal size={11} />
+          </a>
+        </footer>
+      </aside>
+
+      <style>{`
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slide-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      `}</style>
+    </>
+  );
+}
+
+function PlaceholderPage({ source, pageNum, quote }: { source: string | null; pageNum: number; quote: string | null }) {
+  // A stylized "page" so the citation context is shown even without a real PDF.
+  return (
+    <div style={{
+      width: '100%', maxWidth: 520, aspectRatio: '8.5 / 11',
+      background: 'white', boxShadow: '0 4px 24px -8px oklch(0% 0 0 / 0.18)', borderRadius: 4,
+      padding: '52px 56px', position: 'relative', overflow: 'hidden',
+      fontFamily: "'Newsreader', serif", color: 'oklch(20% 0.01 155)',
+    }}>
+      <div style={{
+        fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.12,
+        color: 'oklch(55% 0.02 155)', display: 'flex', justifyContent: 'space-between',
+      }}>
+        <span>{source}</span>
+        <span>Page {pageNum}</span>
+      </div>
+      <div style={{
+        marginTop: 24,
+        fontSize: 18, fontWeight: 500, letterSpacing: '-0.01em',
+      }}>
+        Note 18 — Employees
+      </div>
+      <div style={{ marginTop: 16, fontSize: 11, lineHeight: 1.7, color: 'oklch(35% 0.01 155)' }}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} style={{
+            height: 8, background: 'oklch(92% 0.005 155)', borderRadius: 2,
+            marginBottom: 6, width: `${85 - i * 4}%`,
+          }} />
+        ))}
+      </div>
+      {quote && (
+        <div style={{
+          margin: '24px 0', padding: '12px 14px',
+          background: 'oklch(97% 0.04 95)',
+          borderLeft: '2px solid oklch(75% 0.16 95)',
+          fontSize: 12, lineHeight: 1.5, fontStyle: 'italic',
+        }}>
+          &ldquo;{quote}&rdquo;
+        </div>
+      )}
+      <div style={{ fontSize: 11, lineHeight: 1.7, color: 'oklch(35% 0.01 155)' }}>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} style={{
+            height: 8, background: 'oklch(92% 0.005 155)', borderRadius: 2,
+            marginBottom: 6, width: `${100 - (i % 4) * 8}%`,
+          }} />
+        ))}
+      </div>
+      <div style={{
+        position: 'absolute', bottom: 28, left: 56, right: 56,
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 9, color: 'oklch(55% 0.02 155)',
+        borderTop: '1px solid oklch(90% 0.005 155)', paddingTop: 8,
+      }}>
+        <span>{source}</span>
+        <span>{pageNum}</span>
+      </div>
+      <div style={{
+        position: 'absolute', top: 12, right: 12,
+        fontSize: 9, color: 'oklch(60% 0.05 95)',
+        background: 'oklch(96% 0.04 95)', padding: '2px 6px', borderRadius: 3,
+      }}>preview · backend offline</div>
+    </div>
+  );
+}
+
+window.PdfViewer = PdfViewer;
+
+/* ===== frontend/src/components/Sidebar.tsx ===== */
+
+
+
+const PULLS: Pull[] = [
+  { company: 'ABN AMRO', year: 2025, page: 174, topic: 'Workforce',
+    quote: 'A net workforce reduction of around 5,200 FTE by year-end 2028.' },
+  { company: 'ASML', year: 2025, page: 145, topic: 'Climate',
+    quote: 'Net Scope 1 & 2 GHG-neutral by 2025 — achieved.' },
+  { company: 'Shell', year: 2025, page: 122, topic: 'People',
+    quote: 'Approximately 96,000 employees at the end of 2025.' },
+  { company: 'Heineken', year: 2024, page: 88, topic: 'Headcount',
+    quote: '85,870 full-time equivalents across more than 70 markets.' },
+  { company: 'ABN AMRO', year: 2025, page: 25, topic: 'Sustainability',
+    quote: 'Our climate strategy targets a net-zero economy by 2050.' },
+];
+function Sidebar({ view, onChange, docCount, datapointCount }: Props) {
+  return (
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brand-mark" aria-label="ABN AMRO">
+          <img src="data:image/jpeg;base64,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" alt="ABN AMRO" />
+        </div>
+        <div>
+          <div className="brand-name">Annualyzer <span className="brand-tag">v1</span></div>
+          <div className="brand-sub">ABN AMRO · Cited answers from filings</div>
+        </div>
+      </div>
+
+      <nav className="nav">
+        <div className="nav-section">Workspace</div>
+        <button className={`nav-item ${view === 'chat' ? 'active' : ''}`} onClick={() => onChange('chat')}>
+          <IChat /> Ask
+        </button>
+        <button className={`nav-item ${view === 'docs' ? 'active' : ''}`} onClick={() => onChange('docs')}>
+          <IDoc /> Documents <span className="badge">{docCount}</span>
+        </button>
+        <button className={`nav-item ${view === 'datapoints' ? 'active' : ''}`} onClick={() => onChange('datapoints')}>
+          <ITable /> Datapoints <span className="badge">{datapointCount}</span>
+        </button>
+      </nav>
+
+      <div className="sidebar-spacer" />
+    </aside>
+  );
+}
+
+window.Sidebar = Sidebar;
+
+/* ===== frontend/src/components/ChatView.tsx ===== */
+
+
+
+
+
+const PHASE_LABELS: Record<ThinkingPhase, string> = {
+  queued: 'Queued',
+  embedding: 'Embedding question',
+  searching: 'Searching index',
+  reading: 'Reading source pages',
+  drafting: 'Drafting answer',
+  citing: 'Verifying verbatim quotes',
+  done: 'Complete',
+};
+
+const PHASE_ORDER: ThinkingPhase[] = ['embedding', 'searching', 'reading', 'drafting', 'citing'];
+
+function pickMockAnswer(q: string): VerbatimAnswer & { caveat?: string } {
+  const lower = q.toLowerCase();
+  if (lower.includes('asml') && (lower.includes('employee') || lower.includes('fte'))) return SAMPLE_ANSWERS.asml_fte;
+  if (lower.includes('shell') && (lower.includes('climate') || lower.includes('adapt'))) return SAMPLE_ANSWERS.shell_climate;
+  if (lower.includes('abn') || lower.includes('workforce')) return SAMPLE_ANSWERS.abn_workforce;
+  if (lower.includes('car') || lower.includes('vehicle')) return SAMPLE_ANSWERS.refusal;
+  // default: a synthesized answer
+  return {
+    question: q,
+    answer: 'I searched across 5 indexed reports but couldn\u2019t find a verbatim figure that directly answers this. The closest matches discuss adjacent topics. Try narrowing to a specific company or year, or rephrase using language likely to appear in the report.',
+    verbatim: null,
+    citations: [
+      { source: 'asml.pdf', page: 178, quote: 'We aim to be greenhouse gas neutral across our value chain by 2040.' },
+    ],
+    refused: false, refusal_reason: null, raw_citations: [], grounding_drops: [],
+  };
+}
+
+function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase; detail?: string; retrievedCount: number }) {
+  const idx = PHASE_ORDER.indexOf(phase);
+  return (
+    <div className="thinking">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="thinking-bars"><span /><span /><span /><span /></div>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--ink-2)' }}>
+          thinking · {PHASE_LABELS[phase].toLowerCase()}{detail ? ` · ${detail}` : ''}
+        </span>
+      </div>
+      {PHASE_ORDER.map((p, i) => {
+        const state = i < idx ? 'done' : i === idx ? 'active' : 'pending';
+        const detailText =
+          p === 'embedding' && state !== 'pending' ? 'text-embedding-3-small · 1536d' :
+          p === 'searching' && state !== 'pending' ? `${retrievedCount} chunks · k=8` :
+          p === 'reading' && state !== 'pending' ? `${Math.min(retrievedCount, 8)} pages` :
+          p === 'drafting' && state !== 'pending' ? 'gpt-4o-mini' :
+          p === 'citing' && state !== 'pending' ? 'verbatim match' : '';
+        return (
+          <div key={p} className={`thinking-row ${state}`}>
+            <span className="pulse" />
+            <span>{PHASE_LABELS[p]}</span>
+            {detailText && <span className="detail">{detailText}</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AnswerBlock({ ans, caveat, onCite }: { ans: VerbatimAnswer; caveat?: string; onCite: (c: Citation) => void }) {
+  if (ans.refused) {
+    return (
+      <div className="msg-assistant">
+        <div className="refusal">
+          <div className="refusal-tag">Cannot answer from indexed documents</div>
+          <div>{ans.refusal_reason}</div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="msg-assistant">
+      <div className="answer-text">{ans.answer}</div>
+      {ans.verbatim && (
+        <div className="verbatim-block">
+          <div className="verbatim-label">Verbatim from source</div>
+          <div className="verbatim-text">&ldquo;{ans.verbatim}&rdquo;</div>
+        </div>
+      )}
+      {caveat && (
+        <div className="caveat">
+          <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
+          <span>{caveat}</span>
+        </div>
+      )}
+      {ans.citations.length > 0 && (
+        <div className="citations">
+          <div className="citations-label">Sources · {ans.citations.length}</div>
+          {ans.citations.map((c, i) => (
+            <div key={i} className="cite-card" onClick={() => onCite(c)} role="button" tabIndex={0}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCite(c); } }}>
+              <div className="cite-num">[{i + 1}]</div>
+              <div className="cite-body">
+                <div className="cite-source">
+                  <span>{c.source}</span>
+                  <span className="cite-page-tag">p.{c.page}</span>
+                </div>
+                <div className="cite-quote">&ldquo;{c.quote}&rdquo;</div>
+              </div>
+              <div className="cite-action"><IExternal /></div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SuggestedQuestions({ questions, onPick }: { questions: string[]; onPick: (q: string) => void }) {
+  const PAGE_SIZE = 4;
+  const totalPages = Math.max(1, Math.ceil(questions.length / PAGE_SIZE));
+  const [page, setPage] = useState(0);
+  const start = page * PAGE_SIZE;
+  const slice = questions.slice(start, start + PAGE_SIZE);
+  // Pad to keep grid height stable across pages
+  const pad = PAGE_SIZE - slice.length;
+
+  const next = () => setPage(p => (p + 1) % totalPages);
+  const prev = () => setPage(p => (p - 1 + totalPages) % totalPages);
+
+  return (
+    <div className="suggested">
+      <div className="suggested-head">
+        <span className="suggested-label">Try one of these</span>
+        {totalPages > 1 && (
+          <div className="suggested-pager">
+            <button className="pager-btn" onClick={prev} aria-label="Previous suggestions">←</button>
+            <span className="pager-count">{page + 1} / {totalPages}</span>
+            <button className="pager-btn" onClick={next} aria-label="Next suggestions">→</button>
+          </div>
+        )}
+      </div>
+      <div className="suggested-grid">
+        {slice.map(q => (
+          <button key={q} className="suggested-btn" onClick={() => onPick(q)}>
+            {q}<span className="arrow">→</span>
+          </button>
+        ))}
+        {Array.from({ length: pad }).map((_, i) => (
+          <div key={`pad-${i}`} className="suggested-btn suggested-btn-empty" aria-hidden="true" />
+        ))}
+      </div>
+    </div>
+  );
+}
+function ChatView() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [scope, setScope] = useState<string>('all');
+  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<ThinkingPhase>('queued');
+  const [phaseDetail, setPhaseDetail] = useState<string>('');
+  const [viewer, setViewer] = useState<{ source: string; page: number; quote: string } | null>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  const companies = useMemo(() => {
+    const s = new Set(MOCK_DOCS.map(d => d.company).filter((c): c is string => !!c));
+    return Array.from(s).sort();
+  }, []);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages, busy, phase]);
+
+  const send = async (q: string) => {
+    if (!q.trim() || busy) return;
+    const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: 'user', content: q, ts: Date.now() };
+    setMessages(m => [...m, userMsg]);
+    setInput('');
+    setBusy(true);
+
+    // Simulated phase progression. Real call would use api.ask() with onPhase.
+    const phaseTimings: [ThinkingPhase, string, number][] = [
+      ['embedding', '', 350],
+      ['searching', 'k=8 · cosine', 600],
+      ['reading', '', 700],
+      ['drafting', '', 1100],
+      ['citing', '', 500],
+    ];
+    for (const [p, d, ms] of phaseTimings) {
+      setPhase(p); setPhaseDetail(d);
+      await new Promise(r => setTimeout(r, ms));
+    }
+
+    const ans = pickMockAnswer(q);
+    const aMsg: ChatMessage = {
+      id: `a-${Date.now()}`,
+      role: 'assistant',
+      content: ans.answer,
+      answer: ans,
+      caveat: (ans as VerbatimAnswer & { caveat?: string }).caveat,
+      ts: Date.now(),
+    };
+    setMessages(m => [...m, aMsg]);
+    setBusy(false); setPhase('queued');
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send(input);
+    }
+  };
+
+  // autosize
+  useEffect(() => {
+    const ta = taRef.current; if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+  }, [input]);
+
+  const lastAssistantQuestion = messages.findLast?.(m => m.role === 'user')?.content;
+
+  return (
+    <>
+      <div className="view">
+        <div className="chat-wrap">
+          {messages.length === 0 ? (
+            <div className="chat-empty">
+              <h2>Ask anything from indexed reports.</h2>
+              <p>Every answer is grounded in a verbatim quote with page-level citations. Off-topic questions and hallucinations are refused.</p>
+              <SuggestedQuestions questions={SUGGESTED_QUESTIONS} onPick={send} />
+            </div>
+          ) : (
+            messages.map(m => (
+              <div key={m.id} className="msg">
+                {m.role === 'user' ? (
+                  <div className="msg-user">
+                    <div className="msg-meta">You asked</div>
+                    {m.content}
+                  </div>
+                ) : (
+                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} onCite={c => setViewer({ source: c.source, page: c.page, quote: c.quote })} />
+                )}
+              </div>
+            ))
+          )}
+
+          {busy && (
+            <div className="msg">
+              <ThinkingPanel phase={phase} detail={phaseDetail} retrievedCount={12} />
+            </div>
+          )}
+
+          <div ref={endRef} />
+        </div>
+      </div>
+
+      <div className="composer-dock">
+        <div className="composer-dock-inner">
+          <div className="composer">
+            <textarea
+              ref={taRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={onKey}
+              placeholder={lastAssistantQuestion ? 'Ask a follow-up…' : 'Ask about ASML, Shell, ABN AMRO, Heineken…'}
+              rows={1}
+            />
+            <div className="composer-row">
+              <span className="scope-pill">
+                <span style={{ color: 'var(--ink-3)' }}>Scope</span>
+                <select value={scope} onChange={e => setScope(e.target.value)}>
+                  <option value="all">All documents</option>
+                  {companies.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>
+                {busy ? '· streaming' : 'Enter to send · Shift+Enter newline'}
+              </span>
+              <button
+                className="send-btn"
+                disabled={!input.trim() || busy}
+                onClick={() => send(input)}
+                aria-label="Send"
+              ><ISend /></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <PdfViewer
+        open={!!viewer}
+        source={viewer?.source ?? null}
+        page={viewer?.page ?? null}
+        quote={viewer?.quote ?? null}
+        onClose={() => setViewer(null)}
+      />
+    </>
+  );
+}
+
+window.ChatView = ChatView;
+
+/* ===== frontend/src/components/DocumentsView.tsx ===== */
+function DocumentsView() {
+  const [docs] = useState<Document[]>(MOCK_DOCS);
+  const [over, setOver] = useState(false);
+  const [ingest, setIngest] = useState<Ingest[]>([]);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const showToast = () => {
+    const id = `t-${Date.now()}`;
+    setToasts(arr => [...arr, { id }]);
+    setTimeout(() => setToasts(arr => arr.filter(t => t.id !== id)), 7000);
+  };
+  const dismissToast = (id: string) => setToasts(arr => arr.filter(t => t.id !== id));
+
+  const simulate = (name: string) => {
+    showToast();
+    const id = `ing-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setIngest(arr => [...arr, { id, name, stage: 'parsing', pct: 6 }]);
+    let pct = 6;
+    const tick = setInterval(() => {
+      pct += 4 + Math.random() * 8;
+      setIngest(arr => arr.map(j => {
+        if (j.id !== id) return j;
+        if (pct >= 100) return { ...j, pct: 100, stage: 'done' };
+        if (pct > 55) return { ...j, pct, stage: 'embedding' };
+        return { ...j, pct };
+      }));
+      if (pct >= 100) {
+        clearInterval(tick);
+        setTimeout(() => setIngest(arr => arr.filter(j => j.id !== id)), 1400);
+      }
+    }, 220);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setOver(false);
+    Array.from(e.dataTransfer.files).forEach(f => simulate(f.name));
+  };
+
+  return (
+    <div className="view">
+      <div className="docs-wrap">
+        <div className="docs-hd">
+          <h2>Documents</h2>
+          <div className="docs-count">{docs.length} indexed · 22,265 chunks · 100.4 MB</div>
+        </div>
+
+        <div
+          className={`dropzone ${over ? 'over' : ''}`}
+          onDragOver={e => { e.preventDefault(); setOver(true); }}
+          onDragLeave={() => setOver(false)}
+          onDrop={onDrop}
+        >
+          <div style={{ marginBottom: 8, opacity: 0.5 }}><IUpload size={22} /></div>
+          <div className="dz-title">Drop annual reports here</div>
+          <div className="dz-sub">PDF · up to ~500 pages · parsed with Docling, chunked, embedded into Postgres pgvector</div>
+          <button className="btn" onClick={() => simulate(`upload-${Date.now() % 1000}.pdf`)}>
+            <IUpload /> Choose file
+          </button>
+        </div>
+
+        {ingest.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            {ingest.map(j => (
+              <div key={j.id} className="ingest-row">
+                <div style={{ flex: '0 0 220px' }}>
+                  <div className="name">{j.name}</div>
+                  <div className="stages">
+                    <span className={j.stage === 'parsing' ? 'active' : ''}>Parsing</span>
+                    <span>·</span>
+                    <span className={j.stage === 'embedding' ? 'active' : ''}>Embedding</span>
+                    <span>·</span>
+                    <span className={j.stage === 'done' ? 'active' : ''}>Indexed</span>
+                  </div>
+                </div>
+                <div className="progress-bar"><div className="fill" style={{ width: `${j.pct}%` }} /></div>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', minWidth: 38, textAlign: 'right' }}>
+                  {Math.round(j.pct)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="docs-grid">
+          {docs.map(d => (
+            <div key={d.id} className="doc-card">
+              <div className="doc-card-hd">
+                <div className="doc-icon"><IDoc size={18} /></div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="doc-title">{d.title}</div>
+                  <div className="doc-meta">{d.source} · {d.pages}pp · {d.size_mb.toFixed(1)} MB</div>
+                  <div className={`doc-status ready`} style={{ marginTop: 6, color: 'var(--ink-3)' }}>
+                    <span className="dot" /> {d.status} · {d.chunks.toLocaleString()} chunks · {d.parser}
+                  </div>
+                </div>
+                <button className="btn" style={{ padding: '6px 8px' }} aria-label="Remove">
+                  <ITrash />
+                </button>
+              </div>
+              <div className="doc-stats">
+                <div>
+                  <div className="doc-stat-label"><IUsers /> FTE (extracted)</div>
+                  <div className="doc-stat-value">{d.fte ?? '—'}</div>
+                </div>
+                <div>
+                  <div className="doc-stat-label"><ILeaf /> Net-zero year</div>
+                  <div className="doc-stat-value">{d.net_zero_year ?? '—'}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Upload toasts */}
+      <div className="toast-stack">
+        {toasts.map(t => (
+          <div key={t.id} className="toast" role="status">
+            <div className="toast-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M17 8h1a4 4 0 0 1 0 8h-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M7 1.5c0 1.5-1 1.5-1 3s1 1.5 1 3M11 1.5c0 1.5-1 1.5-1 3s1 1.5 1 3M15 1.5c0 1.5-1 1.5-1 3s1 1.5 1 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div className="toast-body">
+              <div className="toast-title">Hang tight — we&rsquo;re indexing your document</div>
+              <div className="toast-text">This can take a minute. Grab a quick coffee, or feel free to keep asking questions — we&rsquo;ll let you know when it&rsquo;s ready.</div>
+            </div>
+            <button className="toast-close" aria-label="Dismiss" onClick={() => dismissToast(t.id)}>×</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+window.DocumentsView = DocumentsView;
+
+/* ===== frontend/src/components/DatapointsView.tsx ===== */
+
+
+
+
+
+// Pretty labels keyed by `datapoint_type` from
+// backend/app/extracted_datapoints.py::NormalizedDatapoint. New backend types
+// fall through to a Title Case derivation so adding e.g. `risk_factor` later
+// just shows up as a chip without a frontend change.
+const TYPE_LABELS: Record<string, string> = {
+  fte: 'FTE / Workforce',
+  sustainability_goal: 'Sustainability goals',
+  esg_datapoint: 'ESG / Climate',
+  financial_highlight: 'Financial',
+  business_performance: 'Business KPIs',
+  shareholder_return: 'Shareholder returns',
+};
+function prettifyType(key: string): string {
+  if (TYPE_LABELS[key]) return TYPE_LABELS[key];
+  return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+function DatapointsView() {
+  const [type, setType] = useState<string>('all');
+  const [company, setCompany] = useState<string>('all');
+  const [viewer, setViewer] = useState<{ source: string; page: number; quote: string } | null>(null);
+  const [data, setData] = useState<Datapoint[]>(MOCK_DATAPOINTS);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [live, setLive] = useState<boolean>(false);
+
+  // Fetch on mount. Falls back to mocks transparently when API is offline.
+  useEffect(() => {
+    const ac = new AbortController();
+    setLoading(true);
+    (async () => {
+      try {
+        const res = await fetch('/api/datapoints', { signal: ac.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const raw: any[] = await res.json();
+        if (Array.isArray(raw) && raw.length > 0) {
+          setData(raw.map(normalizeDatapoint));
+          setLive(true);
+        }
+      } catch { /* keep mocks */ }
+      finally { if (!ac.signal.aborted) setLoading(false); }
+    })();
+    return () => ac.abort();
+  }, []);
+
+  const companies = useMemo(() => {
+    return Array.from(new Set(data.map(d => d.company).filter(Boolean) as string[])).sort();
+  }, [data]);
+
+  const types = useMemo(() => {
+    const seen = Array.from(new Set(data.map(d => d.datapoint_type))).sort();
+    return [{ key: 'all', label: 'All' }, ...seen.map(k => ({ key: k, label: prettifyType(k) }))];
+  }, [data]);
+
+  const rows = useMemo(() => {
+    return data.filter(d => {
+      if (type !== 'all' && d.datapoint_type !== type) return false;
+      if (company !== 'all' && d.company !== company) return false;
+      return true;
+    });
+  }, [data, type, company]);
+
+  const formatValue = (d: Datapoint) => {
+    const v = d.value ?? '';
+    if (!v) return d.target_year ? `by ${d.target_year}` : '—';
+    if (d.unit && !String(v).includes(d.unit)) return `${v} ${d.unit}`;
+    return String(v);
+  };
+
+  const formatPeriod = (d: Datapoint) => {
+    if (d.period) return String(d.period);
+    if (d.target_year) return `target ${d.target_year}`;
+    if (d.year) return String(d.year);
+    return '—';
+  };
+
+  return (
+    <div className="view">
+      <div className="dp-wrap">
+        <div className="dp-hd">
+          <h2>Datapoints</h2>
+          <div style={{ color: 'var(--ink-3)', fontSize: 13 }}>
+            {loading ? 'loading…' : `${rows.length} extracted · all grounded with verbatim source quotes`}
+            {live && (
+              <span style={{ marginLeft: 8, padding: '2px 6px', borderRadius: 999, background: 'var(--primary-tint)', color: 'var(--primary)', fontSize: 10, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>live</span>
+            )}
+          </div>
+        </div>
+
+        <div className="dp-filters">
+          {types.map(t => (
+            <button
+              key={t.key}
+              className={`filter-chip ${type === t.key ? 'active' : ''}`}
+              onClick={() => setType(t.key)}
+            >{t.label}</button>
+          ))}
+          <span style={{ width: 1, background: 'var(--line)', margin: '0 4px' }} />
+          <button
+            className={`filter-chip ${company === 'all' ? 'active' : ''}`}
+            onClick={() => setCompany('all')}
+          >All companies</button>
+          {companies.map(c => (
+            <button
+              key={c}
+              className={`filter-chip ${company === c ? 'active' : ''}`}
+              onClick={() => setCompany(c)}
+            >{c}</button>
+          ))}
+        </div>
+
+        <div className="dp-table">
+          <div className="dp-row header">
+            <div>Company</div>
+            <div>Metric</div>
+            <div>Value</div>
+            <div>Period</div>
+            <div>Source</div>
+          </div>
+          {rows.map((d, i) => (
+            <div
+              key={i}
+              className="dp-row"
+              onClick={() => setViewer({ source: d.source, page: d.page ?? 1, quote: d.quote })}
+              role="button" tabIndex={0}
+              style={{ cursor: 'pointer' }}
+              onKeyDown={e => { if (e.key === 'Enter') setViewer({ source: d.source, page: d.page ?? 1, quote: d.quote }); }}
+            >
+              <div>
+                <div className="company">{d.company ?? '—'}</div>
+                <span className="type-tag">{prettifyType(d.datapoint_type)}</span>
+                {d.fact_kind && d.fact_kind !== 'actual' && (
+                  <span className="type-tag" style={{ marginTop: 2, color: 'var(--accent-ink)', background: 'var(--accent)', padding: '1px 6px', borderRadius: 3, display: 'inline-block', letterSpacing: 0.4 }}>
+                    {d.fact_kind}
+                  </span>
+                )}
+              </div>
+              <div className="metric">
+                {d.metric}
+                {d.quote && <div className="verbatim">&ldquo;{d.quote}&rdquo;</div>}
+              </div>
+              <div className="value">{formatValue(d)}</div>
+              <div className="page-ref">{formatPeriod(d)}</div>
+              <div className="source-ref">
+                {d.source}
+                <div>
+                  p.{d.page ?? '?'}{d.section_path ? ` · ${d.section_path}` : ''} <IExternal size={11} />
+                </div>
+              </div>
+            </div>
+          ))}
+          {!loading && rows.length === 0 && (
+            <div className="dp-row" style={{ gridTemplateColumns: '1fr', color: 'var(--ink-3)', justifyContent: 'center' }}>
+              No datapoints match this filter.
+            </div>
+          )}
+        </div>
+      </div>
+      <PdfViewer
+        open={!!viewer}
+        source={viewer?.source ?? null}
+        page={viewer?.page ?? null}
+        quote={viewer?.quote ?? null}
+        onClose={() => setViewer(null)}
+      />
+    </div>
+  );
+}
+
+window.DatapointsView = DatapointsView;
+
+/* ===== frontend/src/components/Tour.tsx ===== */
+
+
+
+const PAD = 8;
+const GAP = 14;
+const CARD_W = 340;
+function Tour({ steps, onClose, onViewChange }: Props) {
+  const [i, setI] = useState(0);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const [, setTick] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const lastMeasuredKey = useRef<string>('');
+
+  const step = steps[i];
+
+  // Switch view if step needs it
+  useEffect(() => {
+    if (step?.view) onViewChange(step.view);
+  }, [i]);
+
+  // Measure target rect — retries briefly because view changes might not be
+  // painted yet on the very first frame.
+  useEffect(() => {
+    if (!step) return;
+    let cancelled = false;
+    let tries = 0;
+    const measure = () => {
+      if (cancelled) return;
+      if (step.placement === 'center' || !step.selector) {
+        setRect(null);
+        return;
+      }
+      const el = document.querySelector(step.selector) as HTMLElement | null;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setRect(r);
+        // Make sure it's visible
+        if (r.top < 0 || r.bottom > window.innerHeight) {
+          el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          // re-measure after scroll settles
+          setTimeout(() => {
+            if (!cancelled) setRect(el.getBoundingClientRect());
+          }, 320);
+        }
+      } else if (tries++ < 20) {
+        setTimeout(measure, 60);
+      } else {
+        setRect(null);
+      }
+    };
+    measure();
+
+    const onResize = () => {
+      const el = step.selector ? (document.querySelector(step.selector) as HTMLElement | null) : null;
+      if (el) setRect(el.getBoundingClientRect());
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onResize, true);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onResize, true);
+    };
+  }, [i, step]);
+
+  // After paint, force one re-render so cardRef.current?.offsetHeight is used
+  // for clamping. Guard with a key so we don't loop.
+  useEffect(() => {
+    const key = `${i}:${rect?.x ?? 'x'}:${rect?.y ?? 'y'}:${rect?.width ?? 'w'}:${rect?.height ?? 'h'}`;
+    if (cardRef.current && lastMeasuredKey.current !== key) {
+      lastMeasuredKey.current = key;
+      setTick(t => t + 1);
+    }
+  });
+
+  // ESC closes
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight' || e.key === 'Enter') next();
+      if (e.key === 'ArrowLeft') prev();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [i]);
+
+  const next = () => {
+    if (i < steps.length - 1) setI(i + 1);
+    else onClose();
+  };
+  const prev = () => { if (i > 0) setI(i - 1); };
+
+  // Compute spotlight + card position
+  const spot = rect
+    ? { x: rect.left - PAD, y: rect.top - PAD, w: rect.width + PAD * 2, h: rect.height + PAD * 2 }
+    : null;
+
+  let cardStyle: React.CSSProperties = {};
+  if (!spot || step.placement === 'center') {
+    cardStyle = {
+      left: '50%', top: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: CARD_W,
+    };
+  } else {
+    const place = step.placement || 'right';
+    const vw = window.innerWidth, vh = window.innerHeight;
+    // Use the card's measured height when available, so right/left placements
+    // don't get clipped at the top when their target sits near the viewport edge.
+    const cardH = (cardRef.current?.offsetHeight ?? 220);
+    let left = 0, top = 0;
+    if (place === 'right') {
+      left = spot.x + spot.w + GAP;
+      top = spot.y + spot.h / 2 - cardH / 2;
+    } else if (place === 'left') {
+      left = spot.x - GAP - CARD_W;
+      top = spot.y + spot.h / 2 - cardH / 2;
+    } else if (place === 'bottom') {
+      left = spot.x + spot.w / 2 - CARD_W / 2;
+      top = spot.y + spot.h + GAP;
+    } else {
+      left = spot.x + spot.w / 2 - CARD_W / 2;
+      top = spot.y - GAP - cardH;
+    }
+    // clamp to viewport
+    left = Math.max(16, Math.min(left, vw - CARD_W - 16));
+    top = Math.max(16, Math.min(top, vh - cardH - 16));
+    cardStyle = { left, top, width: CARD_W };
+  }
+
+  if (!step) return null;
+
+  return (
+    <div className="tour-root" role="dialog" aria-modal="true" aria-label="Product tour">
+      {/* SVG mask for spotlight */}
+      <svg className="tour-mask" width="100%" height="100%">
+        <defs>
+          <mask id="tour-cut">
+            <rect width="100%" height="100%" fill="white" />
+            {spot && (
+              <rect x={spot.x} y={spot.y} width={spot.w} height={spot.h} rx={10} ry={10} fill="black" />
+            )}
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="rgba(15, 23, 30, 0.55)" mask="url(#tour-cut)" />
+        {spot && (
+          <rect
+            x={spot.x} y={spot.y} width={spot.w} height={spot.h}
+            rx={10} ry={10} fill="none"
+            stroke="var(--primary)" strokeWidth={2}
+            className="tour-ring"
+          />
+        )}
+      </svg>
+
+      <div className="tour-card" style={cardStyle} ref={cardRef}>
+        <div className="tour-step">Step {i + 1} of {steps.length}</div>
+        <div className="tour-title">{step.title}</div>
+        <div className="tour-body">{step.body}</div>
+        <div className="tour-actions">
+          <button className="tour-skip" onClick={onClose}>Skip tour</button>
+          <div style={{ flex: 1 }} />
+          {i > 0 && <button className="btn tour-back" onClick={prev}>Back</button>}
+          <button className="btn btn-primary tour-next" onClick={next}>
+            {i === steps.length - 1 ? 'Got it' : 'Next'}
+          </button>
+        </div>
+        <div className="tour-progress" aria-hidden="true">
+          {steps.map((_, k) => (
+            <span key={k} className={`tour-dot ${k === i ? 'on' : ''} ${k < i ? 'done' : ''}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+window.Tour = Tour;
+
+/* ===== frontend/src/App.tsx ===== */
+
+
+
+
+
+
+
+const TOUR_KEY = 'annualyzer.tour.seen.v1';
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    selector: '',
+    placement: 'center',
+    title: 'Welcome to Annualyzer',
+    body: 'A 60-second tour of how to ask questions, ground answers in source PDFs, and add new annual reports. You can skip anytime — we won’t show this again.',
+  },
+  {
+    selector: '.brand',
+    view: 'chat',
+    placement: 'right',
+    title: 'Your workspace',
+    body: 'Annualyzer is a private RAG over annual reports. Everything stays on your indexed corpus — answers cite the exact page they came from.',
+  },
+  {
+    selector: '.nav',
+    view: 'chat',
+    placement: 'right',
+    title: 'Three views',
+    body: 'Ask questions, manage indexed documents, or browse pre-extracted datapoints (FTE, ESG targets, financials) for instant lookups without an LLM call.',
+  },
+  {
+    selector: '.composer',
+    view: 'chat',
+    placement: 'top',
+    title: 'Ask anything',
+    body: 'Type a question and we retrieve the most relevant chunks, then generate a cited answer. Try “What is ABN AMRO’s net-zero target?”',
+  },
+  {
+    selector: '.dropzone',
+    view: 'docs',
+    placement: 'bottom',
+    title: 'Add reports',
+    body: 'Drop a PDF here. We parse it with Docling, chunk by section, embed into pgvector, and extract key datapoints automatically. A friendly toast lets you know it can take a minute.',
+  },
+  {
+    selector: '.help-btn',
+    view: 'chat',
+    placement: 'bottom',
+    title: 'Need this again?',
+    body: 'The Help button is always there. Click it to replay this tour anytime.',
+  },
+];
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "primaryHue": 155,
+  "primaryChroma": 0.06,
+  "density": "comfortable",
+  "fontPair": "newsreader-inter",
+  "showVerbatim": true
+}/*EDITMODE-END*/;
+
+const FONT_PAIRS: Record<string, { editorial: string; ui: string; gfont: string }> = {
+  'newsreader-inter': { editorial: "'Newsreader', Georgia, serif", ui: "'Inter Tight', sans-serif", gfont: 'Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter+Tight:wght@400;500;600' },
+  'fraunces-geist': { editorial: "'Fraunces', Georgia, serif", ui: "'Geist', sans-serif", gfont: 'Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Geist:wght@400;500;600' },
+  'instrument-ibm': { editorial: "'Instrument Serif', Georgia, serif", ui: "'IBM Plex Sans', sans-serif", gfont: 'Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600' },
+};
+
+function applyTweaks(t: Tweaks) {
+  const root = document.documentElement;
+  root.style.setProperty('--primary', `oklch(35% ${t.primaryChroma} ${t.primaryHue})`);
+  root.style.setProperty('--primary-hover', `oklch(30% ${t.primaryChroma + 0.01} ${t.primaryHue})`);
+  root.style.setProperty('--primary-tint', `oklch(94% ${Math.min(t.primaryChroma * 0.4, 0.04)} ${t.primaryHue})`);
+  root.style.setProperty('--accent', `oklch(85% 0.15 ${(t.primaryHue + 300) % 360})`);
+
+  const pair = FONT_PAIRS[t.fontPair] ?? FONT_PAIRS['newsreader-inter'];
+  document.body.style.fontFamily = pair.ui;
+  document.querySelectorAll<HTMLElement>('.editorial, .answer-text, .verbatim-text, .doc-stat-value, .dp-row .value, .chat-empty h2, .docs-hd h2, .dp-hd h2').forEach(el => {
+    el.style.fontFamily = pair.editorial;
+  });
+
+  const dens = t.density === 'compact' ? { fs: '13px' } : t.density === 'spacious' ? { fs: '15px' } : { fs: '14px' };
+  document.body.style.fontSize = dens.fs;
+
+  // Hide / show verbatim blocks
+  document.querySelectorAll<HTMLElement>('.verbatim-block').forEach(el => {
+    el.style.display = t.showVerbatim ? '' : 'none';
+  });
+}
+
+function ensureFontLink(fontPair: string) {
+  const id = 'gfont-' + fontPair;
+  document.querySelectorAll('link[data-tweak-font]').forEach(n => n.remove());
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${FONT_PAIRS[fontPair].gfont}&family=JetBrains+Mono:wght@400;500&display=swap`;
+  link.id = id;
+  link.setAttribute('data-tweak-font', '1');
+  document.head.appendChild(link);
+}
+function App() {
+  const [view, setView] = useState<ViewKey>('chat');
+  const [tweaks, setTweaks] = useState<Tweaks>(TWEAK_DEFAULTS);
+  const [tweaksOpen, setTweaksOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [datapointCount, setDatapointCount] = useState<number>(MOCK_DATAPOINTS.length);
+  const [docCount, setDocCount] = useState<number>(MOCK_DOCS.length);
+
+  // Sidebar badges. Try the live API once; if it returns a list, use that count
+  // — otherwise keep the mock count so the empty-state numbers still feel real.
+  useEffect(() => {
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const [dpRes, docRes] = await Promise.all([
+          fetch('/api/datapoints', { signal: ac.signal }).catch(() => null),
+          fetch('/api/documents', { signal: ac.signal }).catch(() => null),
+        ]);
+        if (dpRes && dpRes.ok) {
+          const list = await dpRes.json();
+          if (Array.isArray(list)) setDatapointCount(list.length);
+        }
+        if (docRes && docRes.ok) {
+          const list = await docRes.json();
+          if (Array.isArray(list)) setDocCount(list.length);
+        }
+      } catch { /* keep defaults */ }
+    })();
+    return () => ac.abort();
+  }, []);
+
+  // First-run tour
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(TOUR_KEY)) {
+        // tiny delay so layout settles
+        setTimeout(() => setTourOpen(true), 400);
+      }
+    } catch {}
+  }, []);
+
+  const closeTour = () => {
+    setTourOpen(false);
+    try { localStorage.setItem(TOUR_KEY, '1'); } catch {}
+  };
+  const openTour = () => setTourOpen(true);
+
+  // Tweaks protocol
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === '__activate_edit_mode') setTweaksOpen(true);
+      if (e.data?.type === '__deactivate_edit_mode') setTweaksOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  useEffect(() => {
+    ensureFontLink(tweaks.fontPair);
+    // tiny delay so fonts apply before we re-target
+    const id = setTimeout(() => applyTweaks(tweaks), 50);
+    applyTweaks(tweaks);
+    return () => clearTimeout(id);
+  }, [tweaks, view]);
+
+  const setTweak = <K extends keyof Tweaks>(k: K, v: Tweaks[K]) => {
+    setTweaks(prev => {
+      const next = { ...prev, [k]: v };
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+      return next;
+    });
+  };
+
+  const titles: Record<ViewKey, { h: string; sub: string }> = {
+    chat: { h: 'Ask', sub: 'Verbatim Q&A grounded in indexed PDFs' },
+    docs: { h: 'Documents', sub: 'Annual reports indexed for retrieval' },
+    datapoints: { h: 'Datapoints', sub: 'Pre-extracted facts for fast answers' },
+  };
+
+  return (
+    <div className="app">
+      <Sidebar
+        view={view}
+        onChange={setView}
+        docCount={docCount}
+        datapointCount={datapointCount}
+      />
+      <main className="main">
+        <header className="topbar">
+          <div>
+            <h1>{titles[view].h}</h1>
+            <div className="crumb">{titles[view].sub}</div>
+          </div>
+          <div className="topbar-spacer" />
+          <button className="btn help-btn" onClick={openTour} aria-label="Help / take a tour" title="Take the tour">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Help
+          </button>
+          {view === 'chat' && (
+            <button className="btn">New thread</button>
+          )}
+        </header>
+
+        {view === 'chat' && <ChatView />}
+        {view === 'docs' && <DocumentsView />}
+        {view === 'datapoints' && <DatapointsView />}
+      </main>
+
+      {tourOpen && (
+        <Tour steps={TOUR_STEPS} onClose={closeTour} onViewChange={setView} />
+      )}
+
+      {tweaksOpen && (
+        <div style={{
+          position: 'fixed', right: 20, bottom: 20, width: 280,
+          background: 'var(--paper)', border: '1px solid var(--line-2)', borderRadius: 12,
+          boxShadow: '0 12px 40px -12px oklch(0% 0 0 / 0.18)',
+          padding: 16, zIndex: 50,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Tweaks</div>
+            <button
+              style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 18, lineHeight: 1 }}
+              onClick={() => {
+                setTweaksOpen(false);
+                window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+              }}
+            >×</button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ fontSize: 11, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+                Primary hue · {tweaks.primaryHue}°
+              </label>
+              <input type="range" min={0} max={360} value={tweaks.primaryHue}
+                onChange={e => setTweak('primaryHue', Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+                Saturation · {tweaks.primaryChroma.toFixed(2)}
+              </label>
+              <input type="range" min={0} max={0.18} step={0.01} value={tweaks.primaryChroma}
+                onChange={e => setTweak('primaryChroma', Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 4 }}>
+                Font pair
+              </label>
+              <select value={tweaks.fontPair} onChange={e => setTweak('fontPair', e.target.value as Tweaks['fontPair'])}
+                style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--line)', borderRadius: 6, background: 'var(--bg-2)' }}>
+                <option value="newsreader-inter">Newsreader · Inter Tight</option>
+                <option value="fraunces-geist">Fraunces · Geist</option>
+                <option value="instrument-ibm">Instrument Serif · IBM Plex</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 4 }}>
+                Density
+              </label>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {(['compact','comfortable','spacious'] as const).map(d => (
+                  <button key={d}
+                    className={`btn ${tweaks.density === d ? 'btn-primary' : ''}`}
+                    style={{ flex: 1, padding: '5px 6px', fontSize: 11, textTransform: 'capitalize' }}
+                    onClick={() => setTweak('density', d)}
+                  >{d}</button>
+                ))}
+              </div>
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+              <input type="checkbox" checked={tweaks.showVerbatim}
+                onChange={e => setTweak('showVerbatim', e.target.checked)} />
+              Show verbatim quote block
+            </label>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+window.App = App;
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));</script>
+<script>
+(function(){
+  var src = document.getElementById('src-tsx').textContent;
+  var out = Babel.transform(src, {
+    presets: ['react'],
+    plugins: [['transform-typescript', { isTSX: true, allExtensions: true, allowDeclareFields: true }]],
+    filename: 'inline.tsx'
+  }).code;
+  var s = document.createElement('script');
+  s.text = out;
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>

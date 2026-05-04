@@ -13,12 +13,12 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.app.openai_table_vision import (
+from backend.app.ingest.table_vision import (
     PageTableExtraction,
     enhance_page_tables,
     tables_to_text,
 )
-from backend.app.vision_page_selection import classify_table_complexity
+from backend.app.ingest.vision_selection import classify_table_complexity
 
 log = logging.getLogger(__name__)
 

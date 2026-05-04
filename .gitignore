@@ -14,7 +14,7 @@ build/
 .DS_Store
 
 AGENTS.md
-reports/*.pdf
+backend/data/reports/*.pdf
 backend/data/chroma/
 backend/data/processed/
 backend/data/*.db

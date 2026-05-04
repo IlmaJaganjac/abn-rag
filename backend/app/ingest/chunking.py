@@ -1,72 +1,30 @@
 from __future__ import annotations
 
-import html
 import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
+from backend.app.ingest.chunking_heuristics import (
+    HEADING_RE,
+    TABLE_SEPARATOR_RE,
+    YEAR_RE,
+    clean_block,
+    clean_heading,
+    find_boilerplate_lines,
+    is_noise_line,
+    is_table_line,
+    looks_like_heading,
+    looks_like_value,
+    normalize_line,
+    parse_table_cells,
+    remove_boilerplate,
+    starts_with_value,
+    unit_from_text,
+    year_period,
+)
 from backend.app.schemas import Chunk
 
-HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
-TABLE_SEPARATOR_RE = re.compile(r"^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$")
-YEAR_RE = re.compile(r"\b20\d{2}\b")
-VALUE_RE = re.compile(
-    r"^\s*(?:[€$£]?\s*)?(?:[<>]?\s*)?\d[\d,.]*(?:\s?(?:%|bn|m|kt|mt|million|billion))?\s*$",
-    re.IGNORECASE,
-)
-READ_MORE_RE = re.compile(r"^read more on page \d+\s*>?$", re.IGNORECASE)
-PAGE_NUMBER_RE = re.compile(r"^\d{1,4}$")
-
-KPI_RETRIEVAL_HINTS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
-    (
-        ("shareholder", "shareholders", "returned", "dividend", "dividends", "buyback", "buybacks"),
-        ("dividends", "buybacks", "shareholder distributions"),
-    ),
-    (
-        ("r&d", "research", "development", "investment", "spend", "spending"),
-        ("research and development spend", "monetary R&D investment", "financial expense"),
-    ),
-    (
-        ("margin", "rate", "ratio", "percentage"),
-        ("percentage", "margin", "rate", "ratio"),
-    ),
-    (
-        ("employee", "employees", "fte", "ftes", "headcount", "workforce"),
-        ("workforce", "employees", "headcount", "full-time equivalents"),
-    ),
-    (
-        ("emission", "emissions", "scope", "co2", "co₂", "ghg"),
-        ("greenhouse gas", "GHG", "CO2e", "emissions"),
-    ),
-    (
-        ("sales", "revenue", "turnover"),
-        ("revenue", "net sales", "turnover"),
-    ),
-)
-
-VAGUE_KPI_LABELS: frozenset[str] = frozenset(
-    {
-        "read more", "continued", "cont.", "cont", "key", "on track",
-        "more", "see more", "tbd", "n/a", "note", "notes",
-    }
-)
-SENTENCE_HEADING_PREFIXES = (
-    "we ",
-    "our ",
-    "the ",
-    "this ",
-    "these ",
-    "as ",
-    "in ",
-    "while ",
-    "today",
-    "at the ",
-    "closer to ",
-    "turning ",
-    "finally",
-    "i ",
-)
 
 @dataclass(frozen=True)
 class ChunkDraft:
@@ -90,7 +48,7 @@ def build_semantic_chunks(
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[Chunk]:
     page_list = list(pages)
-    boilerplate = _find_boilerplate_lines(text for _, text in page_list)
+    boilerplate = find_boilerplate_lines(text for _, text in page_list)
     drafts: list[ChunkDraft] = []
     heading_stack: list[tuple[int, str]] = []
     for page, text in page_list:
@@ -155,13 +113,13 @@ def _page_drafts(
         headings = [
             clean
             for _, clean in heading_stack
-            if _normalize_line(clean) not in boilerplate
+            if normalize_line(clean) not in boilerplate
         ]
         return " > ".join(headings) if headings else None
 
     def flush_narrative() -> None:
         nonlocal narrative
-        body = _remove_boilerplate("\n".join(narrative), boilerplate)
+        body = remove_boilerplate("\n".join(narrative), boilerplate)
         narrative = []
         if not body:
             return
@@ -206,10 +164,10 @@ def _page_drafts(
         heading = HEADING_RE.match(stripped)
         if heading:
             level = len(heading.group(1))
-            title = _clean_heading(heading.group(2))
-            if _normalize_line(title) in boilerplate:
+            title = clean_heading(heading.group(2))
+            if normalize_line(title) in boilerplate:
                 continue
-            if not _looks_like_heading(title):
+            if not looks_like_heading(title):
                 if table:
                     flush_table()
                 narrative.append(title)
@@ -220,10 +178,10 @@ def _page_drafts(
             heading_stack.append((level, title))
             continue
 
-        if _normalize_line(stripped) in boilerplate or _is_noise_line(stripped):
+        if normalize_line(stripped) in boilerplate or is_noise_line(stripped):
             continue
 
-        if _is_table_line(stripped):
+        if is_table_line(stripped):
             flush_narrative()
             table.append(stripped)
             continue
@@ -254,7 +212,7 @@ def _table_drafts(
 ) -> list[ChunkDraft]:
     drafts: list[ChunkDraft] = []
     table_kind = _classify_table(rows)
-    full_table = _clean_block("\n".join(rows))
+    full_table = clean_block("\n".join(rows))
     if full_table:
         table_context = _table_context(section_path, rows, table_kind)
         for part in _split_table_on_rows(
@@ -281,7 +239,7 @@ def _table_drafts(
 
     if table_kind == "header_table":
         for row in body_rows:
-            cells = _parse_table_cells(row)
+            cells = parse_table_cells(row)
             row_text = _format_header_aware_row(headers, cells)
             if not row_text:
                 continue
@@ -325,7 +283,7 @@ def _split_table_on_rows(
     max_tokens: int,
     token_counter: Callable[[str], int],
 ) -> list[str]:
-    full_table = _clean_block("\n".join(rows))
+    full_table = clean_block("\n".join(rows))
     if not full_table or token_counter(full_table) <= max_tokens:
         return [full_table] if full_table else []
 
@@ -338,7 +296,6 @@ def _split_table_on_rows(
         header_rows.append(rows[1])
         body_start = 2
 
-    header_text = "\n".join(header_rows)
     body_rows = rows[body_start:]
     if not body_rows:
         return [full_table]
@@ -353,13 +310,13 @@ def _split_table_on_rows(
         candidate_rows = current + [row]
         candidate = "\n".join(header_rows + candidate_rows)
         if current and token_counter(candidate) > max_tokens:
-            parts.append(_clean_block(current_text()))
+            parts.append(clean_block(current_text()))
             current = [row]
         else:
             current = candidate_rows
 
     if current:
-        parts.append(_clean_block(current_text()))
+        parts.append(clean_block(current_text()))
 
     return parts or [full_table]
 
@@ -376,7 +333,7 @@ def _draft(
     boilerplate: set[str],
     extra_embedding_context: str | None = None,
 ) -> ChunkDraft:
-    body = _remove_boilerplate(text, boilerplate).strip()
+    body = remove_boilerplate(text, boilerplate).strip()
     context = _embedding_context(
         company=company,
         year=year,
@@ -429,14 +386,14 @@ def _classify_table(rows: list[str]) -> str:
     headers, body_rows = _table_headers_and_body(data_rows)
     if headers is not None and body_rows and _looks_like_header_row(headers):
         return "header_table"
-    if data_rows and _mostly_metric_pairs(_parse_table_cells(data_rows[0])):
+    if data_rows and _mostly_metric_pairs(parse_table_cells(data_rows[0])):
         return "kpi_pairs"
     return "generic_table"
 
 
 def _looks_like_header_row(cells: list[str]) -> bool:
-    normalized = {_normalize_line(cell) for cell in cells if cell.strip()}
-    if any(_year_period(cell) is not None for cell in cells):
+    normalized = {normalize_line(cell) for cell in cells if cell.strip()}
+    if any(year_period(cell) is not None for cell in cells):
         return True
     return bool(normalized & {"notes", "note", "description", "metric", "topic"})
 
@@ -454,167 +411,21 @@ def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
     while i + 1 < len(cells):
         value = cells[i].strip()
         label = cells[i + 1].strip()
-        if value and label and _looks_like_value(value) and not _looks_like_value(label):
+        if value and label and looks_like_value(value) and not looks_like_value(label):
             pairs.append((value, label))
             i += 2
         elif (
             value
             and label
             and YEAR_RE.search(value)
-            and _starts_with_value(label)
-            and not _looks_like_value(label)
+            and starts_with_value(label)
+            and not looks_like_value(label)
         ):
             pairs.append((label, value))
             i += 2
         else:
             i += 1
     return pairs
-
-
-def _is_kpi_label(label: str) -> bool:
-    clean = label.strip()
-    if len(clean) < 3 or len(clean) > 80:
-        return False
-    if _looks_like_value(clean):
-        return False
-    norm = _normalize_line(clean)
-    if norm in VAGUE_KPI_LABELS:
-        return False
-    if not re.search(r"[A-Za-z]", clean):
-        return False
-    return True
-
-
-def _infer_kpi_unit(value: str, label: str) -> str | None:
-    raw = value.strip()
-    if not raw:
-        return None
-    if "%" in raw:
-        return "%"
-    if re.search(r"\bMt\b", raw):
-        return "Mt"
-    if re.search(r"\bkt\b", raw):
-        return "kt"
-    has_eur = "€" in raw
-    has_usd = "$" in raw
-    has_gbp = "£" in raw
-    has_billion = bool(re.search(r"(?<![A-Za-z])bn(?![A-Za-z])|billion", raw, re.IGNORECASE))
-    has_million = bool(re.search(r"(?<![A-Za-z])m(?![A-Za-z])|million", raw, re.IGNORECASE))
-    if has_eur and has_billion:
-        return "EUR billion"
-    if has_eur and has_million:
-        return "EUR million"
-    if has_usd and has_billion:
-        return "USD billion"
-    if has_usd and has_million:
-        return "USD million"
-    if has_billion:
-        return "billion"
-    if has_million:
-        return "million"
-    if has_eur:
-        return "EUR"
-    if has_usd:
-        return "USD"
-    if re.search(r"\bFTEs?\b", label):
-        return "FTEs"
-    return None
-
-
-def _matches_keyword(keyword: str, tokens: set[str], norm: str) -> bool:
-    if keyword in tokens:
-        return True
-    if "&" in keyword or " " in keyword:
-        return keyword in norm
-    return False
-
-
-def _kpi_retrieval_hints(label: str) -> list[str]:
-    norm = label.casefold()
-    tokens = set(re.findall(r"[a-z0-9&₂]+", norm))
-    hints: list[str] = []
-    seen: set[str] = set()
-    for keywords, category_hints in KPI_RETRIEVAL_HINTS:
-        if not any(_matches_keyword(kw, tokens, norm) for kw in keywords):
-            continue
-        for hint in category_hints:
-            if hint not in seen:
-                seen.add(hint)
-                hints.append(hint)
-    return hints
-
-
-def _kpi_metric_draft(
-    *,
-    page: int,
-    value: str,
-    label: str,
-    section_path: str | None,
-    company: str | None,
-    year: int | None,
-    parser: str | None,
-    boilerplate: set[str],
-) -> ChunkDraft:
-    unit = _infer_kpi_unit(value, label)
-    period = str(year) if year is not None else None
-    text_lines = [f"Metric: {label}"]
-    if period:
-        text_lines.append(f"Period: {period}")
-    text_lines.append(f"Value: {value}")
-    if unit:
-        text_lines.append(f"Unit: {unit}")
-    text_lines.append("Presentation: highlight")
-    text = "\n".join(text_lines)
-
-    extra_lines = ["Type: KPI highlight", f"Metric: {label}", f"Value: {value}"]
-    if unit:
-        extra_lines.append(f"Unit: {unit}")
-    hints = _kpi_retrieval_hints(label)
-    if hints:
-        extra_lines.append("Retrieval hints: " + ", ".join(hints))
-
-    return _draft(
-        page=page,
-        text=text,
-        chunk_kind="metric",
-        section_path=section_path,
-        company=company,
-        year=year,
-        parser=parser,
-        boilerplate=boilerplate,
-        extra_embedding_context="\n".join(extra_lines),
-    )
-
-
-def _year_period(text: str) -> str | None:
-    match = re.fullmatch(r"(?:FY\s*|Year\s*)?(20\d{2})", text.strip(), re.IGNORECASE)
-    return match.group(1) if match else None
-
-
-def _unit_from_text(text: str) -> str | None:
-    if not text:
-        return None
-    t = text.strip()
-    if re.search(r"\bEUR\b|\b€\b", t):
-        if re.search(r"\bmillion\b|\bm\b", t, re.IGNORECASE):
-            return "EUR million"
-        if re.search(r"\bbillion\b|\bbn\b", t, re.IGNORECASE):
-            return "EUR billion"
-        return "EUR"
-    if re.search(r"\bUSD\b|\$", t):
-        return "USD million" if re.search(r"\bmillion\b", t, re.IGNORECASE) else "USD"
-    if re.search(r"\bkt\b", t):
-        return "kt"
-    if re.search(r"\bMt\b", t):
-        return "Mt"
-    return None
-
-
-def _is_useful_metric_header(text: str) -> bool:
-    clean = text.strip().casefold()
-    if not clean or _year_period(clean) is not None:
-        return True
-    return clean not in {"metric", "name", "description", "topic"}
 
 
 def _financial_metric_texts_from_header_row(
@@ -629,14 +440,14 @@ def _financial_metric_texts_from_header_row(
     if label_idx is None:
         return []
     metric = cells[label_idx].strip()
-    if _looks_like_value(metric):
+    if looks_like_value(metric):
         return []
-    unit = _unit_from_text(headers[0]) or _unit_from_text(section_path or "")
+    unit = unit_from_text(headers[0]) or unit_from_text(section_path or "")
     metrics: list[str] = []
     for header, cell in zip(headers[label_idx + 1:], cells[label_idx + 1:], strict=False):
-        period = _year_period(header)
+        period = year_period(header)
         value = cell.strip()
-        if period is None or not value or not _looks_like_value(value):
+        if period is None or not value or not looks_like_value(value):
             continue
         lines = [f"Metric: {metric}", f"Period: {period}", f"Value: {value}"]
         if unit:
@@ -648,7 +459,7 @@ def _financial_metric_texts_from_header_row(
 def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:
     if len(data_rows) < 2:
         return None, data_rows
-    headers = _parse_table_cells(data_rows[0])
+    headers = parse_table_cells(data_rows[0])
     if not headers or not any(header.strip() for header in headers):
         return None, data_rows
     return headers, data_rows[1:]
@@ -657,7 +468,6 @@ def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, lis
 def _format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str | None:
     if headers is None:
         return None
-    # Pad / truncate to match header count so misparsed rows still produce a chunk.
     if len(cells) < len(headers):
         cells = cells + [""] * (len(headers) - len(cells))
     elif len(cells) > len(headers):
@@ -668,139 +478,3 @@ def _format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str
         if header.strip() and cell.strip()
     ]
     return "\n".join(lines) if lines else None
-
-
-def _parse_table_cells(row: str) -> list[str]:
-    stripped = row.strip()
-    if stripped.startswith("|"):
-        stripped = stripped[1:]
-    if stripped.endswith("|"):
-        stripped = stripped[:-1]
-    return [_clean_cell(cell) for cell in stripped.split("|")]
-
-
-def _format_table_row(cells: list[str]) -> str:
-    return "| " + " | ".join(cells) + " |"
-
-
-def _looks_like_value(text: str) -> bool:
-    clean = text.replace("&nbsp;", " ").strip()
-    return bool(VALUE_RE.match(clean)) or bool(YEAR_RE.fullmatch(clean))
-
-
-def _starts_with_value(text: str) -> bool:
-    clean = text.replace("&nbsp;", " ").strip()
-    return bool(re.match(r"^[€$£]?\s*[<>]?\s*\d", clean))
-
-
-def _is_table_line(line: str) -> bool:
-    return line.startswith("|") and line.endswith("|") and line.count("|") >= 2
-
-
-def _looks_like_heading(text: str) -> bool:
-    clean = _clean_heading(text)
-    if not clean:
-        return False
-    normalized = clean.casefold()
-    if READ_MORE_RE.match(normalized):
-        return False
-    if clean.startswith("Q:") or clean.startswith("Q "):
-        return True
-    if len(clean) <= 60 and clean[-1] not in ".!?":
-        return True
-    if len(clean) > 100:
-        return False
-    if clean.endswith("."):
-        return False
-    if any(normalized.startswith(prefix) for prefix in SENTENCE_HEADING_PREFIXES):
-        return False
-    if "," in clean and len(clean) > 60:
-        return False
-    return True
-
-
-def _is_noise_line(line: str) -> bool:
-    if not line:
-        return False
-    normalized = _normalize_line(line)
-    return bool(READ_MORE_RE.match(normalized) or PAGE_NUMBER_RE.match(normalized))
-
-
-def _find_boilerplate_lines(texts: Iterable[str]) -> set[str]:
-    per_page: list[set[str]] = []
-    for text in texts:
-        lines = {
-            norm
-            for line in text.splitlines()
-            if (norm := _normalize_line(line)) and not _is_table_line(line.strip())
-        }
-        per_page.append(lines)
-    if not per_page:
-        return set()
-    counts = Counter(line for lines in per_page for line in lines)
-    threshold = max(3, len(per_page) // 8)
-    return {
-        line
-        for line, count in counts.items()
-        if count >= threshold and _is_likely_boilerplate(line)
-    }
-
-
-def _is_likely_boilerplate(line: str) -> bool:
-    if len(line) <= 2:
-        return False
-    if "annual report" in line:
-        return True
-    if line in {
-        "strategic report",
-        "corporate governance",
-        "sustainability",
-        "financials",
-        "at a glance",
-        "q&#x26;a with the ceo",
-        "q&a with the ceo",
-        "our business",
-        "financial performance",
-        "risk and security",
-        "general disclosures",
-        "environmental",
-        "social",
-        "governance",
-    }:
-        return True
-    return False
-
-
-def _remove_boilerplate(text: str, boilerplate: set[str]) -> str:
-    lines = [
-        line
-        for line in text.splitlines()
-        if _normalize_line(line) not in boilerplate
-    ]
-    return _clean_block("\n".join(lines))
-
-
-def _clean_block(text: str) -> str:
-    lines = [line.rstrip() for line in text.splitlines()]
-    while lines and not lines[0].strip():
-        lines.pop(0)
-    while lines and not lines[-1].strip():
-        lines.pop()
-    return "\n".join(lines)
-
-
-def _clean_heading(text: str) -> str:
-    return _clean_cell(text).strip("# ")
-
-
-def _clean_cell(text: str) -> str:
-    return " ".join(html.unescape(text).replace("\\&", "&").split())
-
-
-def _normalize_line(line: str) -> str:
-    line = line.strip()
-    heading = HEADING_RE.match(line)
-    if heading:
-        line = heading.group(2)
-    line = _clean_cell(line)
-    return line.casefold()

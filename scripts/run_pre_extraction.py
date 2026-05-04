@@ -10,18 +10,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.app.extraction_page_scanner import load_pages_jsonl, scan_pages
-from backend.app.extracted_datapoints import (
+from backend.app.extract.page_scanner import load_pages_jsonl, scan_pages
+from backend.app.extract.datapoints import (
     deduplicate_datapoints,
     normalize_llamaextract_result,
     save_datapoint_set,
 )
-from backend.app.datapoint_schemas import (
+from backend.app.extract.schemas import (
     AnnualReportDatapoints,
     extract_annual_report_datapoints,
 )
-from backend.app.openai_extract_datapoints import extract_annual_report_datapoints_openai
-from backend.app.openai_validate_datapoints import validate_datapoints_openai
+from backend.app.extract.openai_extract import extract_annual_report_datapoints_openai
+from backend.app.extract.openai_validate import validate_datapoints_openai
 
 _PRE_EXTRACTED_ROOT = Path("backend/data/processed/pre_extracted")
 _RAW_AUDIT_ROOT = Path("backend/data/processed/pre_extracted_raw")

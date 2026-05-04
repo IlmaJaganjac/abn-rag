@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.extraction_page_scanner import (
+from backend.app.extract.page_scanner import (
     _expand_with_context,
     _to_range_string,
     scan_pages,

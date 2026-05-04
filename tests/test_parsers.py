@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from backend.app.parsers import (
+from backend.app.ingest.parsers import (
     ParsedPage,
     ParserUnavailableError,
     combine_with_pdf_text_layer,
@@ -24,7 +24,7 @@ def test_llamaparse_parser_dispatches_with_api_key(monkeypatch: pytest.MonkeyPat
         assert api_key == "llx-key"
         return [ParsedPage(page=3, text="llamaparse markdown")]
 
-    monkeypatch.setattr("backend.app.parsers.parse_pdf_llamaparse", fake_llamaparse)
+    monkeypatch.setattr("backend.app.ingest.parsers.parse_pdf_llamaparse", fake_llamaparse)
 
     result = parse_pdf_pages(
         Path("report.pdf"),

@@ -1,117 +1,37 @@
 from __future__ import annotations
 
-import json
 import re
 import unicodedata
 from pathlib import Path
-from typing import Any
 
 from pydantic import BaseModel
 
-from backend.app.datapoint_schemas import AnnualReportDatapoints
-
-_PUNCT_RE = re.compile(r"[^\w\s]")
-_SPACE_RE = re.compile(r"\s+")
-_SYMBOL_SPACE_RE = re.compile(r"\s*([€$£%><=,.])\s*")
-_PLACEHOLDER_VALUE = re.compile(r"^(?:unknown|n/?a|none|null|[-—]+|[€$£]?\s*x+x+%?|x+x+%?)$", re.IGNORECASE)
-_STATUS_ONLY_VALUE = re.compile(
-    r"^(?:approved|executed|suspended|modified|discontinued|may\s+(?:suspend|not declare|pay).*|"
-    r"on\s+track|tbc|tbd|in\s+progress|ongoing)$",
-    re.IGNORECASE,
-)
-_ACTUAL_METRIC = re.compile(r"\bactual\b|\breported\b|\bperformance\b", re.IGNORECASE)
-_PROGRESS_SIGNAL = re.compile(r"\bprogress\b|achieved|completion|against\s+(?:the\s+)?target", re.IGNORECASE)
-_FORECAST_SIGNAL = re.compile(r"\bforecast\b|outlook|guidance|expect(?:ed|s|ation)?|anticipate|project(?:ed|ion)?", re.IGNORECASE)
-_DEFINITION_SIGNAL = re.compile(r"\bdefinition\b|defined as|means|refers to", re.IGNORECASE)
-_SCOPE_CUSTOMER_SIGNAL = re.compile(r"\bcustomer\b|client", re.IGNORECASE)
-_SCOPE_SEGMENT_SIGNAL = re.compile(r"\bsegment\b|division|business unit|product line|product-specific", re.IGNORECASE)
-_SCOPE_GEOGRAPHY_SIGNAL = re.compile(r"\bgeograph|region|country|emea|asia|europe|united states|china|japan", re.IGNORECASE)
-_SCOPE_PRODUCT_SIGNAL = re.compile(r"\bproduct\b|system|unit model", re.IGNORECASE)
-_TOTAL_COMPANY_SIGNAL = re.compile(r"\btotal\b|company[- ]wide|group", re.IGNORECASE)
-_COUNT_METRIC_SIGNAL = re.compile(r"\b(?:count|number|units?|systems?|employees?|fte?s?|headcount|sold|shipped)\b", re.IGNORECASE)
-_RATE_UNIT_SIGNAL = re.compile(r"%|per[-\s]?hour|per\s+\w+|rate|ratio|intensity|throughput|efficiency", re.IGNORECASE)
-
-# FTE priority helpers
-_FTE_COMPANY_WIDE = re.compile(
-    r"total\s+employees?|total\s+workforce|all\s+employees?|"
-    r"total\s+number\s+of\s+(?:payroll\s+)?employees|internal\s+employees?",
-    re.IGNORECASE,
-)
-_FTE_AVG_PAYROLL = re.compile(
-    r"\baverage\b|\bpayroll\b|\btemporary\b|\bpermanent\b",
-    re.IGNORECASE,
-)
-_FTE_HEADCOUNT = re.compile(r"\bheadcount\b", re.IGNORECASE)
-_FTE_SPECIFIC = re.compile(
-    r"dedicated\s+fte|team\s+fte|program\s+fte|project\s+fte",
-    re.IGNORECASE,
-)
-_FTE_SIGNAL = re.compile(
-    r"\bfte?s?\b|full[- ]time\s+equivalents?|headcount|employees?|workforce|"
-    r"payroll|permanent|temporary|internal|external|contractors?|turnover|attrition",
-    re.IGNORECASE,
-)
-_FTE_NON_EMPLOYEE = re.compile(
-    r"survey\s+score|engagement\s+score|training\s+hours?|lost\s+time|incident\s+rate|"
-    r"revenue|net\s+sales|dividend|buyback|emissions?|scope\s+[123]|net[- ]zero",
-    re.IGNORECASE,
-)
-_SUST_SIGNAL = re.compile(
-    r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|net[- ]zero|"
-    r"carbon|methane|flaring|renewable|energy\s+(?:efficien|savings?|use)|"
-    r"electricity|power\s+consumption|wafer|waste|reuse|re-?use|recycl|circular|water|"
-    r"biodiversity|supplier\s+sustainability|"
-    r"diversity|inclusion|safety|ethics|governance",
-    re.IGNORECASE,
-)
-_SUST_TARGET_SIGNAL = re.compile(
-    r"target|goal|ambition|commitment|committed|aim|reduce|reduction|halve|"
-    r"achieve|become|maintain|eliminate|by\s+20[2-9]\d|20[3-9]\d",
-    re.IGNORECASE,
-)
-_SUST_BUSINESS_ONLY = re.compile(
-    r"lng\s+sales|liquids?\s+production|barrels?\s+per\s+day|refining\s+throughput|"
-    r"production\s+growth|volume\s+growth|market\s+share|revenue\s+growth|"
-    r"customer\s+growth|stores?|branches?|locations?",
-    re.IGNORECASE,
-)
-_ESG_SIGNAL = re.compile(
-    r"emissions?|greenhouse\s+gas|\bghg\b|co2e?|co₂e?|scope\s+[123]|renewable|"
-    r"energy|waste|reuse|re-?use|recycl|water|circular|biodiversity|supplier|diversity|"
-    r"inclusion|safety|ethics|governance",
-    re.IGNORECASE,
-)
-_FIN_SIGNAL = re.compile(
-    r"net\s+sales|revenue|total\s+income|gross\s+profit|gross\s+margin|"
-    r"operating\s+(?:income|profit)|income\s+from\s+operations|\bebit(?:da)?\b|"
-    r"net\s+(?:income|profit)|income\s+tax|effective\s+tax\s+rate|\betr\b|"
-    r"earnings\s+per\s+share|\beps\b|r&d|research\s+and\s+development|"
-    r"free\s+cash\s+flow|operating\s+cash\s+flow|cash\s+flow\s+from\s+operat|"
-    r"net\s+cash\s+provided\s+by\s+operating\s+activities|"
-    r"cash\s+and\s+cash\s+equivalents|short[- ]term\s+investments?|"
-    r"capex|capital\s+expenditure|property,\s+plant\s+and\s+equipment|"
-    r"intangible\s+assets|return\s+on\s+(?:equity|invested\s+capital)|"
-    r"\broe\b|\broic\b|\bcet1\b|capital\s+ratio|liquidity\s+coverage|"
-    r"net\s+interest\s+margin|\bnim\b",
-    re.IGNORECASE,
-)
-_BIZ_SIGNAL = re.compile(
-    r"systems?\s+sold|systems?\s+recognized|lithography\s+systems?|euv\s+systems?|"
-    r"units?\s+sold|installed\s+base|"
-    r"order\s+intake|order\s+book|backlog|bookings|customers?|clients?|"
-    r"customer\s+satisfaction|suppliers?|reuse\s+rate|market\s+share|"
-    r"production\s+volume|deliveries|loans?|deposits?|mortgages?|lng|"
-    r"barrels?\s+per\s+day|refining\s+throughput|beer\s+volume|hectoliters?|"
-    r"stores?|branches?|locations?|assets\s+under\s+management|\baum\b|"
-    r"transaction\s+volume",
-    re.IGNORECASE,
-)
-_SH_SIGNAL = re.compile(
-    r"dividend|share\s+buybacks?|share\s+repurchases?|repurchased|"
-    r"returned?\s+to\s+shareholders?|shareholder\s+(?:returns?|distributions?)|"
-    r"capital\s+return|payout\s+ratio|treasury\s+shares?|shares?\s+cancelled|"
-    r"cash\s+returned",
-    re.IGNORECASE,
+from backend.app.extract.schemas import AnnualReportDatapoints
+from backend.app.extract.signals import (
+    ACTUAL_METRIC,
+    BIZ_SIGNAL,
+    ESG_SIGNAL,
+    FIN_SIGNAL,
+    FTE_AVG_PAYROLL,
+    FTE_COMPANY_WIDE,
+    FTE_HEADCOUNT,
+    FTE_NON_EMPLOYEE,
+    FTE_SIGNAL,
+    FTE_SPECIFIC,
+    PLACEHOLDER_VALUE,
+    PUNCT_RE,
+    SCOPE_CUSTOMER_SIGNAL,
+    SCOPE_GEOGRAPHY_SIGNAL,
+    SCOPE_PRODUCT_SIGNAL,
+    SCOPE_SEGMENT_SIGNAL,
+    SH_SIGNAL,
+    SPACE_RE,
+    STATUS_ONLY_VALUE,
+    SUST_BUSINESS_ONLY,
+    SUST_SIGNAL,
+    SUST_TARGET_SIGNAL,
+    SYMBOL_SPACE_RE,
+    TOTAL_COMPANY_SIGNAL,
 )
 
 
@@ -146,16 +66,12 @@ class NormalizedDatapointSet(BaseModel):
     datapoints: list[NormalizedDatapoint] = []
 
 
-# ---------------------------------------------------------------------------
-# Normalization helpers
-# ---------------------------------------------------------------------------
-
 def _norm_text(s: str | None) -> str:
     if not s:
         return ""
     s = unicodedata.normalize("NFKD", s)
-    s = _PUNCT_RE.sub(" ", s).lower()
-    s = _SPACE_RE.sub(" ", s).strip()
+    s = PUNCT_RE.sub(" ", s).lower()
+    s = SPACE_RE.sub(" ", s).strip()
     return s
 
 
@@ -163,20 +79,20 @@ def _norm_value(s: str | None) -> str:
     if not s:
         return ""
     s = s.lower().strip()
-    s = _SYMBOL_SPACE_RE.sub(r"\1", s)
-    s = _SPACE_RE.sub(" ", s).strip()
+    s = SYMBOL_SPACE_RE.sub(r"\1", s)
+    s = SPACE_RE.sub(" ", s).strip()
     return s
 
 
 def _fte_priority(metric: str, basis: str | None) -> int:
     combined = f"{metric} {basis or ''}"
-    if _FTE_SPECIFIC.search(combined):
+    if FTE_SPECIFIC.search(combined):
         return 30
-    if _FTE_HEADCOUNT.search(combined):
+    if FTE_HEADCOUNT.search(combined):
         return 70
-    if _FTE_AVG_PAYROLL.search(combined):
+    if FTE_AVG_PAYROLL.search(combined):
         return 85
-    if _FTE_COMPANY_WIDE.search(combined):
+    if FTE_COMPANY_WIDE.search(combined):
         return 100
     return 60
 
@@ -241,13 +157,13 @@ def _normalized_contains_value(quote: str, value: str) -> bool:
 def _is_scoped_total(dp: NormalizedDatapoint) -> bool:
     text = _combined_dp_text(dp)
     return bool(
-        _TOTAL_COMPANY_SIGNAL.search(dp.metric or "")
+        TOTAL_COMPANY_SIGNAL.search(dp.metric or "")
         and (
-            _SCOPE_CUSTOMER_SIGNAL.search(text)
-            or _SCOPE_SEGMENT_SIGNAL.search(text)
-            or _SCOPE_GEOGRAPHY_SIGNAL.search(text)
-            or _SCOPE_PRODUCT_SIGNAL.search(text)
-            or _FTE_SPECIFIC.search(text)
+            SCOPE_CUSTOMER_SIGNAL.search(text)
+            or SCOPE_SEGMENT_SIGNAL.search(text)
+            or SCOPE_GEOGRAPHY_SIGNAL.search(text)
+            or SCOPE_PRODUCT_SIGNAL.search(text)
+            or FTE_SPECIFIC.search(text)
         )
     )
 
@@ -257,60 +173,55 @@ def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
     value = (dp.value or "").strip()
     quote = dp.quote or ""
     metric = dp.metric or ""
-    unit = dp.unit or ""
     strict_openai = dp.extractor == "openai"
     if strict_openai:
         if not quote:
             return False
-        if value and (_PLACEHOLDER_VALUE.fullmatch(value) or _STATUS_ONLY_VALUE.fullmatch(value)):
+        if value and (PLACEHOLDER_VALUE.fullmatch(value) or STATUS_ONLY_VALUE.fullmatch(value)):
             return False
         if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
             return False
     if dp.datapoint_type == "fte":
         if strict_openai and dp.fact_kind != "actual":
             return False
-        return bool(_FTE_SIGNAL.search(text)) and not bool(_FTE_NON_EMPLOYEE.search(text))
+        return bool(FTE_SIGNAL.search(text)) and not bool(FTE_NON_EMPLOYEE.search(text))
 
     if dp.datapoint_type == "sustainability_goal":
         if strict_openai and dp.fact_kind not in {"target", "forecast"}:
             return False
-        if strict_openai and _ACTUAL_METRIC.search(metric):
+        if strict_openai and ACTUAL_METRIC.search(metric):
             return False
-        has_sust_signal = bool(_SUST_SIGNAL.search(text))
-        has_target_signal = bool(_SUST_TARGET_SIGNAL.search(text) or dp.target_year)
-        business_only = bool(_SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
+        has_sust_signal = bool(SUST_SIGNAL.search(text))
+        has_target_signal = bool(SUST_TARGET_SIGNAL.search(text) or dp.target_year)
+        business_only = bool(SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
         return has_sust_signal and has_target_signal and not business_only
 
     if dp.datapoint_type == "esg_datapoint":
         if strict_openai and dp.fact_kind != "actual":
             return False
-        return bool(_ESG_SIGNAL.search(text)) and not bool(_SUST_TARGET_SIGNAL.search(text))
+        return bool(ESG_SIGNAL.search(text)) and not bool(SUST_TARGET_SIGNAL.search(text))
 
     if dp.datapoint_type == "financial_highlight":
         if strict_openai and dp.fact_kind != "actual":
             return False
-        if _SH_SIGNAL.search(text) or _FTE_SIGNAL.search(text) or _SUST_SIGNAL.search(text):
+        if SH_SIGNAL.search(text) or FTE_SIGNAL.search(text) or SUST_SIGNAL.search(text):
             return False
-        return bool(_FIN_SIGNAL.search(text))
+        return bool(FIN_SIGNAL.search(text))
 
     if dp.datapoint_type == "business_performance":
         if strict_openai and dp.fact_kind != "actual":
             return False
-        if _FTE_SIGNAL.search(text) or _SH_SIGNAL.search(text):
+        if FTE_SIGNAL.search(text) or SH_SIGNAL.search(text):
             return False
-        if _SUST_SIGNAL.search(text) and _SUST_TARGET_SIGNAL.search(text):
+        if SUST_SIGNAL.search(text) and SUST_TARGET_SIGNAL.search(text):
             return False
-        return bool(_BIZ_SIGNAL.search(text))
+        return bool(BIZ_SIGNAL.search(text))
 
     if dp.datapoint_type == "shareholder_return":
-        return bool(_SH_SIGNAL.search(text))
+        return bool(SH_SIGNAL.search(text))
 
     return True
 
-
-# ---------------------------------------------------------------------------
-# Public normalization
-# ---------------------------------------------------------------------------
 
 def normalize_llamaextract_result(
     result: AnnualReportDatapoints,
@@ -472,11 +383,9 @@ def deduplicate_datapoints(
         if existing is None:
             seen[key] = dp
             continue
-        # keep higher priority
         if dp.priority > existing.priority:
             seen[key] = dp
         elif dp.priority == existing.priority:
-            # prefer higher confidence
             dp_conf = dp.confidence or 0.0
             ex_conf = existing.confidence or 0.0
             if dp_conf > ex_conf:

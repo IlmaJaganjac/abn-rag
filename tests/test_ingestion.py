@@ -2,21 +2,19 @@ from __future__ import annotations
 
 import json
 
-from backend.app.extracted_datapoints import NormalizedDatapoint
+from backend.app.extract.datapoints import NormalizedDatapoint
 from backend.app.ingestion import (
     build_datapoint_chunks,
     build_chunks,
     extract_categorized_datapoints,
-    extract_datapoint_candidates,
-    extract_fte_candidates,
     ingest_pdf,
     persist_chunks,
     persist_datapoints,
     persist_parsed_pages,
 )
-from backend.app.datapoint_schemas import AnnualReportDatapoints
-from backend.app.openai_validate_datapoints import ValidationItem
-from backend.app.parsers import ParsedPage, ParseResult
+from backend.app.extract.schemas import AnnualReportDatapoints
+from backend.app.extract.openai_validate import ValidationItem
+from backend.app.ingest.parsers import ParsedPage, ParseResult
 
 
 def test_build_chunks_keeps_page_metadata() -> None:
@@ -534,34 +532,6 @@ def test_ingest_pdf_extracts_datapoints_only_when_flag_enabled(
     assert (processed_dir / "datapoints" / "asml-2025.json").exists()
 
 
-def test_extract_fte_candidates_detects_fte_keyword() -> None:
-    candidates = extract_fte_candidates(
-        [(5, "At a glance\n> 44,000\nTotal employees (FTEs)")],
-        source="asml.pdf",
-        company="ASML",
-        year=2025,
-        parser="llamaparse",
-    )
-
-    assert len(candidates) == 1
-    assert candidates[0]["datapoint_type"] == "fte_candidate"
-    assert candidates[0]["page"] == 5
-    assert "Total employees (FTEs)" in str(candidates[0]["verbatim_text"])
-
-
-def test_extract_fte_candidates_detects_full_time_equivalent() -> None:
-    candidates = extract_fte_candidates(
-        [(131, "The average number of payroll employees in full-time equivalent was 43,267.")],
-        source="asml.pdf",
-        company="ASML",
-        year=2025,
-        parser="llamaparse",
-    )
-
-    assert len(candidates) == 1
-    assert "full-time equivalent" in str(candidates[0]["verbatim_text"])
-
-
 def test_persist_datapoints_writes_json(tmp_path) -> None:
     datapoints = [
         {
@@ -634,7 +604,7 @@ def test_extract_categorized_datapoints_uses_all_categories(monkeypatch) -> None
         return AnnualReportDatapoints(**payload)
 
     monkeypatch.setattr(
-        "backend.app.ingestion.extract_annual_report_datapoints_openai",
+        "backend.app.extract.categorize.extract_annual_report_datapoints_openai",
         fake_extract,
     )
 
@@ -694,11 +664,11 @@ def test_extract_categorized_datapoints_validates_and_deduplicates(monkeypatch) 
         return AnnualReportDatapoints(**payload)
 
     monkeypatch.setattr(
-        "backend.app.ingestion.extract_annual_report_datapoints_openai",
+        "backend.app.extract.categorize.extract_annual_report_datapoints_openai",
         fake_extract,
     )
     monkeypatch.setattr(
-        "backend.app.ingestion.validate_datapoints_openai",
+        "backend.app.extract.categorize.validate_datapoints_openai",
         lambda **kwargs: [
             ValidationItem(index=0, is_valid=True, reason="valid"),
             ValidationItem(index=1, is_valid=False, reason="duplicate", duplicate_of_index=0),
@@ -1016,13 +986,3 @@ def _skip_kpi_pair_skips_hints_when_no_category_matches() -> None:
     assert "Retrieval hints:" not in embedding
 
 
-def test_extract_fte_candidates_returns_empty_list_when_no_candidate_exists() -> None:
-    candidates = extract_fte_candidates(
-        [(1, "Revenue increased and sustainability targets were discussed.")],
-        source="asml.pdf",
-        company="ASML",
-        year=2025,
-        parser="llamaparse",
-    )
-
-    assert candidates == []
