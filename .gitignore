@@ -14,11 +14,10 @@ build/
 .DS_Store
 
 AGENTS.md
-backend/data/reports/*.pdf
-backend/data/chroma/
-backend/data/processed/
-backend/data/*.db
 backend/evals/runs*/*.json
 frontend/*.tsbuildinfo
+backend/data/reports/
+backend/data/chroma/
+backend/data/processed/
 claude.md
 !**/.gitkeep

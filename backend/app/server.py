@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from backend.app.answer import answer_question
 from backend.app.config import settings
+from backend.app.db import init_db, query_datapoints
 from backend.app.ingest.embedding import get_collection
 from backend.app.ingestion import ingest_pdf
 from backend.app.retrieval import retrieve_decomposed
@@ -24,6 +25,12 @@ from backend.app.schemas import RetrievalQuery, VerbatimAnswer
 log = logging.getLogger(__name__)
 
 app = FastAPI(title="Annualyzer API")
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    init_db()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -213,19 +220,7 @@ def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
 
 
 def _load_datapoints() -> list[dict[str, Any]]:
-    """Load all persisted datapoints from disk and return them as dictionaries."""
-    dp_dir = settings.get_processed_path() / "datapoints"
-    out: list[dict[str, Any]] = []
-    if not dp_dir.exists():
-        return out
-    for path in sorted(dp_dir.glob("*.json")):
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        if isinstance(data, list):
-            out.extend(data)
-    return out
+    return query_datapoints()
 
 
 # ---------- documents ----------
@@ -365,11 +360,9 @@ def delete_document(doc_id: str) -> dict[str, str]:
 @app.get("/api/datapoints")
 def list_datapoints(company: str | None = None, type: str | None = None) -> list[dict[str, Any]]:
     """Return pre-extracted datapoints, optionally filtered by company or datapoint type."""
-    items = _load_datapoints()
+    items = query_datapoints(company=company)
     out: list[dict[str, Any]] = []
     for dp in items:
-        if company and (dp.get("company") or "").lower() != company.lower():
-            continue
         dp_type = _bucket_type(dp.get("datapoint_type") or "")
         if type and dp_type != type:
             continue

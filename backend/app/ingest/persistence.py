@@ -98,6 +98,10 @@ def persist_datapoints(
         else:
             serializable.append(datapoint)
     out_path.write_text(json.dumps(serializable, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    from backend.app.db import upsert_datapoints
+    upsert_datapoints([dp if isinstance(dp, dict) else dp for dp in serializable])
+
     return out_path
 
 

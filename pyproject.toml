@@ -17,7 +17,10 @@ dependencies = [
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
     "tiktoken>=0.7",
-    "sentence-transformers>=3.0",
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    "pymupdf>=1.24",
 ]
 
 [project.optional-dependencies]
