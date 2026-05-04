@@ -26,6 +26,7 @@ _reranker_model_name: str | None = None
 
 
 def _get_reranker():
+    """Load or reuse the configured cross-encoder reranker and return the model instance."""
     global _reranker_model, _reranker_model_name
     model_name = os.environ.get("RERANKER_MODEL") or DEFAULT_RERANKER_MODEL
     if _reranker_model is None or _reranker_model_name != model_name:
@@ -41,6 +42,7 @@ def rerank_chunks_cross_encoder(
     top_k: int,
     text_chars: int = 3000,
 ) -> list[RetrievedChunk]:
+    """Rerank candidate chunks and return the top results with updated scores."""
     try:
         model = _get_reranker()
         pairs = [(question, chunk.text[:text_chars]) for chunk in chunks]
@@ -63,6 +65,7 @@ _FIN_EXPANSION = "financial performance revenue net sales gross margin operating
 
 
 def expand_query_for_retrieval(question: str) -> str:
+    """Expand a user question with domain terms and return the retrieval query text."""
     q = question.casefold()
     tokens = set(re.findall(r"[a-z0-9₂&]+", q))
     parts = [question]
@@ -76,6 +79,7 @@ def expand_query_for_retrieval(question: str) -> str:
 
 
 def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
+    """Build a Chroma metadata filter for the requested company and year."""
     clauses: list[dict[str, Any]] = []
     if company is not None:
         clauses.append({"company": company})
@@ -95,6 +99,7 @@ def _retrieved_chunk(
     meta: dict[str, Any],
     score: float,
 ) -> RetrievedChunk:
+    """Convert raw vector-store fields into one `RetrievedChunk` object."""
     return RetrievedChunk(
         id=cid,
         source=str(meta.get("source", "")),
@@ -117,6 +122,7 @@ def _retrieved_chunk(
 
 
 def _tokenize(text: str) -> list[str]:
+    """Tokenize text into lowercase alphanumeric terms for BM25-style scoring."""
     return [
         token
         for token in re.findall(r"[a-z0-9]+", text.casefold())
@@ -125,6 +131,7 @@ def _tokenize(text: str) -> list[str]:
 
 
 def _chunk_search_text(record: dict[str, Any]) -> str:
+    """Concatenate searchable record fields into one BM25 text string."""
     parts = [
         record.get("text"),
         record.get("section_path"),
@@ -136,6 +143,7 @@ def _chunk_search_text(record: dict[str, Any]) -> str:
 
 
 def _iter_processed_chunk_records() -> list[dict[str, Any]]:
+    """Load all persisted chunk records from disk and return them as dictionaries."""
     chunks_dir = settings.get_processed_path() / "chunks"
     records: list[dict[str, Any]] = []
     for path in sorted(chunks_dir.glob("*.jsonl")):
@@ -149,6 +157,7 @@ def _iter_processed_chunk_records() -> list[dict[str, Any]]:
 
 
 def _passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
+    """Return whether one persisted record matches the active retrieval filters."""
     if query.company is not None and record.get("company") != query.company:
         return False
     if query.year is not None and record.get("year") != query.year:
@@ -157,6 +166,7 @@ def _passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
 
 
 def _bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
+    """Score persisted chunks with BM25-style ranking and return candidate chunks."""
     records = [record for record in _iter_processed_chunk_records() if _passes_filters(record, query)]
     query_terms = _tokenize(query.question)
     if not records or not query_terms:
@@ -206,10 +216,12 @@ def _rrf_merge(
     bm25_chunks: list[RetrievedChunk],
     top_k: int,
 ) -> list[RetrievedChunk]:
+    """Fuse dense and BM25 rankings with reciprocal-rank fusion and return merged chunks."""
     scores: dict[str, float] = {}
     chunks_by_id: dict[str, RetrievedChunk] = {}
 
     def add_ranked(chunks: list[RetrievedChunk], weight: float) -> None:
+        """Accumulate reciprocal-rank scores for one ranked result list."""
         for rank, chunk in enumerate(chunks, start=1):
             chunks_by_id.setdefault(chunk.id, chunk)
             scores[chunk.id] = scores.get(chunk.id, 0.0) + weight / (RRF_K + rank)
@@ -226,6 +238,7 @@ def _rrf_merge(
 
 
 def retrieve(query: RetrievalQuery) -> RetrievalResult:
+    """Run the retrieval pipeline and return ranked chunks plus the effective query."""
     collection = get_collection()
     reranker_enabled = os.environ.get("ENABLE_RERANKER") == "1"
     if reranker_enabled:

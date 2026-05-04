@@ -4,11 +4,10 @@ import html
 import re
 import unicodedata
 
-from backend.app._openai import openai_client
-from backend.app.config import settings
+from backend.app.config import openai_client, settings
 from backend.app.schemas import Citation, GroundingDrop, LLMAnswer, RetrievedChunk, VerbatimAnswer
 
-SYSTEM_PROMPT = """\ka
+SYSTEM_PROMPT = """
 You answer questions about annual reports using only the provided context blocks.
 
 Rules:
@@ -89,6 +88,7 @@ Rules:
 
 
 def _format_context(chunks: list[RetrievedChunk]) -> str:
+    """Render retrieved chunks into the context block string sent to the answer model."""
     blocks: list[str] = []
     for i, c in enumerate(chunks, start=1):
         header = f"[Rank {i}] source={c.source} page={c.page}"
@@ -130,11 +130,12 @@ _METRIC_STOP = frozenset({
 
 
 def _source_tokens(source: str) -> frozenset[str]:
-    """Tokens of len≥4 extracted from a source filename, used to filter company names."""
+    """Return source-name tokens used to ignore company words when grounding table quotes."""
     return frozenset(re.findall(r"[a-z]{4,}", source.lower()))
 
 
 def _normalize_for_grounding(s: str) -> str:
+    """Normalize text for strict grounding comparisons and verbatim matching."""
     s = unicodedata.normalize("NFKC", s)
     s = s.translate(_DASH_TRANS).translate(_QUOTE_TRANS)
     s = s.replace("\u2026", "...")
@@ -144,11 +145,7 @@ def _normalize_for_grounding(s: str) -> str:
 
 
 def _normalize_for_grounding_layout(s: str) -> str:
-    """Fallback normalization that additionally strips PDF layout artifacts:
-    bracketed footnote markers like [A][B][C] and PDF bullet characters.
-    Used only when the strict normalization fails to find a match.
-    Footnote/bullet stripping runs before NFKC so original codepoints are matched.
-    """
+    """Normalize text for fallback grounding while stripping PDF layout artifacts."""
     s = _FOOTNOTE_RE.sub(" ", s)
     s = _PDF_BULLET_RE.sub(" ", s)
     s = unicodedata.normalize("NFKC", s)
@@ -160,11 +157,13 @@ def _normalize_for_grounding_layout(s: str) -> str:
 
 
 def _split_on_ellipsis(needle: str) -> list[str]:
+    """Split a grounded quote on ellipsis markers and return the non-empty fragments."""
     parts = [p.strip() for p in _ELLIPSIS_RE.split(needle)]
     return [p for p in parts if p]
 
 
 def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
+    """Return whether all quote fragments appear in order inside the candidate text."""
     cursor = 0
     for frag in fragments:
         idx = haystack.find(frag, cursor)
@@ -250,6 +249,20 @@ def _clean_citation_quote(raw: str) -> str:
     if text.count("|") >= 2:
         return "Refer to the table on this page."
     return text
+
+
+def _citation_contains_verbatim_number(cite: Citation, verbatim: str | None) -> bool:
+    """Return whether a citation quote contains the key numeric token from the verbatim answer."""
+    if not verbatim:
+        return True
+    verbatim_nums = {
+        n for n in _NUM_RE.findall(_normalize_for_grounding(verbatim))
+        if len(n) >= 3
+    }
+    if not verbatim_nums:
+        return True
+    quote_nums = set(_NUM_RE.findall(_normalize_for_grounding(cite.quote)))
+    return bool(verbatim_nums & quote_nums)
 
 
 def _ground_citations(
@@ -345,6 +358,15 @@ def _ground_citations(
             (m for m in matches if m.page == cite.page), None,
         ) or matches[0]
 
+        if len(citations) == 1 and not _citation_contains_verbatim_number(cite, verbatim):
+            drops.append(GroundingDrop(
+                source=cite.source,
+                page=cite.page,
+                quote=cite.quote,
+                reason="quote_not_found_verbatim",
+            ))
+            continue
+
         grounded.append(Citation(
             source=best.source,
             page=best.page,
@@ -357,6 +379,7 @@ def _ground_citations(
 
 
 def _refuse(question: str, reason: str) -> VerbatimAnswer:
+    """Build a refusal answer object with a consistent fallback message."""
     return VerbatimAnswer(
         question=question,
         answer="The answer is not available in the provided reports.",
@@ -367,9 +390,8 @@ def _refuse(question: str, reason: str) -> VerbatimAnswer:
     )
 
 
-def answer_question(
-    question: str, chunks: list[RetrievedChunk]
-) -> VerbatimAnswer:
+def answer_question(question: str, chunks: list[RetrievedChunk]) -> VerbatimAnswer:
+    """Answer one question from retrieved chunks and return a grounded `VerbatimAnswer`."""
     if not chunks:
         return _refuse(question, "no retrieved context")
 
@@ -416,30 +438,13 @@ def answer_question(
             grounding_drops=drops,
         )
 
-    citations = _trim_citations(grounded, question)
-
     return VerbatimAnswer(
         question=question,
         answer=parsed.answer,
         verbatim=parsed.verbatim,
-        citations=citations,
+        citations=grounded,
         refused=False,
         refusal_reason=None,
         raw_citations=parsed.citations,
         grounding_drops=drops,
     )
-
-
-_MULTI_TOPIC_RE = re.compile(
-    r"\b(compare|comparison|versus|vs\.?|both|all|each|difference|between|and|multiple|across)\b",
-    re.IGNORECASE,
-)
-
-
-def _trim_citations(citations: list[Citation], question: str) -> list[Citation]:
-    if len(citations) <= 1:
-        return citations
-    unique_sources = {c.source for c in citations}
-    if len(unique_sources) > 1 and _MULTI_TOPIC_RE.search(question):
-        return citations
-    return citations[:1]

@@ -52,14 +52,17 @@ BOILERPLATE_PHRASES: frozenset[str] = frozenset(
 
 
 def clean_cell(text: str) -> str:
+    """Normalize one table cell into a single cleaned text value."""
     return " ".join(html.unescape(text).replace("\\&", "&").split())
 
 
 def clean_heading(text: str) -> str:
+    """Clean a heading line and return the heading text without markdown markers."""
     return clean_cell(text).strip("# ")
 
 
 def clean_block(text: str) -> str:
+    """Trim leading and trailing blank lines and return the cleaned block text."""
     lines = [line.rstrip() for line in text.splitlines()]
     while lines and not lines[0].strip():
         lines.pop(0)
@@ -69,6 +72,7 @@ def clean_block(text: str) -> str:
 
 
 def normalize_line(line: str) -> str:
+    """Normalize one line for case-insensitive comparisons and boilerplate checks."""
     line = line.strip()
     heading = HEADING_RE.match(line)
     if heading:
@@ -78,10 +82,12 @@ def normalize_line(line: str) -> str:
 
 
 def is_table_line(line: str) -> bool:
+    """Return whether a line looks like a markdown table row."""
     return line.startswith("|") and line.endswith("|") and line.count("|") >= 2
 
 
 def parse_table_cells(row: str) -> list[str]:
+    """Split one markdown table row into cleaned cell values."""
     stripped = row.strip()
     if stripped.startswith("|"):
         stripped = stripped[1:]
@@ -91,16 +97,19 @@ def parse_table_cells(row: str) -> list[str]:
 
 
 def looks_like_value(text: str) -> bool:
+    """Return whether text looks like a numeric value or standalone year."""
     clean = text.replace("&nbsp;", " ").strip()
     return bool(VALUE_RE.match(clean)) or bool(YEAR_RE.fullmatch(clean))
 
 
 def starts_with_value(text: str) -> bool:
+    """Return whether text begins with a numeric-looking value."""
     clean = text.replace("&nbsp;", " ").strip()
     return bool(re.match(r"^[€$£]?\s*[<>]?\s*\d", clean))
 
 
 def looks_like_heading(text: str) -> bool:
+    """Heuristically decide whether a text line should be treated as a heading."""
     clean = clean_heading(text)
     if not clean:
         return False
@@ -123,6 +132,7 @@ def looks_like_heading(text: str) -> bool:
 
 
 def is_noise_line(line: str) -> bool:
+    """Return whether a line is layout noise such as page numbers or read-more hints."""
     if not line:
         return False
     normalized = normalize_line(line)
@@ -130,6 +140,7 @@ def is_noise_line(line: str) -> bool:
 
 
 def is_likely_boilerplate(line: str) -> bool:
+    """Return whether a normalized line is likely repeated report boilerplate."""
     if len(line) <= 2:
         return False
     if "annual report" in line:
@@ -138,11 +149,13 @@ def is_likely_boilerplate(line: str) -> bool:
 
 
 def year_period(text: str) -> str | None:
+    """Return the extracted year when text represents a year-like period label."""
     match = re.fullmatch(r"(?:FY\s*|Year\s*)?(20\d{2})", text.strip(), re.IGNORECASE)
     return match.group(1) if match else None
 
 
 def unit_from_text(text: str) -> str | None:
+    """Infer a coarse unit label from text and return it when detectable."""
     if not text:
         return None
     t = text.strip()
@@ -162,6 +175,7 @@ def unit_from_text(text: str) -> str | None:
 
 
 def remove_boilerplate(text: str, boilerplate: set[str]) -> str:
+    """Remove normalized boilerplate lines from a block and return the cleaned text."""
     lines = [
         line
         for line in text.splitlines()
@@ -171,6 +185,7 @@ def remove_boilerplate(text: str, boilerplate: set[str]) -> str:
 
 
 def find_boilerplate_lines(texts: Iterable[str]) -> set[str]:
+    """Find repeated boilerplate lines across pages and return them as normalized text."""
     from collections import Counter
     per_page: list[set[str]] = []
     for text in texts:

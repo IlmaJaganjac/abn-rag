@@ -36,6 +36,7 @@ from backend.app.extract.signals import (
 
 
 class NormalizedDatapoint(BaseModel):
+    """Canonical datapoint shape used after extraction cleanup."""
     source: str
     company: str | None = None
     year: int | None = None
@@ -60,6 +61,7 @@ class NormalizedDatapoint(BaseModel):
 
 
 class NormalizedDatapointSet(BaseModel):
+    """Container for one source file and the normalized datapoints extracted from it."""
     source: str
     company: str | None = None
     year: int | None = None
@@ -67,6 +69,7 @@ class NormalizedDatapointSet(BaseModel):
 
 
 def _norm_text(s: str | None) -> str:
+    """Normalize free text for deduplication and heuristic matching."""
     if not s:
         return ""
     s = unicodedata.normalize("NFKD", s)
@@ -76,6 +79,7 @@ def _norm_text(s: str | None) -> str:
 
 
 def _norm_value(s: str | None) -> str:
+    """Normalize a datapoint value string for value-level comparisons."""
     if not s:
         return ""
     s = s.lower().strip()
@@ -85,6 +89,7 @@ def _norm_value(s: str | None) -> str:
 
 
 def _fte_priority(metric: str, basis: str | None) -> int:
+    """Score FTE datapoints so broader company-wide metrics outrank weaker variants."""
     combined = f"{metric} {basis or ''}"
     if FTE_SPECIFIC.search(combined):
         return 30
@@ -98,6 +103,7 @@ def _fte_priority(metric: str, basis: str | None) -> int:
 
 
 def _sustainability_priority(goal: str, quote: str | None, target_year: str | None) -> int:
+    """Score sustainability goals so more explicit targets rank above vague ones."""
     if quote and target_year:
         return 95
     if target_year:
@@ -108,6 +114,7 @@ def _sustainability_priority(goal: str, quote: str | None, target_year: str | No
 
 
 def _highlight_priority(page: int | None, quote: str | None) -> int:
+    """Score generic highlight datapoints based on evidence completeness."""
     if page is not None and quote:
         return 90
     if page is not None or quote:
@@ -116,6 +123,7 @@ def _highlight_priority(page: int | None, quote: str | None) -> int:
 
 
 def _esg_priority(quote: str | None, period: str | None) -> int:
+    """Score ESG datapoints so quoted period-specific facts rank highest."""
     if quote and period:
         return 95
     if quote:
@@ -124,6 +132,7 @@ def _esg_priority(quote: str | None, period: str | None) -> int:
 
 
 def _combined_dp_text(dp: NormalizedDatapoint) -> str:
+    """Concatenate the key fields of one datapoint into one searchable text string."""
     return " ".join(
         part for part in (
             dp.datapoint_type,
@@ -141,6 +150,7 @@ def _combined_dp_text(dp: NormalizedDatapoint) -> str:
 
 
 def _normalized_contains_value(quote: str, value: str) -> bool:
+    """Return whether the quote still contains the datapoint value after normalization."""
     if not quote or not value:
         return True
     if value in quote:
@@ -155,6 +165,7 @@ def _normalized_contains_value(quote: str, value: str) -> bool:
 
 
 def _is_scoped_total(dp: NormalizedDatapoint) -> bool:
+    """Return whether a datapoint is a scoped subtotal rather than a true company-wide total."""
     text = _combined_dp_text(dp)
     return bool(
         TOTAL_COMPANY_SIGNAL.search(dp.metric or "")
@@ -169,6 +180,7 @@ def _is_scoped_total(dp: NormalizedDatapoint) -> bool:
 
 
 def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
+    """Reject placeholder, mis-scoped, or category-inconsistent datapoints."""
     text = _combined_dp_text(dp)
     value = (dp.value or "").strip()
     quote = dp.quote or ""
@@ -231,9 +243,11 @@ def normalize_llamaextract_result(
     year: int | None,
     extractor: str = "llamaextract",
 ) -> list[NormalizedDatapoint]:
+    """Convert raw extraction output into cleaned normalized datapoints."""
     out: list[NormalizedDatapoint] = []
 
     def append_if_plausible(dp: NormalizedDatapoint) -> None:
+        """Append a datapoint only when it passes plausibility checks."""
         if _is_plausible_datapoint(dp):
             out.append(dp)
 
@@ -370,6 +384,7 @@ def normalize_llamaextract_result(
 def deduplicate_datapoints(
     datapoints: list[NormalizedDatapoint],
 ) -> list[NormalizedDatapoint]:
+    """Return the best unique datapoints after applying category-specific deduplication rules."""
     seen: dict[tuple, NormalizedDatapoint] = {}
     for dp in datapoints:
         key = (
@@ -403,6 +418,7 @@ def save_datapoint_set(
     year: int | None,
     out_path: Path,
 ) -> Path:
+    """Persist a normalized datapoint set to disk and return the written JSON path."""
     ds = NormalizedDatapointSet(
         source=source,
         company=company,

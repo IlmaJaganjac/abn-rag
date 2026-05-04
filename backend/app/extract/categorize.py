@@ -6,8 +6,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from backend.app.extract.datapoints import deduplicate_datapoints, normalize_llamaextract_result
-from backend.app.extract.openai_extract import extract_annual_report_datapoints_openai
-from backend.app.extract.openai_validate import validate_datapoints_openai
+from backend.app.extract.openai import (
+    extract_annual_report_datapoints_openai,
+    validate_datapoints_openai,
+)
 from backend.app.ingest.categories import (
     CATEGORY_MAX_PAGES,
     CATEGORY_PATTERNS,
@@ -26,6 +28,7 @@ def extract_categorized_datapoints(
     year: int | None,
     validate: bool = False,
 ) -> list[object]:
+    """Extract category-specific datapoints and return one merged normalized list."""
     page_records = [
         {
             "source": source,
@@ -39,6 +42,7 @@ def extract_categorized_datapoints(
     ]
 
     def _pages_label(records: list[dict[str, Any]]) -> str:
+        """Render a compact page label string for logging selected page ranges."""
         pages_str = [str(record["page"]) for record in records]
         label = ", ".join(pages_str[:12])
         if len(pages_str) > 12:
@@ -46,6 +50,7 @@ def extract_categorized_datapoints(
         return label
 
     def _extract_category(category: str) -> list[object]:
+        """Extract and optionally validate datapoints for one category."""
         max_pages = CATEGORY_MAX_PAGES.get(category, 20)
         if category in CATEGORY_PATTERNS:
             scored = [
@@ -66,6 +71,7 @@ def extract_categorized_datapoints(
         )
 
         def _extract_page(page_record: dict) -> list[object]:
+            """Extract normalized datapoints from one page record."""
             result = extract_annual_report_datapoints_openai(
                 pages=[page_record],
                 company=company,

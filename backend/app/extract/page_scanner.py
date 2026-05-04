@@ -130,12 +130,14 @@ CATEGORIES = (
 
 @dataclass
 class PageScore:
+    """One page number with its relevance score for a specific category."""
     page: int
     score: float
 
 
 @dataclass
 class PageScanResult:
+    """Per-category ranked page scores returned by the page scanner."""
     fte: list[PageScore] = field(default_factory=list)
     sustainability: list[PageScore] = field(default_factory=list)
     financial_highlight: list[PageScore] = field(default_factory=list)
@@ -148,6 +150,7 @@ class PageScanResult:
 # ---------------------------------------------------------------------------
 
 def _score_fte(text: str) -> float:
+    """Return a heuristic FTE relevance score for one page of text."""
     score = 0.0
     score += len(_FTE_HIGH.findall(text)) * 5.0
     score += len(_FTE_MED.findall(text)) * 2.0
@@ -157,6 +160,7 @@ def _score_fte(text: str) -> float:
 
 
 def _score_sustainability(text: str) -> float:
+    """Return a heuristic sustainability-target relevance score for one page."""
     score = 0.0
     n_target = len(_SUST_TARGET.findall(text))
     n_esg = len(_SUST_ESG.findall(text))
@@ -170,6 +174,7 @@ def _score_sustainability(text: str) -> float:
 
 
 def _score_financial_highlight(text: str) -> float:
+    """Return a heuristic financial-highlight relevance score for one page."""
     score = 0.0
     n_title = len(_FIN_TITLE.findall(text))
     n_metrics = len(_FIN_METRICS.findall(text))
@@ -184,6 +189,7 @@ def _score_financial_highlight(text: str) -> float:
 
 
 def _score_business_performance(text: str) -> float:
+    """Return a heuristic business-performance relevance score for one page."""
     score = 0.0
     n_title = len(_BIZ_TITLE.findall(text))
     n_metrics = len(_BIZ_METRICS.findall(text))
@@ -197,6 +203,7 @@ def _score_business_performance(text: str) -> float:
 
 
 def _score_shareholder_return(text: str) -> float:
+    """Return a heuristic shareholder-return relevance score for one page."""
     score = 0.0
     n_metrics = len(_SH_METRICS.findall(text))
     score += min(n_metrics, 6) * 4.0
@@ -207,6 +214,7 @@ def _score_shareholder_return(text: str) -> float:
 
 
 def score_page(text: str) -> dict[str, float]:
+    """Score one page across all extraction categories and return the score map."""
     return {
         "fte": _score_fte(text),
         "sustainability": _score_sustainability(text),
@@ -221,6 +229,7 @@ def score_page(text: str) -> dict[str, float]:
 # ---------------------------------------------------------------------------
 
 def _expand_with_context(pages: list[int], context: int, all_pages: set[int]) -> list[int]:
+    """Expand selected pages with neighboring context pages and return the sorted result."""
     expanded: set[int] = set()
     for p in pages:
         for delta in range(-context, context + 1):
@@ -231,6 +240,7 @@ def _expand_with_context(pages: list[int], context: int, all_pages: set[int]) ->
 
 
 def _to_range_string(pages: list[int]) -> str:
+    """Convert page numbers into a compact range string such as `1-3,7`."""
     if not pages:
         return ""
     pages = sorted(set(pages))
@@ -254,6 +264,7 @@ def _to_range_string(pages: list[int]) -> str:
 # ---------------------------------------------------------------------------
 
 def load_pages_jsonl(path: Path) -> list[dict]:
+    """Load persisted page records from JSONL and return them as dictionaries."""
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
 
 

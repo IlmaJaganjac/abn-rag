@@ -18,12 +18,14 @@ Difficulty = Literal["easy", "medium", "hard"]
 
 
 class Citation(BaseModel):
+    """A verbatim evidence span tied to one source file and one PDF page."""
     source: str
     page: int = Field(ge=1)
     quote: str
 
 
 class Chunk(BaseModel):
+    """Stored retrieval unit created from report text or pre-extracted datapoints."""
     id: str
     source: str
     company: str | None = None
@@ -44,10 +46,12 @@ class Chunk(BaseModel):
 
 
 class RetrievedChunk(Chunk):
+    """A chunk returned by retrieval with an attached ranking score."""
     score: float
 
 
 class GroundingDrop(BaseModel):
+    """A citation candidate rejected during grounding, with the rejection reason."""
     source: str
     page: int
     quote: str
@@ -59,6 +63,7 @@ class GroundingDrop(BaseModel):
 
 
 class VerbatimAnswer(BaseModel):
+    """Final answer returned to the UI or CLI, including citations or refusal metadata."""
     question: str
     answer: str
     verbatim: str | None = None
@@ -70,6 +75,7 @@ class VerbatimAnswer(BaseModel):
 
     @model_validator(mode="after")
     def _check_citations(self) -> VerbatimAnswer:
+        """Enforce that grounded answers cite sources and refusals explain themselves."""
         if not self.refused and not self.citations:
             raise ValueError("non-refused answers must include at least one citation")
         if self.refused and self.refusal_reason is None:
@@ -78,6 +84,7 @@ class VerbatimAnswer(BaseModel):
 
 
 class LLMAnswer(BaseModel):
+    """Raw model output before citation grounding is enforced."""
     answer: str
     verbatim: str | None = None
     citations: list[Citation] = Field(default_factory=list)
@@ -86,6 +93,7 @@ class LLMAnswer(BaseModel):
 
 
 class RetrievalQuery(BaseModel):
+    """Input filters and question text for one retrieval request."""
     question: str
     top_k: int = Field(ge=1)
     company: str | None = None
@@ -93,11 +101,13 @@ class RetrievalQuery(BaseModel):
 
 
 class RetrievalResult(BaseModel):
+    """Ranked retrieval output containing the effective query and selected chunks."""
     query: RetrievalQuery
     chunks: list[RetrievedChunk]
 
 
 class EvalQuestion(BaseModel):
+    """One eval-set question with expected behavior and optional answer constraints."""
     id: str
     question: str
     category: Category
@@ -112,6 +122,7 @@ class EvalQuestion(BaseModel):
 
 
 class EvalSet(BaseModel):
+    """Top-level eval configuration containing multiple `EvalQuestion` entries."""
     source: str
     company: str
     year: int

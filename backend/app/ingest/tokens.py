@@ -7,10 +7,12 @@ _ENCODING = tiktoken.get_encoding("cl100k_base")
 
 
 def count_tokens(text: str) -> int:
+    """Return the token count for text using the embedding tokenizer."""
     return len(_ENCODING.encode(text, disallowed_special=()))
 
 
 def split_oversize(text: str, max_tokens: int, overlap: int) -> list[str]:
+    """Split oversized text into overlapping token windows and return decoded pieces."""
     tokens = _ENCODING.encode(text, disallowed_special=())
     if len(tokens) <= max_tokens:
         return [text]

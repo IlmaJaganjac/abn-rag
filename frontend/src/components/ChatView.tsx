@@ -22,7 +22,6 @@ const PHASE_LABELS: Record<ThinkingPhase, string> = {
 
 const PHASE_ORDER: ThinkingPhase[] = ['embedding', 'searching', 'reading', 'drafting', 'citing'];
 
-
 function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase; detail?: string; retrievedCount: number }) {
   const idx = PHASE_ORDER.indexOf(phase);
   return (
@@ -106,7 +105,6 @@ function SuggestedQuestions({ questions, onPick }: { questions: string[]; onPick
   const [page, setPage] = useState(0);
   const start = page * PAGE_SIZE;
   const slice = questions.slice(start, start + PAGE_SIZE);
-  // Pad to keep grid height stable across pages
   const pad = PAGE_SIZE - slice.length;
 
   const next = () => setPage(p => (p + 1) % totalPages);
@@ -138,7 +136,11 @@ function SuggestedQuestions({ questions, onPick }: { questions: string[]; onPick
   );
 }
 
-export function ChatView() {
+interface ChatViewProps {
+  clearKey: number;
+}
+
+export function ChatView({ clearKey }: ChatViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [scope, setScope] = useState<string>('all');
@@ -154,6 +156,15 @@ export function ChatView() {
       try { setDocs(await api.listDocuments()); } catch {}
     })();
   }, []);
+
+  useEffect(() => {
+    setMessages([]);
+    setInput('');
+    setScope('all');
+    setBusy(false);
+    setPhase('queued');
+    setPhaseDetail('');
+  }, [clearKey]);
 
   const reports = useMemo(() =>
     docs
@@ -176,6 +187,10 @@ export function ChatView() {
   }, [docs]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages, busy, phase]);
+
+  const setScopeOnly = (nextScope: string) => {
+    setScope(nextScope);
+  };
 
   const send = async (q: string) => {
     if (!q.trim() || busy) return;
@@ -236,7 +251,6 @@ export function ChatView() {
     }
   };
 
-  // autosize
   useEffect(() => {
     const ta = taRef.current; if (!ta) return;
     ta.style.height = 'auto';
@@ -294,7 +308,7 @@ export function ChatView() {
             <div className="composer-row">
               <span className="scope-pill">
                 <span style={{ color: 'var(--ink-3)' }}>Scope</span>
-                <select value={scope} onChange={e => setScope(e.target.value)}>
+                <select value={scope} onChange={e => setScopeOnly(e.target.value)}>
                   <option value="all">All reports</option>
                   {reports.map(r => <option key={r.source} value={r.source}>{r.label}</option>)}
                 </select>

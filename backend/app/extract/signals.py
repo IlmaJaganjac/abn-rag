@@ -121,3 +121,4 @@ SH_SIGNAL = re.compile(
     r"cash\s+returned",
     re.IGNORECASE,
 )
+"""Regex signals used to classify, clean, and filter extracted datapoints."""

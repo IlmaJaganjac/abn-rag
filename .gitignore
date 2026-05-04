@@ -18,6 +18,7 @@ backend/data/reports/*.pdf
 backend/data/chroma/
 backend/data/processed/
 backend/data/*.db
-evals/runs/*.json
+backend/evals/runs*/*.json
+frontend/*.tsbuildinfo
 claude.md
 !**/.gitkeep

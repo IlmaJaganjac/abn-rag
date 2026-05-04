@@ -28,6 +28,7 @@ from backend.app.schemas import Chunk
 
 @dataclass(frozen=True)
 class ChunkDraft:
+    """Intermediate chunk representation before ids and final metadata are assigned."""
     page: int
     text: str
     chunk_kind: str
@@ -47,6 +48,7 @@ def build_semantic_chunks(
     token_counter: Callable[[str], int],
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[Chunk]:
+    """Convert parsed pages into final `Chunk` objects ready for persistence and retrieval."""
     page_list = list(pages)
     boilerplate = find_boilerplate_lines(text for _, text in page_list)
     drafts: list[ChunkDraft] = []
@@ -105,11 +107,13 @@ def _page_drafts(
     token_counter: Callable[[str], int],
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
+    """Build draft chunks for one page by separating headings, narrative, and tables."""
     drafts: list[ChunkDraft] = []
     narrative: list[str] = []
     table: list[str] = []
 
     def section_path() -> str | None:
+        """Return the active heading path for the current page position."""
         headings = [
             clean
             for _, clean in heading_stack
@@ -118,6 +122,7 @@ def _page_drafts(
         return " > ".join(headings) if headings else None
 
     def flush_narrative() -> None:
+        """Turn buffered narrative lines into one or more section chunk drafts."""
         nonlocal narrative
         body = remove_boilerplate("\n".join(narrative), boilerplate)
         narrative = []
@@ -138,6 +143,7 @@ def _page_drafts(
             )
 
     def flush_table() -> None:
+        """Turn buffered table rows into table chunk drafts and clear the buffer."""
         nonlocal table
         rows = table
         table = []
@@ -210,6 +216,7 @@ def _table_drafts(
     token_counter: Callable[[str], int],
     split_oversize: Callable[[str, int, int], list[str]],
 ) -> list[ChunkDraft]:
+    """Build draft chunks for one table, including row- and metric-level variants."""
     drafts: list[ChunkDraft] = []
     table_kind = _classify_table(rows)
     full_table = clean_block("\n".join(rows))
@@ -283,6 +290,7 @@ def _split_table_on_rows(
     max_tokens: int,
     token_counter: Callable[[str], int],
 ) -> list[str]:
+    """Split a large markdown table into smaller row-based table text blocks."""
     full_table = clean_block("\n".join(rows))
     if not full_table or token_counter(full_table) <= max_tokens:
         return [full_table] if full_table else []
@@ -304,6 +312,7 @@ def _split_table_on_rows(
     current: list[str] = []
 
     def current_text() -> str:
+        """Return the current table part with header rows reattached."""
         return "\n".join(header_rows + current)
 
     for row in body_rows:
@@ -333,6 +342,7 @@ def _draft(
     boilerplate: set[str],
     extra_embedding_context: str | None = None,
 ) -> ChunkDraft:
+    """Create one `ChunkDraft` with cleaned body text and embedding context."""
     body = remove_boilerplate(text, boilerplate).strip()
     context = _embedding_context(
         company=company,
@@ -359,6 +369,7 @@ def _embedding_context(
     section_path: str | None,
     extra: str | None = None,
 ) -> str:
+    """Build the contextual prefix that is included in a chunk's embedding text."""
     parts = [
         company,
         str(year) if year is not None else None,
@@ -369,6 +380,7 @@ def _embedding_context(
 
 
 def _table_context(section_path: str | None, rows: list[str], table_kind: str) -> str | None:
+    """Summarize table metadata for embeddings and return it as extra context text."""
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
     headers, _ = _table_headers_and_body(data_rows)
     parts: list[str] = [f"Table type: {table_kind}"]
@@ -382,6 +394,7 @@ def _table_context(section_path: str | None, rows: list[str], table_kind: str) -
 
 
 def _classify_table(rows: list[str]) -> str:
+    """Classify a table into a coarse kind used for downstream chunk shaping."""
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
     headers, body_rows = _table_headers_and_body(data_rows)
     if headers is not None and body_rows and _looks_like_header_row(headers):
@@ -392,6 +405,7 @@ def _classify_table(rows: list[str]) -> str:
 
 
 def _looks_like_header_row(cells: list[str]) -> bool:
+    """Return whether parsed table cells look like a header row."""
     normalized = {normalize_line(cell) for cell in cells if cell.strip()}
     if any(year_period(cell) is not None for cell in cells):
         return True
@@ -399,6 +413,7 @@ def _looks_like_header_row(cells: list[str]) -> bool:
 
 
 def _mostly_metric_pairs(cells: list[str]) -> bool:
+    """Return whether a row mostly consists of alternating value-label metric pairs."""
     non_empty = [cell for cell in cells if cell.strip()]
     if len(non_empty) < 2:
         return False
@@ -406,6 +421,7 @@ def _mostly_metric_pairs(cells: list[str]) -> bool:
 
 
 def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
+    """Extract `(value, label)` metric pairs from table cells when they are detectable."""
     pairs: list[tuple[str, str]] = []
     i = 0
     while i + 1 < len(cells):
@@ -434,6 +450,7 @@ def _financial_metric_texts_from_header_row(
     *,
     section_path: str | None,
 ) -> list[str]:
+    """Create metric text blocks from header-driven financial rows and return them as strings."""
     if headers is None or len(headers) != len(cells) or len(cells) < 2:
         return []
     label_idx = next((i for i, cell in enumerate(cells) if cell.strip()), None)
@@ -457,6 +474,7 @@ def _financial_metric_texts_from_header_row(
 
 
 def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:
+    """Split table rows into optional headers and remaining body rows."""
     if len(data_rows) < 2:
         return None, data_rows
     headers = parse_table_cells(data_rows[0])
@@ -466,6 +484,7 @@ def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, lis
 
 
 def _format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str | None:
+    """Format one table row as `Header: value` lines and return the rendered text."""
     if headers is None:
         return None
     if len(cells) < len(headers):

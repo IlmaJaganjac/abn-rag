@@ -4,8 +4,7 @@ import logging
 
 import chromadb
 
-from backend.app._openai import openai_client
-from backend.app.config import settings
+from backend.app.config import openai_client, settings
 from backend.app.schemas import Chunk
 
 logger = logging.getLogger(__name__)
@@ -14,6 +13,7 @@ CHROMA_UPSERT_BATCH_SIZE = 1000
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
+    """Embed input texts in batches and return one embedding vector per text."""
     if not texts:
         return []
     client = openai_client()
@@ -28,6 +28,7 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
 
 
 def get_collection(reset: bool = False):
+    """Return the persistent Chroma collection, optionally recreating it first."""
     client = chromadb.PersistentClient(path=str(settings.get_chroma_path()))
     name = settings.chroma_collection
     if reset:
@@ -39,6 +40,7 @@ def get_collection(reset: bool = False):
 
 
 def chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
+    """Convert a `Chunk` into flat metadata suitable for vector-store persistence."""
     md: dict[str, str | int] = {
         "source": chunk.source,
         "page": chunk.page,
@@ -71,6 +73,7 @@ def chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
 
 
 def _source_where(source: str, company: str | None, year: int | None) -> dict:
+    """Build the metadata filter used to find existing chunks for one source."""
     clauses: list[dict[str, str | int]] = [{"source": source}]
     if company is not None:
         clauses.append({"company": company})
@@ -88,6 +91,7 @@ def delete_existing_source_chunks(
     company: str | None,
     year: int | None,
 ) -> None:
+    """Delete stored chunks for one source before re-indexing new versions of the same file."""
     try:
         collection.delete(where=_source_where(source, company, year))
     except Exception as exc:  # noqa: BLE001

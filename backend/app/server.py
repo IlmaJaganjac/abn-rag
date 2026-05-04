@@ -46,6 +46,7 @@ _REPORT_WORDS = re.compile(
 
 
 def _clean_company_name(raw: str) -> str:
+    """Normalize a raw company string into a cleaner display and matching form."""
     s = re.sub(r"[_\-]+", " ", raw)
     s = _REPORT_WORDS.sub("", s)
     s = re.sub(r"\s+", " ", s).strip(" -_,.")
@@ -53,6 +54,7 @@ def _clean_company_name(raw: str) -> str:
 
 
 def _company_from_filename(filename: str) -> str | None:
+    """Infer a company name from the uploaded filename when possible."""
     stem = Path(filename).stem
     cleaned = _clean_company_name(stem)
     if not cleaned or len(cleaned) < 2:
@@ -61,6 +63,7 @@ def _company_from_filename(filename: str) -> str | None:
 
 
 def _company_from_pdf(pdf_path: Path) -> str | None:
+    """Infer a company name from PDF metadata or the first visible title lines."""
     try:
         import fitz
 
@@ -90,6 +93,7 @@ def _company_from_pdf(pdf_path: Path) -> str | None:
 
 
 def _detect_company_year(filename: str, pdf_path: Path | None = None) -> tuple[str | None, int | None]:
+    """Infer company and report year from filename and optionally PDF contents."""
     year: int | None = None
     m = re.search(r"(20\d{2})", filename)
     if m:
@@ -119,7 +123,7 @@ def _detect_company_year(filename: str, pdf_path: Path | None = None) -> tuple[s
 
 
 def _processed_doc_index() -> dict[str, dict[str, Any]]:
-    """Returns map keyed by source filename of indexed docs (from chunks/datapoints + chroma metadata)."""
+    """Build a document index keyed by source filename from persisted ingestion artifacts."""
     out: dict[str, dict[str, Any]] = {}
     chunks_dir = settings.get_processed_path() / "chunks"
     if chunks_dir.exists():
@@ -167,6 +171,7 @@ def _processed_doc_index() -> dict[str, dict[str, Any]]:
 
 
 def _title_from_source(source: str, company: str | None, year: int | None) -> str:
+    """Create a user-facing document title from source, company, and year."""
     stem = Path(source).stem.replace("-", " ").replace("_", " ").title()
     if company and year:
         return f"{company} Annual Report {year}"
@@ -176,12 +181,14 @@ def _title_from_source(source: str, company: str | None, year: int | None) -> st
 
 
 def _isoformat(epoch: float) -> str:
+    """Convert a Unix timestamp to an ISO-8601 UTC string."""
     from datetime import datetime, timezone
 
     return datetime.fromtimestamp(epoch, tz=timezone.utc).isoformat()
 
 
 def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
+    """Augment document records in place with summary datapoints such as FTE or net-zero year."""
     dp_dir = settings.get_processed_path() / "datapoints"
     if not dp_dir.exists():
         return
@@ -206,6 +213,7 @@ def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
 
 
 def _load_datapoints() -> list[dict[str, Any]]:
+    """Load all persisted datapoints from disk and return them as dictionaries."""
     dp_dir = settings.get_processed_path() / "datapoints"
     out: list[dict[str, Any]] = []
     if not dp_dir.exists():
@@ -224,6 +232,7 @@ def _load_datapoints() -> list[dict[str, Any]]:
 
 @app.get("/api/documents")
 def list_documents() -> list[dict[str, Any]]:
+    """Return indexed documents plus any in-flight ingestion jobs for the frontend."""
     docs = list(_processed_doc_index().values())
     for j in _jobs.values():
         if j["status"] not in ("ready", "error"):
@@ -238,6 +247,7 @@ async def upload_document(
     company: str | None = Form(default=None),
     year: int | None = Form(default=None),
 ) -> dict[str, Any]:
+    """Upload a PDF, start background ingestion, and return the pending document record."""
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="only PDF files are supported")
 
@@ -282,6 +292,7 @@ async def upload_document(
     _jobs[job_id] = {"status": "parsing", "doc": initial_doc, "error": None}
 
     def _run() -> None:
+        """Ingest the uploaded PDF in the background and update job state."""
         try:
             ingest_pdf(
                 target,
@@ -306,6 +317,7 @@ async def upload_document(
 
 @app.get("/api/documents/{doc_id}/status")
 def document_status(doc_id: str) -> dict[str, Any]:
+    """Return the current ingestion status for one uploaded document id."""
     if doc_id in _jobs:
         j = _jobs[doc_id]
         return {"id": doc_id, "status": j["status"], "error": j.get("error"), "document": j["doc"]}
@@ -317,6 +329,7 @@ def document_status(doc_id: str) -> dict[str, Any]:
 
 @app.delete("/api/documents/{doc_id}")
 def delete_document(doc_id: str) -> dict[str, str]:
+    """Delete one indexed document and return a summary of removed artifacts."""
     proc = settings.get_processed_path()
     stem = Path(doc_id).stem
     removed: list[str] = []
@@ -351,6 +364,7 @@ def delete_document(doc_id: str) -> dict[str, str]:
 
 @app.get("/api/datapoints")
 def list_datapoints(company: str | None = None, type: str | None = None) -> list[dict[str, Any]]:
+    """Return pre-extracted datapoints, optionally filtered by company or datapoint type."""
     items = _load_datapoints()
     out: list[dict[str, Any]] = []
     for dp in items:
@@ -374,12 +388,14 @@ def list_datapoints(company: str | None = None, type: str | None = None) -> list
 
 
 def _bucket_type(t: str) -> str:
+    """Normalize a datapoint type into the bucket label exposed by the API."""
     return t.lower().strip() if t else "other"
 
 
 # ---------- chat (SSE) ----------
 
 class ChatRequest(BaseModel):
+    """Incoming chat request with question text and optional retrieval filters."""
     question: str
     company: str | None = None
     year: int | None = None
@@ -400,6 +416,7 @@ def _company_aliases(company: str) -> list[re.Pattern[str]]:
     seen: set[str] = set()
 
     def add(variant: str) -> None:
+        """Register one company-name variant as a regex if it is useful."""
         v = variant.strip().casefold()
         if not v or v in seen or v in _STOPWORDS or len(v) < 2:
             return
@@ -436,13 +453,16 @@ def _detect_company_from_question(question: str) -> str | None:
 
 
 def _sse(event: str, data: dict[str, Any] | str) -> str:
+    """Format one Server-Sent Event payload line block and return it as text."""
     payload = data if isinstance(data, str) else json.dumps(data)
     return f"event: {event}\ndata: {payload}\n\n"
 
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
+    """Stream chat progress events and the final grounded answer as Server-Sent Events."""
     async def event_stream():
+        """Yield SSE progress updates followed by the final answer event."""
         loop = asyncio.get_running_loop()
         yield _sse("phase", {"phase": "embedding", "detail": "text-embedding-3-small"})
         await asyncio.sleep(0)
@@ -463,7 +483,10 @@ async def chat(req: ChatRequest):
 
         yield _sse("phase", {"phase": "drafting"})
         answer: VerbatimAnswer = await loop.run_in_executor(
-            _executor, answer_question, req.question, result.chunks
+            _executor,
+            answer_question,
+            req.question,
+            result.chunks,
         )
         yield _sse("phase", {"phase": "citing", "detail": f"{len(answer.citations)} citations"})
         yield _sse("phase", {"phase": "done"})
@@ -476,6 +499,7 @@ async def chat(req: ChatRequest):
 
 @app.get("/api/pdf/{source}")
 def serve_pdf(source: str):
+    """Return the stored PDF file response for the requested source filename."""
     from fastapi.responses import FileResponse
 
     pdf = settings.reports_dir / source

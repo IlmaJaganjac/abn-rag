@@ -13,21 +13,25 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ParsedPage:
+    """One parsed PDF page with its 1-based page number and normalized text."""
     page: int
     text: str
 
 
 @dataclass(frozen=True)
 class ParseResult:
+    """Parsed document pages plus the parser name that produced them."""
     pages: list[ParsedPage]
     parser: str
 
 
 class ParserUnavailableError(RuntimeError):
+    """Raised when the configured parser cannot be used in the current environment."""
     pass
 
 
 def _llamaparse_page_text(page: dict[str, Any]) -> str:
+    """Extract the best available text field from one raw LlamaParse page record."""
     for key in ("md", "markdown", "text", "content"):
         value = page.get(key)
         if isinstance(value, str) and value.strip():
@@ -36,6 +40,7 @@ def _llamaparse_page_text(page: dict[str, Any]) -> str:
 
 
 def llamaparse_json_to_pages(results: list[dict[str, Any]]) -> list[ParsedPage]:
+    """Convert raw LlamaParse JSON output into normalized `ParsedPage` records."""
     pages: list[ParsedPage] = []
     fallback_page = 1
     for result in results:
@@ -51,10 +56,12 @@ def llamaparse_json_to_pages(results: list[dict[str, Any]]) -> list[ParsedPage]:
 
 
 def _normalized_text(text: str) -> str:
+    """Normalize text for loose equality comparisons across parser outputs."""
     return " ".join(text.split()).casefold()
 
 
 def strip_boilerplate(text: str) -> str:
+    """Return parsed page text after lightweight boilerplate stripping."""
     return text.strip()
 
 
@@ -90,6 +97,7 @@ def persist_llamaparse_artifacts(
     source_path: Path,
     processed_dir: Path,
 ) -> tuple[Path, Path]:
+    """Persist raw parser JSON and concatenated markdown, then return both output paths."""
     json_path = processed_dir / "llamaparse" / f"{source_path.stem}.json"
     markdown_path = processed_dir / "markdown" / f"{source_path.stem}.md"
     json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,6 +116,7 @@ def parse_pdf_llamaparse(
     api_key: str | None,
     processed_dir: Path | None = None,
 ) -> list[ParsedPage]:
+    """Parse a PDF with LlamaParse and return non-empty normalized pages."""
     if not api_key:
         raise ParserUnavailableError(
             "LLAMA_CLOUD_API_KEY is not set. Add it to .env."
@@ -151,6 +160,7 @@ def parse_pdf_pages(
     llama_cloud_api_key: str | None = None,
     parser: str = "llamaparse",
 ) -> ParseResult:
+    """Parse a PDF with the configured parser and return a unified `ParseResult`."""
     if parser != "llamaparse":
         raise ValueError(f"unsupported PDF parser: {parser!r}")
     llama_pages = parse_pdf_llamaparse(
@@ -162,5 +172,6 @@ def parse_pdf_pages(
 
 
 def as_page_tuples(pages: list[ParsedPage]) -> Iterator[tuple[int, str]]:
+    """Yield `(page, text)` tuples from parsed page objects."""
     for page in pages:
         yield page.page, page.text

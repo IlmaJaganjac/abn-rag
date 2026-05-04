@@ -18,6 +18,7 @@ def build_chunks(
     overlap: int,
     parser: str | None = None,
 ) -> list[Chunk]:
+    """Build semantic text chunks for report pages and return them as `Chunk` objects."""
     cap = min(max_tokens, EMBEDDING_MAX_TOKENS)
     return build_semantic_chunks(
         pages,
@@ -33,6 +34,7 @@ def build_chunks(
 
 
 def deduplicate_chunks(chunks: list[Chunk]) -> list[Chunk]:
+    """Return chunks with duplicate ids removed while preserving first-seen order."""
     seen: set[tuple[str, str]] = set()
     deduped: list[Chunk] = []
     for chunk in chunks:
@@ -45,6 +47,7 @@ def deduplicate_chunks(chunks: list[Chunk]) -> list[Chunk]:
 
 
 def _format_datapoint_chunk_text(datapoint: dict[str, Any]) -> str:
+    """Render one datapoint record into a structured text block for retrieval."""
     lines: list[str] = []
     metric = str(datapoint.get("metric") or datapoint.get("label") or "").strip()
     if metric:
@@ -85,6 +88,7 @@ def build_datapoint_chunks(
     parser: str | None,
     existing_chunks: list[Chunk],
 ) -> list[Chunk]:
+    """Convert persisted datapoints into retrieval-ready chunks and return them as a list."""
     next_idx_by_page: dict[int, int] = {}
     for chunk in existing_chunks:
         idx = int(chunk.id.rsplit(":", 1)[-1])

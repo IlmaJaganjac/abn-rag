@@ -13,22 +13,27 @@ logger = logging.getLogger(__name__)
 
 
 def _root(processed_dir: Path | None) -> Path:
+    """Return the effective processed-data root directory for persistence helpers."""
     return processed_dir or settings.get_processed_path()
 
 
 def processed_pages_path(source: str, processed_dir: Path | None = None) -> Path:
+    """Return the JSONL path used to store parsed pages for one source."""
     return _root(processed_dir) / "pages" / f"{Path(source).stem}.jsonl"
 
 
 def processed_pages_enhanced_path(source: str, processed_dir: Path | None = None) -> Path:
+    """Return the JSONL path used to store vision-enhanced pages for one source."""
     return _root(processed_dir) / "pages_enhanced" / f"{Path(source).stem}.jsonl"
 
 
 def processed_datapoints_path(source: str, processed_dir: Path | None = None) -> Path:
+    """Return the JSON path used to store extracted datapoints for one source."""
     return _root(processed_dir) / "datapoints" / f"{Path(source).stem}.json"
 
 
 def processed_chunks_path(source: str, processed_dir: Path | None = None) -> Path:
+    """Return the JSONL path used to store retrieval chunks for one source."""
     return _root(processed_dir) / "chunks" / f"{Path(source).stem}.jsonl"
 
 
@@ -41,6 +46,7 @@ def persist_parsed_pages(
     parser: str,
     processed_dir: Path | None = None,
 ) -> Path:
+    """Write parsed page text to JSONL and return the output path."""
     out_path = processed_pages_path(source, processed_dir)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f:
@@ -66,6 +72,7 @@ def persist_enhanced_pages(
     source: str,
     processed_dir: Path | None = None,
 ) -> Path:
+    """Write vision-enhanced page records to JSONL and return the output path."""
     out_path = processed_pages_enhanced_path(source, processed_dir)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f:
@@ -80,6 +87,7 @@ def persist_datapoints(
     source: str,
     processed_dir: Path | None = None,
 ) -> Path:
+    """Write extracted datapoints to JSON and return the output path."""
     out_path = processed_datapoints_path(source, processed_dir)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     serializable: list[object] = []
@@ -99,6 +107,7 @@ def persist_chunks(
     source: str,
     processed_dir: Path | None = None,
 ) -> Path:
+    """Write retrieval chunks to JSONL and return the output path."""
     out_path = processed_chunks_path(source, processed_dir)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as f:
@@ -129,6 +138,7 @@ def apply_enhanced_text(
     pages: list[tuple[int, str]],
     enhanced_jsonl: Path,
 ) -> list[tuple[int, str]]:
+    """Overlay enhanced page text where available and return updated page tuples."""
     overrides: dict[int, str] = {}
     with enhanced_jsonl.open(encoding="utf-8") as f:
         for line in f:
@@ -144,6 +154,7 @@ def apply_enhanced_text(
 
 
 def load_pages_jsonl(path: Path) -> tuple[list[tuple[int, str]], str]:
+    """Load persisted pages and return page tuples together with the parser name."""
     pages: list[tuple[int, str]] = []
     parser: str | None = None
     with path.open(encoding="utf-8") as f:
@@ -161,6 +172,7 @@ def load_pages_jsonl(path: Path) -> tuple[list[tuple[int, str]], str]:
 
 
 def load_datapoints_json(path: Path) -> list[dict[str, Any]]:
+    """Load persisted datapoints and return them as plain dictionaries."""
     payload = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
         payload = payload.get("datapoints", [])

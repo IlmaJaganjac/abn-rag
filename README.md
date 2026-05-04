@@ -33,13 +33,13 @@ python -m backend.app.pipeline \
 python -m backend.app.pipeline "..." --company ASML --year 2025 --show-context
 
 # 3. run the eval set against the live pipeline
-python -m evals.runner
-python -m evals.runner --show-failures-only
-python -m evals.runner --top-k 12
-python -m evals.runner --no-save              # don't write a run record
+python -m backend.evals.runner
+python -m backend.evals.runner --show-failures-only
+python -m backend.evals.runner --top-k 12
+python -m backend.evals.runner --no-save      # don't write a run record
 ```
 
-Each run writes a JSON record to `evals/runs/` named
+Each run writes a JSON record to `backend/evals/runs/` named
 `<UTC-timestamp>_<passed>of<total>.json`. The record includes the run config
 (model, top-k, persist dir), the per-question outcomes (full `VerbatimAnswer`
 + pass/fail + reasons), and the by-category summary, so you can diff baselines
@@ -63,7 +63,9 @@ Out-of-corpus questions (e.g. "How many employees does Tesla have?") return
 ```
 backend/app/   schemas, config, ingestion/retrieval/answer/pipeline (phase 2)
 backend/data/  ChromaDB + processed parser artifacts (gitignored)
-evals/         questions.yaml + runner (phase 2)
+backend/evals/ questions + runner (phase 2)
+backend/tests/ backend tests
+backend/utils/ helper scripts
 reports/       PDFs (gitignored)
 ```
 
@@ -72,7 +74,7 @@ reports/       PDFs (gitignored)
 1. Skeleton + schemas + config
 2. Ingestion + retrieval baseline
 3. Structured `VerbatimAnswer` with citations (LLM)
-4. **Eval runner against `evals/questions.yaml`** ← current
+4. **Eval runner against `backend/evals/questions-2025-multi-company.yaml`** ← current
 5. FastAPI + frontend chat UI
 
 The first useful milestone is a baseline eval score, not a polished UI.

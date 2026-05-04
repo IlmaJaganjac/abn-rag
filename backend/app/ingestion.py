@@ -49,6 +49,7 @@ def ingest_pdf(
     skip_embed: bool = False,
     validate_datapoints: bool = True,
 ) -> int:
+    """Ingest one PDF and return the total number of chunks prepared for indexing."""
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
@@ -193,6 +194,7 @@ def ingest_pdf(
 
 
 def _cli(argv: list[str] | None = None) -> int:
+    """Parse CLI flags for ingestion and return the process exit code."""
     parser = argparse.ArgumentParser(description="Ingest an annual report PDF into ChromaDB.")
     parser.add_argument("pdf", type=Path)
     parser.add_argument("--company", default=None)

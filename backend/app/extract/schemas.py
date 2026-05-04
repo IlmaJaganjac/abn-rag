@@ -127,6 +127,7 @@ _MAX_WAIT = 600
 
 
 class ExtractedFTEDatapoint(BaseModel):
+    """Structured FTE or workforce datapoint extracted from a report."""
     label: str
     value: str
     quote: str
@@ -140,6 +141,7 @@ class ExtractedFTEDatapoint(BaseModel):
 
 
 class ExtractedSustainabilityGoal(BaseModel):
+    """Structured sustainability goal, target, or commitment extracted from a report."""
     goal: str
     quote: str
     fact_kind: Literal["actual", "target", "progress", "forecast"]
@@ -154,6 +156,7 @@ class ExtractedSustainabilityGoal(BaseModel):
 
 
 class ExtractedESGDatapoint(BaseModel):
+    """Structured ESG performance datapoint extracted from a report."""
     metric: str
     value: str
     quote: str
@@ -167,6 +170,7 @@ class ExtractedESGDatapoint(BaseModel):
 
 
 class ExtractedFinancialHighlight(BaseModel):
+    """Structured financial KPI extracted from a report."""
     metric: str
     value: str
     quote: str
@@ -180,6 +184,7 @@ class ExtractedFinancialHighlight(BaseModel):
 
 
 class ExtractedBusinessPerformance(BaseModel):
+    """Structured operational or business KPI extracted from a report."""
     metric: str
     value: str
     quote: str
@@ -193,6 +198,7 @@ class ExtractedBusinessPerformance(BaseModel):
 
 
 class ExtractedShareholderReturn(BaseModel):
+    """Structured shareholder return or capital distribution datapoint."""
     metric: str
     value: str
     quote: str
@@ -206,6 +212,7 @@ class ExtractedShareholderReturn(BaseModel):
 
 
 class AnnualReportDatapoints(BaseModel):
+    """Top-level grouped extraction result for one annual report."""
     company: str | None = None
     year: int | None = None
     fte_datapoints: list[ExtractedFTEDatapoint] = []
@@ -217,16 +224,19 @@ class AnnualReportDatapoints(BaseModel):
 
 
 def _json_schema() -> dict[str, Any]:
+    """Return the JSON schema for the top-level extraction response model."""
     return AnnualReportDatapoints.model_json_schema()
 
 
 def category_prompt(category: str | None) -> str:
+    """Return the extraction prompt for one category or the generic fallback prompt."""
     if not category:
         return _DEFAULT_PROMPT
     return _CATEGORY_PROMPTS.get(category, _DEFAULT_PROMPT)
 
 
 def _poll_until_done(client_extract: Any, job_id: str) -> str:
+    """Poll a LlamaExtract job until completion and return its success marker."""
     from llama_cloud import ExtractJobStatus
 
     deadline = time.monotonic() + _MAX_WAIT
@@ -250,6 +260,7 @@ def extract_annual_report_datapoints(
     page_range: str | None = None,
     category: str | None = None,
 ) -> AnnualReportDatapoints:
+    """Run LlamaExtract on a PDF and return grouped typed datapoints for the report."""
     api_key = settings.llama_cloud_api_key.get_secret_value()
     if not api_key:
         raise RuntimeError(

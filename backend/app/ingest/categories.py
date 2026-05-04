@@ -102,4 +102,5 @@ DATAPOINT_CATEGORIES: tuple[str, ...] = (
 
 
 def category_page_score(category: str, text: str) -> int:
+    """Return a regex-based relevance score for one category on one page of text."""
     return sum(len(pattern.findall(text)) for pattern in CATEGORY_PATTERNS.get(category, []))

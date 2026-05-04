@@ -1,0 +1,1518 @@
+questions:
+  # =========================
+  # ASML 2025
+  # =========================
+
+  - id: asml_2025_fte_total_employees
+    company: ASML
+    year: 2025
+    category: fte
+    question: "How many total employees did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 227
+    expected_answer_contains_any:
+      - "44,175"
+      - "44175"
+      - "total number of employees"
+      - "headcount"
+    difficulty: easy
+    notes: "Total employees/headcount, not payroll plus temporary FTE."
+
+  - id: asml_2025_fte_payroll_employees_fte
+    company: ASML
+    year: 2025
+    category: fte
+    question: "How many payroll employees in FTE did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 227
+      - 301
+    expected_answer_contains_any:
+      - "43,520"
+      - "43520"
+      - "payroll employees"
+      - "FTE"
+    difficulty: easy
+    notes: "Payroll employees in FTE differs from total employees/headcount."
+
+  - id: asml_2025_fte_average_payroll_employees
+    company: ASML
+    year: 2025
+    category: fte
+    question: "What was ASML's average number of payroll employees worldwide in FTEs in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 301
+      - 132
+    expected_answer_contains_any:
+      - "43,267"
+      - "43267"
+      - "average number of payroll employees"
+      - "FTE"
+    difficulty: medium
+    notes: "Average payroll employees is different from year-end total employees."
+
+  - id: asml_2025_fte_employees_by_gender_total
+    company: ASML
+    year: 2025
+    category: fte
+    question: "What total employee number did ASML use in its employee headcount by gender table for 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 227
+    expected_answer_contains_any:
+      - "44,175"
+      - "44175"
+      - "headcount by gender"
+      - "total employees"
+    difficulty: medium
+    notes: "This checks that the system retrieves the employee gender table, not financial FTE averages."
+
+  - id: asml_2025_fte_temporary_reconciliation
+    company: ASML
+    year: 2025
+    category: fte
+    question: "How many temporary employees were included in ASML's ESRS employee reconciliation in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 227
+      - 301
+    expected_answer_contains_any:
+      - "689"
+      - "temporary employees"
+      - "ESRS"
+    difficulty: hard
+    notes: "Use the reconciliation from ESRS employees to payroll employees."
+
+  - id: asml_2025_sustainability_goal_value_chain_ghg_neutral
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "By what year does ASML aim to be greenhouse gas neutral across its value chain?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 153
+      - 156
+    expected_answer_contains_any:
+      - "2040"
+      - "greenhouse gas neutral across our value chain by 2040"
+      - "GHG neutrality across the value chain by 2040"
+    difficulty: easy
+    notes: "ASML 2025 states the value-chain GHG neutrality ambition on the climate action pages."
+
+  - id: asml_2025_sustainability_goal_scope_1_2_neutral
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "What is ASML's goal for scope 1 and scope 2 emissions?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 178
+      - 163
+    expected_answer_contains_all:
+      - "scope 1 and 2"
+      - "GHG neutral"
+      - "2025"
+    difficulty: medium
+    notes: "Target question: ASML aims to become GHG neutral for scope 1 and 2 emissions from manufacturing and buildings by 2025."
+
+  - id: asml_2025_sustainability_goal_scope_3_upstream
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "What is ASML's ambition for scope 3 emissions related to purchased goods, capital goods and logistics?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 178
+    expected_answer_contains_all:
+      - "scope 3"
+      - "purchased goods"
+      - "capital goods"
+      - "2030"
+    difficulty: medium
+    notes: "ASML 2025 describes this scope 3 near-term target as GHG neutrality for purchased goods, capital goods and logistics by 2030."
+
+  - id: asml_2025_sustainability_goal_roadmap_year
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "In what year did ASML present its roadmap to GHG neutrality across the value chain?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 156
+    expected_answer_contains_any:
+      - "2021"
+      - "roadmap to GHG neutrality across the value chain by 2040"
+    difficulty: easy
+    notes: "ASML 2025 says it presented the roadmap to GHG neutrality across the value chain in 2021."
+
+  - id: asml_2025_sustainability_goal_energy_efficiency_climate_action
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "Which ESG theme contains ASML's GHG targets and indicators?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 178
+    expected_answer_contains_any:
+      - "Energy efficiency and climate action"
+    difficulty: medium
+    notes: "The methodology section places the GHG targets and indicators under the ESG theme Energy efficiency and climate action."
+
+  - id: asml_2025_sustainability_goal_supplier_climate
+    company: ASML
+    year: 2025
+    category: sustainability_goal
+    question: "What commitment does ASML seek from its top 80% suppliers by CO₂e emissions by 2030?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 179
+    expected_answer_contains_all:
+      - "top 80% suppliers"
+      - "CO₂e"
+      - "2030"
+    difficulty: medium
+    notes: "Supplier-specific climate goal: commitment from top 80% suppliers by CO₂e emissions to reduce their CO₂e footprint by 2030."
+
+  - id: asml_2025_esg_datapoint_scope_1_2_actual
+    company: ASML
+    year: 2025
+    category: esg_datapoint
+    question: "What 2025 performance value did ASML report for gross scope 1 and 2 CO₂e emissions?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 145
+      - 158
+      - 163
+    expected_answer_contains_any:
+      - "26 kt"
+      - "26 kt CO₂e"
+      - "gross scope 1 and 2"
+    difficulty: hard
+    notes: "Actual gross scope 1 and 2 emissions datapoint for 2025; do not answer with the net 0 kt figure or future targets."
+
+  - id: asml_2025_esg_datapoint_reuse_returned_parts
+    company: ASML
+    year: 2025
+    category: esg_datapoint
+    question: "What reuse rate of returned parts did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 42
+      - 145
+      - 187
+      - 192
+      - 201
+    expected_answer_contains_any:
+      - "90%"
+      - "90% reuse rate"
+      - "reuse rate of parts returned from the field and factory"
+    difficulty: easy
+    notes: "Reported circularity performance value for parts returned from the field and factory in 2025."
+
+  - id: asml_2025_esg_datapoint_training_hours
+    company: ASML
+    year: 2025
+    category: esg_datapoint
+    question: "What average number of training hours per employee headcount did ASML report for 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 230
+    expected_answer_contains_any:
+      - "40"
+      - "40 training hours"
+      - "average number of training hours per employee"
+    difficulty: medium
+    notes: "Employee ESG datapoint; 2025 average training hours per employee is 40, while 2024 was 41."
+
+  - id: asml_2025_esg_datapoint_performance_review_completion
+    company: ASML
+    year: 2025
+    category: esg_datapoint
+    question: "What percentage of ASML employees eligible for an annual performance and career development review completed one in 2025?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 230
+      - 234
+    expected_answer_contains_any:
+      - "96%"
+      - "eligible for a review"
+      - "annual performance and career development review"
+    difficulty: medium
+    notes: "Actual workforce ESG metric; eligible-employee completion was 96% in 2025."
+
+  - id: asml_2025_esg_datapoint_lithography_systems_active
+    company: ASML
+    year: 2025
+    category: esg_datapoint
+    question: "What percentage of lithography systems sold in the past 30 years did ASML report were still active in the field?"
+    expected_source: "asml.pdf"
+    expected_page:
+      - 18
+      - 191
+    expected_answer_contains_any:
+      - "95%"
+      - "95% of all"
+      - "still active in the field"
+    difficulty: medium
+    notes: "Product/circularity-related reported datapoint; ASML says 95% of systems sold in the past 30 years were still active in the field."
+
+  - id: asml_2025_financial_total_net_sales
+    company: ASML
+    year: 2025
+    category: financial_highlight
+    question: "What total net sales did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [5, 53, 54, 276]
+    expected_answer_contains_any:
+      - "€32.7bn"
+      - "€32.7 billion"
+      - "EUR 32.7 billion"
+      - "32,667.3 million"
+    difficulty: easy
+    notes: "Main financial highlight; also appears in the consolidated statement of operations."
+
+  - id: asml_2025_financial_gross_margin
+    company: ASML
+    year: 2025
+    category: financial_highlight
+    question: "What gross margin did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [50, 56]
+    expected_answer_contains_any:
+      - "52.8%"
+      - "gross margin"
+    difficulty: easy
+    notes: "Main financial highlight."
+
+  - id: asml_2025_financial_net_income
+    company: ASML
+    year: 2025
+    category: financial_highlight
+    question: "What net income did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [50, 56]
+    expected_answer_contains_any:
+      - "€9.6bn"
+      - "EUR 9.6 billion"
+      - "net income"
+    difficulty: easy
+    notes: "Main financial highlight."
+
+  - id: asml_2025_financial_rd_spend
+    company: ASML
+    year: 2025
+    category: financial_highlight
+    question: "How much did ASML report for research and development in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [30, 50, 56]
+    expected_answer_contains_any:
+      - "€4.7bn"
+      - "EUR 4.7 billion"
+      - "research and development"
+      - "R&D"
+    difficulty: easy
+    notes: "Use the annual report financial highlights value."
+
+  - id: asml_2025_business_system_sales_units
+    company: ASML
+    year: 2025
+    category: business_performance
+    question: "What value did ASML report for the 'System sales in units' metric in its 2025 business model/customer overview?"
+    expected_source: "asml.pdf"
+    expected_page: [5, 42]
+    expected_answer_contains_any:
+      - "535"
+      - "System sales in units"
+      - "2024: 583"
+    difficulty: easy
+    notes: "Operational/business performance highlight. Manual PDF check recommended because the parsed page 5 table has conflicting column alignment, while page 42 reports 535."
+
+  - id: asml_2025_business_sales_by_region_asia
+    company: ASML
+    year: 2025
+    category: business_performance
+    question: "Adding the Japan, South Korea, Singapore, Taiwan, China and Rest of Asia rows in the geographic sales table, approximately how much of ASML's 2025 total net sales came from Asian regions?"
+    expected_source: "asml.pdf"
+    expected_page: [287]
+    expected_answer_contains_any:
+      - "€28.0bn"
+      - "€28.05bn"
+      - "€28.05 billion"
+      - "28,049.2"
+      - "Japan, South Korea, Singapore, Taiwan, China and Rest of Asia"
+    difficulty: medium
+    notes: "Computed from the 2025 geographic sales rows for Japan, South Korea, Singapore, Taiwan, China and Rest of Asia; manual PDF check recommended because the report does not provide an explicit Asia subtotal."
+
+  - id: asml_2025_business_sales_by_region_us
+    company: ASML
+    year: 2025
+    category: business_performance
+    question: "What 2025 total net sales value did ASML report for the United States in the geographic sales table?"
+    expected_source: "asml.pdf"
+    expected_page: [287]
+    expected_answer_contains_any:
+      - "€4.1bn"
+      - "4.1"
+      - "4,089.1"
+      - "United States"
+    difficulty: medium
+    notes: "Geographic sales table row for the United States; value is reported in € millions."
+
+  - id: asml_2025_business_ai_demand
+    company: ASML
+    year: 2025
+    category: business_performance
+    question: "What demand driver did ASML cite for Logic net sales in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [54, 55, 288]
+    expected_answer_contains_any:
+      - "AI demand"
+      - "leading-edge foundry growth"
+      - "next nodes"
+      - "positive momentum in AI-related demand"
+    difficulty: medium
+    notes: "Business performance narrative."
+
+  - id: asml_2025_shareholder_total_returned
+    company: ASML
+    year: 2025
+    category: shareholder_return
+    question: "How much did ASML return to shareholders through dividends and share buybacks in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [5, 47]
+    expected_answer_contains_any:
+      - "€8.5bn"
+      - "€8.5 billion"
+      - "EUR 8.5 billion"
+      - "dividends and share buybacks"
+    difficulty: easy
+    notes: "Shareholder return datapoint."
+
+  - id: asml_2025_shareholder_eps_basic
+    company: ASML
+    year: 2025
+    category: shareholder_return
+    question: "What basic earnings per share did ASML report in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [53, 276, 316]
+    expected_answer_contains_any:
+      - "€24.73"
+      - "24.73"
+      - "EPS"
+      - "earnings per share"
+      - "basic net income per ordinary share"
+    difficulty: easy
+    notes: "Shareholder return / per-share financial highlight."
+
+  - id: asml_2025_shareholder_buybacks_and_dividends
+    company: ASML
+    year: 2025
+    category: shareholder_return
+    question: "What mechanisms did ASML use to return capital to shareholders in 2025?"
+    expected_source: "asml.pdf"
+    expected_page: [47, 315, 333, 334]
+    expected_answer_contains_all:
+      - "dividend"
+      - "share buyback"
+    difficulty: easy
+    notes: "Expected answer should name both dividend payments and share buybacks; capital repayment may also be mentioned in the financing policy."
+
+  - id: asml_2025_general_strategy
+    company: ASML
+    year: 2025
+    category: general_report_question
+    question: "What were ASML's main strategic themes in the 2025 annual report?"
+    expected_source: "asml.pdf"
+    expected_page: [93]
+    expected_answer_contains_any:
+      - "Deepen customer trust"
+      - "holistic product roadmap"
+      - "Strengthen ecosystem relationships"
+      - "Drive operational excellence"
+      - "Deliver on ESG sustainability"
+    difficulty: medium
+    notes: "ASML 2025 describes six strategic priorities/pillars in the Supervisory Board strategy review."
+
+  - id: asml_2025_general_risks
+    company: ASML
+    year: 2025
+    category: general_report_question
+    question: "What risks does ASML describe in its annual report?"
+    expected_source: "asml.pdf"
+    expected_page: [60, 61]
+    expected_answer_contains_any:
+      - "geopolitical"
+      - "trade restrictions"
+      - "regulatory"
+      - "technological"
+      - "economic shifts"
+    difficulty: medium
+    notes: "Risk management section."
+
+  - id: asml_2025_general_business_model
+    company: ASML
+    year: 2025
+    category: general_report_question
+    question: "What is ASML's business model focused on?"
+    expected_source: "asml.pdf"
+    expected_page: [42, 146]
+    expected_answer_contains_any:
+      - "world-leading lithography systems"
+      - "powerful and energy-efficient chips"
+      - "reduce their costs"
+      - "environmental footprint"
+      - "business model"
+    difficulty: easy
+    notes: "Broad business model question; valid evidence appears in the customer value discussion and business model overview."
+
+  - id: asml_2025_general_ceo_message
+    company: ASML
+    year: 2025
+    category: general_report_question
+    question: "What major market theme did ASML's 2025 annual report associate with growth?"
+    expected_source: "asml.pdf"
+    expected_page: [6, 12, 50, 60]
+    expected_answer_contains_any:
+      - "AI"
+      - "artificial intelligence"
+      - "high-bandwidth Memory"
+      - "HBM"
+    difficulty: medium
+    notes: "CEO/message/highlights style question."
+
+  - id: asml_2025_general_major_development
+    company: ASML
+    year: 2025
+    category: general_report_question
+    question: "What major business development did ASML report regarding 2025 sales?"
+    expected_source: "asml.pdf"
+    expected_page: [50, 60]
+    expected_answer_contains_any:
+      - "record total net sales"
+      - "€32.7bn"
+      - "15.6% year-over-year increase"
+    difficulty: medium
+    notes: "Major annual development."
+
+  - id: asml_2025_hallucination_future_actual_2028_sales
+    company: ASML
+    year: 2025
+    category: hallucination_check
+    question: "What were ASML's actual reported net sales in 2028?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Future actual not in the 2025 report."
+
+  - id: asml_2025_hallucination_tesla_employees
+    company: ASML
+    year: 2025
+    category: hallucination_check
+    question: "How many employees did Tesla report in 2025 according to ASML's annual report?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Out-of-corpus company question."
+
+  - id: asml_2025_hallucination_unreported_crypto_holdings
+    company: ASML
+    year: 2025
+    category: hallucination_check
+    question: "How much Bitcoin did ASML hold at year-end 2025?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Unsupported metric unless explicitly reported."
+
+  # =========================
+  # SHELL 2025
+  # =========================
+
+  - id: shell_2025_fte_employees_excluding_portfolio
+    company: SHELL
+    year: 2025
+    category: fte
+    question: "How many people did Shell employ excluding portfolio companies at the end of December 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 117
+    expected_answer_contains_any:
+      - "72,000"
+      - "72,000 people"
+      - "excluding portfolio companies"
+    difficulty: easy
+    notes: "Workforce number excluding portfolio companies."
+
+  - id: shell_2025_fte_employee_change_2024
+    company: SHELL
+    year: 2025
+    category: fte
+    question: "How did Shell's employee count excluding portfolio companies change from 2024 to 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 117
+    expected_answer_contains_all:
+      - "72,000"
+      - "81,000"
+    difficulty: medium
+    notes: "Expected answer should mention 72,000 in 2025 and 81,000 in 2024."
+
+  - id: shell_2025_fte_board_gender_women
+    company: SHELL
+    year: 2025
+    category: fte
+    question: "What percentage of Shell's Board were women in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 119
+    expected_answer_contains_any:
+      - "42%"
+      - "Board"
+      - "women"
+    difficulty: easy
+    notes: "Gender diversity table."
+
+  - id: shell_2025_fte_executive_committee_women
+    company: SHELL
+    year: 2025
+    category: fte
+    question: "What percentage of Shell's Executive Committee were women in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 119
+    expected_answer_contains_any:
+      - "44%"
+      - "Executive Committee"
+      - "women"
+    difficulty: easy
+    notes: "Gender diversity table."
+
+  - id: shell_2025_fte_senior_leadership_women
+    company: SHELL
+    year: 2025
+    category: fte
+    question: "What percentage of Shell's Senior Leadership roles were held by women in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 119
+    expected_answer_contains_any:
+      - "35%"
+      - "Senior Leadership"
+      - "women"
+    difficulty: easy
+    notes: "Gender diversity table."
+
+  - id: shell_2025_sustainability_goal_net_zero_2050
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What is Shell's long-term net-zero target?"
+    expected_source: "shell.pdf"
+    expected_page: [17, 75, 98, 359, 367]
+    expected_answer_contains_all:
+      - "net-zero"
+      - "2050"
+    difficulty: easy
+    notes: "Long-term climate target: become a net-zero emissions energy business by 2050."
+
+  - id: shell_2025_sustainability_goal_scope_1_2_halve
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What is Shell's 2030 target for Scope 1 and Scope 2 emissions?"
+    expected_source: "shell.pdf"
+    expected_page: [17, 87, 360, 367]
+    expected_answer_contains_all:
+      - "halve"
+      - "Scope 1"
+      - "Scope 2"
+      - "2030"
+    difficulty: easy
+    notes: "Target is to halve operational Scope 1 and 2 emissions by 2030 vs 2016 on a net basis."
+
+  - id: shell_2025_sustainability_goal_nci_2030
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What is Shell's 2030 target for net carbon intensity?"
+    expected_source: "shell.pdf"
+    expected_page: [17, 98, 360]
+    expected_answer_contains_any:
+      - "15–20%"
+      - "15-20%"
+      - "net carbon intensity"
+      - "2030"
+      - "78 gCO2e/MJ"
+    difficulty: medium
+    notes: "Climate target related to energy products sold."
+
+  - id: shell_2025_sustainability_goal_methane_intensity
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What methane emissions intensity target does Shell describe for operated oil and gas assets?"
+    expected_source: "shell.pdf"
+    expected_page: [17, 360, 367]
+    expected_answer_contains_any:
+      - "below 0.2%"
+      - "near-zero"
+      - "2030"
+      - "methane"
+    difficulty: medium
+    notes: "Methane target/ambition."
+
+  - id: shell_2025_sustainability_goal_routine_flaring
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What was Shell's target for routine flaring from upstream-operated assets?"
+    expected_source: "shell.pdf"
+    expected_page: [17, 87, 360, 367]
+    expected_answer_contains_any:
+      - "eliminate routine flaring"
+      - "ending routine flaring"
+      - "ceased routine flaring"
+      - "January 2025"
+      - "2025"
+    difficulty: easy
+    notes: "Routine flaring target."
+
+  - id: shell_2025_sustainability_goal_oil_products_scope_3
+    company: SHELL
+    year: 2025
+    category: sustainability_goal
+    question: "What ambition does Shell describe for customer emissions from the use of its oil products by 2030?"
+    expected_source: "shell.pdf"
+    expected_page: [98, 361, 367]
+    expected_answer_contains_any:
+      - "15–20%"
+      - "15-20%"
+      - "Scope 3"
+      - "Category 11"
+      - "2030"
+      - "2021"
+    difficulty: hard
+    notes: "Distinguish ambition from target."
+
+  - id: shell_2025_esg_datapoint_scope_1_2_reduction
+    company: SHELL
+    year: 2025
+    category: esg_datapoint
+    question: "By how much had Shell reduced combined Scope 1 and Scope 2 emissions by 2025 compared with 2016?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 90]
+    expected_answer_contains_any:
+      - "36%"
+      - "Scope 1 and 2"
+      - "2016"
+    difficulty: easy
+    notes: "Actual reported climate performance."
+
+  - id: shell_2025_esg_datapoint_scope_1_2_net_emissions
+    company: SHELL
+    year: 2025
+    category: esg_datapoint
+    question: "What were Shell's Scope 1 and Scope 2 net emissions in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 90]
+    expected_answer_contains_any:
+      - "53 MtCO2e"
+      - "53 MtCO₂e"
+      - "53"
+    difficulty: medium
+    notes: "Actual emissions datapoint."
+
+  - id: shell_2025_esg_datapoint_methane_intensity
+    company: SHELL
+    year: 2025
+    category: esg_datapoint
+    question: "What methane emissions intensity did Shell report for assets with marketed gas in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 90]
+    expected_answer_contains_any:
+      - "0.04%"
+      - "methane intensity"
+    difficulty: medium
+    notes: "Actual methane datapoint."
+
+  - id: shell_2025_esg_datapoint_methane_reduction
+    company: SHELL
+    year: 2025
+    category: esg_datapoint
+    question: "By how much had Shell reduced methane emissions under operational control by 2025 compared with 2016?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 90]
+    expected_answer_contains_any:
+      - "78%"
+      - "methane"
+      - "2016"
+    difficulty: medium
+    notes: "Actual ESG performance value."
+
+  - id: shell_2025_esg_datapoint_routine_flaring
+    company: SHELL
+    year: 2025
+    category: esg_datapoint
+    question: "What routine flaring did Shell report in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 91]
+    expected_answer_contains_any:
+      - "zero"
+      - "routine flaring"
+      - "0"
+    difficulty: easy
+    notes: "Actual datapoint, not the target; page 91 reports 2025 total hydrocarbons flared in routine flaring as zero."
+
+  - id: shell_2025_financial_adjusted_earnings
+    company: SHELL
+    year: 2025
+    category: financial_highlight
+    question: "What adjusted earnings did Shell report for 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [21, 22]
+    expected_answer_contains_any:
+      - "$18.5 billion"
+      - "18,528"
+      - "Adjusted Earnings"
+    difficulty: easy
+    notes: "Main financial highlight."
+
+  - id: shell_2025_financial_cash_flow_operations
+    company: SHELL
+    year: 2025
+    category: financial_highlight
+    question: "What cash flow from operating activities did Shell report in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [21, 24, 235, 436]
+    expected_answer_contains_any:
+      - "cash flow from operating activities"
+      - "$42.9 billion"
+      - "42,863"
+    difficulty: medium
+    notes: "Main financial cash flow highlight."
+
+  - id: shell_2025_financial_cash_capex
+    company: SHELL
+    year: 2025
+    category: financial_highlight
+    question: "What cash capital expenditure did Shell report in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [21, 24, 84]
+    expected_answer_contains_any:
+      - "$20.9 billion"
+      - "20,915"
+      - "cash capital expenditure"
+    difficulty: medium
+    notes: "Main financial highlight."
+
+  - id: shell_2025_financial_income_period
+    company: SHELL
+    year: 2025
+    category: financial_highlight
+    question: "What income for the period did Shell report in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: [21, 232]
+    expected_answer_contains_any:
+      - "Income for the period"
+      - "$18.1 billion"
+      - "18,119"
+    difficulty: medium
+    notes: "Annual income figure."
+
+  - id: shell_2025_business_segments
+    company: SHELL
+    year: 2025
+    category: business_performance
+    question: "What were Shell's main business segments in 2025?"
+    expected_source: "shell.pdf"
+    expected_page: 261
+    expected_answer_contains_all:
+      - "Integrated Gas"
+      - "Upstream"
+      - "Marketing"
+      - "Chemicals and Products"
+      - "Renewables and Energy Solutions"
+      - "Corporate"
+    difficulty: easy
+    notes: "Segment information note."
+
+  - id: shell_2025_business_integrated_gas_segment
+    company: SHELL
+    year: 2025
+    category: business_performance
+    question: "Which Shell segment includes LNG activities?"
+    expected_source: "shell.pdf"
+    expected_page: [40, 50, 261]
+    expected_answer_contains_any:
+      - "Integrated Gas"
+      - "LNG"
+    difficulty: easy
+    notes: "Business segment understanding."
+
+  - id: shell_2025_business_corporate_segment
+    company: SHELL
+    year: 2025
+    category: business_performance
+    question: "What does Shell's Corporate segment cover?"
+    expected_source: "shell.pdf"
+    expected_page: 71
+    expected_answer_contains_any:
+      - "non-operating activities"
+      - "holdings and treasury"
+      - "headquarters"
+      - "central functions"
+    difficulty: medium
+    notes: "Corporate segment description."
+
+  - id: shell_2025_business_energy_transition_risks
+    company: SHELL
+    year: 2025
+    category: business_performance
+    question: "What commercial risk does Shell identify from the transition to a low-carbon economy?"
+    expected_source: "shell.pdf"
+    expected_page: [362, 363]
+    expected_answer_contains_any:
+      - "lower sales volumes"
+      - "lower margins"
+      - "stranded"
+      - "underutilised"
+    difficulty: medium
+    notes: "Operational/business impact of energy transition."
+
+  - id: shell_2025_shareholder_distributions_percentage_cffo
+    company: SHELL
+    year: 2025
+    category: shareholder_return
+    question: "What shareholder distribution range does Shell describe as a percentage of cash flow from operations?"
+    expected_source: "shell.pdf"
+    expected_page: [14, 260, 436]
+    expected_answer_contains_any:
+      - "40%-50%"
+      - "40%–50%"
+      - "40–50%"
+      - "CFFO"
+      - "cash flow from operations"
+    difficulty: medium
+    notes: "Capital allocation policy."
+
+  - id: shell_2025_shareholder_total_distributions
+    company: SHELL
+    year: 2025
+    category: shareholder_return
+    question: "What types of shareholder distributions does Shell describe?"
+    expected_source: "shell.pdf"
+    expected_page: [24, 25, 260, 436]
+    expected_answer_contains_any:
+      - "dividends"
+      - "share buybacks"
+      - "shareholder distributions"
+      - "$22.4 billion"
+    difficulty: easy
+    notes: "Expected answer should mention dividends and/or buybacks."
+
+  - id: shell_2025_shareholder_capital_allocation_priority
+    company: SHELL
+    year: 2025
+    category: shareholder_return
+    question: "What does Shell say are management's current priorities for applying cash?"
+    expected_source: "shell.pdf"
+    expected_page: [14, 194, 260]
+    expected_answer_contains_any:
+      - "balanced capital allocation"
+      - "shareholder distributions"
+      - "profitable growth"
+      - "fund growth"
+      - "service and reduce debt"
+    difficulty: medium
+    notes: "Capital management section."
+
+  - id: shell_2025_general_strategy
+    company: SHELL
+    year: 2025
+    category: general_report_question
+    question: "What is Shell's strategy in relation to the energy transition?"
+    expected_source: "shell.pdf"
+    expected_page: [75, 87, 359, 361, 362]
+    expected_answer_contains_any:
+      - "energy transition"
+      - "net-zero"
+      - "more value with less emissions"
+    difficulty: medium
+    notes: "General strategy question."
+
+  - id: shell_2025_general_main_risks
+    company: SHELL
+    year: 2025
+    category: general_report_question
+    question: "What risk categories does Shell describe in the annual report?"
+    expected_source: "shell.pdf"
+    expected_page: [134, 257]
+    expected_answer_contains_any:
+      - "Portfolio risks"
+      - "Climate change and the energy transition"
+      - "Health, safety, security and the environment"
+      - "HSSE"
+      - "Health, Safety, Security, and Environment"
+      - "climate-related physical risks"
+      - "security risks"
+      - "Litigation and regulatory compliance"
+      - "Reputation"
+    difficulty: medium
+    notes: "Risk factors overview."
+
+  - id: shell_2025_general_business_model
+    company: SHELL
+    year: 2025
+    category: general_report_question
+    question: "What industries is Shell principally engaged in?"
+    expected_source: "shell.pdf"
+    expected_page: 261
+    expected_answer_contains_any:
+      - "energy"
+      - "petrochemical"
+      - "oil and gas"
+    difficulty: easy
+    notes: "General business description."
+
+  - id: shell_2025_general_sustainability_governance
+    company: SHELL
+    year: 2025
+    category: general_report_question
+    question: "Which Shell Board committee supports oversight of sustainability matters?"
+    expected_source: "shell.pdf"
+    expected_page: [104, 105, 362]
+    expected_answer_contains_any:
+      - "Sustainability Committee"
+      - "SUSCO"
+    difficulty: easy
+    notes: "Governance of sustainability."
+
+  - id: shell_2025_general_major_development_flaring
+    company: SHELL
+    year: 2025
+    category: general_report_question
+    question: "What major 2025 development did Shell report regarding routine flaring?"
+    expected_source: "shell.pdf"
+    expected_page: [87, 90]
+    expected_answer_contains_any:
+      - "achieved"
+      - "January 2025"
+      - "zero"
+      - "routine flaring"
+    difficulty: medium
+    notes: "Major sustainability development in the year."
+
+  - id: shell_2025_hallucination_future_actual_2028_emissions
+    company: SHELL
+    year: 2025
+    category: hallucination_check
+    question: "What were Shell's actual Scope 1 emissions in 2028?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Future actual not in the 2025 report."
+
+  - id: shell_2025_hallucination_asml_net_sales
+    company: SHELL
+    year: 2025
+    category: hallucination_check
+    question: "What were ASML's net sales according to Shell's 2025 annual report?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Out-of-corpus company question."
+
+  - id: shell_2025_hallucination_unreported_ev_count
+    company: SHELL
+    year: 2025
+    category: hallucination_check
+    question: "How many electric cars did Shell manufacture in 2025?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Unsupported/non-applicable metric."
+
+  # =========================
+  # ABN AMRO 2025
+  # =========================
+
+  - id: abn_amro_2025_fte_employee_reduction
+    company: ABN AMRO
+    year: 2025
+    category: fte
+    question: "By about how many FTEs did ABN AMRO's employee numbers decrease in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [15, 38, 40]
+    expected_answer_contains_any:
+      - "1,500 FTEs"
+      - "about 1,500"
+      - "employee numbers decreased"
+    difficulty: easy
+    notes: "Workforce datapoint reported in 2025 performance discussion."
+
+  - id: abn_amro_2025_fte_total_employees
+    company: ABN AMRO
+    year: 2025
+    category: fte
+    question: "What internal and external employee FTE counts did ABN AMRO report at year-end 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [47]
+    expected_answer_contains_all:
+      - "23,126"
+      - "2,216"
+      - "FTE"
+    difficulty: hard
+    notes: "Use the year-end FTE table, not the headcount table or external FTE excluding HAL."
+
+  - id: abn_amro_2025_fte_strategy_right_sizing
+    company: ABN AMRO
+    year: 2025
+    category: fte
+    question: "Which strategic priority explains ABN AMRO's reduction in employee numbers?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [14, 15]
+    expected_answer_contains_any:
+      - "simplify the organisation"
+      - "reduce global staff by about 20%"
+      - "5,200 full-time equivalents"
+      - "right-sizing"
+      - "cost base"
+      - "right-sizing our cost base"
+    difficulty: easy
+    notes: "Connects workforce reduction to simplifying the organisation and the 2026-2028 strategic priority to right-size the cost base."
+
+  - id: abn_amro_2025_fte_employee_topic_sustainability
+    company: ABN AMRO
+    year: 2025
+    category: fte
+    question: "Which employee representative bodies does ABN AMRO mention engaging with in its sustainability materiality process?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 202
+    expected_answer_contains_any:
+      - "employee works councils"
+      - "NL"
+      - "GER"
+      - "FR"
+    difficulty: medium
+    notes: "Workforce/stakeholder engagement datapoint."
+
+  - id: abn_amro_2025_fte_ceo_change
+    company: ABN AMRO
+    year: 2025
+    category: fte
+    question: "Who succeeded Robert Swaak as CEO of ABN AMRO in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 15
+    expected_answer_contains_any:
+      - "Marguerite Bérard"
+      - "Marguerite Berard"
+    difficulty: easy
+    notes: "Leadership workforce/governance datapoint."
+
+  - id: abn_amro_2025_sustainability_goal_transition_finance
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "What transition-related role does ABN AMRO describe for its financing activities?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [18, 23, 200]
+    expected_answer_contains_any:
+      - "finance European transitions"
+      - "transition"
+      - "sustainable long-term value"
+    difficulty: medium
+    notes: "Sustainability/strategy goal, not a single actual datapoint."
+
+  - id: abn_amro_2025_sustainability_goal_long_term_value
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "What long-term value aim does ABN AMRO describe in its value creation model?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 23
+    expected_answer_contains_any:
+      - "sustainable long-term value"
+      - "positive impact"
+      - "reducing the adverse effects"
+    difficulty: medium
+    notes: "Broad sustainability goal from value creation model."
+
+  - id: abn_amro_2025_sustainability_goal_strategy_business_model
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "In the Strategy and business model section, how does ABN AMRO describe the relationship between sustainability, strategy and the business model?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 200
+    expected_answer_contains_any:
+      - "relationship between our strategy and our business model"
+      - "sustainability in relation to our strategy"
+      - "business model"
+      - "relate to sustainability"
+      - "incorporated into the bank’s positioning"
+    difficulty: medium
+    notes: "Sustainability reporting structure."
+
+  - id: abn_amro_2025_sustainability_goal_esg_scenarios
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "Which type of ESG scenario does ABN AMRO mention in its financial materiality assessment?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 203
+    expected_answer_contains_any:
+      - "Climate-related transition"
+      - "ESG scenarios"
+      - "financial materiality assessment"
+    difficulty: hard
+    notes: "Sustainability risk/opportunity assessment."
+
+  - id: abn_amro_2025_sustainability_goal_ethics_integrity
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "What does ABN AMRO say is required to maintain trust in the bank?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 36
+    expected_answer_contains_any:
+      - "high standards of ethics and integrity"
+      - "ethics and integrity"
+      - "compliance"
+    difficulty: easy
+    notes: "Sustainability/governance commitment."
+
+  - id: abn_amro_2025_sustainability_goal_stakeholder_value
+    company: ABN AMRO
+    year: 2025
+    category: sustainability_goal
+    question: "For whom does ABN AMRO say it aims to create long-term value?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [18, 23]
+    expected_answer_contains_any:
+      - "clients"
+      - "colleagues"
+      - "investors"
+      - "society"
+    difficulty: easy
+    notes: "Purpose and sustainability-related value creation."
+
+  - id: abn_amro_2025_esg_datapoint_cet1_ratio
+    company: ABN AMRO
+    year: 2025
+    category: esg_datapoint
+    question: "What CET1 ratio did ABN AMRO report for 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [38, 40]
+    expected_answer_contains_any:
+      - "15.4%"
+      - "CET1 ratio"
+    difficulty: easy
+    notes: "Capital strength datapoint; included as ESG/risk datapoint for bank resilience."
+
+  - id: abn_amro_2025_esg_datapoint_cost_of_risk
+    company: ABN AMRO
+    year: 2025
+    category: esg_datapoint
+    question: "What cost of risk did ABN AMRO report in Q4 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [38, 40]
+    expected_answer_contains_any:
+      - "11 basis points"
+      - "cost of risk"
+    difficulty: medium
+    notes: "Risk/credit quality datapoint."
+
+  - id: abn_amro_2025_esg_datapoint_rwa
+    company: ABN AMRO
+    year: 2025
+    category: esg_datapoint
+    question: "What were ABN AMRO's total risk-weighted assets in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [47, 118]
+    expected_answer_contains_any:
+      - "EUR 135.4 billion"
+      - "135.4 billion"
+      - "135,398"
+      - "RWA"
+    difficulty: medium
+    notes: "Risk/capital datapoint; page 118 reports total risk-weighted assets in EUR millions."
+
+  - id: abn_amro_2025_esg_datapoint_rwa_2024_comparison
+    company: ABN AMRO
+    year: 2025
+    category: esg_datapoint
+    question: "From what amount to what amount did ABN AMRO's total RWA decrease in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 39
+    expected_answer_contains_all:
+      - "EUR 140.9 billion"
+      - "EUR 135.4 billion"
+    difficulty: medium
+    notes: "Actual risk/capital performance comparison."
+
+  - id: abn_amro_2025_esg_datapoint_stakeholder_engagement
+    company: ABN AMRO
+    year: 2025
+    category: esg_datapoint
+    question: "Which stakeholder engagement inputs did ABN AMRO mention for its materiality assessment?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 202
+    expected_answer_contains_any:
+      - "transcripts"
+      - "meeting summaries"
+      - "website search queries"
+      - "employee works councils"
+      - "investor relations"
+    difficulty: hard
+    notes: "Actual sustainability process datapoint."
+
+  - id: abn_amro_2025_financial_net_profit
+    company: ABN AMRO
+    year: 2025
+    category: financial_highlight
+    question: "What net profit did ABN AMRO report in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 40
+    expected_answer_contains_any:
+      - "EUR 2.3 billion"
+      - "€2.3 billion"
+      - "net profit"
+    difficulty: easy
+    notes: "Main annual financial highlight."
+
+  - id: abn_amro_2025_financial_roe
+    company: ABN AMRO
+    year: 2025
+    category: financial_highlight
+    question: "What return on equity did ABN AMRO achieve in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 40
+    expected_answer_contains_any:
+      - "8.7%"
+      - "return on equity"
+      - "ROE"
+    difficulty: easy
+    notes: "Main bank profitability metric."
+
+  - id: abn_amro_2025_financial_net_interest_income
+    company: ABN AMRO
+    year: 2025
+    category: financial_highlight
+    question: "What net interest income did ABN AMRO report for 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 40
+    expected_answer_contains_any:
+      - "EUR 6,335 million"
+      - "6,335 million"
+      - "more than EUR 6.3 billion"
+    difficulty: medium
+    notes: "Use exact value if available; guidance phrase acceptable if report text retrieved."
+
+  - id: abn_amro_2025_financial_fee_commission_income
+    company: ABN AMRO
+    year: 2025
+    category: financial_highlight
+    question: "What net fee and commission income did ABN AMRO report in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 40
+    expected_answer_contains_any:
+      - "EUR 2,132 million"
+      - "2,132 million"
+      - "increased by 12%"
+    difficulty: medium
+    notes: "Main financial highlight from financial performance section."
+
+  - id: abn_amro_2025_business_new_mortgage_production
+    company: ABN AMRO
+    year: 2025
+    category: business_performance
+    question: "What did ABN AMRO report about new mortgage production in Q4 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [27, 92]
+    expected_answer_contains_any:
+      - "new mortgage production"
+      - "19%"
+      - "EUR 1.2 billion"
+      - "reclassified to assets held for sale"
+    difficulty: medium
+    notes: "Business performance narrative; page 92 gives the 2025 market share and Q4 mortgage reclassification."
+
+  - id: abn_amro_2025_business_clearing_fee_income
+    company: ABN AMRO
+    year: 2025
+    category: business_performance
+    question: "Why did ABN AMRO's Clearing business record higher fee income in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 310
+    expected_answer_contains_any:
+      - "increased transaction volumes"
+      - "elevated market volatility"
+      - "higher fee income"
+    difficulty: medium
+    notes: "Segment/business performance."
+
+  - id: abn_amro_2025_business_operating_activities_income
+    company: ABN AMRO
+    year: 2025
+    category: business_performance
+    question: "What net income from other operating activities did ABN AMRO report in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [295, 319]
+    expected_answer_contains_any:
+      - "EUR 30 million"
+      - "30 million"
+      - "other operating activities"
+    difficulty: medium
+    notes: "Business performance/financial detail from the consolidated income statement and note 6."
+
+  - id: abn_amro_2025_business_priorities
+    company: ABN AMRO
+    year: 2025
+    category: business_performance
+    question: "What were ABN AMRO's strategic priorities for 2026 to 2028 as presented in the 2025 report?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 18
+    expected_answer_contains_all:
+      - "profitable growth"
+      - "right-sizing"
+      - "optimising capital allocation"
+    difficulty: easy
+    notes: "Although phrased for 2026-2028, this is discussed in the 2025 annual report."
+
+  - id: abn_amro_2025_shareholder_additional_capital_distribution
+    company: ABN AMRO
+    year: 2025
+    category: shareholder_return
+    question: "What additional capital distribution did ABN AMRO announce for 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [38, 40]
+    expected_answer_contains_any:
+      - "EUR 500 million"
+      - "€500 million"
+      - "additional capital distribution"
+    difficulty: easy
+    notes: "Shareholder return datapoint."
+
+  - id: abn_amro_2025_shareholder_final_dividend
+    company: ABN AMRO
+    year: 2025
+    category: shareholder_return
+    question: "What final dividend per share did ABN AMRO propose for 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [38, 40]
+    expected_answer_contains_any:
+      - "EUR 0.70"
+      - "€0.70"
+      - "final dividend"
+    difficulty: easy
+    notes: "Distinguish proposed final dividend from paid dividend."
+
+  - id: abn_amro_2025_shareholder_capital_return_context
+    company: ABN AMRO
+    year: 2025
+    category: shareholder_return
+    question: "Which capital metric supported ABN AMRO's additional capital distribution in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [38, 40]
+    expected_answer_contains_any:
+      - "CET1 ratio"
+      - "15.4%"
+      - "RWA"
+      - "portfolio optimisation"
+    difficulty: medium
+    notes: "Capital return context."
+
+  - id: abn_amro_2025_general_strategy
+    company: ABN AMRO
+    year: 2025
+    category: general_report_question
+    question: "What was ABN AMRO's stated purpose or strategic positioning in the 2025 report?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [9, 18]
+    expected_answer_contains_any:
+      - "there for everyone with a drive to move forward"
+      - "support clients in their financial decisions"
+      - "long-term value"
+    difficulty: easy
+    notes: "General strategy/purpose question."
+
+  - id: abn_amro_2025_general_ceo_message
+    company: ABN AMRO
+    year: 2025
+    category: general_report_question
+    question: "What phrase did ABN AMRO's CEO use to describe the importance of execution?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 6
+    expected_answer_contains_any:
+      - "Strategy is the first 20%. Execution is the rest"
+      - "Execution is the rest"
+    difficulty: easy
+    notes: "CEO interview highlight."
+
+  - id: abn_amro_2025_general_main_risks
+    company: ABN AMRO
+    year: 2025
+    category: general_report_question
+    question: "How did ABN AMRO's Supervisory Board monitor key risks in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: 159
+    expected_answer_contains_any:
+      - "key financial and non-financial risks"
+      - "internal risk management"
+      - "CRO memo"
+    difficulty: medium
+    notes: "General risk governance question."
+
+  - id: abn_amro_2025_general_business_model
+    company: ABN AMRO
+    year: 2025
+    category: general_report_question
+    question: "What does ABN AMRO say it does for clients?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [7, 13, 200]
+    expected_answer_contains_any:
+      - "support clients in their financial decisions"
+      - "support family wealth and businesses"
+      - "guiding clients from savings to investment solutions"
+      - "provide advice based on better data insights"
+      - "tailor our propositions"
+      - "financial solutions"
+      - "manage their finances"
+      - "personalised services"
+      - "support their goals"
+    difficulty: easy
+    notes: "Broad business model/purpose question; allow client support phrasing from the CEO interview and business model sections."
+
+  - id: abn_amro_2025_general_major_developments
+    company: ABN AMRO
+    year: 2025
+    category: general_report_question
+    question: "What CEO change did ABN AMRO report in 2025?"
+    expected_source: "abn-amro.pdf"
+    expected_page: [15, 155]
+    expected_answer_contains_any:
+      - "Marguerite Bérard succeeded Robert Swaak"
+      - "Chief Executive Officer"
+      - "23 April 2025"
+      - "new CEO"
+      - "April"
+    difficulty: easy
+    notes: "Major CEO change in the year; page 15 gives the formal succession and page 155 discusses her arrival as new CEO."
+
+  - id: abn_amro_2025_hallucination_future_actual_2028_roe
+    company: ABN AMRO
+    year: 2025
+    category: hallucination_check
+    question: "What was ABN AMRO's actual return on equity in 2028?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Future actual not in the 2025 report."
+
+  - id: abn_amro_2025_hallucination_shell_emissions
+    company: ABN AMRO
+    year: 2025
+    category: hallucination_check
+    question: "What were Shell's Scope 1 emissions according to ABN AMRO's 2025 annual report?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Out-of-corpus company question."
+
+  - id: abn_amro_2025_hallucination_unreported_chip_systems
+    company: ABN AMRO
+    year: 2025
+    category: hallucination_check
+    question: "How many lithography systems did ABN AMRO sell in 2025?"
+    expected_behavior: refuse
+    difficulty: easy
+    notes: "Unsupported/non-applicable metric."

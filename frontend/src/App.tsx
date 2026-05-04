@@ -120,6 +120,7 @@ export function App() {
   const [tweaks, setTweaks] = useState<Tweaks>(TWEAK_DEFAULTS);
   const [tweaksOpen, setTweaksOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [chatClearKey, setChatClearKey] = useState(0);
   const [docCount, setDocCount] = useState(0);
   const [datapointCount, setDatapointCount] = useState(0);
   const [ingest, setIngest] = useState<Ingest[]>([]);
@@ -173,6 +174,11 @@ export function App() {
     setTourOpen(false);
   };
   const openTour = () => setTourOpen(true);
+
+  const handleClearChat = () => {
+    setChatClearKey(k => k + 1);
+    setView('chat');
+  };
 
   // Tweaks protocol
   useEffect(() => {
@@ -231,11 +237,11 @@ export function App() {
             Help
           </button>
           {view === 'chat' && (
-            <button className="btn">New thread</button>
+            <button className="btn" onClick={handleClearChat}>Clear chat</button>
           )}
         </header>
 
-        {view === 'chat' && <ChatView />}
+        {view === 'chat' && <ChatView clearKey={chatClearKey} />}
         {view === 'docs' && (
           <DocumentsView
             ingest={ingest}

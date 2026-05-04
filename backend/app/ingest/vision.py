@@ -10,8 +10,12 @@ from typing import Any
 from backend.app.config import settings
 from backend.app.ingest.persistence import persist_enhanced_pages
 from backend.app.ingest.tokens import count_tokens
-from backend.app.ingest.table_vision import PageTableExtraction, enhance_page_tables, tables_to_text
-from backend.app.ingest.vision_selection import classify_table_complexity
+from backend.app.ingest.table_vision import (
+    PageTableExtraction,
+    classify_table_complexity,
+    enhance_page_tables,
+    tables_to_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +28,7 @@ _VISION_WORKERS = 6
 
 
 def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
+    """Render one PDF page to PNG bytes and return the image payload."""
     try:
         import fitz
     except ImportError as exc:
@@ -39,6 +44,7 @@ def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
 
 
 def _strip_markdown_tables(text: str) -> str:
+    """Remove markdown table rows from text and return the remaining narrative."""
     out_lines: list[str] = []
     for line in text.splitlines():
         stripped = line.strip()
@@ -60,6 +66,7 @@ def _strip_markdown_tables(text: str) -> str:
 def _apply_vision_enhancement(
     record: dict[str, Any], extraction: PageTableExtraction, model: str
 ) -> dict[str, Any]:
+    """Apply successful table extraction output to one persisted page record."""
     tables_dicts = [table.model_dump() for table in extraction.tables]
     out = dict(record)
     out["tables"] = tables_dicts
@@ -75,6 +82,7 @@ def _apply_vision_enhancement(
 
 
 def _apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
+    """Return a page record marked as processed but without usable table enhancement."""
     out = dict(record)
     out["tables"] = []
     out["table_enhanced"] = False
@@ -84,6 +92,7 @@ def _apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _apply_enhancement_error(record: dict[str, Any], error: str) -> dict[str, Any]:
+    """Return a page record annotated with a table-enhancement error message."""
     out = _apply_empty_enhancement(record)
     out["table_enhancement_error"] = error
     return out
@@ -101,6 +110,7 @@ def _enhance_page_record_with_retry(
     dpi: int,
     max_attempts: int,
 ) -> PageTableExtraction:
+    """Try table vision for one page record with retries and return the extraction result."""
     page_num = int(record["page"])
     last_exc: Exception | None = None
     token_limit_phrases = ("length limit was reached", "max_tokens", "finish_reason")
@@ -138,6 +148,7 @@ def enhance_pages_with_vision(
     processed_dir: Path | None = None,
     model: str | None = None,
 ) -> list[tuple[int, str]]:
+    """Enhance selected pages with table vision and return updated `(page, text)` tuples."""
     vision_model = model or settings.openai_table_vision_model
     records = [
         {
