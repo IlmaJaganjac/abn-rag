@@ -203,9 +203,22 @@ export function ChatView({ clearKey }: ChatViewProps) {
 
     try {
       const selected = reports.find(r => r.source === scope);
+
+      // Build last-3 Q&A pairs from message history
+      const history: { question: string; answer: string }[] = [];
+      const prev = messages.filter(m => m.role === 'user' || (m.role === 'assistant' && m.answer && !m.answer.refused));
+      for (let i = 0; i + 1 < prev.length; i += 2) {
+        const u = prev[i];
+        const a = prev[i + 1];
+        if (u?.role === 'user' && a?.role === 'assistant' && a.answer) {
+          history.push({ question: u.content, answer: a.answer.answer });
+        }
+      }
+
       const ans = await api.ask(q, {
         company: selected?.company ?? null,
         year: selected?.year ?? null,
+        history: history.slice(-3),
         onPhase: (p, detail) => {
           setPhase(p);
           setPhaseDetail(detail ?? '');

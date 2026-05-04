@@ -18,7 +18,7 @@ from backend.app.answer import answer_question
 from backend.app.config import settings
 from backend.app.ingest.embedding import get_collection
 from backend.app.ingestion import ingest_pdf
-from backend.app.retrieval import retrieve_decomposed as retrieve
+from backend.app.retrieval import retrieve_decomposed
 from backend.app.schemas import RetrievalQuery, VerbatimAnswer
 
 log = logging.getLogger(__name__)
@@ -394,12 +394,18 @@ def _bucket_type(t: str) -> str:
 
 # ---------- chat (SSE) ----------
 
+class HistoryEntry(BaseModel):
+    question: str
+    answer: str
+
+
 class ChatRequest(BaseModel):
     """Incoming chat request with question text and optional retrieval filters."""
     question: str
     company: str | None = None
     year: int | None = None
     top_k: int = 8
+    history: list[HistoryEntry] = []
 
 
 _STOPWORDS = {"the", "and", "of", "group", "company", "corp", "corporation",
@@ -478,7 +484,8 @@ async def chat(req: ChatRequest):
         if eff_company and not req.company:
             detail += f" company={eff_company}"
         yield _sse("phase", {"phase": "searching", "detail": detail})
-        result = await loop.run_in_executor(_executor, retrieve, query)
+        history = [{"question": h.question, "answer": h.answer} for h in req.history]
+        result = await loop.run_in_executor(_executor, retrieve_decomposed, query, history)
         yield _sse("phase", {"phase": "reading", "detail": f"{len(result.chunks)} chunks"})
 
         yield _sse("phase", {"phase": "drafting"})
@@ -487,6 +494,7 @@ async def chat(req: ChatRequest):
             answer_question,
             req.question,
             result.chunks,
+            history,
         )
         yield _sse("phase", {"phase": "citing", "detail": f"{len(answer.citations)} citations"})
         yield _sse("phase", {"phase": "done"})

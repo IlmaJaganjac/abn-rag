@@ -390,7 +390,7 @@ def _refuse(question: str, reason: str) -> VerbatimAnswer:
     )
 
 
-def answer_question(question: str, chunks: list[RetrievedChunk]) -> VerbatimAnswer:
+def answer_question(question: str, chunks: list[RetrievedChunk], history: list[dict] | None = None) -> VerbatimAnswer:
     """Answer one question from retrieved chunks and return a grounded `VerbatimAnswer`."""
     if not chunks:
         return _refuse(question, "no retrieved context")
@@ -401,13 +401,16 @@ def answer_question(question: str, chunks: list[RetrievedChunk]) -> VerbatimAnsw
     model = settings.openai_answer_model
     supports_temp_zero = "gpt-5" not in model
 
+    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for h in (history or [])[-3:]:
+        messages.append({"role": "user", "content": h["question"]})
+        messages.append({"role": "assistant", "content": h["answer"]})
+    messages.append({"role": "user", "content": user_msg})
+
     completion = client.beta.chat.completions.parse(
         model=model,
         **( {"temperature": 0} if supports_temp_zero else {}),
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_msg},
-        ],
+        messages=messages,
         response_format=LLMAnswer,
     )
     parsed = completion.choices[0].message.parsed

@@ -8,11 +8,12 @@ import re
 from collections import Counter
 from typing import Any
 
-_DECOMPOSE_SYSTEM = (
-    "You decompose user questions for a RAG system over annual reports. "
-    "Split the question into 1–4 atomic sub-questions that can each be answered independently. "
+_REWRITE_SYSTEM = (
+    "You are a query planner for a RAG system over annual reports. "
+    "Given optional conversation history and the latest user question, produce 1–4 standalone atomic sub-questions. "
+    "Each sub-question must be fully self-contained (resolve all pronouns and references using history). "
     "Return ONLY a JSON array of strings, no explanation. "
-    "If the question is already atomic, return a single-element array."
+    "If the question is already atomic and standalone, return a single-element array."
 )
 
 logger = logging.getLogger(__name__)
@@ -292,16 +293,22 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     return RetrievalResult(query=query, chunks=chunks)
 
 
-def decompose_query(question: str) -> list[str]:
-    """Use an LLM to split a compound question into atomic sub-questions."""
+def rewrite_and_decompose(question: str, history: list[dict]) -> list[str]:
+    """Rewrite a follow-up question using conversation history, decompose into atomic sub-questions."""
     from backend.app.config import openai_client
     client = openai_client()
+    user_content = question
+    if history:
+        lines = []
+        for h in history[-3:]:
+            lines.append(f"Q: {h['question']}\nA: {h['answer']}")
+        user_content = "Conversation history:\n" + "\n\n".join(lines) + f"\n\nCurrent question: {question}"
     resp = client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0,
         messages=[
-            {"role": "system", "content": _DECOMPOSE_SYSTEM},
-            {"role": "user", "content": question},
+            {"role": "system", "content": _REWRITE_SYSTEM},
+            {"role": "user", "content": user_content},
         ],
     )
     raw = (resp.choices[0].message.content or "").strip()
@@ -324,10 +331,10 @@ def _merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[R
     return sorted(best.values(), key=lambda c: c.score, reverse=True)[:top_k]
 
 
-def retrieve_decomposed(query: RetrievalQuery) -> RetrievalResult:
-    """Decompose the query into sub-questions, retrieve for each, and merge results."""
-    sub_questions = decompose_query(query.question)
-    logger.debug("decomposed %r into %d sub-questions: %s", query.question, len(sub_questions), sub_questions)
+def retrieve_decomposed(query: RetrievalQuery, history: list[dict] | None = None) -> RetrievalResult:
+    """Decompose the query (with optional history), retrieve for each sub-question, merge results."""
+    sub_questions = rewrite_and_decompose(query.question, history or [])
+    logger.debug("rewritten into %d sub-questions: %s", len(sub_questions), sub_questions)
     chunk_lists = [
         retrieve(query.model_copy(update={"question": q})).chunks
         for q in sub_questions
@@ -336,4 +343,4 @@ def retrieve_decomposed(query: RetrievalQuery) -> RetrievalResult:
     return RetrievalResult(query=query, chunks=chunks)
 
 
-__all__ = ["retrieve", "retrieve_decomposed", "decompose_query", "settings"]
+__all__ = ["retrieve", "retrieve_decomposed", "rewrite_and_decompose", "settings"]

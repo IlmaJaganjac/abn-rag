@@ -100,6 +100,7 @@ export const api = {
       company?: string | null;
       year?: number | null;
       top_k?: number;
+      history?: { question: string; answer: string }[];
       onPhase?: (p: ThinkingPhase, detail?: string) => void;
       signal?: AbortSignal;
     } = {},
@@ -112,6 +113,7 @@ export const api = {
         company: opts.company ?? null,
         year: opts.year ?? null,
         top_k: opts.top_k ?? 12,
+        history: opts.history ?? [],
       }),
       signal: opts.signal,
     });
