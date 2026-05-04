@@ -9,8 +9,10 @@ from typing import Any
 
 import yaml
 
+from backend.app.answer import answer_question
 from backend.app.config import settings
-from backend.app.pipeline import answer_with_context as pipeline_answer_with_context
+from backend.app.retrieval import retrieve_decomposed
+from backend.app.schemas import RetrievalQuery
 
 DEFAULT_QUESTIONS = Path("backend/evals/questions-2025-multi-company.yaml")
 DEFAULT_RUNS_DIR = Path("backend/evals/ragas_runs")
@@ -95,21 +97,24 @@ def run_ragas_eval(
     for i, q in enumerate(filtered, 1):
         print(f"  [{i}/{len(filtered)}] {q['id']}", end="", flush=True)
         try:
-            result = pipeline_answer_with_context(
-                _question_text(q),
-                top_k=settings.top_k,
-                company=q.get("company"),
-                year=q.get("year"),
+            retrieval = retrieve_decomposed(
+                RetrievalQuery(
+                    question=_question_text(q),
+                    top_k=settings.top_k,
+                    company=q.get("company"),
+                    year=q.get("year"),
+                )
             )
-            if result.answer.refused:
+            answer = answer_question(_question_text(q), retrieval.chunks)
+            if answer.refused:
                 print(" (refused, skipped)")
                 skipped += 1
                 continue
             records.append(
                 {
                     "question": _question_text(q),
-                    "answer": result.answer.answer,
-                    "contexts": [c.text for c in result.retrieved_chunks],
+                    "answer": answer.answer,
+                    "contexts": [c.text for c in retrieval.chunks],
                     "ground_truth": _ground_truth(q),
                 }
             )

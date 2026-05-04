@@ -35,7 +35,7 @@ class NormalizedDatapoint(BaseModel):
     basis: str | None = None
     scope: str | None = None
     target_year: str | None = None
-    extractor: str = "llamaextract"
+    extractor: str = "openai"
     priority: int = 50
     confidence: float | None = None
     fact_kind: str | None = None
@@ -136,8 +136,6 @@ def _normalized_contains_value(quote: str, value: str) -> bool:
 
 def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
     """Reject obvious placeholders and ungrounded values; leave category checks to the LLM validator."""
-    if dp.extractor != "openai":
-        return True
     value = (dp.value or "").strip()
     quote = dp.quote or ""
     if not quote:
@@ -155,7 +153,7 @@ def normalize_llamaextract_result(
     source: str,
     company: str | None,
     year: int | None,
-    extractor: str = "llamaextract",
+    extractor: str = "openai",
 ) -> list[NormalizedDatapoint]:
     """Convert raw extraction output into cleaned normalized datapoints."""
     out: list[NormalizedDatapoint] = []

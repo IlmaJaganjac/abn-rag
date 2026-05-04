@@ -11,9 +11,11 @@ from typing import Any
 
 import yaml
 
+from backend.app.answer import answer_question
 from backend.app.config import settings
-from backend.app.pipeline import answer_with_context as pipeline_answer_with_context
+from backend.app.retrieval import retrieve_decomposed
 from backend.app.schemas import EvalQuestion, RetrievedChunk, VerbatimAnswer
+from backend.app.schemas import RetrievalQuery
 
 PREVIEW_CHARS = 80
 RETRIEVAL_PREVIEW_CHARS = 160
@@ -656,11 +658,16 @@ def run_eval(
         eff_company = q.company if q.company is not None else (company if company is not None else eval_set.company)
         eff_year = q.year if q.year is not None else (year if year is not None else eval_set.year)
         try:
-            result = pipeline_answer_with_context(
-                q.question, top_k=top_k, company=eff_company, year=eff_year
+            retrieval = retrieve_decomposed(
+                RetrievalQuery(
+                    question=q.question,
+                    top_k=top_k,
+                    company=eff_company,
+                    year=eff_year,
+                )
             )
-            ans = result.answer
-            retrieved_chunks = result.retrieved_chunks
+            ans = answer_question(q.question, retrieval.chunks)
+            retrieved_chunks = retrieval.chunks
             retrieved_pages = [chunk.page for chunk in retrieved_chunks]
             (
                 passed,

@@ -1,17 +1,8 @@
 from __future__ import annotations
 
-import base64
-import json
-import logging
-import time
-from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel
-
-from backend.app.config import settings
-
-logger = logging.getLogger(__name__)
 
 _BASE_INSTRUCTIONS = """\
 Only extract information explicitly present in the document.
@@ -122,10 +113,6 @@ You extract structured datapoints from annual reports.
 {_BASE_INSTRUCTIONS}
 """
 
-_POLL_INTERVAL = 5
-_MAX_WAIT = 600
-
-
 class ExtractedFTEDatapoint(BaseModel):
     """Structured FTE or workforce datapoint extracted from a report."""
     label: str
@@ -233,102 +220,3 @@ def category_prompt(category: str | None) -> str:
     if not category:
         return _DEFAULT_PROMPT
     return _CATEGORY_PROMPTS.get(category, _DEFAULT_PROMPT)
-
-
-def _poll_until_done(client_extract: Any, job_id: str) -> str:
-    """Poll a LlamaExtract job until completion and return its success marker."""
-    from llama_cloud import ExtractJobStatus
-
-    deadline = time.monotonic() + _MAX_WAIT
-    while time.monotonic() < deadline:
-        job = client_extract.get_job(job_id)
-        status = job.status
-        if status == ExtractJobStatus.SUCCESS:
-            return "success"
-        if status in (ExtractJobStatus.ERROR, ExtractJobStatus.CANCELLED):
-            error = getattr(job, "error", None)
-            raise RuntimeError(f"LlamaExtract job {job_id} ended with status {status}: {error}")
-        time.sleep(_POLL_INTERVAL)
-    raise TimeoutError(f"LlamaExtract job {job_id} did not complete within {_MAX_WAIT}s")
-
-
-def extract_annual_report_datapoints(
-    pdf_path: Path,
-    *,
-    company: str | None,
-    year: int | None,
-    page_range: str | None = None,
-    category: str | None = None,
-) -> AnnualReportDatapoints:
-    """Run LlamaExtract on a PDF and return grouped typed datapoints for the report."""
-    api_key = settings.llama_cloud_api_key.get_secret_value()
-    if not api_key:
-        raise RuntimeError(
-            "LLAMA_CLOUD_API_KEY is not set. Add it to .env."
-        )
-
-    try:
-        from llama_cloud.client import LlamaCloud
-        from llama_cloud import ExtractConfig, FileData
-        from llama_cloud.types.extract_mode import ExtractMode
-    except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            f"llama-cloud SDK not installed. Run `pip install llama-cloud`. Missing: {exc}"
-        ) from exc
-
-    pdf_bytes = pdf_path.read_bytes()
-    pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
-
-    client = LlamaCloud(token=api_key)
-    le = client.llama_extract
-
-    system_prompt = category_prompt(category)
-    schema = _json_schema()
-    config = ExtractConfig(
-        cite_sources=True,
-        confidence_scores=True,
-        extraction_mode=ExtractMode.FAST,
-        system_prompt=system_prompt,
-        page_range=page_range,
-        use_reasoning=True,
-    )
-
-    logger.info("submitting LlamaExtract job for %s", pdf_path.name)
-    job = le.extract_stateless(
-        config=config,
-        data_schema=schema,
-        file=FileData(data=pdf_b64, mime_type="application/pdf"),
-    )
-    job_id = job.id
-    logger.info("LlamaExtract job submitted: %s", job_id)
-
-    _poll_until_done(le, job_id)
-    logger.info("LlamaExtract job %s complete", job_id)
-
-    resultset = le.get_job_result(job_id)
-    raw: Any = resultset.data
-
-    if raw is None:
-        logger.warning("LlamaExtract returned null data for job %s", job_id)
-        return AnnualReportDatapoints(company=company, year=year)
-
-    if isinstance(raw, list):
-        raw = raw[0] if raw else {}
-
-    try:
-        result = AnnualReportDatapoints.model_validate(raw)
-    except Exception as exc:
-        logger.error("failed to parse LlamaExtract result: %s\nraw=%s", exc, json.dumps(raw, indent=2)[:500])
-        return AnnualReportDatapoints(company=company, year=year)
-
-    result = AnnualReportDatapoints(
-        company=company or result.company,
-        year=year or result.year,
-        fte_datapoints=result.fte_datapoints,
-        sustainability_goals=result.sustainability_goals,
-        esg_datapoints=result.esg_datapoints,
-        financial_highlights=result.financial_highlights,
-        business_performance=result.business_performance,
-        shareholder_returns=result.shareholder_returns,
-    )
-    return result

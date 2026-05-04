@@ -24,15 +24,7 @@ python -m backend.app.ingestion \
     reports/asml-2025-annual-report-based-on-us-gaap.pdf \
     --company ASML --year 2025
 
-# 2. ask a question — prints a structured VerbatimAnswer (JSON)
-python -m backend.app.pipeline \
-    "How many total employees did ASML have in 2025?" \
-    --company ASML --year 2025
-
-# add --show-context to also print the retrieved chunks above the JSON
-python -m backend.app.pipeline "..." --company ASML --year 2025 --show-context
-
-# 3. run the eval set against the live pipeline
+# 2. run the eval set against the live pipeline
 python -m backend.evals.runner
 python -m backend.evals.runner --show-failures-only
 python -m backend.evals.runner --top-k 12

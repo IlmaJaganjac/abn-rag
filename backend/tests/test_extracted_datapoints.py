@@ -103,15 +103,6 @@ def test_sustainability_goal_with_year_and_quote_priority_95():
     assert sg[0].priority == 95
 
 
-def test_sustainability_goal_no_quote_priority_70():
-    result = _make_result(sustainability_goals=[
-        ExtractedSustainabilityGoal(goal="Reduce GHG emissions", page=160, quote="", fact_kind="target", scope_type="company_wide"),
-    ])
-    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    sg = _norm(dps, "sustainability_goal")
-    assert sg[0].priority == 70
-
-
 # ---------------------------------------------------------------------------
 # Priority rules — financial_highlight, business_performance, shareholder_return
 # ---------------------------------------------------------------------------
@@ -123,15 +114,6 @@ def test_financial_highlight_with_page_and_quote_priority_90():
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fh = _norm(dps, "financial_highlight")
     assert fh[0].priority == 90
-
-
-def test_financial_highlight_without_quote_priority_75():
-    result = _make_result(financial_highlights=[
-        ExtractedFinancialHighlight(metric="Gross margin", value="51.3%", page=56, quote="", fact_kind="actual", scope_type="company_wide"),
-    ])
-    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    fh = _norm(dps, "financial_highlight")
-    assert fh[0].priority == 75
 
 
 def test_business_performance_with_page_and_quote_priority_90():
@@ -150,15 +132,6 @@ def test_shareholder_return_with_page_and_quote_priority_90():
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     sr = _norm(dps, "shareholder_return")
     assert sr[0].priority == 90
-
-
-def test_shareholder_return_no_page_no_quote_priority_60():
-    result = _make_result(shareholder_returns=[
-        ExtractedShareholderReturn(metric="Dividends paid", value="1.2", quote="", fact_kind="actual", scope_type="company_wide"),
-    ])
-    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    sr = _norm(dps, "shareholder_return")
-    assert sr[0].priority == 60
 
 
 # ---------------------------------------------------------------------------
@@ -261,7 +234,7 @@ def test_normalize_preserves_fields():
     assert dp.period == "2025"
     assert dp.page == 5
     assert dp.confidence == 0.98
-    assert dp.extractor == "llamaextract"
+    assert dp.extractor == "openai"
 
 
 # ---------------------------------------------------------------------------
@@ -369,15 +342,6 @@ def test_esg_priority_quote_only():
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     esg = _norm(dps, "esg_datapoint")
     assert esg[0].priority == 85
-
-
-def test_esg_priority_no_quote_no_period():
-    result = _make_result(esg_datapoints=[
-        ExtractedESGDatapoint(metric="Water use", value="1,200 ML", page=160, quote="", fact_kind="actual", scope_type="company_wide"),
-    ])
-    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
-    esg = _norm(dps, "esg_datapoint")
-    assert esg[0].priority == 70
 
 
 def test_sustainability_category_keeps_goals_and_esg():
@@ -553,50 +517,3 @@ def test_openai_less_than_value_not_in_quote_rejected():
 def test_openai_percent_value_in_quote_accepted():
     dps = _norm_openai(_openai_fin(value="51.3%", quote="Gross margin was 51.3% in 2024."))
     assert len(dps) == 1
-
-
-def test_llamaextract_blank_quote_not_rejected():
-    result = _make_result(financial_highlights=[
-        ExtractedFinancialHighlight(metric="Net income", value="7.6", unit="€bn", period="2024", page=5,
-                                    quote="", fact_kind="actual", scope_type="company_wide"),
-    ])
-    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025, extractor="llamaextract")
-    assert len(dps) == 1
-
-
-# ---------------------------------------------------------------------------
-# Raw audit payload
-# ---------------------------------------------------------------------------
-
-from backend.utils.scripts.run_pre_extraction import _build_raw_audit_payload  # noqa: E402
-
-
-def test_raw_audit_payload_structure():
-    raw_batch = {"company": "ACME", "year": 2024, "fte_datapoints": [{"label": "FTE", "value": "44000"}]}
-    payload = _build_raw_audit_payload(
-        source="acme_2024.pdf",
-        company="ACME",
-        year=2024,
-        extractor="openai",
-        categories=["fte", "esg"],
-        raw_by_cat={"fte": [raw_batch]},
-    )
-    assert payload["source"] == "acme_2024.pdf"
-    assert payload["company"] == "ACME"
-    assert payload["year"] == 2024
-    assert payload["extractor"] == "openai"
-    assert payload["categories"] == ["fte", "esg"]
-    assert payload["raw"]["fte"] == [raw_batch]
-
-
-def test_raw_audit_payload_does_not_mutate_input():
-    raw_batch = {"company": "ACME", "fte_datapoints": []}
-    original = {"fte": [raw_batch]}
-    _build_raw_audit_payload("x.pdf", "ACME", 2024, "openai", ["fte"], original)
-    assert original == {"fte": [raw_batch]}
-
-
-def test_raw_audit_payload_empty_categories():
-    payload = _build_raw_audit_payload("x.pdf", None, None, "openai", [], {})
-    assert payload["categories"] == []
-    assert payload["raw"] == {}

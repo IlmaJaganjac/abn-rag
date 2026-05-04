@@ -20,9 +20,6 @@ from backend.app.ingest.embedding import (
     get_collection,
 )
 from backend.app.ingest.persistence import (
-    apply_enhanced_text,
-    load_datapoints_json,
-    load_pages_jsonl,
     persist_chunks,
     persist_datapoints,
     persist_parsed_pages,
@@ -41,12 +38,6 @@ def ingest_pdf(
     reset: bool = False,
     parser: str | None = None,
     source_name: str | None = None,
-    enhanced_jsonl: Path | None = None,
-    pages_jsonl: Path | None = None,
-    extract_datapoints: bool = True,
-    enhance_vision: bool = True,
-    datapoints_json: Path | None = None,
-    skip_embed: bool = False,
     validate_datapoints: bool = True,
 ) -> int:
     """Ingest one PDF and return the total number of chunks prepared for indexing."""
@@ -57,25 +48,16 @@ def ingest_pdf(
     requested_parser = parser or settings.pdf_parser
     processed_dir = settings.get_processed_path()
 
-    if pages_jsonl is not None:
-        logger.info("loading parsed pages from %s", pages_jsonl)
-        pages, parsed_parser = load_pages_jsonl(pages_jsonl)
-        parser_name = parsed_parser
-        logger.info("loaded %d non-empty pages from %s", len(pages), pages_jsonl)
-    else:
-        logger.info("parsing %s with %s", source, requested_parser)
-        parsed = parse_pdf_pages(
-            pdf_path,
-            parser=requested_parser,
-            processed_dir=processed_dir,
-            llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
-        )
-        pages = list(as_page_tuples(parsed.pages))
-        parser_name = parsed.parser
-        logger.info("parsed %d non-empty pages with %s", len(pages), parser_name)
-
-    if enhanced_jsonl is not None and pages_jsonl is None:
-        pages = apply_enhanced_text(pages, enhanced_jsonl)
+    logger.info("parsing %s with %s", source, requested_parser)
+    parsed = parse_pdf_pages(
+        pdf_path,
+        parser=requested_parser,
+        processed_dir=processed_dir,
+        llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+    )
+    pages = list(as_page_tuples(parsed.pages))
+    parser_name = parsed.parser
+    logger.info("parsed %d non-empty pages with %s", len(pages), parser_name)
 
     pages_path = persist_parsed_pages(
         pages,
@@ -86,17 +68,16 @@ def ingest_pdf(
         processed_dir=processed_dir,
     )
     logger.info("wrote parsed pages to %s", pages_path)
-    if pages_jsonl is None and enhanced_jsonl is None and enhance_vision:
-        pages = enhance_pages_with_vision(
-            pdf_path=pdf_path,
-            pages=pages,
-            source=source,
-            company=company,
-            year=year,
-            parser=parser_name,
-            processed_dir=processed_dir,
-        )
-        logger.info("applied automatic vision enhancement to difficult table pages")
+    pages = enhance_pages_with_vision(
+        pdf_path=pdf_path,
+        pages=pages,
+        source=source,
+        company=company,
+        year=year,
+        parser=parser_name,
+        processed_dir=processed_dir,
+    )
+    logger.info("applied automatic vision enhancement to difficult table pages")
     chunks = build_chunks(
         iter(pages),
         source=source,
@@ -110,29 +91,24 @@ def ingest_pdf(
     chunks = deduplicate_chunks(chunks)
     logger.info("kept %d semantic chunks after exact deduplication", len(chunks))
 
-    raw_datapoints: list[dict] = []
-    if extract_datapoints:
-        datapoints = extract_categorized_datapoints(
-            pages,
-            source=source,
-            company=company,
-            year=year,
-            validate=validate_datapoints,
-        )
-        datapoints_path = persist_datapoints(
-            datapoints,
-            source=source,
-            processed_dir=processed_dir,
-        )
-        logger.info(
-            "wrote %d categorized LLM-extracted datapoints to %s",
-            len(datapoints),
-            datapoints_path,
-        )
-        raw_datapoints = [dp if isinstance(dp, dict) else dp.model_dump() for dp in datapoints]
-    elif datapoints_json is not None:
-        raw_datapoints = load_datapoints_json(datapoints_json)
-        logger.info("loaded %d datapoints from %s", len(raw_datapoints), datapoints_json)
+    datapoints = extract_categorized_datapoints(
+        pages,
+        source=source,
+        company=company,
+        year=year,
+        validate=validate_datapoints,
+    )
+    datapoints_path = persist_datapoints(
+        datapoints,
+        source=source,
+        processed_dir=processed_dir,
+    )
+    logger.info(
+        "wrote %d categorized LLM-extracted datapoints to %s",
+        len(datapoints),
+        datapoints_path,
+    )
+    raw_datapoints = [dp if isinstance(dp, dict) else dp.model_dump() for dp in datapoints]
 
     if raw_datapoints:
         dp_chunks = build_datapoint_chunks(
@@ -150,10 +126,6 @@ def ingest_pdf(
     logger.info("kept %d chunks after exact deduplication", len(chunks))
     chunks_path = persist_chunks(chunks, source=source, processed_dir=processed_dir)
     logger.info("wrote debug chunks to %s", chunks_path)
-
-    if skip_embed:
-        logger.info("skip_embed=True: skipping embedding and ChromaDB upsert")
-        return len(chunks)
 
     embeddings = embed_texts([c.embedding_text or c.text for c in chunks])
     if len(embeddings) != len(chunks):
@@ -202,14 +174,8 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--source-name", default=None)
     parser.add_argument("--reset", action="store_true")
     parser.add_argument("--parser", choices=["llamaparse"], default=settings.pdf_parser)
-    parser.add_argument("--enhanced-jsonl", type=Path, default=None)
-    parser.add_argument("--pages-jsonl", type=Path, default=None)
-    parser.add_argument("--no-extract-datapoints", action="store_false", dest="extract_datapoints")
-    parser.add_argument("--no-vision-enhancement", action="store_false", dest="enhance_vision")
-    parser.add_argument("--datapoints-json", type=Path, default=None)
-    parser.add_argument("--skip-embed", action="store_true")
     parser.add_argument("--no-validate-datapoints", action="store_false", dest="validate_datapoints")
-    parser.set_defaults(extract_datapoints=True, enhance_vision=True, skip_embed=False, validate_datapoints=True)
+    parser.set_defaults(validate_datapoints=True)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -221,12 +187,6 @@ def _cli(argv: list[str] | None = None) -> int:
             reset=args.reset,
             parser=args.parser,
             source_name=args.source_name,
-            enhanced_jsonl=args.enhanced_jsonl,
-            pages_jsonl=args.pages_jsonl,
-            extract_datapoints=args.extract_datapoints,
-            enhance_vision=args.enhance_vision,
-            datapoints_json=args.datapoints_json,
-            skip_embed=args.skip_embed,
             validate_datapoints=args.validate_datapoints,
         )
     except (FileNotFoundError, RuntimeError) as exc:
