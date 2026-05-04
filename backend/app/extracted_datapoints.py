@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from backend.app.llama_extract_datapoints import AnnualReportDatapoints
+from backend.app.datapoint_schemas import AnnualReportDatapoints
 
 _PUNCT_RE = re.compile(r"[^\w\s]")
 _SPACE_RE = re.compile(r"\s+")
@@ -267,9 +267,13 @@ def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
         if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
             return False
     if dp.datapoint_type == "fte":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
         return bool(_FTE_SIGNAL.search(text)) and not bool(_FTE_NON_EMPLOYEE.search(text))
 
     if dp.datapoint_type == "sustainability_goal":
+        if strict_openai and dp.fact_kind not in {"target", "forecast"}:
+            return False
         if strict_openai and _ACTUAL_METRIC.search(metric):
             return False
         has_sust_signal = bool(_SUST_SIGNAL.search(text))
@@ -278,14 +282,20 @@ def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
         return has_sust_signal and has_target_signal and not business_only
 
     if dp.datapoint_type == "esg_datapoint":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
         return bool(_ESG_SIGNAL.search(text)) and not bool(_SUST_TARGET_SIGNAL.search(text))
 
     if dp.datapoint_type == "financial_highlight":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
         if _SH_SIGNAL.search(text) or _FTE_SIGNAL.search(text) or _SUST_SIGNAL.search(text):
             return False
         return bool(_FIN_SIGNAL.search(text))
 
     if dp.datapoint_type == "business_performance":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
         if _FTE_SIGNAL.search(text) or _SH_SIGNAL.search(text):
             return False
         if _SUST_SIGNAL.search(text) and _SUST_TARGET_SIGNAL.search(text):

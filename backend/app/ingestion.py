@@ -7,6 +7,7 @@ import random
 import re
 import sys
 import time
+from collections import Counter
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -21,6 +22,7 @@ from backend.app.config import settings
 from backend.app.openai_table_vision import PageTableExtraction, enhance_page_tables, tables_to_text
 from backend.app.extracted_datapoints import deduplicate_datapoints, normalize_llamaextract_result
 from backend.app.openai_extract_datapoints import extract_annual_report_datapoints_openai
+from backend.app.openai_validate_datapoints import validate_datapoints_openai
 from backend.app.parsers import as_page_tuples, parse_pdf_pages
 from backend.app.schemas import Chunk
 from backend.app.vision_page_selection import classify_table_complexity
@@ -31,26 +33,69 @@ EMBEDDING_MAX_TOKENS = 8191
 CHROMA_UPSERT_BATCH_SIZE = 1000
 _ENCODING = tiktoken.get_encoding("cl100k_base")
 _FTE_PATTERNS = [
-    re.compile(r"\bFTEs?\b", re.IGNORECASE),
-    re.compile(r"\bfull[-\s]time equivalents?\b", re.IGNORECASE),
+    re.compile(
+        r"\bFTEs?\b|\bfull[-\s]time equivalents?\b|"
+        r"total\s+employees?|number\s+of\s+employees|headcount|workforce|"
+        r"payroll\s+employees?|internal\s+employees?|external\s+employees?|"
+        r"permanent\s+employees?|temporary\s+employees?|part[-\s]time\s+employees?|"
+        r"employee\s+turnover|attrition\s+rate",
+        re.IGNORECASE,
+    ),
 ]
 _SUSTAINABILITY_PATTERNS = [
-    re.compile(r"\b(target|goal|aim|ambition|commit(?:ment|ted)?|plan)\b", re.IGNORECASE),
-    re.compile(r"\b(net[-\s]?zero|greenhouse gas|ghg|co2e|co₂e|scope [123])\b", re.IGNORECASE),
-    re.compile(r"\b20\d{2}\b", re.IGNORECASE),
+    re.compile(
+        r"\b(target|goal|aim|ambition|commit(?:ment|ted)?|plan|intend|achieve|reduce|reduction)\b|"
+        r"net[-\s]?zero|science\s+based\s+targets?|\bsbti\b|transition\s+plan",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"greenhouse\s+gas|\bghg\b|co2e?|co₂e?|\bscope\s+[123]\b|emissions?|"
+        r"climate|carbon|methane|flaring|renewable|energy|waste|recycl|circular|"
+        r"water|biodiversity|supplier|diversity|inclusion|safety|human\s+rights",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\b20[3-9]\d\b", re.IGNORECASE),
 ]
 _ESG_PATTERNS = [
-    re.compile(r"\b(ESG|environmental|social|governance)\b", re.IGNORECASE),
-    re.compile(r"\b(climate|carbon|emission|biodiversity|water|waste|diversity|inclusion)\b", re.IGNORECASE),
+    re.compile(
+        r"\b(ESG|environmental|social|governance)\b|"
+        r"greenhouse\s+gas|\bghg\b|co2e?|co₂e?|\bscope\s+[123]\b|emissions?|"
+        r"renewable|energy|water|waste|recycl|circular|biodiversity|supplier|"
+        r"diversity|inclusion|safety|ethics",
+        re.IGNORECASE,
+    ),
 ]
 _FINANCIAL_HIGHLIGHT_PATTERNS = [
-    re.compile(r"\b(revenue|net income|profit|loss|EBITDA|operating income|earnings|return on equity|ROE|ROA|NII|net interest income)\b", re.IGNORECASE),
+    re.compile(
+        r"financial\s+highlights?|financial\s+performance|at\s+a\s+glance|"
+        r"\brevenue\b|net\s+sales|total\s+income|net\s+income|net\s+profit|"
+        r"operating\s+(?:income|profit)|\bebit(?:da)?\b|gross\s+margin|gross\s+profit|"
+        r"earnings\s+per\s+share|\beps\b|free\s+cash\s+flow|operating\s+cash\s+flow|"
+        r"cash\s+flow\s+from\s+operat|r&d|research\s+and\s+development|"
+        r"return\s+on\s+equity|\broe\b|\bcet1\b|capital\s+ratio|"
+        r"liquidity\s+coverage|net\s+interest\s+margin|\bnim\b",
+        re.IGNORECASE,
+    ),
 ]
 _BUSINESS_PERFORMANCE_PATTERNS = [
-    re.compile(r"\b(segment|business line|performance|growth|market share|volumes?|loans?|deposits?|assets under management|AuM|client)\b", re.IGNORECASE),
+    re.compile(
+        r"business\s+performance|operational\s+highlights?|segment\s+performance|"
+        r"systems?\s+sold|lithography\s+systems?|installed\s+base|order\s+intake|"
+        r"order\s+book|backlog|bookings|customers?|clients?|suppliers?|"
+        r"customer\s+satisfaction|market\s+share|production\s+volume|deliveries|"
+        r"\bloans?\b|\bdeposits?\b|\bmortgages?\b|\blng\b|barrels?\s+per\s+day|"
+        r"refining\s+throughput|assets\s+under\s+management|\baum\b",
+        re.IGNORECASE,
+    ),
 ]
 _SHAREHOLDER_RETURN_PATTERNS = [
-    re.compile(r"\b(dividend|EPS|earnings per share|share buyback|repurchase|total shareholder return|TSR|capital return|payout)\b", re.IGNORECASE),
+    re.compile(
+        r"returned?\s+to\s+shareholders?|shareholder\s+(?:returns?|distributions?)|"
+        r"capital\s+return|dividends?|dividend\s+per\s+share|payout\s+ratio|"
+        r"share\s+buybacks?|share\s+repurchases?|repurchased|treasury\s+shares?|"
+        r"shares?\s+cancelled",
+        re.IGNORECASE,
+    ),
 ]
 _CATEGORY_MAX_PAGES: dict[str, int] = {
     "sustainability": 30,
@@ -76,11 +121,15 @@ _DATAPOINT_CATEGORIES = (
     "business_performance",
     "shareholder_return",
 )
-_VISION_MAX_PAGES = 20
+_VISION_MAX_PAGES = 30
 _VISION_MAX_ATTEMPTS = 2
 _VISION_DETAIL = "high"
 _VISION_DPI = 180
 _VISION_WORKERS = 6
+
+
+def _category_page_score(category: str, text: str) -> int:
+    return sum(len(pattern.findall(text)) for pattern in _CATEGORY_PATTERNS.get(category, []))
 
 
 def _count_tokens(text: str) -> int:
@@ -275,6 +324,7 @@ def extract_categorized_datapoints(
     source: str,
     company: str | None,
     year: int | None,
+    validate: bool = False,
 ) -> list[object]:
     page_records = [
         {
@@ -287,12 +337,19 @@ def extract_categorized_datapoints(
         for page, text in pages
         if text.strip()
     ]
+
+    def _pages_label(records: list[dict[str, Any]]) -> str:
+        pages = [str(record["page"]) for record in records]
+        label = ", ".join(pages[:12])
+        if len(pages) > 12:
+            label += f", ... (+{len(pages) - 12})"
+        return label
+
     def _extract_category(category: str) -> list[object]:
         max_pages = _CATEGORY_MAX_PAGES.get(category, 20)
-        patterns = _CATEGORY_PATTERNS.get(category, [])
-        if patterns:
+        if category in _CATEGORY_PATTERNS:
             scored = [
-                (p, sum(len(pat.findall(p["text"])) for pat in patterns))
+                (p, _category_page_score(category, p["text"]))
                 for p in page_records
             ]
             scored = [(p, s) for p, s in scored if s > 0]
@@ -300,7 +357,13 @@ def extract_categorized_datapoints(
             candidate_pages = [p for p, _ in scored[:max_pages]] or page_records[:max_pages]
         else:
             candidate_pages = page_records[:max_pages]
-        logger.info("category %s: %d/%d pages selected by regex", category, len(candidate_pages), len(page_records))
+        logger.info(
+            "category %s: %d/%d pages selected by regex: %s",
+            category,
+            len(candidate_pages),
+            len(page_records),
+            _pages_label(candidate_pages),
+        )
 
         def _extract_page(page_record: dict) -> list[object]:
             result = extract_annual_report_datapoints_openai(
@@ -316,6 +379,40 @@ def extract_categorized_datapoints(
             page_futures = [page_executor.submit(_extract_page, p) for p in candidate_pages]
             for f in as_completed(page_futures):
                 category_results.extend(f.result())
+        logger.info("category %s: %d structured datapoints extracted", category, len(category_results))
+        if validate and category_results:
+            try:
+                validation_items = validate_datapoints_openai(
+                    category=category,
+                    datapoints=category_results,
+                    company=company,
+                    year=year,
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("category %s validation failed (%s), keeping extracted datapoints", category, exc)
+                return category_results
+            if not validation_items:
+                logger.warning("category %s validation returned no items, keeping extracted datapoints", category)
+                return category_results
+            keep_indices = {
+                item.index
+                for item in validation_items
+                if item.is_valid and item.duplicate_of_index is None
+            }
+            validated = [
+                dp.model_copy(update={"validation_status": "valid"})
+                if hasattr(dp, "model_copy")
+                else dp
+                for i, dp in enumerate(category_results)
+                if i in keep_indices
+            ]
+            logger.info(
+                "category %s validation: kept %d/%d datapoints",
+                category,
+                len(validated),
+                len(category_results),
+            )
+            return validated
         return category_results
 
     extracted = []
@@ -323,7 +420,10 @@ def extract_categorized_datapoints(
         futures = {executor.submit(_extract_category, cat): cat for cat in _DATAPOINT_CATEGORIES}
         for future in as_completed(futures):
             extracted.extend(future.result())
-    return deduplicate_datapoints(extracted)
+    deduped = deduplicate_datapoints(extracted)
+    counts = Counter(getattr(dp, "datapoint_type", None) for dp in deduped)
+    logger.info("structured datapoints after deduplication: %s", dict(sorted(counts.items())))
+    return deduped
 
 
 def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
@@ -595,6 +695,10 @@ def deduplicate_chunks(chunks: list[Chunk]) -> list[Chunk]:
     return deduped
 
 
+def _chunks_for_embedding(chunks: list[Chunk]) -> list[Chunk]:
+    return chunks
+
+
 def embed_texts(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
@@ -676,8 +780,49 @@ def delete_existing_source_chunks(
         logger.info("could not delete existing chunks for %s: %s", source, exc)
 
 
+def _load_datapoints_json(path: Path) -> list[dict[str, Any]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, dict):
+        payload = payload.get("datapoints", [])
+    if not isinstance(payload, list):
+        raise RuntimeError(f"datapoints JSON must be a list or contain a 'datapoints' list: {path}")
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def _format_datapoint_chunk_text(datapoint: dict[str, Any]) -> str:
+    lines: list[str] = []
+    metric = str(datapoint.get("metric") or datapoint.get("label") or "").strip()
+    if metric:
+        lines.append(f"Metric: {metric}")
+    datapoint_type = str(datapoint.get("datapoint_type") or "").strip()
+    if datapoint_type:
+        lines.append(f"Type: {datapoint_type}")
+    value = str(datapoint.get("value") or datapoint.get("value_or_target") or "").strip()
+    unit = str(datapoint.get("unit") or "").strip()
+    if value and unit:
+        lines.append(f"Value: {value} {unit}")
+    elif value:
+        lines.append(f"Value: {value}")
+    for label, key in (
+        ("Period", "period"),
+        ("Basis", "basis"),
+        ("Scope", "scope"),
+        ("Scope type", "scope_type"),
+        ("Target year", "target_year"),
+        ("Fact kind", "fact_kind"),
+        ("Canonical metric", "canonical_metric"),
+    ):
+        value = str(datapoint.get(key) or "").strip()
+        if value:
+            lines.append(f"{label}: {value}")
+    quote = str(datapoint.get("verbatim_text") or datapoint.get("quote") or "").strip()
+    if quote:
+        lines.append(f"Quote: {quote}")
+    return "\n".join(lines).strip()
+
+
 def build_datapoint_chunks(
-    datapoints: list[dict[str, str | int | None]],
+    datapoints: list[dict[str, Any]],
     *,
     source: str,
     company: str | None,
@@ -692,11 +837,11 @@ def build_datapoint_chunks(
 
     chunks: list[Chunk] = []
     for datapoint in datapoints:
-        page = int(datapoint["page"] or 1)
+        page = int(datapoint.get("page") or 1)
         idx = next_idx_by_page.get(page, 0)
         next_idx_by_page[page] = idx + 1
         datapoint_type = str(datapoint.get("datapoint_type") or "datapoint")
-        text = str(datapoint.get("verbatim_text") or datapoint.get("quote") or "").strip()
+        text = _format_datapoint_chunk_text(datapoint)
         if not text:
             continue
         section_path = datapoint.get("section_path")
@@ -719,9 +864,15 @@ def build_datapoint_chunks(
                 text=text,
                 token_count=_count_tokens(text),
                 parser=parser,
-                chunk_kind="datapoint",
+                chunk_kind="extracted_datapoint",
                 section_path=str(section_path) if section_path else datapoint_type,
                 embedding_text="\n".join(part for part in embedding_parts if part),
+                fact_kind=datapoint.get("fact_kind"),
+                basis=datapoint.get("basis"),
+                scope_type=datapoint.get("scope_type"),
+                quality=datapoint.get("quality"),
+                validation_status=datapoint.get("validation_status"),
+                canonical_metric=datapoint.get("canonical_metric"),
             )
         )
     return chunks
@@ -776,6 +927,7 @@ def ingest_pdf(
     enhance_vision: bool = True,
     datapoints_json: Path | None = None,
     skip_embed: bool = False,
+    validate_datapoints: bool = True,
 ) -> int:
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
@@ -844,6 +996,7 @@ def ingest_pdf(
             source=source,
             company=company,
             year=year,
+            validate=validate_datapoints,
         )
         datapoints_path = persist_datapoints(
             datapoints,
@@ -857,7 +1010,7 @@ def ingest_pdf(
         )
         raw_datapoints = [dp if isinstance(dp, dict) else dp.model_dump() for dp in datapoints]
     elif datapoints_json is not None:
-        raw_datapoints = json.loads(datapoints_json.read_text(encoding="utf-8"))
+        raw_datapoints = _load_datapoints_json(datapoints_json)
         logger.info("loaded %d datapoints from %s", len(raw_datapoints), datapoints_json)
 
     if raw_datapoints:
@@ -881,10 +1034,11 @@ def ingest_pdf(
         logger.info("skip_embed=True: skipping embedding and ChromaDB upsert")
         return len(chunks)
 
-    embeddings = embed_texts([c.embedding_text or c.text for c in chunks])
-    if len(embeddings) != len(chunks):
+    embed_chunks = _chunks_for_embedding(chunks)
+    embeddings = embed_texts([c.embedding_text or c.text for c in embed_chunks])
+    if len(embeddings) != len(embed_chunks):
         raise RuntimeError(
-            f"embedding count {len(embeddings)} != chunk count {len(chunks)}"
+            f"embedding count {len(embeddings)} != embeddable chunk count {len(embed_chunks)}"
         )
 
     collection = get_collection(reset=reset)
@@ -895,8 +1049,8 @@ def ingest_pdf(
             company=company,
             year=year,
         )
-    for i in range(0, len(chunks), CHROMA_UPSERT_BATCH_SIZE):
-        batch_chunks = chunks[i : i + CHROMA_UPSERT_BATCH_SIZE]
+    for i in range(0, len(embed_chunks), CHROMA_UPSERT_BATCH_SIZE):
+        batch_chunks = embed_chunks[i : i + CHROMA_UPSERT_BATCH_SIZE]
         batch_embeddings = embeddings[i : i + CHROMA_UPSERT_BATCH_SIZE]
         collection.upsert(
             ids=[c.id for c in batch_chunks],
@@ -912,7 +1066,7 @@ def ingest_pdf(
         )
     logger.info(
         "upserted %d chunks into '%s' at %s",
-        len(chunks),
+        len(embed_chunks),
         settings.chroma_collection,
         settings.chroma_persist_dir,
     )
@@ -971,7 +1125,13 @@ def _cli(argv: list[str] | None = None) -> int:
         action="store_true",
         help="skip embedding and ChromaDB upsert (parse, vision and datapoint extraction only)",
     )
-    parser.set_defaults(extract_datapoints=True, enhance_vision=True, skip_embed=False)
+    parser.add_argument(
+        "--no-validate-datapoints",
+        action="store_false",
+        dest="validate_datapoints",
+        help="skip OpenAI validation/deduplication of extracted datapoints",
+    )
+    parser.set_defaults(extract_datapoints=True, enhance_vision=True, skip_embed=False, validate_datapoints=True)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -989,6 +1149,7 @@ def _cli(argv: list[str] | None = None) -> int:
             enhance_vision=args.enhance_vision,
             datapoints_json=args.datapoints_json,
             skip_embed=args.skip_embed,
+            validate_datapoints=args.validate_datapoints,
         )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)

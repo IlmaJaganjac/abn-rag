@@ -8,7 +8,7 @@ from backend.app.extracted_datapoints import (
     deduplicate_datapoints,
     normalize_llamaextract_result,
 )
-from backend.app.llama_extract_datapoints import (
+from backend.app.datapoint_schemas import (
     AnnualReportDatapoints,
     ExtractedBusinessPerformance,
     ExtractedESGDatapoint,

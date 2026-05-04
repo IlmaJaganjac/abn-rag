@@ -4,7 +4,7 @@ from typing import Any
 
 from backend.app._openai import openai_client
 from backend.app.config import settings
-from backend.app.llama_extract_datapoints import AnnualReportDatapoints, category_prompt
+from backend.app.datapoint_schemas import AnnualReportDatapoints, category_prompt
 
 
 def _parse_page_range(page_range: str | None) -> set[int]:

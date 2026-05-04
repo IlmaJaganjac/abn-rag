@@ -16,7 +16,7 @@ from backend.app.extracted_datapoints import (
     normalize_llamaextract_result,
     save_datapoint_set,
 )
-from backend.app.llama_extract_datapoints import (
+from backend.app.datapoint_schemas import (
     AnnualReportDatapoints,
     extract_annual_report_datapoints,
 )

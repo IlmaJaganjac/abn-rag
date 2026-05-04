@@ -4,6 +4,7 @@ import json
 
 from backend.app.extracted_datapoints import NormalizedDatapoint
 from backend.app.ingestion import (
+    build_datapoint_chunks,
     build_chunks,
     extract_categorized_datapoints,
     extract_datapoint_candidates,
@@ -13,7 +14,8 @@ from backend.app.ingestion import (
     persist_datapoints,
     persist_parsed_pages,
 )
-from backend.app.llama_extract_datapoints import AnnualReportDatapoints
+from backend.app.datapoint_schemas import AnnualReportDatapoints
+from backend.app.openai_validate_datapoints import ValidationItem
 from backend.app.parsers import ParsedPage, ParseResult
 
 
@@ -386,7 +388,7 @@ def test_ingest_pdf_can_store_stable_source_name(
     )
     monkeypatch.setattr(
         "backend.app.ingestion.extract_categorized_datapoints",
-        lambda pages, source, company, year: [
+        lambda pages, source, company, year, validate=False: [
             NormalizedDatapoint(
                 source=source,
                 company=company,
@@ -424,20 +426,44 @@ def test_ingest_pdf_can_store_stable_source_name(
         source_name="asml.pdf",
     )
 
-    assert count == 1
+    assert count == 2
     assert collection.delete_kwargs["where"] == {
         "$and": [{"source": "asml.pdf"}, {"company": "ASML"}, {"year": 2025}]
     }
-    assert len(collection.upsert_calls) == 1
+    assert len(collection.upsert_calls) == 2
     assert collection.upsert_calls[0]["ids"] == ["asml.pdf:5:0"]
     assert collection.upsert_calls[0]["documents"] == ["Enhanced page text"]
     assert collection.upsert_calls[0]["embeddings"] == [[0.1, 0.2]]
+    assert collection.upsert_calls[1]["ids"] == ["asml.pdf:5:1"]
+    assert collection.upsert_calls[1]["documents"] == [
+        "Metric: Total employees (FTEs)\n"
+        "Type: fte\n"
+        "Value: > 44,000\n"
+        "Quote: Total employees (FTEs): > 44,000"
+    ]
+    assert embedded_texts == [
+        "ASML\n2025\nEnhanced page text",
+        "ASML\n2025\nllamaparse\ndatapoint\nfte\n"
+        "Metric: Total employees (FTEs)\n"
+        "Type: fte\n"
+        "Value: > 44,000\n"
+        "Quote: Total employees (FTEs): > 44,000",
+    ]
     assert collection.upsert_calls[0]["metadatas"][0]["source"] == "asml.pdf"
     assert collection.upsert_calls[0]["metadatas"][0]["parser"] == "llamaparse"
     assert collection.upsert_calls[0]["metadatas"][0]["chunk_kind"] == "section"
+    assert collection.upsert_calls[1]["metadatas"][0]["chunk_kind"] == "extracted_datapoint"
     assert (processed_dir / "pages" / "asml.jsonl").exists()
     assert (processed_dir / "datapoints" / "asml.json").exists()
     assert (processed_dir / "chunks" / "asml.jsonl").exists()
+    records = [
+        json.loads(line)
+        for line in (processed_dir / "chunks" / "asml.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert [record["chunk_kind"] for record in records] == ["section", "extracted_datapoint"]
+    assert "Metric: Total employees (FTEs)" in records[1]["text"]
+    assert "Value: > 44,000" in records[1]["text"]
+    assert "Quote: Total employees (FTEs): > 44,000" in records[1]["text"]
 
 
 def test_ingest_pdf_extracts_datapoints_only_when_flag_enabled(
@@ -466,7 +492,7 @@ def test_ingest_pdf_extracts_datapoints_only_when_flag_enabled(
     )
     monkeypatch.setattr(
         "backend.app.ingestion.extract_categorized_datapoints",
-        lambda pages, source, company, year: [
+        lambda pages, source, company, year, validate=False: [
             NormalizedDatapoint(
                 source=source,
                 company=company,
@@ -619,17 +645,76 @@ def test_extract_categorized_datapoints_uses_all_categories(monkeypatch) -> None
         year=2025,
     )
 
-    assert calls == [
+    assert sorted(calls) == sorted([
         "fte",
         "sustainability",
         "esg",
         "financial_highlight",
         "business_performance",
         "shareholder_return",
-    ]
+    ])
     assert len(datapoints) == 1
     assert datapoints[0].datapoint_type == "fte"
     assert datapoints[0].extractor == "openai"
+
+
+def test_extract_categorized_datapoints_validates_and_deduplicates(monkeypatch) -> None:
+    def fake_extract(*, pages, company, year, category):
+        payload = {
+            "company": company,
+            "year": year,
+            "fte_datapoints": [],
+            "sustainability_goals": [],
+            "esg_datapoints": [],
+            "financial_highlights": [],
+            "business_performance": [],
+            "shareholder_returns": [],
+        }
+        if category == "fte":
+            payload["fte_datapoints"] = [
+                {
+                    "label": "Total employees (FTEs)",
+                    "value": "20,455",
+                    "unit": "FTEs",
+                    "quote": "Internal employees | 20,455",
+                    "fact_kind": "actual",
+                    "scope_type": "company_wide",
+                    "page": 14,
+                },
+                {
+                    "label": "Total employees (FTEs)",
+                    "value": "20,455",
+                    "unit": "FTEs",
+                    "quote": "Internal employees | 20,455",
+                    "fact_kind": "actual",
+                    "scope_type": "company_wide",
+                    "page": 14,
+                },
+            ]
+        return AnnualReportDatapoints(**payload)
+
+    monkeypatch.setattr(
+        "backend.app.ingestion.extract_annual_report_datapoints_openai",
+        fake_extract,
+    )
+    monkeypatch.setattr(
+        "backend.app.ingestion.validate_datapoints_openai",
+        lambda **kwargs: [
+            ValidationItem(index=0, is_valid=True, reason="valid"),
+            ValidationItem(index=1, is_valid=False, reason="duplicate", duplicate_of_index=0),
+        ],
+    )
+
+    datapoints = extract_categorized_datapoints(
+        [(14, "Internal employees | 20,455 FTEs")],
+        source="abn-amro.pdf",
+        company="ABN AMRO",
+        year=2025,
+        validate=True,
+    )
+
+    assert len(datapoints) == 1
+    assert datapoints[0].validation_status == "valid"
 
 
 def test_ingest_pdf_can_skip_vision_enhancement(
@@ -698,6 +783,54 @@ def test_persist_chunks_writes_debug_jsonl(tmp_path) -> None:
     assert record["chunk_kind"] == "section"
     assert record["text"] == "Total employees (FTEs): > 44,000"
     assert record["embedding_text"] == chunk.embedding_text
+
+
+def test_build_datapoint_chunks_include_structured_fact_text() -> None:
+    existing = build_chunks(
+        iter([(5, "Annual report page text")]),
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        max_tokens=800,
+        overlap=120,
+        parser="llamaparse",
+    )
+
+    [chunk] = build_datapoint_chunks(
+        [
+            {
+                "source": "asml.pdf",
+                "company": "ASML",
+                "year": 2025,
+                "datapoint_type": "fte",
+                "metric": "Total employees",
+                "value": "> 44,000",
+                "unit": "FTEs",
+                "period": "2025",
+                "page": 5,
+                "quote": "Total employees (FTEs): > 44,000",
+                "basis": "FTE",
+                "fact_kind": "actual",
+                "scope_type": "company_wide",
+                "canonical_metric": "total_employees",
+            }
+        ],
+        source="asml.pdf",
+        company="ASML",
+        year=2025,
+        parser="llamaparse",
+        existing_chunks=existing,
+    )
+
+    assert chunk.id == "asml.pdf:5:1"
+    assert chunk.chunk_kind == "extracted_datapoint"
+    assert chunk.section_path == "fte"
+    assert "Metric: Total employees" in chunk.text
+    assert "Value: > 44,000 FTEs" in chunk.text
+    assert "Quote: Total employees (FTEs): > 44,000" in chunk.text
+    assert chunk.fact_kind == "actual"
+    assert chunk.scope_type == "company_wide"
+    assert chunk.canonical_metric == "total_employees"
 
 
 def _skip_test_extract_datapoint_candidates_finds_sustainability_goals() -> None:  # disabled: table-based candidate detection removed

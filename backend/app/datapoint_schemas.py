@@ -34,9 +34,9 @@ _CATEGORY_PROMPTS: dict[str, str] = {
     "fte": f"""\
 You extract workforce and headcount datapoints from annual reports. Only populate fte_datapoints. Leave all other lists empty.
 
-Extract workforce/headcount datapoints: total employees (FTEs or headcount), average number of payroll employees, number of internal employees, permanent employees, temporary employees, part-time employees, full-time employees, non-guaranteed hours employees, external employees, contractors, year-end employee count, average employee count, employees by gender, employees by region or country, employee turnover or attrition rate. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated. Include label, value, unit (FTEs or headcount), basis (FTE/headcount/payroll/etc.), period (year or date), page, and verbatim quote.
+Extract actual reported workforce/headcount datapoints for the reporting period: total employees (FTEs or headcount), average number of payroll employees, number of internal employees, permanent employees, temporary employees, part-time employees, full-time employees, non-guaranteed hours employees, external employees, contractors, year-end employee count, average employee count, employees by gender, employees by region or country, employee turnover or attrition rate. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated. Include label, value, unit (FTEs or headcount), basis (FTE/headcount/payroll/etc.), period (year or date), page, and verbatim quote.
 
-Do not extract: dedicated FTEs for a specific project, program, or team; employee engagement survey scores; training hours; safety incident rates; board or executive diversity percentages unless they are explicitly reported as employee/headcount counts. Do not extract financial, sustainability, operational, or shareholder data.
+Do not extract: workforce reduction plans, hiring plans, future FTE targets, dedicated FTEs for a specific project, program, or team; employee engagement survey scores; training hours; safety incident rates; wages/salaries per FTE; board, supervisory-board or executive diversity percentages unless they are explicitly reported as employee/headcount counts. Do not extract financial, sustainability, operational, customer, or shareholder data.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -75,34 +75,34 @@ Always populate:
 - page: exact page number
 - quote: exact verbatim sentence(s) from the report
 
-REJECT: actual historical ESG performance values (reported emissions for the reporting year), business growth or production targets (LNG sales, liquids production, barrels per day, refining throughput, revenue, market share), financial / FTE / operational / shareholder data, general sustainability context or strategy text that states no specific target, and governance or risk text without an explicit target.
+REJECT: actual historical ESG performance values (reported emissions for the reporting year), progress/status-only updates without a target value, business growth or production targets (LNG sales, liquids production, barrels per day, refining throughput, revenue, market share), financial / FTE / operational / shareholder data, general sustainability context or strategy text that states no specific measurable target or commitment, and governance, risk or policy text without an explicit sustainability target.
 
 {_BASE_INSTRUCTIONS}""",
 
     "esg": f"""\
 You extract actual ESG performance values from annual reports. Only populate esg_datapoints. Leave all other lists empty.
 
-Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results, social/workforce ESG metrics. Include value, unit, period/year, scope if present, page, and verbatim quote.
+Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results, social/workforce ESG metrics such as safety rates or employee diversity percentages when explicitly reported as ESG performance. Include value, unit, period/year, scope if present, page, and verbatim quote.
 
-Do not extract forward-looking targets or commitments. Do not extract business production volumes, financial KPIs, shareholder data, FTE/headcount totals, or general operational KPIs unless the value is explicitly reported as an ESG performance metric.
+Do not extract forward-looking targets, ambitions, commitments, target years, or progress against a target. Do not extract business production volumes, financial KPIs, shareholder data, FTE/headcount totals, or general operational KPIs unless the value is explicitly reported as an ESG performance metric.
 
 {_BASE_INSTRUCTIONS}""",
 
     "financial_highlight": f"""\
 You extract financial KPI values from annual reports. Only populate financial_highlights. Leave all other lists empty.
 
-Extract financial performance values from summaries, income statements, tables, or "at a glance" / highlights pages. Target metrics: total net sales / revenue / total income, gross profit, gross margin (%), operating income / operating profit / EBIT / EBITDA / adjusted EBITDA, net income / net profit / profit for the period, earnings per share (EPS) / diluted EPS, R&D spend / research and development expense, free cash flow, operating cash flow / cash flow from operating activities, cash and cash equivalents, capex / capital expenditure, return on equity (ROE), return on invested capital (ROIC), CET1 ratio, capital ratio, liquidity coverage ratio, net interest margin (NIM). Include metric, value, unit (€m / €bn / %), period (year), page, and a short verbatim quote.
+Extract financial performance values from summaries, income statements, banking KPI tables, or "at a glance" / highlights pages. Target metrics: total net sales / revenue / total income, net interest income, fee and commission income, operating result / operating income / operating profit / EBIT / EBITDA / adjusted EBITDA, gross profit, gross margin (%), net income / net profit / profit for the period, earnings per share (EPS) / diluted EPS, R&D spend / research and development expense, free cash flow, operating cash flow / cash flow from operating activities, cash and cash equivalents, capex / capital expenditure, return on equity (ROE), return on invested capital (ROIC), CET1 ratio, capital ratio, liquidity coverage ratio, net interest margin (NIM), cost/income ratio, impairment charges. Include metric, value, unit (€m / €bn / %), period (year), page, and a short verbatim quote.
 
-Do not extract: workforce/FTE data, sustainability or ESG targets, operational KPIs (systems sold, suppliers, satisfaction, LNG sales, barrels per day, production volume), or shareholder return/distribution amounts such as dividends and buybacks.
+Do not extract: workforce/FTE data, sustainability or ESG targets, actual ESG performance, operational non-financial KPIs (systems sold, suppliers, satisfaction, LNG sales, barrels per day, production volume), customer counts, or shareholder return/distribution amounts such as dividends and buybacks.
 
 {_BASE_INSTRUCTIONS}""",
 
     "business_performance": f"""\
 You extract business and operational performance KPI values from annual reports. Only populate business_performance. Leave all other lists empty.
 
-Extract operational/business performance values from summaries, segment tables, or "at a glance" pages. Target metrics: systems sold / lithography systems / net system sales in units, new systems sold, used systems sold, installed base / active systems, order intake / bookings, order book / backlog, number of customers or clients, customer satisfaction score / NPS, number of suppliers, reuse rate (operational/circularity KPI), market share, production volume, delivery volume, loans / deposits / mortgages (banking), LNG sales / barrels per day / refining throughput (energy), beer volume / hectoliters (consumer goods), number of stores / branches / locations (retail), assets under management (AUM), transaction volume. Include metric, value, unit, period, page, and a short verbatim quote.
+Extract operational/business performance values from summaries, segment tables, or "at a glance" pages. Target metrics: systems sold / lithography systems / net system sales in units, new systems sold, used systems sold, installed base / active systems, order intake / bookings, order book / backlog, number of customers or clients, customer satisfaction score / NPS, number of suppliers, reuse rate (operational/circularity KPI), market share, production volume, delivery volume, client assets / assets under management (AUM), transaction volume, number of branches or locations. For banks, include operational balance-sheet/customer metrics such as customer loans, deposits, mortgages, client assets, and number of clients only when reported as business scale/performance KPIs, not as income-statement profit metrics. Include metric, value, unit, period, page, and a short verbatim quote.
 
-Do not extract: FTE/headcount, employee demographics, financial statement lines (revenue/net sales as money, net income, gross margin), sustainability or ESG targets, actual ESG performance values, or shareholder distributions.
+Do not extract: FTE/headcount, employee demographics, financial statement lines (revenue/net sales as money, net interest income, fee income, net income, gross margin, operating profit), capital/liquidity ratios, sustainability or ESG targets, actual ESG performance values, or shareholder distributions.
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -111,7 +111,7 @@ You extract shareholder return and capital distribution values from annual repor
 
 Extract: total returned to shareholders, total shareholder distributions, capital return, dividends paid, ordinary dividend, special dividend, final dividend, interim dividend, dividend per share, proposed dividend, payout ratio, share buybacks, share repurchases, treasury shares purchased, shares cancelled, number of shares repurchased, total cash returned. Include metric, value, unit (€ per share / €bn / €m / %), period (year), page, and a short verbatim quote.
 
-Do not extract: financial performance KPIs (net income, gross margin, revenue, cash flow), workforce data, sustainability targets, business operational KPIs, or general share price/market capitalization values unless they are explicitly part of dividends, buybacks, capital returns, or shareholder distributions.
+Do not extract: financial performance KPIs (net income, gross margin, revenue, cash flow, EPS unless explicitly tied to dividend payout), workforce data, sustainability targets, business operational KPIs, or general share price/market capitalization values unless they are explicitly part of dividends, buybacks, capital returns, or shareholder distributions.
 
 {_BASE_INSTRUCTIONS}""",
 }
