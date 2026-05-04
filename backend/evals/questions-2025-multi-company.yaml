@@ -1028,7 +1028,7 @@ questions:
   # =========================
 
   - id: abn_amro_2025_fte_employee_reduction
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: fte
     question: "By about how many FTEs did ABN AMRO's employee numbers decrease in 2025?"
@@ -1042,7 +1042,7 @@ questions:
     notes: "Workforce datapoint reported in 2025 performance discussion."
 
   - id: abn_amro_2025_fte_total_employees
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: fte
     question: "What internal and external employee FTE counts did ABN AMRO report at year-end 2025?"
@@ -1056,7 +1056,7 @@ questions:
     notes: "Use the year-end FTE table, not the headcount table or external FTE excluding HAL."
 
   - id: abn_amro_2025_fte_strategy_right_sizing
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: fte
     question: "Which strategic priority explains ABN AMRO's reduction in employee numbers?"
@@ -1073,7 +1073,7 @@ questions:
     notes: "Connects workforce reduction to simplifying the organisation and the 2026-2028 strategic priority to right-size the cost base."
 
   - id: abn_amro_2025_fte_employee_topic_sustainability
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: fte
     question: "Which employee representative bodies does ABN AMRO mention engaging with in its sustainability materiality process?"
@@ -1088,7 +1088,7 @@ questions:
     notes: "Workforce/stakeholder engagement datapoint."
 
   - id: abn_amro_2025_fte_ceo_change
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: fte
     question: "Who succeeded Robert Swaak as CEO of ABN AMRO in 2025?"
@@ -1101,7 +1101,7 @@ questions:
     notes: "Leadership workforce/governance datapoint."
 
   - id: abn_amro_2025_sustainability_goal_transition_finance
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "What transition-related role does ABN AMRO describe for its financing activities?"
@@ -1115,7 +1115,7 @@ questions:
     notes: "Sustainability/strategy goal, not a single actual datapoint."
 
   - id: abn_amro_2025_sustainability_goal_long_term_value
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "What long-term value aim does ABN AMRO describe in its value creation model?"
@@ -1129,7 +1129,7 @@ questions:
     notes: "Broad sustainability goal from value creation model."
 
   - id: abn_amro_2025_sustainability_goal_strategy_business_model
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "In the Strategy and business model section, how does ABN AMRO describe the relationship between sustainability, strategy and the business model?"
@@ -1145,7 +1145,7 @@ questions:
     notes: "Sustainability reporting structure."
 
   - id: abn_amro_2025_sustainability_goal_esg_scenarios
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "Which type of ESG scenario does ABN AMRO mention in its financial materiality assessment?"
@@ -1159,7 +1159,7 @@ questions:
     notes: "Sustainability risk/opportunity assessment."
 
   - id: abn_amro_2025_sustainability_goal_ethics_integrity
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "What does ABN AMRO say is required to maintain trust in the bank?"
@@ -1173,7 +1173,7 @@ questions:
     notes: "Sustainability/governance commitment."
 
   - id: abn_amro_2025_sustainability_goal_stakeholder_value
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: sustainability_goal
     question: "For whom does ABN AMRO say it aims to create long-term value?"
@@ -1188,7 +1188,7 @@ questions:
     notes: "Purpose and sustainability-related value creation."
 
   - id: abn_amro_2025_esg_datapoint_cet1_ratio
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: esg_datapoint
     question: "What CET1 ratio did ABN AMRO report for 2025?"
@@ -1201,7 +1201,7 @@ questions:
     notes: "Capital strength datapoint; included as ESG/risk datapoint for bank resilience."
 
   - id: abn_amro_2025_esg_datapoint_cost_of_risk
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: esg_datapoint
     question: "What cost of risk did ABN AMRO report in Q4 2025?"
@@ -1214,7 +1214,7 @@ questions:
     notes: "Risk/credit quality datapoint."
 
   - id: abn_amro_2025_esg_datapoint_rwa
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: esg_datapoint
     question: "What were ABN AMRO's total risk-weighted assets in 2025?"
@@ -1229,7 +1229,7 @@ questions:
     notes: "Risk/capital datapoint; page 118 reports total risk-weighted assets in EUR millions."
 
   - id: abn_amro_2025_esg_datapoint_rwa_2024_comparison
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: esg_datapoint
     question: "From what amount to what amount did ABN AMRO's total RWA decrease in 2025?"
@@ -1242,7 +1242,7 @@ questions:
     notes: "Actual risk/capital performance comparison."
 
   - id: abn_amro_2025_esg_datapoint_stakeholder_engagement
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: esg_datapoint
     question: "Which stakeholder engagement inputs did ABN AMRO mention for its materiality assessment?"
@@ -1258,7 +1258,7 @@ questions:
     notes: "Actual sustainability process datapoint."
 
   - id: abn_amro_2025_financial_net_profit
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: financial_highlight
     question: "What net profit did ABN AMRO report in 2025?"
@@ -1272,7 +1272,7 @@ questions:
     notes: "Main annual financial highlight."
 
   - id: abn_amro_2025_financial_roe
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: financial_highlight
     question: "What return on equity did ABN AMRO achieve in 2025?"
@@ -1286,7 +1286,7 @@ questions:
     notes: "Main bank profitability metric."
 
   - id: abn_amro_2025_financial_net_interest_income
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: financial_highlight
     question: "What net interest income did ABN AMRO report for 2025?"
@@ -1300,7 +1300,7 @@ questions:
     notes: "Use exact value if available; guidance phrase acceptable if report text retrieved."
 
   - id: abn_amro_2025_financial_fee_commission_income
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: financial_highlight
     question: "What net fee and commission income did ABN AMRO report in 2025?"
@@ -1314,7 +1314,7 @@ questions:
     notes: "Main financial highlight from financial performance section."
 
   - id: abn_amro_2025_business_new_mortgage_production
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: business_performance
     question: "What did ABN AMRO report about new mortgage production in Q4 2025?"
@@ -1329,7 +1329,7 @@ questions:
     notes: "Business performance narrative; page 92 gives the 2025 market share and Q4 mortgage reclassification."
 
   - id: abn_amro_2025_business_clearing_fee_income
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: business_performance
     question: "Why did ABN AMRO's Clearing business record higher fee income in 2025?"
@@ -1343,7 +1343,7 @@ questions:
     notes: "Segment/business performance."
 
   - id: abn_amro_2025_business_operating_activities_income
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: business_performance
     question: "What net income from other operating activities did ABN AMRO report in 2025?"
@@ -1357,7 +1357,7 @@ questions:
     notes: "Business performance/financial detail from the consolidated income statement and note 6."
 
   - id: abn_amro_2025_business_priorities
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: business_performance
     question: "What were ABN AMRO's strategic priorities for 2026 to 2028 as presented in the 2025 report?"
@@ -1371,7 +1371,7 @@ questions:
     notes: "Although phrased for 2026-2028, this is discussed in the 2025 annual report."
 
   - id: abn_amro_2025_shareholder_additional_capital_distribution
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: shareholder_return
     question: "What additional capital distribution did ABN AMRO announce for 2025?"
@@ -1385,7 +1385,7 @@ questions:
     notes: "Shareholder return datapoint."
 
   - id: abn_amro_2025_shareholder_final_dividend
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: shareholder_return
     question: "What final dividend per share did ABN AMRO propose for 2025?"
@@ -1399,7 +1399,7 @@ questions:
     notes: "Distinguish proposed final dividend from paid dividend."
 
   - id: abn_amro_2025_shareholder_capital_return_context
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: shareholder_return
     question: "Which capital metric supported ABN AMRO's additional capital distribution in 2025?"
@@ -1414,7 +1414,7 @@ questions:
     notes: "Capital return context."
 
   - id: abn_amro_2025_general_strategy
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: general_report_question
     question: "What was ABN AMRO's stated purpose or strategic positioning in the 2025 report?"
@@ -1428,7 +1428,7 @@ questions:
     notes: "General strategy/purpose question."
 
   - id: abn_amro_2025_general_ceo_message
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: general_report_question
     question: "What phrase did ABN AMRO's CEO use to describe the importance of execution?"
@@ -1441,7 +1441,7 @@ questions:
     notes: "CEO interview highlight."
 
   - id: abn_amro_2025_general_main_risks
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: general_report_question
     question: "How did ABN AMRO's Supervisory Board monitor key risks in 2025?"
@@ -1455,7 +1455,7 @@ questions:
     notes: "General risk governance question."
 
   - id: abn_amro_2025_general_business_model
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: general_report_question
     question: "What does ABN AMRO say it does for clients?"
@@ -1475,7 +1475,7 @@ questions:
     notes: "Broad business model/purpose question; allow client support phrasing from the CEO interview and business model sections."
 
   - id: abn_amro_2025_general_major_developments
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: general_report_question
     question: "What CEO change did ABN AMRO report in 2025?"
@@ -1491,7 +1491,7 @@ questions:
     notes: "Major CEO change in the year; page 15 gives the formal succession and page 155 discusses her arrival as new CEO."
 
   - id: abn_amro_2025_hallucination_future_actual_2028_roe
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: hallucination_check
     question: "What was ABN AMRO's actual return on equity in 2028?"
@@ -1500,7 +1500,7 @@ questions:
     notes: "Future actual not in the 2025 report."
 
   - id: abn_amro_2025_hallucination_shell_emissions
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: hallucination_check
     question: "What were Shell's Scope 1 emissions according to ABN AMRO's 2025 annual report?"
@@ -1509,7 +1509,7 @@ questions:
     notes: "Out-of-corpus company question."
 
   - id: abn_amro_2025_hallucination_unreported_chip_systems
-    company: ABN AMRO
+    company: ABN AMRO Bank
     year: 2025
     category: hallucination_check
     question: "How many lithography systems did ABN AMRO sell in 2025?"

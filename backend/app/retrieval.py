@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import math
-import os
 import re
 from collections import Counter
 from typing import Any
@@ -25,41 +24,6 @@ from backend.app.schemas import RetrievalQuery, RetrievalResult, RetrievedChunk
 RRF_K = 60
 DENSE_TOP_N = 30
 BM25_TOP_N = 30
-
-DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-DEFAULT_RERANK_CANDIDATE_K = 40
-DEFAULT_RERANK_TEXT_CHARS = 1000
-_reranker_model = None
-_reranker_model_name: str | None = None
-
-
-def _get_reranker():
-    """Load or reuse the configured cross-encoder reranker and return the model instance."""
-    global _reranker_model, _reranker_model_name
-    model_name = os.environ.get("RERANKER_MODEL") or DEFAULT_RERANKER_MODEL
-    if _reranker_model is None or _reranker_model_name != model_name:
-        from sentence_transformers import CrossEncoder
-        _reranker_model = CrossEncoder(model_name)
-        _reranker_model_name = model_name
-    return _reranker_model
-
-
-def rerank_chunks_cross_encoder(
-    question: str,
-    chunks: list[RetrievedChunk],
-    top_k: int,
-    text_chars: int = 3000,
-) -> list[RetrievedChunk]:
-    """Rerank candidate chunks and return the top results with updated scores."""
-    try:
-        model = _get_reranker()
-        pairs = [(question, chunk.text[:text_chars]) for chunk in chunks]
-        scores = model.predict(pairs)
-        ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
-        return [chunk.model_copy(update={"score": float(score)}) for score, chunk in ranked[:top_k]]
-    except Exception as exc:
-        logger.warning("reranker failed, falling back to original order: %s", exc)
-        return chunks[:top_k]
 
 
 _FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
@@ -248,13 +212,6 @@ def _rrf_merge(
 def retrieve(query: RetrievalQuery) -> RetrievalResult:
     """Run the retrieval pipeline and return ranked chunks plus the effective query."""
     collection = get_collection()
-    reranker_enabled = os.environ.get("ENABLE_RERANKER") == "1"
-    if reranker_enabled:
-        _ck = os.environ.get("RERANK_CANDIDATE_K")
-        candidate_k = int(_ck) if _ck else max(query.top_k * 4, DEFAULT_RERANK_CANDIDATE_K)
-    else:
-        candidate_k = query.top_k
-
     retrieval_text = expand_query_for_retrieval(query.question)
 
     [embedding] = embed_texts([retrieval_text])
@@ -262,7 +219,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     where = _build_where(query.company, query.year)
     raw = collection.query(
         query_embeddings=[embedding],
-        n_results=max(candidate_k, DENSE_TOP_N),
+        n_results=max(query.top_k, DENSE_TOP_N),
         where=where,
         include=["documents", "metadatas", "distances"],
     )
@@ -282,13 +239,8 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     chunks = _rrf_merge(
         dense_chunks=dense_chunks,
         bm25_chunks=_bm25_candidates(retrieval_query),
-        top_k=candidate_k,
+        top_k=query.top_k,
     )
-
-    if reranker_enabled:
-        _tc = os.environ.get("RERANK_TEXT_CHARS")
-        text_chars = int(_tc) if _tc else DEFAULT_RERANK_TEXT_CHARS
-        chunks = rerank_chunks_cross_encoder(query.question, chunks, query.top_k, text_chars=text_chars)
 
     return RetrievalResult(query=query, chunks=chunks)
 

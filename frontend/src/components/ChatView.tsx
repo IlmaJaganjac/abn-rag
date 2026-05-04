@@ -4,10 +4,14 @@ import { api } from '../api/client';
 import { ISend } from './Icons';
 
 const SUGGESTED_QUESTIONS = [
-  'How many total employees did ASML have at the end of 2025?',
-  'What were ASML’s total net sales in 2025?',
-  'What was ABN AMRO’s CET1 ratio in 2025?',
-  'Who was ABN AMRO’s CEO in 2025?',
+  "How many total employees did ASML have at the end of 2025?",
+  "What were ASML’s total net sales in 2025?",
+  "What was ABN AMRO’s CET1 ratio in 2025?",
+  "Who was ABN AMRO’s CEO in 2025?",
+  "What were Shell’s total revenues in 2025?",
+  "How many employees did Shell have in 2025?",
+  "What was Heineken’s net revenue in 2025?",
+  "How many employees did Heineken have in 2025?",
 ];
 
 const PHASE_LABELS: Record<ThinkingPhase, string> = {
@@ -100,36 +104,16 @@ function AnswerBlock({ ans, caveat, sourceLabel }: { ans: VerbatimAnswer; caveat
 }
 
 function SuggestedQuestions({ questions, onPick }: { questions: string[]; onPick: (q: string) => void }) {
-  const PAGE_SIZE = 4;
-  const totalPages = Math.max(1, Math.ceil(questions.length / PAGE_SIZE));
-  const [page, setPage] = useState(0);
-  const start = page * PAGE_SIZE;
-  const slice = questions.slice(start, start + PAGE_SIZE);
-  const pad = PAGE_SIZE - slice.length;
-
-  const next = () => setPage(p => (p + 1) % totalPages);
-  const prev = () => setPage(p => (p - 1 + totalPages) % totalPages);
-
   return (
     <div className="suggested">
       <div className="suggested-head">
         <span className="suggested-label">Try one of these</span>
-        {totalPages > 1 && (
-          <div className="suggested-pager">
-            <button className="pager-btn" onClick={prev} aria-label="Previous suggestions">←</button>
-            <span className="pager-count">{page + 1} / {totalPages}</span>
-            <button className="pager-btn" onClick={next} aria-label="Next suggestions">→</button>
-          </div>
-        )}
       </div>
       <div className="suggested-grid">
-        {slice.map(q => (
+        {questions.map(q => (
           <button key={q} className="suggested-btn" onClick={() => onPick(q)}>
             {q}<span className="arrow">→</span>
           </button>
-        ))}
-        {Array.from({ length: pad }).map((_, i) => (
-          <div key={`pad-${i}`} className="suggested-btn suggested-btn-empty" aria-hidden="true" />
         ))}
       </div>
     </div>
