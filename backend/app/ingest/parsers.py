@@ -55,40 +55,11 @@ def llamaparse_json_to_pages(results: list[dict[str, Any]]) -> list[ParsedPage]:
     return pages
 
 
-def _normalized_text(text: str) -> str:
-    """Normalize text for loose equality comparisons across parser outputs."""
-    return " ".join(text.split()).casefold()
-
 
 def strip_boilerplate(text: str) -> str:
     """Return parsed page text after lightweight boilerplate stripping."""
     return text.strip()
 
-
-def combine_with_pdf_text_layer(
-    parsed_pages: list[ParsedPage],
-    pdf_text_pages: list[ParsedPage],
-) -> list[ParsedPage]:
-    """Merge a parsed page list with a PDF native text layer."""
-    pdf_text_by_page = {page.page: page.text for page in pdf_text_pages}
-    combined: list[ParsedPage] = []
-    for page in parsed_pages:
-        pdf_text = pdf_text_by_page.get(page.page, "").strip()
-        parsed_text = page.text.strip()
-        if not pdf_text:
-            combined.append(page)
-            continue
-
-        normalized_pdf = _normalized_text(pdf_text)
-        normalized_parsed = _normalized_text(parsed_text)
-        if normalized_pdf == normalized_parsed or normalized_pdf in normalized_parsed:
-            combined.append(page)
-        elif normalized_parsed in normalized_pdf:
-            combined.append(ParsedPage(page=page.page, text=pdf_text))
-        else:
-            text = f"{pdf_text}\n\n--- Parsed markdown ---\n\n{parsed_text}"
-            combined.append(ParsedPage(page=page.page, text=text))
-    return combined
 
 
 def persist_llamaparse_artifacts(

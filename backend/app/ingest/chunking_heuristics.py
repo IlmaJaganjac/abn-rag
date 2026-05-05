@@ -154,25 +154,6 @@ def year_period(text: str) -> str | None:
     return match.group(1) if match else None
 
 
-def unit_from_text(text: str) -> str | None:
-    """Infer a coarse unit label from text and return it when detectable."""
-    if not text:
-        return None
-    t = text.strip()
-    if re.search(r"\bEUR\b|\b€\b", t):
-        if re.search(r"\bmillion\b|\bm\b", t, re.IGNORECASE):
-            return "EUR million"
-        if re.search(r"\bbillion\b|\bbn\b", t, re.IGNORECASE):
-            return "EUR billion"
-        return "EUR"
-    if re.search(r"\bUSD\b|\$", t):
-        return "USD million" if re.search(r"\bmillion\b", t, re.IGNORECASE) else "USD"
-    if re.search(r"\bkt\b", t):
-        return "kt"
-    if re.search(r"\bMt\b", t):
-        return "Mt"
-    return None
-
 
 def remove_boilerplate(text: str, boilerplate: set[str]) -> str:
     """Remove normalized boilerplate lines from a block and return the cleaned text."""

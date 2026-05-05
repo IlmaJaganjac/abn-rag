@@ -250,6 +250,13 @@ async def upload_document(
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="only PDF files are supported")
 
+    if not re.search(r"20\d{2}", file.filename) or not _company_from_filename(file.filename):
+        log.warning(
+            "uploaded file '%s' does not appear to include a company name and report year — "
+            "consider renaming it to something like 'abn-amro-2023.pdf' for reliable metadata",
+            file.filename,
+        )
+
     target = settings.reports_dir / file.filename
     settings.reports_dir.mkdir(parents=True, exist_ok=True)
 

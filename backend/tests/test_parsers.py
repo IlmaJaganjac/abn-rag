@@ -7,7 +7,6 @@ import pytest
 from backend.app.ingest.parsers import (
     ParsedPage,
     ParserUnavailableError,
-    combine_with_pdf_text_layer,
     llamaparse_json_to_pages,
     parse_pdf_pages,
     persist_llamaparse_artifacts,
@@ -79,26 +78,6 @@ def test_llamaparse_json_to_pages_prefers_markdown_text() -> None:
         ParsedPage(page=8, text="plain fallback"),
     ]
 
-
-def test_combine_with_pdf_text_layer_keeps_pdf_text_first_for_datapoints() -> None:
-    pages = combine_with_pdf_text_layer(
-        [
-            ParsedPage(
-                page=5,
-                text="| 535 | Nationalities | 143 | System sales in units |",
-            )
-        ],
-        [
-            ParsedPage(
-                page=5,
-                text="535\nSystem sales in units\n143\nNationalities",
-            )
-        ],
-    )
-
-    assert pages[0].text.startswith("535\nSystem sales in units")
-    assert "--- Parsed markdown ---" in pages[0].text
-    assert "| 535 | Nationalities |" in pages[0].text
 
 
 def test_unknown_parser_raises() -> None:
