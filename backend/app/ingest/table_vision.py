@@ -99,17 +99,17 @@ def classify_table_complexity(text: str) -> tuple[str, float]:
     return "skip", 0.0
 
 
-def _make_table_id(source: str | None, page: int, n: int) -> str:
+def make_table_id(source: str | None, page: int, n: int) -> str:
     """Build a deterministic table id from source name, page number, and ordinal."""
     stem = Path(source).stem if source else "doc"
     return f"{stem}_p{page}_t{n}"
 
 
-def _assign_table_ids(extraction: PageTableExtraction, source: str | None) -> None:
+def assign_table_ids(extraction: PageTableExtraction, source: str | None) -> None:
     """Fill missing table ids and copy page/source metadata onto extracted tables."""
     for n, table in enumerate(extraction.tables, 1):
         if not table.table_id:
-            table.table_id = _make_table_id(source, extraction.page, n)
+            table.table_id = make_table_id(source, extraction.page, n)
         table.page = extraction.page
         if source:
             table.source = source
@@ -190,5 +190,5 @@ def enhance_page_tables(
         return PageTableExtraction(page=page, has_tables=False)
 
     parsed.page = page
-    _assign_table_ids(parsed, source)
+    assign_table_ids(parsed, source)
     return parsed

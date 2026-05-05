@@ -100,7 +100,96 @@ DATAPOINT_CATEGORIES: tuple[str, ...] = (
     "shareholder_return",
 )
 
+CATEGORY_SECTION_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "fte": (
+        "headcount", "workforce", "employee", "people", "diversity",
+        "talent", "remuneration", "human capital", "own workforce",
+        "hiring", "retention", "turnover",
+    ),
+    "esg": (
+        "esg", "environmental", "social", "governance", "ghg", "emission",
+        "scope 1", "scope 2", "scope 3", "climate", "diversity", "safety",
+        "supplier", "ethics", "human rights", "biodiversity", "energy",
+        "waste", "water",
+    ),
+    "financial_highlight": (
+        "financial highlight", "financial performance", "income statement",
+        "cash flow", "balance sheet", "results", "at a glance",
+        "revenue", "profit", "earnings", "key figures", "financial review",
+        "consolidated", "operating result",
+    ),
+    "business_performance": (
+        "business performance", "operational", "segment", "personal banking",
+        "business banking", "wealth management", "corporate banking",
+        "operations", "production", "deliveries", "order", "customers",
+        "market", "performance review", "strategy", "business unit",
+    ),
+    "shareholder_return": (
+        "shareholder", "dividend", "buyback", "repurchase", "capital return",
+        "treasury share", "payout", "distribution", "earnings per share",
+        "remuneration policy",
+    ),
+}
+
+SUSTAINABILITY_TARGET_KEYWORDS: tuple[str, ...] = (
+    "target", "targets", "goal", "goals", "ambition", "ambitions",
+    "commitment", "commitments", "pathway", "roadmap", "transition plan",
+    "net zero", "net-zero", "decarbonisation", "decarbonization",
+    "reduction target", "emissions target", "climate target",
+    "paris proof", "science-based", "science based", "sbti",
+    "2030", "2040", "2050",
+)
+
+SUSTAINABILITY_DOMAIN_KEYWORDS: tuple[str, ...] = (
+    "climate", "emission", "ghg", "greenhouse gas", "carbon",
+    "energy", "renewable", "biodiversity", "nature", "circularity",
+    "circular", "waste", "water", "supplier", "human rights",
+    "safety", "diversity", "inclusion", "own workforce",
+    "own operations", "financed emissions", "facilitated emissions",
+)
+
+SUSTAINABILITY_EXCLUSION_KEYWORDS: tuple[str, ...] = (
+    "esrs index", "disclosure index", "disclosure requirement",
+    "glossary", "definitions", "methodology", "assumptions",
+    "data quality", "accounting polic", "notes to",
+    "remuneration", "risk management",
+    "progress against", "performance against",
+)
+
 
 def category_page_score(category: str, text: str) -> int:
     """Return a regex-based relevance score for one category on one page of text."""
     return sum(len(pattern.findall(text)) for pattern in CATEGORY_PATTERNS.get(category, []))
+
+
+def sustainability_section_match(section_path: str) -> bool:
+    """Return whether a section path likely contains explicit sustainability targets/commitments.
+
+    Strict: requires either a strong target keyword in the path, or a sustainability
+    domain keyword combined with a target/commitment keyword. Section paths dominated
+    by exclusion keywords (ESRS index, methodology, notes, remuneration, etc.) are rejected.
+    """
+    sl = section_path.lower()
+    if any(ex in sl for ex in SUSTAINABILITY_EXCLUSION_KEYWORDS):
+        return False
+    has_target = any(kw in sl for kw in SUSTAINABILITY_TARGET_KEYWORDS)
+    has_domain = any(kw in sl for kw in SUSTAINABILITY_DOMAIN_KEYWORDS)
+    if has_target and has_domain:
+        return True
+    strong_target_phrases = (
+        "target", "goal", "ambition", "commitment",
+        "net zero", "net-zero", "transition plan", "roadmap",
+        "pathway", "decarbon", "paris proof", "sbti", "science-based", "science based",
+    )
+    return any(kw in sl for kw in strong_target_phrases)
+
+
+def section_matches_category(category: str, section_path: str) -> bool:
+    """Return whether a section path matches a given category by keyword rules."""
+    if category == "sustainability":
+        return sustainability_section_match(section_path)
+    keywords = CATEGORY_SECTION_KEYWORDS.get(category, ())
+    if not keywords:
+        return False
+    sl = section_path.lower()
+    return any(kw in sl for kw in keywords)

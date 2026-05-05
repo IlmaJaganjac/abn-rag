@@ -15,27 +15,7 @@ STATUS_ONLY_VALUE = re.compile(
     re.IGNORECASE,
 )
 ACTUAL_METRIC = re.compile(r"\bactual\b|\breported\b|\bperformance\b", re.IGNORECASE)
-PROGRESS_SIGNAL = re.compile(
-    r"\bprogress\b|achieved|completion|against\s+(?:the\s+)?target", re.IGNORECASE,
-)
-FORECAST_SIGNAL = re.compile(
-    r"\bforecast\b|outlook|guidance|expect(?:ed|s|ation)?|anticipate|project(?:ed|ion)?",
-    re.IGNORECASE,
-)
 DEFINITION_SIGNAL = re.compile(r"\bdefinition\b|defined as|means|refers to", re.IGNORECASE)
-SCOPE_CUSTOMER_SIGNAL = re.compile(r"\bcustomer\b|client", re.IGNORECASE)
-SCOPE_SEGMENT_SIGNAL = re.compile(
-    r"\bsegment\b|division|business unit|product line|product-specific", re.IGNORECASE,
-)
-SCOPE_GEOGRAPHY_SIGNAL = re.compile(
-    r"\bgeograph|region|country|emea|asia|europe|united states|china|japan", re.IGNORECASE,
-)
-SCOPE_PRODUCT_SIGNAL = re.compile(r"\bproduct\b|system|unit model", re.IGNORECASE)
-TOTAL_COMPANY_SIGNAL = re.compile(r"\btotal\b|company[- ]wide|group", re.IGNORECASE)
-COUNT_METRIC_SIGNAL = re.compile(
-    r"\b(?:count|number|units?|systems?|employees?|fte?s?|headcount|sold|shipped)\b",
-    re.IGNORECASE,
-)
 RATE_UNIT_SIGNAL = re.compile(
     r"%|per[-\s]?hour|per\s+\w+|rate|ratio|intensity|throughput|efficiency", re.IGNORECASE,
 )
@@ -60,7 +40,15 @@ FTE_SIGNAL = re.compile(
     re.IGNORECASE,
 )
 FTE_NON_EMPLOYEE = re.compile(
-    r"survey\s+score|engagement\s+score|training\s+hours?|lost\s+time|incident\s+rate|"
+    r"survey\s+score|engagement\s+score|engagement\s+survey|engagement\s+participation|"
+    r"engagement\s+index|engagement\s+drivers?|employee\s+engagement|"
+    r"survey\s+participation|gender\s+diversity|gender\s+pay\s+gap|pay\s+gap|"
+    r"contract\s+types?|"
+    r"executive\s+board|supervisory\s+board|\bboard\b|identified\s+staff|\bcla\+?\b|"
+    r"remuneration(?:\s+report)?|compensation|fixed\s+remuneration|variable\s+remuneration|"
+    r"awarded\s+remuneration|benefits?|pensions?|sign[-\s]?on|severance|bonus|salary|wages|"
+    r"pay\s+ratio|\bratio\b|\bpercentage\b|occupational\s+disability|"
+    r"training\s+hours?|lost\s+time|incident\s+rate|safety\s+incident|"
     r"revenue|net\s+sales|dividend|buyback|emissions?|scope\s+[123]|net[- ]zero",
     re.IGNORECASE,
 )

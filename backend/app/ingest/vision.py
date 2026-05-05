@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from backend.app.config import settings
-from backend.app.ingest.persistence import persist_enhanced_pages
+from backend.app.ingest.persistence import (
+    persist_enhanced_pages,
+    processed_pages_enhanced_path,
+)
 from backend.app.ingest.tokens import count_tokens
 from backend.app.ingest.table_vision import (
     PageTableExtraction,
@@ -27,7 +30,7 @@ _VISION_DPI = 180
 _VISION_WORKERS = 6
 
 
-def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
+def render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
     """Render one PDF page to PNG bytes and return the image payload."""
     try:
         import fitz
@@ -43,7 +46,7 @@ def _render_page(pdf_path: Path, page_1based: int, dpi: int) -> bytes:
         doc.close()
 
 
-def _strip_markdown_tables(text: str) -> str:
+def strip_markdown_tables(text: str) -> str:
     """Remove markdown table rows from text and return the remaining narrative."""
     out_lines: list[str] = []
     for line in text.splitlines():
@@ -63,7 +66,7 @@ def _strip_markdown_tables(text: str) -> str:
     return "\n".join(cleaned).strip()
 
 
-def _apply_vision_enhancement(
+def apply_vision_enhancement(
     record: dict[str, Any], extraction: PageTableExtraction, model: str
 ) -> dict[str, Any]:
     """Apply successful table extraction output to one persisted page record."""
@@ -76,12 +79,12 @@ def _apply_vision_enhancement(
     if out["table_enhanced"] and tables_dicts:
         summary = tables_to_text(tables_dicts).strip()
         if summary:
-            narrative = _strip_markdown_tables(record.get("text") or "")
+            narrative = strip_markdown_tables(record.get("text") or "")
             out["enhanced_text"] = (narrative + "\n\n" + summary).strip() if narrative else summary
     return out
 
 
-def _apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
+def apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
     """Return a page record marked as processed but without usable table enhancement."""
     out = dict(record)
     out["tables"] = []
@@ -91,14 +94,14 @@ def _apply_empty_enhancement(record: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def _apply_enhancement_error(record: dict[str, Any], error: str) -> dict[str, Any]:
+def apply_enhancement_error(record: dict[str, Any], error: str) -> dict[str, Any]:
     """Return a page record annotated with a table-enhancement error message."""
-    out = _apply_empty_enhancement(record)
+    out = apply_empty_enhancement(record)
     out["table_enhancement_error"] = error
     return out
 
 
-def _enhance_page_record_with_retry(
+def enhance_page_record_with_retry(
     *,
     pdf_path: Path,
     record: dict[str, Any],
@@ -116,7 +119,7 @@ def _enhance_page_record_with_retry(
     token_limit_phrases = ("length limit was reached", "max_tokens", "finish_reason")
     for attempt in range(max_attempts):
         try:
-            image_bytes = _render_page(pdf_path, page_num, dpi)
+            image_bytes = render_page(pdf_path, page_num, dpi)
             return enhance_page_tables(
                 image_bytes=image_bytes,
                 page=page_num,
@@ -149,6 +152,20 @@ def enhance_pages_with_vision(
     model: str | None = None,
 ) -> list[tuple[int, str]]:
     """Enhance selected pages with table vision and return updated `(page, text)` tuples."""
+    cached_path = processed_pages_enhanced_path(source, processed_dir)
+    if cached_path.exists():
+        import json as _json
+        cached_pages: list[tuple[int, str]] = []
+        with cached_path.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                rec = _json.loads(line)
+                cached_pages.append((int(rec["page"]), str(rec.get("enhanced_text") or rec.get("text") or "")))
+        logger.info("loaded %d cached vision-enhanced pages from %s", len(cached_pages), cached_path)
+        return cached_pages
+
     vision_model = model or settings.openai_table_vision_model
     records = [
         {
@@ -179,7 +196,7 @@ def enhance_pages_with_vision(
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(
-                _enhance_page_record_with_retry,
+                enhance_page_record_with_retry,
                 pdf_path=pdf_path,
                 record=page_map[page_num],
                 company=company,
@@ -196,18 +213,18 @@ def enhance_pages_with_vision(
             page_num = futures[future]
             try:
                 extraction = future.result()
-                results[page_num] = _apply_vision_enhancement(page_map[page_num], extraction, vision_model)
+                results[page_num] = apply_vision_enhancement(page_map[page_num], extraction, vision_model)
             except Exception as exc:
-                results[page_num] = _apply_enhancement_error(page_map[page_num], str(exc))
+                results[page_num] = apply_enhancement_error(page_map[page_num], str(exc))
 
     enhanced_records: list[dict[str, Any]] = []
     enhanced_pages: list[tuple[int, str]] = []
     for record in records:
         page_num = int(record["page"])
         if page_num in selected_set:
-            row = results.get(page_num) or _apply_enhancement_error(record, "no result returned")
+            row = results.get(page_num) or apply_enhancement_error(record, "no result returned")
         else:
-            row = _apply_empty_enhancement(record)
+            row = apply_empty_enhancement(record)
         enhanced_records.append(row)
         enhanced_pages.append((page_num, str(row.get("enhanced_text") or row.get("text") or "")))
 

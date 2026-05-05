@@ -46,7 +46,7 @@ def deduplicate_chunks(chunks: list[Chunk]) -> list[Chunk]:
     return deduped
 
 
-def _format_datapoint_chunk_text(datapoint: dict[str, Any]) -> str:
+def format_datapoint_chunk_text(datapoint: dict[str, Any]) -> str:
     """Render one datapoint record into a structured text block for retrieval."""
     lines: list[str] = []
     metric = str(datapoint.get("metric") or datapoint.get("label") or "").strip()
@@ -100,7 +100,7 @@ def build_datapoint_chunks(
         idx = next_idx_by_page.get(page, 0)
         next_idx_by_page[page] = idx + 1
         datapoint_type = str(datapoint.get("datapoint_type") or "datapoint")
-        text = _format_datapoint_chunk_text(datapoint)
+        text = format_datapoint_chunk_text(datapoint)
         if not text:
             continue
         section_path = datapoint.get("section_path")

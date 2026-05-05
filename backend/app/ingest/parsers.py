@@ -30,7 +30,7 @@ class ParserUnavailableError(RuntimeError):
     pass
 
 
-def _llamaparse_page_text(page: dict[str, Any]) -> str:
+def llamaparse_page_text(page: dict[str, Any]) -> str:
     """Extract the best available text field from one raw LlamaParse page record."""
     for key in ("md", "markdown", "text", "content"):
         value = page.get(key)
@@ -45,7 +45,7 @@ def llamaparse_json_to_pages(results: list[dict[str, Any]]) -> list[ParsedPage]:
     fallback_page = 1
     for result in results:
         for page in result.get("pages", []):
-            text = _llamaparse_page_text(page)
+            text = llamaparse_page_text(page)
             if not text:
                 fallback_page += 1
                 continue
@@ -129,11 +129,8 @@ def parse_pdf_pages(
     *,
     processed_dir: Path | None = None,
     llama_cloud_api_key: str | None = None,
-    parser: str = "llamaparse",
 ) -> ParseResult:
-    """Parse a PDF with the configured parser and return a unified `ParseResult`."""
-    if parser != "llamaparse":
-        raise ValueError(f"unsupported PDF parser: {parser!r}")
+    """Parse a PDF with LlamaParse and return a unified `ParseResult`."""
     llama_pages = parse_pdf_llamaparse(
         path,
         api_key=llama_cloud_api_key,

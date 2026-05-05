@@ -4,9 +4,8 @@ import json
 import logging
 import math
 import re
-import time
 from collections import Counter
-from contextlib import contextmanager
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 _REWRITE_SYSTEM = (
@@ -20,14 +19,6 @@ _REWRITE_SYSTEM = (
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def _timed(label: str):
-    t0 = time.perf_counter()
-    try:
-        yield
-    finally:
-        logger.info("TIMING %s: %.2fs", label, time.perf_counter() - t0)
-
 from backend.app.config import settings
 from backend.app.ingestion import embed_texts, get_collection
 from backend.app.schemas import RetrievalQuery, RetrievalResult, RetrievedChunk
@@ -39,7 +30,8 @@ BM25_TOP_N = 40
 _reranker = None
 
 
-def _get_reranker():
+def get_reranker():
+    """Load and cache the cross-encoder reranker model, returning the singleton."""
     global _reranker
     if _reranker is None:
         import os
@@ -52,12 +44,12 @@ def _get_reranker():
 
 
 def rerank(query: str, chunks: list[RetrievedChunk], top_k: int) -> list[RetrievedChunk]:
-    with _timed(f"rerank({len(chunks)} chunks)"):
-        reranker = _get_reranker()
-        pairs = [(query, c.text) for c in chunks]
-        scores = reranker.predict(pairs)
-        ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
-        return [c.model_copy(update={"score": float(s)}) for s, c in ranked[:top_k]]
+    """Re-score chunks with the cross-encoder and return the top-k by descending score."""
+    reranker = get_reranker()
+    pairs = [(query, c.text) for c in chunks]
+    scores = reranker.predict(pairs)
+    ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
+    return [c.model_copy(update={"score": float(s)}) for s, c in ranked[:top_k]]
 
 
 _FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
@@ -84,7 +76,7 @@ def expand_query_for_retrieval(question: str) -> str:
     return "\n".join(parts)
 
 
-def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
+def build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
     """Build a Chroma metadata filter for the requested company and year."""
     clauses: list[dict[str, Any]] = []
     if company is not None:
@@ -98,7 +90,7 @@ def _build_where(company: str | None, year: int | None) -> dict[str, Any] | None
     return {"$and": clauses}
 
 
-def _retrieved_chunk(
+def retrieved_chunk(
     *,
     cid: str,
     doc: str,
@@ -127,7 +119,7 @@ def _retrieved_chunk(
     )
 
 
-def _tokenize(text: str) -> list[str]:
+def tokenize(text: str) -> list[str]:
     """Tokenize text into lowercase alphanumeric terms for BM25-style scoring."""
     return [
         token
@@ -136,7 +128,7 @@ def _tokenize(text: str) -> list[str]:
     ]
 
 
-def _chunk_search_text(record: dict[str, Any]) -> str:
+def chunk_search_text(record: dict[str, Any]) -> str:
     """Concatenate searchable record fields into one BM25 text string."""
     parts = [
         record.get("text"),
@@ -151,7 +143,7 @@ def _chunk_search_text(record: dict[str, Any]) -> str:
 _BM25_CACHE: dict[str, Any] = {"sig": None, "records": [], "tokens": []}
 
 
-def _chunks_dir_signature() -> tuple[tuple[str, float, int], ...]:
+def chunks_dir_signature() -> tuple[tuple[str, float, int], ...]:
     """Return a signature of the chunks dir so cache invalidates on file changes."""
     chunks_dir = settings.get_processed_path() / "chunks"
     if not chunks_dir.exists():
@@ -162,9 +154,9 @@ def _chunks_dir_signature() -> tuple[tuple[str, float, int], ...]:
     )
 
 
-def _iter_processed_chunk_records() -> list[dict[str, Any]]:
+def iter_processed_chunk_records() -> list[dict[str, Any]]:
     """Load all persisted chunk records from disk; cached until files change."""
-    sig = _chunks_dir_signature()
+    sig = chunks_dir_signature()
     if _BM25_CACHE["sig"] == sig:
         return _BM25_CACHE["records"]
 
@@ -180,11 +172,11 @@ def _iter_processed_chunk_records() -> list[dict[str, Any]]:
 
     _BM25_CACHE["sig"] = sig
     _BM25_CACHE["records"] = records
-    _BM25_CACHE["tokens"] = [_tokenize(_chunk_search_text(r)) for r in records]
+    _BM25_CACHE["tokens"] = [tokenize(chunk_search_text(r)) for r in records]
     return records
 
 
-def _passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
+def passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
     """Return whether one persisted record matches the active retrieval filters."""
     if query.company is not None and record.get("company") != query.company:
         return False
@@ -193,16 +185,16 @@ def _passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
     return True
 
 
-def _bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
+def bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
     """Score persisted chunks with BM25-style ranking and return candidate chunks."""
-    all_records = _iter_processed_chunk_records()
+    all_records = iter_processed_chunk_records()
     all_tokens = _BM25_CACHE["tokens"]
     pairs = [
         (rec, toks)
         for rec, toks in zip(all_records, all_tokens, strict=True)
-        if _passes_filters(rec, query)
+        if passes_filters(rec, query)
     ]
-    query_terms = _tokenize(query.question)
+    query_terms = tokenize(query.question)
     if not pairs or not query_terms:
         return []
 
@@ -235,7 +227,7 @@ def _bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
     chunks: list[RetrievedChunk] = []
     for score, record in scored[:BM25_TOP_N]:
         chunks.append(
-            _retrieved_chunk(
+            retrieved_chunk(
                 cid=str(record.get("id", "")),
                 doc=str(record.get("text", "")),
                 meta=record,
@@ -245,7 +237,7 @@ def _bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
     return chunks
 
 
-def _rrf_merge(
+def rrf_merge(
     *,
     dense_chunks: list[RetrievedChunk],
     bm25_chunks: list[RetrievedChunk],
@@ -272,22 +264,27 @@ def _rrf_merge(
     return out
 
 
-def retrieve(query: RetrievalQuery) -> RetrievalResult:
+def retrieve(query: RetrievalQuery, *, skip_rerank: bool = False) -> RetrievalResult:
     """Run the retrieval pipeline and return ranked chunks plus the effective query."""
     collection = get_collection()
     retrieval_text = expand_query_for_retrieval(query.question)
+    retrieval_query = query.model_copy(update={"question": retrieval_text}) if retrieval_text != query.question else query
 
-    with _timed("embed_question"):
+    # BM25 has no dependency on the embedding — run it in parallel with embed+chroma.
+    with ThreadPoolExecutor(max_workers=1) as ex:
+        bm25_future = ex.submit(bm25_candidates, retrieval_query)
+
         [embedding] = embed_texts([retrieval_text])
 
-    where = _build_where(query.company, query.year)
-    with _timed("chroma_query"):
+        where = build_where(query.company, query.year)
         raw = collection.query(
             query_embeddings=[embedding],
             n_results=max(query.top_k, DENSE_TOP_N),
             where=where,
             include=["documents", "metadatas", "distances"],
         )
+
+        bm25_chunks = bm25_future.result()
 
     ids = (raw.get("ids") or [[]])[0]
     docs = (raw.get("documents") or [[]])[0]
@@ -297,17 +294,17 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
     dense_chunks: list[RetrievedChunk] = []
     for cid, doc, meta, dist in zip(ids, docs, metas, dists, strict=True):
         meta = meta or {}
-        dense_chunks.append(_retrieved_chunk(cid=cid, doc=doc or "", meta=meta, score=1.0 - float(dist)))
+        dense_chunks.append(retrieved_chunk(cid=cid, doc=doc or "", meta=meta, score=1.0 - float(dist)))
 
-    retrieval_query = query.model_copy(update={"question": retrieval_text}) if retrieval_text != query.question else query
-
-    with _timed("bm25"):
-        bm25_chunks = _bm25_candidates(retrieval_query)
-    chunks = _rrf_merge(
+    candidates = rrf_merge(
         dense_chunks=dense_chunks,
         bm25_chunks=bm25_chunks,
-        top_k=query.top_k,
+        top_k=settings.rerank_top_n,
     )
+    if settings.enable_rerank and not skip_rerank:
+        chunks = rerank(query.question, candidates, query.top_k)
+    else:
+        chunks = candidates[: query.top_k]
 
     return RetrievalResult(query=query, chunks=chunks)
 
@@ -340,7 +337,7 @@ def rewrite_and_decompose(question: str, history: list[dict]) -> list[str]:
     return [question]
 
 
-def _merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[RetrievedChunk]:
+def merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[RetrievedChunk]:
     """Deduplicate chunks from multiple retrievals, keeping highest score per id."""
     best: dict[str, RetrievedChunk] = {}
     for chunks in chunk_lists:
@@ -353,17 +350,15 @@ def _merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[R
 def retrieve_decomposed(query: RetrievalQuery, history: list[dict] | None = None) -> RetrievalResult:
     """Decompose the query (with optional history), retrieve for each sub-question, merge results."""
     if history:
-        with _timed("decompose"):
-            sub_questions = rewrite_and_decompose(query.question, history)
+        sub_questions = rewrite_and_decompose(query.question, history)
         logger.info("decomposed into %d sub-questions", len(sub_questions))
     else:
         sub_questions = [query.question]
-    with _timed(f"retrieve_all({len(sub_questions)} sub)"):
-        chunk_lists = [
-            retrieve(query.model_copy(update={"question": q})).chunks
-            for q in sub_questions
-        ]
-    candidates = _merge_chunks(chunk_lists, settings.rerank_top_n)
+    chunk_lists = [
+        retrieve(query.model_copy(update={"question": q}), skip_rerank=True).chunks
+        for q in sub_questions
+    ]
+    candidates = merge_chunks(chunk_lists, settings.rerank_top_n)
     if settings.enable_rerank:
         chunks = rerank(query.question, candidates, query.top_k)
     else:

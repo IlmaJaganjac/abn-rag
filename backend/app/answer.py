@@ -93,7 +93,7 @@ Rules:
 """
 
 
-def _format_context(chunks: list[RetrievedChunk]) -> str:
+def format_context(chunks: list[RetrievedChunk]) -> str:
     """Render retrieved chunks into the context block string sent to the answer model."""
     blocks: list[str] = []
     for i, c in enumerate(chunks, start=1):
@@ -135,12 +135,12 @@ _METRIC_STOP = frozenset({
 })
 
 
-def _source_tokens(source: str) -> frozenset[str]:
+def source_tokens(source: str) -> frozenset[str]:
     """Return source-name tokens used to ignore company words when grounding table quotes."""
     return frozenset(re.findall(r"[a-z]{4,}", source.lower()))
 
 
-def _normalize_for_grounding(s: str) -> str:
+def normalize_for_grounding(s: str) -> str:
     """Normalize text for strict grounding comparisons and verbatim matching."""
     s = unicodedata.normalize("NFKC", s)
     s = s.translate(_DASH_TRANS).translate(_QUOTE_TRANS)
@@ -150,7 +150,7 @@ def _normalize_for_grounding(s: str) -> str:
     return s
 
 
-def _normalize_for_grounding_layout(s: str) -> str:
+def normalize_for_grounding_layout(s: str) -> str:
     """Normalize text for fallback grounding while stripping PDF layout artifacts."""
     s = _FOOTNOTE_RE.sub(" ", s)
     s = _PDF_BULLET_RE.sub(" ", s)
@@ -162,13 +162,13 @@ def _normalize_for_grounding_layout(s: str) -> str:
     return s
 
 
-def _split_on_ellipsis(needle: str) -> list[str]:
+def split_on_ellipsis(needle: str) -> list[str]:
     """Split a grounded quote on ellipsis markers and return the non-empty fragments."""
     parts = [p.strip() for p in _ELLIPSIS_RE.split(needle)]
     return [p for p in parts if p]
 
 
-def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
+def fragments_in_order(fragments: list[str], haystack: str) -> bool:
     """Return whether all quote fragments appear in order inside the candidate text."""
     cursor = 0
     for frag in fragments:
@@ -179,7 +179,7 @@ def _fragments_in_order(fragments: list[str], haystack: str) -> bool:
     return True
 
 
-def _table_grounding_fallback(
+def table_grounding_fallback(
     cite: Citation,
     indexed: list[tuple[RetrievedChunk, str]],
     verbatim: str | None,
@@ -194,8 +194,8 @@ def _table_grounding_fallback(
     - AND either ≥2 distinct metric words from question/quote appear in the chunk,
       OR a metric bigram (adjacent pair of metric words) appears in the chunk
     """
-    quote_norm = _normalize_for_grounding(html.unescape(cite.quote))
-    verbatim_norm = _normalize_for_grounding(verbatim) if verbatim else ""
+    quote_norm = normalize_for_grounding(html.unescape(cite.quote))
+    verbatim_norm = normalize_for_grounding(verbatim) if verbatim else ""
 
     value_nums = frozenset(
         m
@@ -206,8 +206,8 @@ def _table_grounding_fallback(
     if not value_nums:
         return None
 
-    question_norm = _normalize_for_grounding(question) if question else ""
-    source_stop = _source_tokens(cite.source)
+    question_norm = normalize_for_grounding(question) if question else ""
+    source_stop = source_tokens(cite.source)
     combined = quote_norm + " " + question_norm
     words_in_order = re.findall(r"[a-z]{4,}", combined)
     metric_words = [w for w in words_in_order if w not in _METRIC_STOP and w not in source_stop]
@@ -243,7 +243,7 @@ def _table_grounding_fallback(
     )
 
 
-def _clean_citation_quote(raw: str) -> str:
+def clean_citation_quote(raw: str) -> str:
     """Strip serialized datapoint metadata; collapse table rows to a hint."""
     if not raw:
         return raw
@@ -257,21 +257,21 @@ def _clean_citation_quote(raw: str) -> str:
     return text
 
 
-def _citation_contains_verbatim_number(cite: Citation, verbatim: str | None) -> bool:
+def citation_contains_verbatim_number(cite: Citation, verbatim: str | None) -> bool:
     """Return whether a citation quote contains the key numeric token from the verbatim answer."""
     if not verbatim:
         return True
     verbatim_nums = {
-        n for n in _NUM_RE.findall(_normalize_for_grounding(verbatim))
+        n for n in _NUM_RE.findall(normalize_for_grounding(verbatim))
         if len(n) >= 3
     }
     if not verbatim_nums:
         return True
-    quote_nums = set(_NUM_RE.findall(_normalize_for_grounding(cite.quote)))
+    quote_nums = set(_NUM_RE.findall(normalize_for_grounding(cite.quote)))
     return bool(verbatim_nums & quote_nums)
 
 
-def _ground_citations(
+def ground_citations(
     citations: list[Citation],
     chunks: list[RetrievedChunk],
     question: str | None = None,
@@ -282,41 +282,41 @@ def _ground_citations(
         return [], "no citations returned"
 
     indexed_strict: list[tuple[RetrievedChunk, str]] = [
-        (c, _normalize_for_grounding(html.unescape(c.text))) for c in chunks
+        (c, normalize_for_grounding(html.unescape(c.text))) for c in chunks
     ]
     indexed_layout: list[tuple[RetrievedChunk, str]] | None = None
 
     grounded: list[Citation] = []
     for cite in citations:
-        needle = _normalize_for_grounding(html.unescape(cite.quote))
+        needle = normalize_for_grounding(html.unescape(cite.quote))
         if not needle:
             continue
 
-        fragments = _split_on_ellipsis(needle)
+        fragments = split_on_ellipsis(needle)
         if not fragments or any(len(f) < _MIN_FRAGMENT_LEN for f in fragments):
             continue
 
         matches = [
             chunk for chunk, hay in indexed_strict
-            if _fragments_in_order(fragments, hay)
+            if fragments_in_order(fragments, hay)
         ]
 
         if not matches:
             if indexed_layout is None:
                 indexed_layout = [
-                    (c, _normalize_for_grounding_layout(html.unescape(c.text)))
+                    (c, normalize_for_grounding_layout(html.unescape(c.text)))
                     for c in chunks
                 ]
-            needle_layout = _normalize_for_grounding_layout(html.unescape(cite.quote))
-            frags_layout = _split_on_ellipsis(needle_layout)
+            needle_layout = normalize_for_grounding_layout(html.unescape(cite.quote))
+            frags_layout = split_on_ellipsis(needle_layout)
             if frags_layout and all(len(f) >= _MIN_FRAGMENT_LEN for f in frags_layout):
                 matches = [
                     chunk for chunk, hay in indexed_layout
-                    if _fragments_in_order(frags_layout, hay)
+                    if fragments_in_order(frags_layout, hay)
                 ]
 
         if not matches:
-            table_chunk = _table_grounding_fallback(cite, indexed_strict, verbatim, question=question)
+            table_chunk = table_grounding_fallback(cite, indexed_strict, verbatim, question=question)
             if table_chunk is not None:
                 matches = [table_chunk]
 
@@ -330,13 +330,13 @@ def _ground_citations(
             (m for m in matches if m.page == cite.page), None,
         ) or matches[0]
 
-        if len(citations) == 1 and not _citation_contains_verbatim_number(cite, verbatim):
+        if len(citations) == 1 and not citation_contains_verbatim_number(cite, verbatim):
             continue
 
         grounded.append(Citation(
             source=best.source,
             page=best.page,
-            quote=_clean_citation_quote(cite.quote),
+            quote=clean_citation_quote(cite.quote),
         ))
 
     if not grounded:
@@ -344,7 +344,7 @@ def _ground_citations(
     return grounded, None
 
 
-def _refuse(question: str, reason: str) -> VerbatimAnswer:
+def refuse(question: str, reason: str) -> VerbatimAnswer:
     """Build a refusal answer object with a consistent fallback message."""
     return VerbatimAnswer(
         question=question,
@@ -359,10 +359,10 @@ def _refuse(question: str, reason: str) -> VerbatimAnswer:
 def answer_question(question: str, chunks: list[RetrievedChunk], history: list[dict] | None = None) -> VerbatimAnswer:
     """Answer one question from retrieved chunks and return a grounded `VerbatimAnswer`."""
     if not chunks:
-        return _refuse(question, "no retrieved context")
+        return refuse(question, "no retrieved context")
 
     client = openai_client()
-    context = _format_context(chunks)
+    context = format_context(chunks)
     user_msg = f"Question: {question}\n\nContext:\n{context}"
     model = settings.openai_answer_model
 
@@ -381,7 +381,7 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
     logger.info("TIMING answer_llm(%s): %.2fs", model, time.perf_counter() - t0)
     parsed = completion.choices[0].message.parsed
     if parsed is None:
-        return _refuse(question, "LLM returned no parsed output")
+        return refuse(question, "LLM returned no parsed output")
 
     if parsed.refused:
         return VerbatimAnswer(
@@ -393,7 +393,7 @@ def answer_question(question: str, chunks: list[RetrievedChunk], history: list[d
             refusal_reason=parsed.refusal_reason or "model declined to answer",
         )
 
-    grounded, failure = _ground_citations(parsed.citations, chunks, question=question, verbatim=parsed.verbatim)
+    grounded, failure = ground_citations(parsed.citations, chunks, question=question, verbatim=parsed.verbatim)
     if failure is not None:
         return VerbatimAnswer(
             question=question,

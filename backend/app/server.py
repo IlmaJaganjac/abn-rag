@@ -29,12 +29,13 @@ app = FastAPI(title="Annualyzer API")
 
 
 @app.on_event("startup")
-def _startup() -> None:
+def startup() -> None:
+    """Initialize the database and warm the reranker on application startup."""
     init_db()
     if settings.enable_rerank:
-        from backend.app.retrieval import _get_reranker, rerank
+        from backend.app.retrieval import get_reranker, rerank
         from backend.app.schemas import RetrievedChunk
-        _get_reranker()
+        get_reranker()
         # Warm MPS kernels with one tiny forward pass so user request 1 is fast.
         rerank("warmup", [RetrievedChunk(id="w", source="w", page=1, text="warmup", token_count=1, score=0.0)], 1)
         log.info("reranker warmed")
@@ -60,7 +61,7 @@ _REPORT_WORDS = re.compile(
 )
 
 
-def _clean_company_name(raw: str) -> str:
+def clean_company_name(raw: str) -> str:
     """Normalize a raw company string into a cleaner display and matching form."""
     s = re.sub(r"[_\-]+", " ", raw)
     s = _REPORT_WORDS.sub("", s)
@@ -68,16 +69,16 @@ def _clean_company_name(raw: str) -> str:
     return s
 
 
-def _company_from_filename(filename: str) -> str | None:
+def company_from_filename(filename: str) -> str | None:
     """Infer a company name from the uploaded filename when possible."""
     stem = Path(filename).stem
-    cleaned = _clean_company_name(stem)
+    cleaned = clean_company_name(stem)
     if not cleaned or len(cleaned) < 2:
         return None
     return cleaned.title() if cleaned.islower() else cleaned
 
 
-def _company_from_pdf(pdf_path: Path) -> str | None:
+def company_from_pdf(pdf_path: Path) -> str | None:
     """Infer a company name from PDF metadata or the first visible title lines."""
     try:
         import fitz
@@ -94,7 +95,7 @@ def _company_from_pdf(pdf_path: Path) -> str | None:
         return None
 
     for candidate in (meta_author, meta_title):
-        c = _clean_company_name(candidate)
+        c = clean_company_name(candidate)
         if c and len(c) >= 2 and not _REPORT_WORDS.fullmatch(c):
             return c
 
@@ -107,18 +108,18 @@ def _company_from_pdf(pdf_path: Path) -> str | None:
     return None
 
 
-def _detect_company_year(filename: str, pdf_path: Path | None = None) -> tuple[str | None, int | None]:
+def detect_company_year(filename: str, pdf_path: Path | None = None) -> tuple[str | None, int | None]:
     """Infer company and report year from filename and optionally PDF contents."""
     year: int | None = None
     m = re.search(r"(20\d{2})", filename)
     if m:
         year = int(m.group(1))
 
-    company = _company_from_filename(filename)
+    company = company_from_filename(filename)
 
     if pdf_path is not None:
         if company is None:
-            company = _company_from_pdf(pdf_path)
+            company = company_from_pdf(pdf_path)
         if year is None:
             try:
                 import fitz
@@ -137,7 +138,7 @@ def _detect_company_year(filename: str, pdf_path: Path | None = None) -> tuple[s
     return company, year
 
 
-def _processed_doc_index() -> dict[str, dict[str, Any]]:
+def processed_doc_index() -> dict[str, dict[str, Any]]:
     """Build a document index keyed by source filename from persisted ingestion artifacts."""
     out: dict[str, dict[str, Any]] = {}
     chunks_dir = settings.get_processed_path() / "chunks"
@@ -148,7 +149,6 @@ def _processed_doc_index() -> dict[str, dict[str, Any]]:
             source: str | None = None
             pages: set[int] = set()
             chunk_count = 0
-            parser: str | None = None
             with path.open(encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
@@ -160,7 +160,6 @@ def _processed_doc_index() -> dict[str, dict[str, Any]]:
                     company = company or rec.get("company")
                     if year is None and rec.get("year") is not None:
                         year = int(rec["year"])
-                    parser = parser or rec.get("parser")
                     if rec.get("page") is not None:
                         pages.add(int(rec["page"]))
             if source:
@@ -171,21 +170,21 @@ def _processed_doc_index() -> dict[str, dict[str, Any]]:
                     "source": source,
                     "company": company,
                     "year": year,
-                    "title": _title_from_source(source, company, year),
+                    "title": title_from_source(source, company, year),
                     "pages": max(pages) if pages else 0,
                     "size_mb": round(size_mb, 1),
-                    "ingested_at": _isoformat(path.stat().st_mtime),
+                    "ingested_at": isoformat(path.stat().st_mtime),
                     "chunks": chunk_count,
-                    "parser": parser or "llamaparse",
+                    "parser": "llamaparse",
                     "status": "ready",
                     "fte": None,
                     "net_zero_year": None,
                 }
-    _enrich_with_datapoints(out)
+    enrich_with_datapoints(out)
     return out
 
 
-def _title_from_source(source: str, company: str | None, year: int | None) -> str:
+def title_from_source(source: str, company: str | None, year: int | None) -> str:
     """Create a user-facing document title from source, company, and year."""
     stem = Path(source).stem.replace("-", " ").replace("_", " ").title()
     if company and year:
@@ -195,14 +194,14 @@ def _title_from_source(source: str, company: str | None, year: int | None) -> st
     return stem
 
 
-def _isoformat(epoch: float) -> str:
+def isoformat(epoch: float) -> str:
     """Convert a Unix timestamp to an ISO-8601 UTC string."""
     from datetime import datetime, timezone
 
     return datetime.fromtimestamp(epoch, tz=timezone.utc).isoformat()
 
 
-def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
+def enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
     """Augment document records in place with summary datapoints such as FTE or net-zero year."""
     dp_dir = settings.get_processed_path() / "datapoints"
     if not dp_dir.exists():
@@ -232,7 +231,7 @@ def _enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
 @app.get("/api/documents")
 def list_documents() -> list[dict[str, Any]]:
     """Return indexed documents plus any in-flight ingestion jobs for the frontend."""
-    docs = list(_processed_doc_index().values())
+    docs = list(processed_doc_index().values())
     for j in _jobs.values():
         if j["status"] not in ("ready", "error"):
             docs.append(j["doc"])
@@ -250,7 +249,7 @@ async def upload_document(
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="only PDF files are supported")
 
-    if not re.search(r"20\d{2}", file.filename) or not _company_from_filename(file.filename):
+    if not re.search(r"20\d{2}", file.filename) or not company_from_filename(file.filename):
         log.warning(
             "uploaded file '%s' does not appear to include a company name and report year — "
             "consider renaming it to something like 'abn-amro-2023.pdf' for reliable metadata",
@@ -260,7 +259,7 @@ async def upload_document(
     target = settings.reports_dir / file.filename
     settings.reports_dir.mkdir(parents=True, exist_ok=True)
 
-    existing = _processed_doc_index().get(file.filename)
+    existing = processed_doc_index().get(file.filename)
     if existing is not None:
         raise HTTPException(
             status_code=409,
@@ -274,7 +273,7 @@ async def upload_document(
     with target.open("wb") as f:
         shutil.copyfileobj(file.file, f)
 
-    detected_company, detected_year = _detect_company_year(file.filename, target)
+    detected_company, detected_year = detect_company_year(file.filename, target)
     eff_company = company or detected_company
     eff_year = year or detected_year
 
@@ -285,10 +284,10 @@ async def upload_document(
         "source": file.filename,
         "company": eff_company,
         "year": eff_year,
-        "title": _title_from_source(file.filename, eff_company, eff_year),
+        "title": title_from_source(file.filename, eff_company, eff_year),
         "pages": 0,
         "size_mb": pdf_size_mb,
-        "ingested_at": _isoformat(target.stat().st_mtime),
+        "ingested_at": isoformat(target.stat().st_mtime),
         "chunks": 0,
         "parser": "llamaparse",
         "status": "parsing",
@@ -297,7 +296,7 @@ async def upload_document(
     }
     _jobs[job_id] = {"status": "parsing", "doc": initial_doc, "error": None}
 
-    def _run() -> None:
+    def run() -> None:
         """Ingest the uploaded PDF in the background and update job state."""
         try:
             ingest_pdf(
@@ -306,8 +305,9 @@ async def upload_document(
                 year=eff_year,
                 source_name=file.filename,
                 reset=False,
+                status_callback=lambda s: _jobs[job_id].update({"status": s}),
             )
-            updated = _processed_doc_index().get(file.filename)
+            updated = processed_doc_index().get(file.filename)
             if updated:
                 _jobs[job_id]["doc"] = updated
             _jobs[job_id]["status"] = "ready"
@@ -317,7 +317,7 @@ async def upload_document(
             _jobs[job_id]["error"] = str(exc)
             _jobs[job_id]["doc"]["status"] = "error"
 
-    _executor.submit(_run)
+    _executor.submit(run)
     return initial_doc
 
 
@@ -327,7 +327,7 @@ def document_status(doc_id: str) -> dict[str, Any]:
     if doc_id in _jobs:
         j = _jobs[doc_id]
         return {"id": doc_id, "status": j["status"], "error": j.get("error"), "document": j["doc"]}
-    doc = _processed_doc_index().get(doc_id)
+    doc = processed_doc_index().get(doc_id)
     if doc is None:
         raise HTTPException(status_code=404, detail="not found")
     return {"id": doc_id, "status": "ready", "error": None, "document": doc}
@@ -374,7 +374,7 @@ def list_datapoints(company: str | None = None, type: str | None = None) -> list
     items = query_datapoints(company=company)
     out: list[dict[str, Any]] = []
     for dp in items:
-        dp_type = _bucket_type(dp.get("datapoint_type") or "")
+        dp_type = bucket_type(dp.get("datapoint_type") or "")
         if type and dp_type != type:
             continue
         out.append({
@@ -391,7 +391,7 @@ def list_datapoints(company: str | None = None, type: str | None = None) -> list
     return out
 
 
-def _bucket_type(t: str) -> str:
+def bucket_type(t: str) -> str:
     """Normalize a datapoint type into the bucket label exposed by the API."""
     return t.lower().strip() if t else "other"
 
@@ -399,6 +399,7 @@ def _bucket_type(t: str) -> str:
 # ---------- chat (SSE) ----------
 
 class HistoryEntry(BaseModel):
+    """One turn of conversation history sent by the client."""
     question: str
     answer: str
 
@@ -408,7 +409,6 @@ class ChatRequest(BaseModel):
     question: str
     company: str | None = None
     year: int | None = None
-    top_k: int = 8
     history: list[HistoryEntry] = []
 
 
@@ -417,7 +417,7 @@ _STOPWORDS = {"the", "and", "of", "group", "company", "corp", "corporation",
               "holdings", "holding"}
 
 
-def _company_aliases(company: str) -> list[re.Pattern[str]]:
+def company_aliases(company: str) -> list[re.Pattern[str]]:
     """Generate flexible regex patterns for a company name and its tokens."""
     name = company.strip()
     if not name:
@@ -444,15 +444,15 @@ def _company_aliases(company: str) -> list[re.Pattern[str]]:
     return patterns
 
 
-def _detect_company_from_question(question: str) -> str | None:
+def detect_company_from_question(question: str) -> str | None:
     """Match question against companies that are actually indexed."""
     q = question.casefold()
     candidates: list[tuple[int, str]] = []
-    for doc in _processed_doc_index().values():
+    for doc in processed_doc_index().values():
         company = doc.get("company")
         if not company:
             continue
-        for pat in _company_aliases(company):
+        for pat in company_aliases(company):
             if pat.search(q):
                 candidates.append((len(company), company))
                 break
@@ -462,7 +462,7 @@ def _detect_company_from_question(question: str) -> str | None:
     return candidates[0][1]
 
 
-def _sse(event: str, data: dict[str, Any] | str) -> str:
+def sse(event: str, data: dict[str, Any] | str) -> str:
     """Format one Server-Sent Event payload line block and return it as text."""
     payload = data if isinstance(data, str) else json.dumps(data)
     return f"event: {event}\ndata: {payload}\n\n"
@@ -474,25 +474,25 @@ async def chat(req: ChatRequest):
     async def event_stream():
         """Yield SSE progress updates followed by the final answer event."""
         loop = asyncio.get_running_loop()
-        yield _sse("phase", {"phase": "embedding", "detail": "text-embedding-3-small"})
+        yield sse("phase", {"phase": "embedding", "detail": "text-embedding-3-small"})
         await asyncio.sleep(0)
 
-        eff_company = req.company or _detect_company_from_question(req.question)
+        eff_company = req.company or detect_company_from_question(req.question)
         query = RetrievalQuery(
             question=req.question,
-            top_k=req.top_k,
+            top_k=settings.top_k,
             company=eff_company,
             year=req.year,
         )
-        detail = f"top_k={req.top_k}"
+        detail = f"top_k={settings.top_k}"
         if eff_company and not req.company:
             detail += f" company={eff_company}"
-        yield _sse("phase", {"phase": "searching", "detail": detail})
+        yield sse("phase", {"phase": "searching", "detail": detail})
         history = [{"question": h.question, "answer": h.answer} for h in req.history]
         result = await loop.run_in_executor(_executor, retrieve_decomposed, query, history)
-        yield _sse("phase", {"phase": "reading", "detail": f"{len(result.chunks)} chunks"})
+        yield sse("phase", {"phase": "reading", "detail": f"{len(result.chunks)} chunks"})
 
-        yield _sse("phase", {"phase": "drafting"})
+        yield sse("phase", {"phase": "drafting"})
         answer: VerbatimAnswer = await loop.run_in_executor(
             _executor,
             answer_question,
@@ -500,9 +500,9 @@ async def chat(req: ChatRequest):
             result.chunks,
             history,
         )
-        yield _sse("phase", {"phase": "citing", "detail": f"{len(answer.citations)} citations"})
-        yield _sse("phase", {"phase": "done"})
-        yield _sse("answer", json.loads(answer.model_dump_json()))
+        yield sse("phase", {"phase": "citing", "detail": f"{len(answer.citations)} citations"})
+        yield sse("phase", {"phase": "done"})
+        yield sse("answer", json.loads(answer.model_dump_json()))
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

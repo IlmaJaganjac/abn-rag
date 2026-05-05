@@ -26,7 +26,6 @@ class Settings(BaseSettings):
     processed_dir: Path = PROJECT_ROOT / "backend/data/processed"
 
     reports_dir: Path = PROJECT_ROOT / "backend/data/reports"
-    pdf_parser: str = "llamaparse"
 
     chunk_size_tokens: int = 800
     chunk_overlap_tokens: int = 120

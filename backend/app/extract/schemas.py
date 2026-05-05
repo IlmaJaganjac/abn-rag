@@ -8,7 +8,6 @@ _BASE_INSTRUCTIONS = """\
 Only extract information explicitly present in the document.
 Do not infer, calculate, convert, round, or normalize values.
 Preserve exact values and qualifiers, including >, <, approximately, more than, %, €, kt, Mt, CO₂e, FTEs.
-For every extracted item, include page and a short verbatim quote if available.
 Preserve exact value-label relationships. Do not swap labels between nearby tiles or columns.
 If not present, leave the list empty. Do not guess.
 
@@ -16,18 +15,38 @@ For every item, classify:
 - fact_kind: "actual" (reported/historical for the period), "target" (forward-looking goal/ambition), "progress" (status update against a target), or "forecast" (outlook/guidance).
 - scope_type: "company_wide" if total/group-level; otherwise "segment", "geography", "product", "customer", or "project". For greenhouse-gas / emissions / climate datapoints, use "scope_1_2", "scope_3", or "supply_chain" only when the report explicitly mentions that scope. Use "unknown" only when the text gives no scope clue.
 
-quote is REQUIRED: a verbatim evidence snippet from the page, table row, or nearby text that contains or directly supports both the metric label and the value. If no such evidence exists, omit the item.
+For every extracted item, quote is REQUIRED. The quote must be a verbatim evidence snippet from the page, table row, or nearby text that contains or directly supports both the metric label and the value. If no such quote exists, omit the item.
+
+Keep value and unit separate. Put the numeric amount or exact reported value in value, and the measurement unit/currency in unit. Do not duplicate the unit in both value and unit. Example: value="1,073", unit="ktCO₂e", not value="1,073 ktCO₂e", unit="ktCO₂e".
 
 Reject placeholder values ("N/A", "—", "xx%", "TBD") and status-only values ("On track", "TBC", "approved", "executed", "in progress", "ongoing").\
 """
 
 _CATEGORY_PROMPTS: dict[str, str] = {
     "fte": f"""\
-You extract workforce and headcount datapoints from annual reports. Only populate fte_datapoints. Leave all other lists empty.
+You extract workforce SIZE/COUNT datapoints from annual reports. Only populate fte_datapoints. Leave all other lists empty.
 
-Extract actual reported workforce/headcount datapoints for the reporting period: total employees (FTEs or headcount), average number of payroll employees, number of internal employees, permanent employees, temporary employees, part-time employees, full-time employees, non-guaranteed hours employees, external employees, contractors, year-end employee count, average employee count, employees by gender, employees by region or country, employee turnover or attrition rate. Distinguish FTE vs headcount, payroll vs temporary, average vs year-end if stated. Include label, value, unit (FTEs or headcount), basis (FTE/headcount/payroll/etc.), period (year or date), page, and verbatim quote.
+Extract ONLY actual reported workforce size/count datapoints for the reporting period. Valid metrics are limited to:
+- Total employees, total workforce, FTE / full-time equivalents, headcount
+- Payroll employees, average number of employees, year-end employees
+- Internal employees, external employees, contractors / external workers
+- Permanent / temporary / full-time / part-time / non-guaranteed hours employees — only when the value is a count, headcount, or FTE
+- Employee breakdowns by gender, country, region, age, contract type, or employment type — only when the reported value is a count, headcount, or FTE
 
-Do not extract: workforce reduction plans, hiring plans, future FTE targets, dedicated FTEs for a specific project, program, or team; employee engagement survey scores; training hours; safety incident rates; wages/salaries per FTE; board, supervisory-board or executive diversity percentages unless they are explicitly reported as employee/headcount counts. Do not extract financial, sustainability, operational, customer, or shareholder data.
+The unit must be a count-style unit: FTEs, headcount, employees, persons, or a plain integer count. The value must be a count.
+
+Do NOT extract any of the following as fte:
+- Percentages, rates, ratios of any kind (gender diversity %, turnover rate %, pay gap %, disability %, engagement participation %, training-hours rate, safety rates, etc.)
+- Remuneration / compensation amounts, sign-on / severance / bonus / salary / wages / remuneration table values
+- Employee engagement survey scores, engagement index, engagement drivers, employee engagement metrics, or participation rates
+- Contract-type rows if values are percentages or the table does not clearly state headcount/FTE/count
+- Executive Board, Supervisory Board, CLA+, Identified Staff, remuneration/governance table rows
+- Training hours or safety incident rates
+- Workforce reduction plans, hiring plans, future FTE targets, dedicated FTEs for a specific project, program, or team
+- Board, supervisory-board, or executive diversity percentages
+- Financial, sustainability/ESG, operational, customer, or shareholder data
+
+If no exact quote supports both the metric label and the value, omit the item. fact_kind must be "actual".
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -73,9 +92,16 @@ REJECT: actual historical ESG performance values (reported emissions for the rep
     "esg": f"""\
 You extract actual ESG performance values from annual reports. Only populate esg_datapoints. Leave all other lists empty.
 
-Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results, social/workforce ESG metrics such as safety rates or employee diversity percentages when explicitly reported as ESG performance. Include value, unit, period/year, scope if present, page, and verbatim quote.
+Extract actual reported performance values for the reporting year (not targets): GHG emissions (Scope 1, Scope 2, Scope 3, combined), renewable electricity percentage, total energy consumption, water use, waste generated, recycling or reuse rate (as ESG metric), supplier sustainability audit results.
 
-Do not extract forward-looking targets, ambitions, commitments, target years, or progress against a target. Do not extract business production volumes, financial KPIs, shareholder data, FTE/headcount totals, or general operational KPIs unless the value is explicitly reported as an ESG performance metric.
+ESG MAY include social/workforce percentages and rates when reported as ESG / S1 / social performance, such as: gender diversity %, pay gap %, disability %, turnover rate %, employee engagement participation %, safety incident rates. Treat such values as ESG performance — do NOT classify them as fte.
+
+ESG must NOT include:
+- Forward-looking targets, ambitions, commitments, target years, or progress against a target — those belong in sustainability_goals.
+- Plain FTE / headcount / employee count totals — those belong in fte. Only include workforce counts here when they appear in an explicit ESG / S1 workforce performance table.
+- Business production volumes, financial KPIs, shareholder data, or general operational KPIs unless the value is explicitly reported as an ESG performance metric.
+
+Include value, unit, period/year, scope if present, page, and verbatim quote. fact_kind must be "actual".
 
 {_BASE_INSTRUCTIONS}""",
 
@@ -208,11 +234,6 @@ class AnnualReportDatapoints(BaseModel):
     financial_highlights: list[ExtractedFinancialHighlight] = []
     business_performance: list[ExtractedBusinessPerformance] = []
     shareholder_returns: list[ExtractedShareholderReturn] = []
-
-
-def _json_schema() -> dict[str, Any]:
-    """Return the JSON schema for the top-level extraction response model."""
-    return AnnualReportDatapoints.model_json_schema()
 
 
 def category_prompt(category: str | None) -> str:

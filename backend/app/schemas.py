@@ -60,7 +60,7 @@ class VerbatimAnswer(BaseModel):
     refusal_reason: str | None = None
 
     @model_validator(mode="after")
-    def _check_citations(self) -> VerbatimAnswer:
+    def check_citations(self) -> VerbatimAnswer:
         """Enforce that grounded answers cite sources and refusals explain themselves."""
         if not self.refused and not self.citations:
             raise ValueError("non-refused answers must include at least one citation")
@@ -105,11 +105,3 @@ class EvalQuestion(BaseModel):
     expected_source: str | None = None
     expected_behavior: Literal["refuse"] | None = None
     notes: str | None = None
-
-
-class EvalSet(BaseModel):
-    """Top-level eval configuration containing multiple `EvalQuestion` entries."""
-    source: str
-    company: str
-    year: int
-    questions: list[EvalQuestion]

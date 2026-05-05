@@ -4,7 +4,6 @@ import pytest
 
 from backend.app.extract.datapoints import (
     NormalizedDatapoint,
-    NormalizedDatapointSet,
     deduplicate_datapoints,
     normalize_llamaextract_result,
 )
@@ -54,13 +53,69 @@ def test_average_payroll_gets_priority_85():
     assert fte[0].priority == 85
 
 
-def test_headcount_gets_priority_70():
+def test_percentage_headcount_rejected_as_fte():
     result = _make_result(fte_datapoints=[
         ExtractedFTEDatapoint(label="Women in our workforce (headcount)", value="21%", basis="headcount", page=5, quote="Women in our workforce (headcount): 21%", fact_kind="actual", scope_type="segment"),
     ])
     dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
     fte = _norm(dps, "fte")
+    assert fte == []
+
+
+def test_headcount_count_gets_priority_70():
+    result = _make_result(fte_datapoints=[
+        ExtractedFTEDatapoint(label="Country headcount - Netherlands", value="20,300", basis="headcount", page=5, quote="Country split headcount: Netherlands 20,300", fact_kind="actual", scope_type="geography"),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    fte = _norm(dps, "fte")
     assert fte[0].priority == 70
+
+
+def test_fte_count_kept_when_quote_contains_unrelated_percentages():
+    result = _make_result(fte_datapoints=[
+        ExtractedFTEDatapoint(
+            label="Internal employees",
+            value="20,455",
+            unit="employees",
+            page=5,
+            quote="Internal employees 20,455; women in workforce 21%",
+            fact_kind="actual",
+            scope_type="company_wide",
+        ),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    fte = _norm(dps, "fte")
+    assert len(fte) == 1
+
+
+@pytest.mark.parametrize(
+    ("label", "value", "unit", "quote", "basis"),
+    [
+        ("overall engagement index", "79", None, "overall engagement index of 79", None),
+        ("Breakdown by contract types - Temporary", "2", "headcount", "| Breakdown by contract types - Temporary | 2 | 5 |", "contract types"),
+        ("Breakdown by contract types - Permanent", "37", "headcount", "| Breakdown by contract types - Permanent | 37 | 37 |", "contract types"),
+        ("Breakdown by contract types - Full-time", "32", "headcount", "| Breakdown by contract types - Full-time | 32 | 37 |", "contract types"),
+        ("Breakdown by contract types - Part-time", "7", "headcount", "| Breakdown by contract types - Part-time | 7 | 5 |", "contract types"),
+        ("Executive Board", "2", "FTE", "| Executive Board | 2 |", None),
+        ("CLA+", "2", "FTE", "| CLA+ | 2 |", None),
+        ("Number of FTEs (Identified Staff)", "380", "FTE", "| Total | 380 | 112,809 |", "Identified Staff"),
+    ],
+)
+def test_non_workforce_fte_false_positives_rejected(label, value, unit, quote, basis):
+    result = _make_result(fte_datapoints=[
+        ExtractedFTEDatapoint(
+            label=label,
+            value=value,
+            unit=unit,
+            basis=basis,
+            page=5,
+            quote=quote,
+            fact_kind="actual",
+            scope_type="company_wide",
+        ),
+    ])
+    dps = normalize_llamaextract_result(result, source="test.pdf", company="ACME", year=2025)
+    assert _norm(dps, "fte") == []
 
 
 def test_dedicated_fte_gets_priority_30():
@@ -515,5 +570,5 @@ def test_openai_less_than_value_not_in_quote_rejected():
 
 
 def test_openai_percent_value_in_quote_accepted():
-    dps = _norm_openai(_openai_fin(value="51.3%", quote="Gross margin was 51.3% in 2024."))
+    dps = _norm_openai(_openai_fin(metric="Gross margin", value="51.3%", quote="Gross margin was 51.3% in 2024."))
     assert len(dps) == 1

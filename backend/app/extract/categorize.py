@@ -15,6 +15,7 @@ from backend.app.ingest.categories import (
     CATEGORY_PATTERNS,
     DATAPOINT_CATEGORIES,
     category_page_score,
+    section_matches_category,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ def extract_categorized_datapoints(
     company: str | None,
     year: int | None,
     validate: bool = False,
+    page_sections: dict[int, set[str]] | None = None,
 ) -> list[object]:
     """Extract category-specific datapoints and return one merged normalized list."""
     page_records = [
@@ -40,8 +42,9 @@ def extract_categorized_datapoints(
         for page, text in pages
         if text.strip()
     ]
+    page_sections = page_sections or {}
 
-    def _pages_label(records: list[dict[str, Any]]) -> str:
+    def pages_label(records: list[dict[str, Any]]) -> str:
         """Render a compact page label string for logging selected page ranges."""
         pages_str = [str(record["page"]) for record in records]
         label = ", ".join(pages_str[:12])
@@ -49,10 +52,42 @@ def extract_categorized_datapoints(
             label += f", ... (+{len(pages_str) - 12})"
         return label
 
-    def _extract_category(category: str) -> list[object]:
+    def extract_category(category: str) -> list[object]:
         """Extract and optionally validate datapoints for one category."""
         max_pages = CATEGORY_MAX_PAGES.get(category, 20)
-        if category in CATEGORY_PATTERNS:
+
+        section_pages: list[dict[str, Any]] = []
+        if page_sections:
+            section_pages = [
+                p for p in page_records
+                if any(
+                    section_matches_category(category, sp)
+                    for sp in page_sections.get(p["page"], set())
+                )
+            ]
+
+        if section_pages:
+            section_pages.sort(
+                key=lambda p: category_page_score(category, p["text"]),
+                reverse=True,
+            )
+            candidate_pages = section_pages[:max_pages]
+            min_section_floor = min(5, max_pages // 2)
+            if len(candidate_pages) < min_section_floor and category in CATEGORY_PATTERNS:
+                seen_pages = {p["page"] for p in candidate_pages}
+                regex_scored = [
+                    (p, category_page_score(category, p["text"]))
+                    for p in page_records
+                    if p["page"] not in seen_pages
+                ]
+                regex_scored = [
+                    (p, s) for p, s in regex_scored if s >= 3
+                ]
+                regex_scored.sort(key=lambda x: x[1], reverse=True)
+                fill = max_pages - len(candidate_pages)
+                candidate_pages.extend(p for p, _ in regex_scored[:fill])
+            selection_method = f"section+regex ({len(section_pages)} section hits)"
+        elif category in CATEGORY_PATTERNS:
             scored = [
                 (p, category_page_score(category, p["text"]))
                 for p in page_records
@@ -60,20 +95,26 @@ def extract_categorized_datapoints(
             scored = [(p, s) for p, s in scored if s > 0]
             scored.sort(key=lambda x: x[1], reverse=True)
             candidate_pages = [p for p, _ in scored[:max_pages]] or page_records[:max_pages]
+            selection_method = "regex"
         else:
             candidate_pages = page_records[:max_pages]
+            selection_method = "fallback"
+
         logger.info(
-            "category %s: %d/%d pages selected by regex: %s",
+            "category %s: %d/%d pages selected by %s: %s",
             category,
             len(candidate_pages),
             len(page_records),
-            _pages_label(candidate_pages),
+            selection_method,
+            pages_label(candidate_pages),
         )
 
-        def _extract_page(page_record: dict) -> list[object]:
-            """Extract normalized datapoints from one page record."""
+        PAGE_BATCH_SIZE = 3
+
+        def extract_batch(batch: list[dict]) -> list[object]:
+            """Extract normalized datapoints from a batch of page records."""
             result = extract_annual_report_datapoints_openai(
-                pages=[page_record],
+                pages=batch,
                 company=company,
                 year=year,
                 category=category,
@@ -82,9 +123,13 @@ def extract_categorized_datapoints(
                 result, source=source, company=company, year=year, extractor="openai"
             )
 
+        batches = [
+            candidate_pages[i : i + PAGE_BATCH_SIZE]
+            for i in range(0, len(candidate_pages), PAGE_BATCH_SIZE)
+        ]
         category_results: list[object] = []
         with ThreadPoolExecutor(max_workers=3) as page_executor:
-            page_futures = [page_executor.submit(_extract_page, p) for p in candidate_pages]
+            page_futures = [page_executor.submit(extract_batch, b) for b in batches]
             for f in as_completed(page_futures):
                 category_results.extend(f.result())
         logger.info("category %s: %d structured datapoints extracted", category, len(category_results))
@@ -125,7 +170,7 @@ def extract_categorized_datapoints(
 
     extracted = []
     with ThreadPoolExecutor(max_workers=3) as executor:
-        futures = {executor.submit(_extract_category, cat): cat for cat in DATAPOINT_CATEGORIES}
+        futures = {executor.submit(extract_category, cat): cat for cat in DATAPOINT_CATEGORIES}
         for future in as_completed(futures):
             extracted.extend(future.result())
     deduped = deduplicate_datapoints(extracted)

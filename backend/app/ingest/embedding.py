@@ -72,7 +72,7 @@ def chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
     return md
 
 
-def _source_where(source: str, company: str | None, year: int | None) -> dict:
+def source_where(source: str, company: str | None, year: int | None) -> dict:
     """Build the metadata filter used to find existing chunks for one source."""
     clauses: list[dict[str, str | int]] = [{"source": source}]
     if company is not None:
@@ -93,6 +93,6 @@ def delete_existing_source_chunks(
 ) -> None:
     """Delete stored chunks for one source before re-indexing new versions of the same file."""
     try:
-        collection.delete(where=_source_where(source, company, year))
+        collection.delete(where=source_where(source, company, year))
     except Exception as exc:  # noqa: BLE001
         logger.info("could not delete existing chunks for %s: %s", source, exc)

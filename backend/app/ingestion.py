@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from backend.app.config import settings
@@ -20,6 +21,7 @@ from backend.app.ingest.embedding import (
     get_collection,
 )
 from backend.app.ingest.persistence import (
+    load_parsed_pages,
     persist_chunks,
     persist_datapoints,
     persist_parsed_pages,
@@ -36,48 +38,58 @@ def ingest_pdf(
     company: str | None,
     year: int | None,
     reset: bool = False,
-    parser: str | None = None,
     source_name: str | None = None,
     validate_datapoints: bool = True,
+    skip_vision: bool = False,
+    skip_parse: bool = False,
+    status_callback: Callable[[str], None] | None = None,
 ) -> int:
     """Ingest one PDF and return the total number of chunks prepared for indexing."""
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
     source = source_name or pdf_path.name
-    requested_parser = parser or settings.pdf_parser
     processed_dir = settings.get_processed_path()
 
-    logger.info("parsing %s with %s", source, requested_parser)
-    parsed = parse_pdf_pages(
-        pdf_path,
-        parser=requested_parser,
-        processed_dir=processed_dir,
-        llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
-    )
-    pages = list(as_page_tuples(parsed.pages))
-    parser_name = parsed.parser
-    logger.info("parsed %d non-empty pages with %s", len(pages), parser_name)
-
-    pages_path = persist_parsed_pages(
-        pages,
-        source=source,
-        company=company,
-        year=year,
-        parser=parser_name,
-        processed_dir=processed_dir,
-    )
-    logger.info("wrote parsed pages to %s", pages_path)
-    pages = enhance_pages_with_vision(
-        pdf_path=pdf_path,
-        pages=pages,
-        source=source,
-        company=company,
-        year=year,
-        parser=parser_name,
-        processed_dir=processed_dir,
-    )
-    logger.info("applied automatic vision enhancement to difficult table pages")
+    if skip_parse:
+        pages = load_parsed_pages(source, processed_dir)
+        parser_name = "llamaparse"
+        logger.info("loaded %d persisted pages for %s (skipped parse)", len(pages), source)
+    else:
+        logger.info("parsing %s with llamaparse", source)
+        parsed = parse_pdf_pages(
+            pdf_path,
+            processed_dir=processed_dir,
+            llama_cloud_api_key=settings.llama_cloud_api_key.get_secret_value(),
+        )
+        pages = list(as_page_tuples(parsed.pages))
+        parser_name = parsed.parser
+        logger.info("parsed %d non-empty pages with %s", len(pages), parser_name)
+        pages_path = persist_parsed_pages(
+            pages,
+            source=source,
+            company=company,
+            year=year,
+            parser=parser_name,
+            processed_dir=processed_dir,
+        )
+        logger.info("wrote parsed pages to %s", pages_path)
+    if not skip_vision:
+        pages = enhance_pages_with_vision(
+            pdf_path=pdf_path,
+            pages=pages,
+            source=source,
+            company=company,
+            year=year,
+            parser=parser_name,
+            processed_dir=processed_dir,
+        )
+        logger.info("applied automatic vision enhancement to difficult table pages")
+    if status_callback:
+        try:
+            status_callback("embedding")
+        except Exception:
+            pass
     chunks = build_chunks(
         iter(pages),
         source=source,
@@ -91,12 +103,17 @@ def ingest_pdf(
     chunks = deduplicate_chunks(chunks)
     logger.info("kept %d semantic chunks after exact deduplication", len(chunks))
 
+    page_sections: dict[int, set[str]] = {}
+    for chunk in chunks:
+        if chunk.section_path:
+            page_sections.setdefault(chunk.page, set()).add(chunk.section_path)
     datapoints = extract_categorized_datapoints(
         pages,
         source=source,
         company=company,
         year=year,
         validate=validate_datapoints,
+        page_sections=page_sections,
     )
     datapoints_path = persist_datapoints(
         datapoints,
@@ -165,7 +182,7 @@ def ingest_pdf(
     return len(chunks)
 
 
-def _cli(argv: list[str] | None = None) -> int:
+def cli(argv: list[str] | None = None) -> int:
     """Parse CLI flags for ingestion and return the process exit code."""
     parser = argparse.ArgumentParser(description="Ingest an annual report PDF into ChromaDB.")
     parser.add_argument("pdf", type=Path)
@@ -173,9 +190,10 @@ def _cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--year", type=int, default=None)
     parser.add_argument("--source-name", default=None)
     parser.add_argument("--reset", action="store_true")
-    parser.add_argument("--parser", choices=["llamaparse"], default=settings.pdf_parser)
     parser.add_argument("--no-validate-datapoints", action="store_false", dest="validate_datapoints")
-    parser.set_defaults(validate_datapoints=True)
+    parser.add_argument("--skip-vision", action="store_true", dest="skip_vision")
+    parser.add_argument("--skip-parse", action="store_true", dest="skip_parse")
+    parser.set_defaults(validate_datapoints=True, skip_vision=False, skip_parse=False)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -185,9 +203,10 @@ def _cli(argv: list[str] | None = None) -> int:
             company=args.company,
             year=args.year,
             reset=args.reset,
-            parser=args.parser,
             source_name=args.source_name,
             validate_datapoints=args.validate_datapoints,
+            skip_vision=args.skip_vision,
+            skip_parse=args.skip_parse,
         )
     except (FileNotFoundError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -197,4 +216,4 @@ def _cli(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(_cli())
+    raise SystemExit(cli())

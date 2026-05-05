@@ -7,10 +7,6 @@ from collections.abc import Iterable
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 TABLE_SEPARATOR_RE = re.compile(r"^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$")
 YEAR_RE = re.compile(r"\b20\d{2}\b")
-VALUE_RE = re.compile(
-    r"^\s*(?:[€$£]?\s*)?(?:[<>]?\s*)?\d[\d,.]*(?:\s?(?:%|bn|m|kt|mt|million|billion))?\s*$",
-    re.IGNORECASE,
-)
 READ_MORE_RE = re.compile(r"^read more on page \d+\s*>?$", re.IGNORECASE)
 PAGE_NUMBER_RE = re.compile(r"^\d{1,4}$")
 
@@ -94,18 +90,6 @@ def parse_table_cells(row: str) -> list[str]:
     if stripped.endswith("|"):
         stripped = stripped[:-1]
     return [clean_cell(cell) for cell in stripped.split("|")]
-
-
-def looks_like_value(text: str) -> bool:
-    """Return whether text looks like a numeric value or standalone year."""
-    clean = text.replace("&nbsp;", " ").strip()
-    return bool(VALUE_RE.match(clean)) or bool(YEAR_RE.fullmatch(clean))
-
-
-def starts_with_value(text: str) -> bool:
-    """Return whether text begins with a numeric-looking value."""
-    clean = text.replace("&nbsp;", " ").strip()
-    return bool(re.match(r"^[€$£]?\s*[<>]?\s*\d", clean))
 
 
 def looks_like_heading(text: str) -> bool:

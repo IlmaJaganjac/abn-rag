@@ -8,18 +8,15 @@ from dataclasses import dataclass
 from backend.app.ingest.chunking_heuristics import (
     HEADING_RE,
     TABLE_SEPARATOR_RE,
-    YEAR_RE,
     clean_block,
     clean_heading,
     find_boilerplate_lines,
     is_noise_line,
     is_table_line,
     looks_like_heading,
-    looks_like_value,
     normalize_line,
     parse_table_cells,
     remove_boilerplate,
-    starts_with_value,
     year_period,
 )
 from backend.app.schemas import Chunk
@@ -54,7 +51,7 @@ def build_semantic_chunks(
     heading_stack: list[tuple[int, str]] = []
     for page, text in page_list:
         drafts.extend(
-            _page_drafts(
+            page_drafts(
                 page=page,
                 text=text,
                 heading_stack=heading_stack,
@@ -91,7 +88,7 @@ def build_semantic_chunks(
     return chunks
 
 
-def _page_drafts(
+def page_drafts(
     *,
     page: int,
     text: str,
@@ -127,7 +124,7 @@ def _page_drafts(
             return
         for part in split_oversize(body, max_tokens, overlap):
             drafts.append(
-                _draft(
+                draft(
                     page=page,
                     text=part,
                     chunk_kind="section",
@@ -147,7 +144,7 @@ def _page_drafts(
         if not rows:
             return
         drafts.extend(
-            _table_drafts(
+            table_drafts(
                 page=page,
                 rows=rows,
                 section_path=section_path(),
@@ -197,7 +194,7 @@ def _page_drafts(
     return drafts
 
 
-def _table_drafts(
+def table_drafts(
     *,
     page: int,
     rows: list[str],
@@ -210,17 +207,17 @@ def _table_drafts(
 ) -> list[ChunkDraft]:
     """Build draft chunks for one table, including row- and metric-level variants."""
     drafts: list[ChunkDraft] = []
-    table_kind = _classify_table(rows)
+    table_kind = classify_table(rows)
     full_table = clean_block("\n".join(rows))
     if full_table:
-        table_context = _table_context(section_path, rows, table_kind)
-        for part in _split_table_on_rows(
+        tbl_ctx = table_context(section_path, rows, table_kind)
+        for part in split_table_on_rows(
             rows=rows,
             max_tokens=max_tokens,
             token_counter=token_counter,
         ):
             drafts.append(
-                _draft(
+                draft(
                     page=page,
                     text=part,
                     chunk_kind="table",
@@ -229,21 +226,21 @@ def _table_drafts(
                     year=year,
 
                     boilerplate=boilerplate,
-                    extra_embedding_context=table_context,
+                    extra_embedding_context=tbl_ctx,
                 )
             )
 
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
-    headers, body_rows = _table_headers_and_body(data_rows)
+    headers, body_rows = table_headers_and_body(data_rows)
 
     if table_kind == "header_table":
         for row in body_rows:
             cells = parse_table_cells(row)
-            row_text = _format_header_aware_row(headers, cells)
+            row_text = format_header_aware_row(headers, cells)
             if not row_text:
                 continue
             drafts.append(
-                _draft(
+                draft(
                     page=page,
                     text=row_text,
                     chunk_kind="table_row",
@@ -252,13 +249,13 @@ def _table_drafts(
                     year=year,
 
                     boilerplate=boilerplate,
-                    extra_embedding_context=_table_context(section_path, rows, table_kind),
+                    extra_embedding_context=table_context(section_path, rows, table_kind),
                 )
             )
     return drafts
 
 
-def _split_table_on_rows(
+def split_table_on_rows(
     *,
     rows: list[str],
     max_tokens: int,
@@ -304,7 +301,7 @@ def _split_table_on_rows(
     return parts or [full_table]
 
 
-def _draft(
+def draft(
     *,
     page: int,
     text: str,
@@ -317,7 +314,7 @@ def _draft(
 ) -> ChunkDraft:
     """Create one `ChunkDraft` with cleaned body text and embedding context."""
     body = remove_boilerplate(text, boilerplate).strip()
-    context = _embedding_context(
+    context = embedding_context(
         company=company,
         year=year,
         section_path=section_path,
@@ -333,7 +330,7 @@ def _draft(
     )
 
 
-def _embedding_context(
+def embedding_context(
     *,
     company: str | None,
     year: int | None,
@@ -350,10 +347,10 @@ def _embedding_context(
     return "\n".join(part for part in parts if part)
 
 
-def _table_context(section_path: str | None, rows: list[str], table_kind: str) -> str | None:
+def table_context(section_path: str | None, rows: list[str], table_kind: str) -> str | None:
     """Summarize table metadata for embeddings and return it as extra context text."""
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
-    headers, _ = _table_headers_and_body(data_rows)
+    headers, _ = table_headers_and_body(data_rows)
     parts: list[str] = [f"Table type: {table_kind}"]
     if section_path:
         parts.append(f"Table caption: {section_path}")
@@ -364,18 +361,16 @@ def _table_context(section_path: str | None, rows: list[str], table_kind: str) -
     return "\n".join(parts) if parts else None
 
 
-def _classify_table(rows: list[str]) -> str:
+def classify_table(rows: list[str]) -> str:
     """Classify a table into a coarse kind used for downstream chunk shaping."""
     data_rows = [row for row in rows if not TABLE_SEPARATOR_RE.match(row)]
-    headers, body_rows = _table_headers_and_body(data_rows)
-    if headers is not None and body_rows and _looks_like_header_row(headers):
+    headers, body_rows = table_headers_and_body(data_rows)
+    if headers is not None and body_rows and looks_like_header_row(headers):
         return "header_table"
-    if data_rows and _mostly_metric_pairs(parse_table_cells(data_rows[0])):
-        return "kpi_pairs"
     return "generic_table"
 
 
-def _looks_like_header_row(cells: list[str]) -> bool:
+def looks_like_header_row(cells: list[str]) -> bool:
     """Return whether parsed table cells look like a header row."""
     normalized = {normalize_line(cell) for cell in cells if cell.strip()}
     if any(year_period(cell) is not None for cell in cells):
@@ -383,40 +378,7 @@ def _looks_like_header_row(cells: list[str]) -> bool:
     return bool(normalized & {"notes", "note", "description", "metric", "topic"})
 
 
-def _mostly_metric_pairs(cells: list[str]) -> bool:
-    """Return whether a row mostly consists of alternating value-label metric pairs."""
-    non_empty = [cell for cell in cells if cell.strip()]
-    if len(non_empty) < 2:
-        return False
-    return len(_metric_pairs(non_empty)) * 2 >= len(non_empty)
-
-
-def _metric_pairs(cells: list[str]) -> list[tuple[str, str]]:
-    """Extract `(value, label)` metric pairs from table cells when they are detectable."""
-    pairs: list[tuple[str, str]] = []
-    i = 0
-    while i + 1 < len(cells):
-        value = cells[i].strip()
-        label = cells[i + 1].strip()
-        if value and label and looks_like_value(value) and not looks_like_value(label):
-            pairs.append((value, label))
-            i += 2
-        elif (
-            value
-            and label
-            and YEAR_RE.search(value)
-            and starts_with_value(label)
-            and not looks_like_value(label)
-        ):
-            pairs.append((label, value))
-            i += 2
-        else:
-            i += 1
-    return pairs
-
-
-
-def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:
+def table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, list[str]]:
     """Split table rows into optional headers and remaining body rows."""
     if len(data_rows) < 2:
         return None, data_rows
@@ -426,7 +388,7 @@ def _table_headers_and_body(data_rows: list[str]) -> tuple[list[str] | None, lis
     return headers, data_rows[1:]
 
 
-def _format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str | None:
+def format_header_aware_row(headers: list[str] | None, cells: list[str]) -> str | None:
     """Format one table row as `Header: value` lines and return the rendered text."""
     if headers is None:
         return None

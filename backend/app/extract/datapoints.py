@@ -2,20 +2,31 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from pathlib import Path
 
 from pydantic import BaseModel
 
 from backend.app.extract.schemas import AnnualReportDatapoints
 from backend.app.extract.signals import (
+    ACTUAL_METRIC,
+    BIZ_SIGNAL,
+    DEFINITION_SIGNAL,
+    ESG_SIGNAL,
+    FIN_SIGNAL,
     FTE_AVG_PAYROLL,
     FTE_COMPANY_WIDE,
     FTE_HEADCOUNT,
+    FTE_NON_EMPLOYEE,
+    FTE_SIGNAL,
     FTE_SPECIFIC,
     PLACEHOLDER_VALUE,
     PUNCT_RE,
+    RATE_UNIT_SIGNAL,
+    SH_SIGNAL,
     SPACE_RE,
     STATUS_ONLY_VALUE,
+    SUST_BUSINESS_ONLY,
+    SUST_SIGNAL,
+    SUST_TARGET_SIGNAL,
     SYMBOL_SPACE_RE,
 )
 
@@ -45,15 +56,7 @@ class NormalizedDatapoint(BaseModel):
     canonical_metric: str | None = None
 
 
-class NormalizedDatapointSet(BaseModel):
-    """Container for one source file and the normalized datapoints extracted from it."""
-    source: str
-    company: str | None = None
-    year: int | None = None
-    datapoints: list[NormalizedDatapoint] = []
-
-
-def _norm_text(s: str | None) -> str:
+def norm_text(s: str | None) -> str:
     """Normalize free text for deduplication and heuristic matching."""
     if not s:
         return ""
@@ -63,7 +66,7 @@ def _norm_text(s: str | None) -> str:
     return s
 
 
-def _norm_value(s: str | None) -> str:
+def norm_value(s: str | None) -> str:
     """Normalize a datapoint value string for value-level comparisons."""
     if not s:
         return ""
@@ -73,7 +76,7 @@ def _norm_value(s: str | None) -> str:
     return s
 
 
-def _fte_priority(metric: str, basis: str | None) -> int:
+def fte_priority(metric: str, basis: str | None) -> int:
     """Score FTE datapoints so broader company-wide metrics outrank weaker variants."""
     combined = f"{metric} {basis or ''}"
     if FTE_SPECIFIC.search(combined):
@@ -87,7 +90,7 @@ def _fte_priority(metric: str, basis: str | None) -> int:
     return 60
 
 
-def _sustainability_priority(goal: str, quote: str | None, target_year: str | None) -> int:
+def sustainability_priority(quote: str | None, target_year: str | None) -> int:
     """Score sustainability goals so more explicit targets rank above vague ones."""
     if quote and target_year:
         return 95
@@ -98,7 +101,7 @@ def _sustainability_priority(goal: str, quote: str | None, target_year: str | No
     return 70
 
 
-def _highlight_priority(page: int | None, quote: str | None) -> int:
+def highlight_priority(page: int | None, quote: str | None) -> int:
     """Score generic highlight datapoints based on evidence completeness."""
     if page is not None and quote:
         return 90
@@ -107,7 +110,7 @@ def _highlight_priority(page: int | None, quote: str | None) -> int:
     return 60
 
 
-def _esg_priority(quote: str | None, period: str | None) -> int:
+def esg_priority(quote: str | None, period: str | None) -> int:
     """Score ESG datapoints so quoted period-specific facts rank highest."""
     if quote and period:
         return 95
@@ -116,9 +119,25 @@ def _esg_priority(quote: str | None, period: str | None) -> int:
     return 70
 
 
+def combined_dp_text(dp: NormalizedDatapoint) -> str:
+    """Concatenate the key fields of one datapoint into one searchable text string."""
+    return " ".join(
+        part for part in (
+            dp.datapoint_type,
+            dp.metric,
+            dp.value,
+            dp.unit,
+            dp.period,
+            dp.quote,
+            dp.basis,
+            dp.scope,
+            dp.target_year,
+        )
+        if part
+    )
 
 
-def _normalized_contains_value(quote: str, value: str) -> bool:
+def normalized_contains_value(quote: str, value: str) -> bool:
     """Return whether the quote still contains the datapoint value after normalization."""
     if not quote or not value:
         return True
@@ -133,17 +152,135 @@ def _normalized_contains_value(quote: str, value: str) -> bool:
     return bool(numeric_value and numeric_value in numeric_quote)
 
 
+def is_percentage_or_rate(dp: NormalizedDatapoint) -> bool:
+    """Return whether a datapoint reports a percentage, rate, or ratio rather than a count."""
+    value = dp.value or ""
+    unit = dp.unit or ""
+    metric_basis = " ".join(
+        part for part in (dp.metric, dp.unit, dp.basis) if part
+    )
+    return "%" in value or "%" in unit or bool(RATE_UNIT_SIGNAL.search(metric_basis))
 
-def _is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
-    """Reject obvious placeholders and ungrounded values; leave category checks to the LLM validator."""
+
+def is_definition_without_numeric_value(dp: NormalizedDatapoint) -> bool:
+    """Return whether a datapoint looks like a textual definition with no numeric value."""
+    text = combined_dp_text(dp)
+    value = dp.value or ""
+    return bool(DEFINITION_SIGNAL.search(text)) and not bool(re.search(r"\d|%|€|\$|£", value))
+
+
+def strip_duplicated_unit(value: str | None, unit: str | None) -> str | None:
+    """Return value with the trailing unit removed when value duplicates unit."""
+    if not value or not unit:
+        return value
+    v = value.rstrip()
+    u = unit.strip()
+    if not u or not v.lower().endswith(u.lower()):
+        return value
+    head = v[: -len(u)].rstrip()
+    if not head or not re.search(r"[\d%]", head):
+        return value
+    return head
+
+
+def is_ambiguous_fte_table_row(dp: NormalizedDatapoint) -> bool:
+    """Reject FTE-looking rows from governance, remuneration, or ambiguous contract tables."""
+    text = combined_dp_text(dp)
+    metric = dp.metric or ""
+    quote = dp.quote or ""
+    value = dp.value or ""
+    unit = (dp.unit or "").lower()
+
+    if re.search(
+        r"executive\s+board|supervisory\s+board|identified\s+staff|\bcla\+?\b|"
+        r"remuneration|compensation|severance|sign[-\s]?on|bonus|salary|wages",
+        text,
+        re.IGNORECASE,
+    ):
+        return True
+
+    if re.search(
+        r"contract\s+types?|temporary|permanent|full[-\s]?time|part[-\s]?time",
+        metric,
+        re.IGNORECASE,
+    ):
+        if unit not in {"fte", "ftes", "headcount", "employees", "persons"}:
+            return True
+        if not re.search(
+            r"headcount|fte|full[-\s]?time\s+equivalent|number\s+of\s+employees|employees\s+\(",
+            quote,
+            re.IGNORECASE,
+        ):
+            return True
+        if re.fullmatch(r"\d{1,2}", value.strip()) and not re.search(
+            r"headcount|fte|number\s+of",
+            quote,
+            re.IGNORECASE,
+        ):
+            return True
+
+    return False
+
+
+def is_plausible_datapoint(dp: NormalizedDatapoint) -> bool:
+    """Reject placeholder, mis-scoped, or category-inconsistent datapoints."""
+    text = combined_dp_text(dp)
     value = (dp.value or "").strip()
     quote = dp.quote or ""
-    if not quote:
-        return False
-    if value and (PLACEHOLDER_VALUE.fullmatch(value) or STATUS_ONLY_VALUE.fullmatch(value)):
-        return False
-    if value and re.search(r"[\d%<>]", value) and not _normalized_contains_value(quote, value):
-        return False
+    metric = dp.metric or ""
+    strict_openai = dp.extractor == "openai"
+    if strict_openai:
+        if not quote:
+            return False
+        if value and (PLACEHOLDER_VALUE.fullmatch(value) or STATUS_ONLY_VALUE.fullmatch(value)):
+            return False
+        if value and re.search(r"[\d%<>]", value) and not normalized_contains_value(quote, value):
+            return False
+        if is_definition_without_numeric_value(dp):
+            return False
+    if dp.datapoint_type == "fte":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
+        if is_percentage_or_rate(dp):
+            return False
+        if is_ambiguous_fte_table_row(dp):
+            return False
+        return bool(FTE_SIGNAL.search(text)) and not bool(FTE_NON_EMPLOYEE.search(text))
+
+    if dp.datapoint_type == "sustainability_goal":
+        if strict_openai and dp.fact_kind not in {"target", "forecast"}:
+            return False
+        if strict_openai and ACTUAL_METRIC.search(metric):
+            return False
+        has_sust_signal = bool(SUST_SIGNAL.search(text))
+        has_target_signal = bool(SUST_TARGET_SIGNAL.search(text) or dp.target_year)
+        business_only = bool(SUST_BUSINESS_ONLY.search(text)) and not has_sust_signal
+        return has_sust_signal and has_target_signal and not business_only
+
+    if dp.datapoint_type == "esg_datapoint":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
+        return bool(ESG_SIGNAL.search(text)) and not bool(SUST_TARGET_SIGNAL.search(text))
+
+    if dp.datapoint_type == "financial_highlight":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
+        if SH_SIGNAL.search(text) or FTE_SIGNAL.search(text) or SUST_SIGNAL.search(text):
+            return False
+        return bool(FIN_SIGNAL.search(text))
+
+    if dp.datapoint_type == "business_performance":
+        if strict_openai and dp.fact_kind != "actual":
+            return False
+        if FTE_SIGNAL.search(text) or SH_SIGNAL.search(text):
+            return False
+        if SUST_SIGNAL.search(text) and SUST_TARGET_SIGNAL.search(text):
+            return False
+        return bool(BIZ_SIGNAL.search(text))
+
+    if dp.datapoint_type == "shareholder_return":
+        return bool(SH_SIGNAL.search(text))
+
     return True
 
 
@@ -160,18 +297,18 @@ def normalize_llamaextract_result(
 
     def append_if_plausible(dp: NormalizedDatapoint) -> None:
         """Append a datapoint only when it passes plausibility checks."""
-        if _is_plausible_datapoint(dp):
+        if is_plausible_datapoint(dp):
             out.append(dp)
 
     for dp in result.fte_datapoints:
-        priority = _fte_priority(dp.label, dp.basis)
+        priority = fte_priority(dp.label, dp.basis)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
             datapoint_type="fte",
             metric=dp.label,
-            value=dp.value,
+            value=strip_duplicated_unit(dp.value, dp.unit),
             unit=dp.unit,
             period=dp.period,
             page=dp.page,
@@ -185,7 +322,7 @@ def normalize_llamaextract_result(
         ))
 
     for sg in result.sustainability_goals:
-        priority = _sustainability_priority(sg.goal, sg.quote, sg.target_year)
+        priority = sustainability_priority(sg.quote, sg.target_year)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
@@ -207,14 +344,14 @@ def normalize_llamaextract_result(
         ))
 
     for esg in result.esg_datapoints:
-        priority = _esg_priority(esg.quote, esg.period)
+        priority = esg_priority(esg.quote, esg.period)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
             datapoint_type="esg_datapoint",
             metric=esg.metric,
-            value=esg.value,
+            value=strip_duplicated_unit(esg.value, esg.unit),
             unit=esg.unit,
             period=esg.period,
             scope=esg.scope,
@@ -228,14 +365,14 @@ def normalize_llamaextract_result(
         ))
 
     for fh in result.financial_highlights:
-        priority = _highlight_priority(fh.page, fh.quote)
+        priority = highlight_priority(fh.page, fh.quote)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
             datapoint_type="financial_highlight",
             metric=fh.metric,
-            value=fh.value,
+            value=strip_duplicated_unit(fh.value, fh.unit),
             unit=fh.unit,
             period=fh.period,
             page=fh.page,
@@ -249,14 +386,14 @@ def normalize_llamaextract_result(
         ))
 
     for bp in result.business_performance:
-        priority = _highlight_priority(bp.page, bp.quote)
+        priority = highlight_priority(bp.page, bp.quote)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
             datapoint_type="business_performance",
             metric=bp.metric,
-            value=bp.value,
+            value=strip_duplicated_unit(bp.value, bp.unit),
             unit=bp.unit,
             period=bp.period,
             page=bp.page,
@@ -270,14 +407,14 @@ def normalize_llamaextract_result(
         ))
 
     for sr in result.shareholder_returns:
-        priority = _highlight_priority(sr.page, sr.quote)
+        priority = highlight_priority(sr.page, sr.quote)
         append_if_plausible(NormalizedDatapoint(
             source=source,
             company=company,
             year=year,
             datapoint_type="shareholder_return",
             metric=sr.metric,
-            value=sr.value,
+            value=strip_duplicated_unit(sr.value, sr.unit),
             unit=sr.unit,
             period=sr.period,
             page=sr.page,
@@ -303,8 +440,8 @@ def deduplicate_datapoints(
             dp.source,
             dp.page,
             dp.datapoint_type,
-            _norm_text(dp.metric),
-            _norm_value(dp.value),
+            norm_text(dp.metric),
+            norm_value(dp.value),
         )
         existing = seen.get(key)
         if existing is None:
@@ -320,23 +457,3 @@ def deduplicate_datapoints(
             elif dp_conf == ex_conf and dp.quote and not existing.quote:
                 seen[key] = dp
     return list(seen.values())
-
-
-def save_datapoint_set(
-    datapoints: list[NormalizedDatapoint],
-    *,
-    source: str,
-    company: str | None,
-    year: int | None,
-    out_path: Path,
-) -> Path:
-    """Persist a normalized datapoint set to disk and return the written JSON path."""
-    ds = NormalizedDatapointSet(
-        source=source,
-        company=company,
-        year=year,
-        datapoints=datapoints,
-    )
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(ds.model_dump_json(indent=2), encoding="utf-8")
-    return out_path

@@ -12,29 +12,42 @@ from backend.app.schemas import Chunk
 logger = logging.getLogger(__name__)
 
 
-def _root(processed_dir: Path | None) -> Path:
+def get_root(processed_dir: Path | None) -> Path:
     """Return the effective processed-data root directory for persistence helpers."""
     return processed_dir or settings.get_processed_path()
 
 
 def processed_pages_path(source: str, processed_dir: Path | None = None) -> Path:
     """Return the JSONL path used to store parsed pages for one source."""
-    return _root(processed_dir) / "pages" / f"{Path(source).stem}.jsonl"
+    return get_root(processed_dir) / "pages" / f"{Path(source).stem}.jsonl"
 
 
 def processed_pages_enhanced_path(source: str, processed_dir: Path | None = None) -> Path:
     """Return the JSONL path used to store vision-enhanced pages for one source."""
-    return _root(processed_dir) / "pages_enhanced" / f"{Path(source).stem}.jsonl"
+    return get_root(processed_dir) / "pages_enhanced" / f"{Path(source).stem}.jsonl"
 
 
 def processed_datapoints_path(source: str, processed_dir: Path | None = None) -> Path:
     """Return the JSON path used to store extracted datapoints for one source."""
-    return _root(processed_dir) / "datapoints" / f"{Path(source).stem}.json"
+    return get_root(processed_dir) / "datapoints" / f"{Path(source).stem}.json"
 
 
 def processed_chunks_path(source: str, processed_dir: Path | None = None) -> Path:
     """Return the JSONL path used to store retrieval chunks for one source."""
-    return _root(processed_dir) / "chunks" / f"{Path(source).stem}.jsonl"
+    return get_root(processed_dir) / "chunks" / f"{Path(source).stem}.jsonl"
+
+
+def load_parsed_pages(source: str, processed_dir: Path | None = None) -> list[tuple[int, str]]:
+    """Load previously persisted parsed pages from JSONL and return (page, text) tuples."""
+    path = processed_pages_path(source, processed_dir)
+    if not path.exists():
+        raise FileNotFoundError(f"No persisted pages found at {path}")
+    pages = []
+    with path.open(encoding="utf-8") as f:
+        for line in f:
+            record = json.loads(line)
+            pages.append((record["page"], record["text"]))
+    return pages
 
 
 def persist_parsed_pages(

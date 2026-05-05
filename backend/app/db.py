@@ -25,13 +25,15 @@ CREATE INDEX IF NOT EXISTS idx_dp_source ON datapoints(source);
 """
 
 
-def _db_path() -> Path:
+def db_path() -> Path:
+    """Return the absolute path to the SQLite datapoints database file."""
     path = settings.get_processed_path() / "datapoints.db"
     return path
 
 
 def get_conn() -> sqlite3.Connection:
-    conn = sqlite3.connect(str(_db_path()))
+    """Open and return a SQLite connection with row-factory set to sqlite3.Row."""
+    conn = sqlite3.connect(str(db_path()))
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -84,6 +86,7 @@ def query_datapoints(
     company: str | None = None,
     datapoint_type: str | None = None,
 ) -> list[dict[str, Any]]:
+    """Query datapoints from the database, optionally filtered by company and type."""
     clauses: list[str] = []
     params: list[str] = []
     if company:

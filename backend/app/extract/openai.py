@@ -13,14 +13,22 @@ log = logging.getLogger(__name__)
 
 _CATEGORY_RULES: dict[str, str] = {
     "fte": """
-A valid fte datapoint must describe company workforce size or workforce breakdowns.
-Valid: total employees, FTE/full-time equivalent, headcount, payroll employees, average employees,
-year-end employees, internal employees, permanent/temporary/part-time/full-time employees,
-contractors/external workers if clearly workforce-related, portfolio company employees,
-employees by gender, country, region, age, contract type, or employment type.
-Invalid: board/executive diversity percentages, employee engagement survey scores, training hours,
-safety incident rates, customer counts, suppliers, financial values, sustainability goals,
-general HR text without a numeric workforce datapoint.
+A valid fte datapoint reports a workforce SIZE/COUNT only — i.e. an integer number of people, FTEs, or headcount.
+Valid: total employees, FTE / full-time equivalents, headcount, payroll employees, average number of employees,
+year-end employees, internal employees, external employees, contractors, permanent / temporary / part-time /
+full-time / non-guaranteed-hours employees when reported as counts, employee breakdowns by gender / country /
+region / age / contract type / employment type when reported as counts/headcount/FTE.
+Invalid (mark is_valid=false):
+- Any percentage, rate, or ratio (gender diversity %, turnover rate %, pay gap %, disability %,
+  engagement participation %, training-hours rate, safety incident rate, etc.).
+- Remuneration / compensation / sign-on / severance / bonus / salary / wages / remuneration table values.
+- Employee engagement survey scores, engagement index, engagement drivers, or participation rates.
+- Contract-type rows unless explicitly reported as a count/headcount/FTE workforce table.
+- Executive Board / Supervisory Board / CLA+ / Identified Staff remuneration/governance table rows.
+- Training hours or safety incident rates.
+- Board / supervisory-board / executive diversity percentages.
+- Customer counts, supplier counts, financial values, sustainability goals/targets.
+- General HR text without a numeric workforce count.
 """,
     "sustainability": """
 A valid sustainability_goal must be a forward-looking goal, target, ambition, aim, or commitment
@@ -78,9 +86,18 @@ Category: {category}
 Category validation rules:
 {rules}
 
+Data quality rules (apply to every candidate before category rules):
+- Mark is_valid=false if the quote does not contain or directly support BOTH the metric label and the value.
+- Mark is_valid=false if the value is a definition or descriptive sentence rather than a datapoint value
+  (e.g. value reads like "means the number of employees..." instead of an actual count).
+- Mark is_valid=false if the value appears to be assigned to the wrong table column / wrong header
+  (label/value mismatch with the table structure shown in the quote).
+- Mark is_valid=false if value/unit are duplicated (value already contains the unit string and unit is
+  also set) AND this duplication makes the value implausible.
+
 Deduplication rules:
 - Identify duplicates within the candidate list. If multiple datapoints represent the same real-world
-  datapoint/goal/KPI, keep only the best one.
+  datapoint/goal/KPI (same metric, value, period, page, with only minor wording differences), keep only the best one.
 - Prefer the record with: (1) the clearest exact quote, (2) the most complete fields, (3) the most
   specific metric name, (4) the clearest page/source, (5) the highest confidence if available.
 - Mark duplicate records as is_valid=false and set duplicate_of_index to the kept record's index.
