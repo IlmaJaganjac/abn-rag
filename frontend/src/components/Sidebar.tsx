@@ -1,4 +1,3 @@
-import React from 'react';
 import { IChat, IDoc, ITable } from './Icons';
 
 export type ViewKey = 'chat' | 'docs' | 'datapoints';

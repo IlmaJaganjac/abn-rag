@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sidebar, ViewKey } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
 import { DocumentsView } from './components/DocumentsView';

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Datapoint, DatapointType, Document } from '../types';
 import { api } from '../api/client';
 import { reportLabel } from '../utils';
