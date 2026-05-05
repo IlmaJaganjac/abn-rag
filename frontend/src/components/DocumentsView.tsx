@@ -36,8 +36,10 @@ export function DocumentsView({ ingest, setIngest, pollStatus, refreshDocsRef }:
   const showToast = (kind: ToastKind, filename?: string) => {
     const id = `t-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     setToasts(arr => [...arr, { id, kind, filename }]);
-    const ttl = kind === 'already' ? 6000 : kind === 'ready' ? 8000 : 7000;
-    setTimeout(() => dismissToast(id), ttl);
+    const ttl = kind === 'already' ? 6000 : kind === 'indexing' ? 7000 : null;
+    if (ttl !== null) {
+      setTimeout(() => dismissToast(id), ttl);
+    }
   };
 
   const handleFiles = async (files: File[]) => {

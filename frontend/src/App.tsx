@@ -35,7 +35,7 @@ const TOUR_STEPS: TourStep[] = [
     view: 'chat',
     placement: 'top',
     title: 'Ask anything',
-    body: 'Type a question and we retrieve the most relevant chunks, then generate a cited answer. Try “What is ABN AMRO’s net-zero target?”',
+    body: 'Type a question and we retrieve the most relevant chunks, then generate a cited answer.',
   },
   {
     selector: '.dropzone',

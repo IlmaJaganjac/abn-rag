@@ -4,15 +4,6 @@ import { api } from '../api/client';
 import { ISend } from './Icons';
 import { reportLabel } from '../utils';
 
-const SUGGESTED_QUESTIONS = [
-  "What was ABN AMRO’s CET1 ratio in 2025?",
-  "Who was ABN AMRO’s CEO in 2025?",
-  "What was ABN AMRO’s net profit in 2025?",
-  "How many employees did ABN AMRO have at the end of 2025?",
-  "What was ABN AMRO’s cost/income ratio in 2025?",
-  "What is ABN AMRO’s net-zero target?",
-];
-
 const PHASE_LABELS: Record<ThinkingPhase, string> = {
   queued: 'Queued',
   embedding: 'Embedding question',
@@ -39,7 +30,7 @@ function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase
         const state = i < idx ? 'done' : i === idx ? 'active' : 'pending';
         const detailText =
           p === 'embedding' && state !== 'pending' ? 'text-embedding-3-small · 1536d' :
-          p === 'searching' && state !== 'pending' ? `${retrievedCount} chunks · k=12` :
+          p === 'searching' && state !== 'pending' ? '' :
           p === 'reading' && state !== 'pending' ? `${Math.min(retrievedCount, 8)} pages` :
           p === 'drafting' && state !== 'pending' ? 'gpt-4o-mini' :
           p === 'citing' && state !== 'pending' ? 'verbatim match' : '';
@@ -92,23 +83,6 @@ function AnswerBlock({ ans, sourceLabel }: { ans: VerbatimAnswer; sourceLabel: (
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function SuggestedQuestions({ questions, onPick }: { questions: string[]; onPick: (q: string) => void }) {
-  return (
-    <div className="suggested">
-      <div className="suggested-head">
-        <span className="suggested-label">Try one of these</span>
-      </div>
-      <div className="suggested-grid">
-        {questions.map(q => (
-          <button key={q} className="suggested-btn" onClick={() => onPick(q)}>
-            {q}<span className="arrow">→</span>
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
@@ -248,7 +222,6 @@ export function ChatView({ clearKey }: ChatViewProps) {
             <div className="chat-empty">
               <h2>Ask anything from indexed reports.</h2>
               <p>Every answer is grounded in a verbatim quote with page-level citations. Off-topic questions and hallucinations are refused.</p>
-              <SuggestedQuestions questions={SUGGESTED_QUESTIONS} onPick={send} />
             </div>
           ) : (
             messages.map(m => (
@@ -283,7 +256,7 @@ export function ChatView({ clearKey }: ChatViewProps) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKey}
-              placeholder={lastAssistantQuestion ? 'Ask a follow-up…' : 'Ask about ASML, Shell, ABN AMRO, Heineken…'}
+              placeholder={lastAssistantQuestion ? 'Ask a follow-up…' : 'Ask a question about your indexed reports…'}
               rows={1}
             />
             <div className="composer-row">

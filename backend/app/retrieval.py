@@ -32,10 +32,6 @@ def get_reranker():
     """Load and cache the cross-encoder reranker model, returning the singleton."""
     global _reranker
     if _reranker is None:
-        import os
-        # Skip ~25 HF HEAD requests on every cold load when model is already cached.
-        os.environ.setdefault("HF_HUB_OFFLINE", "1")
-        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
         from sentence_transformers import CrossEncoder
         _reranker = CrossEncoder(settings.reranker_model)
     return _reranker

@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
+      args:
+        PREDOWNLOAD_RERANKER: "true"
+        RERANKER_MODEL: BAAI/bge-reranker-v2-m3
+        HF_TOKEN: ${HF_TOKEN}
     env_file: .env
     ports:
       - "8000:8000"

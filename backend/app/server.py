@@ -30,14 +30,8 @@ app = FastAPI(title="Annualyzer API")
 
 @app.on_event("startup")
 def startup() -> None:
-    """Initialize the database and warm the reranker on application startup."""
+    """Initialize the database on application startup."""
     init_db()
-    from backend.app.retrieval import get_reranker, rerank
-    from backend.app.schemas import RetrievedChunk
-    get_reranker()
-    # Warm MPS kernels with one tiny forward pass so user request 1 is fast.
-    rerank("warmup", [RetrievedChunk(id="w", source="w", page=1, text="warmup", token_count=1, score=0.0)], 1)
-    log.info("reranker warmed")
 
 
 app.add_middleware(
