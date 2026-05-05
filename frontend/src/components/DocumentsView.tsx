@@ -10,7 +10,7 @@ interface Toast { id: string; kind: ToastKind; filename?: string; }
 interface Props {
   ingest: Ingest[];
   setIngest: React.Dispatch<React.SetStateAction<Ingest[]>>;
-  pollStatus: (jobId: string, docId: string) => void;
+  pollStatus: (jobId: string, docId: string, onReady?: () => void) => void;
   refreshDocsRef: React.MutableRefObject<(() => void) | null>;
 }
 
@@ -52,7 +52,7 @@ export function DocumentsView({ ingest, setIngest, pollStatus, refreshDocsRef }:
           ...arr,
           { id: jobId, name: file.name, stage, pct },
         ]);
-        pollStatus(jobId, doc.id);
+        pollStatus(jobId, doc.id, () => showToast('ready', file.name));
       } catch (err) {
         if (err instanceof AlreadyIndexedError) {
           showToast('already', file.name);

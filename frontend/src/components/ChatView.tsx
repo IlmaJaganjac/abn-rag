@@ -2,16 +2,15 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ChatMessage, ThinkingPhase, VerbatimAnswer, Document } from '../types';
 import { api } from '../api/client';
 import { ISend } from './Icons';
+import { reportLabel } from '../utils';
 
 const SUGGESTED_QUESTIONS = [
-  "How many total employees did ASML have at the end of 2025?",
-  "What were ASML’s total net sales in 2025?",
   "What was ABN AMRO’s CET1 ratio in 2025?",
   "Who was ABN AMRO’s CEO in 2025?",
-  "What were Shell’s total revenues in 2025?",
-  "How many employees did Shell have in 2025?",
-  "What was Heineken’s net revenue in 2025?",
-  "How many employees did Heineken have in 2025?",
+  "What was ABN AMRO’s net profit in 2025?",
+  "How many employees did ABN AMRO have at the end of 2025?",
+  "What was ABN AMRO’s cost/income ratio in 2025?",
+  "What is ABN AMRO’s net-zero target?",
 ];
 
 const PHASE_LABELS: Record<ThinkingPhase, string> = {
@@ -56,7 +55,7 @@ function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase
   );
 }
 
-function AnswerBlock({ ans, caveat, sourceLabel }: { ans: VerbatimAnswer; caveat?: string; sourceLabel: (src: string) => string }) {
+function AnswerBlock({ ans, sourceLabel }: { ans: VerbatimAnswer; sourceLabel: (src: string) => string }) {
   if (ans.refused) {
     return (
       <div className="msg-assistant">
@@ -74,12 +73,6 @@ function AnswerBlock({ ans, caveat, sourceLabel }: { ans: VerbatimAnswer; caveat
         <div className="verbatim-block">
           <div className="verbatim-label">Verbatim from source</div>
           <div className="verbatim-text">&ldquo;{ans.verbatim}&rdquo;</div>
-        </div>
-      )}
-      {caveat && (
-        <div className="caveat">
-          <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
-          <span>{caveat}</span>
         </div>
       )}
       {ans.citations.length > 0 && (
@@ -157,24 +150,17 @@ export function ChatView({ clearKey }: ChatViewProps) {
         source: d.source,
         company: d.company!,
         year: d.year,
-        label: [d.company, d.year ? String(d.year) : null].filter(Boolean).join(' '),
+        label: reportLabel(d),
       }))
       .sort((a, b) => a.label.localeCompare(b.label)),
     [docs]);
 
   const sourceLabel = useMemo(() => {
-    const m = new Map(docs.map(d => [
-      d.source,
-      [d.company, d.year ? String(d.year) : null].filter(Boolean).join(' ') || d.source,
-    ]));
+    const m = new Map(docs.map(d => [d.source, reportLabel(d)]));
     return (src: string) => m.get(src) ?? src;
   }, [docs]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }); }, [messages, busy, phase]);
-
-  const setScopeOnly = (nextScope: string) => {
-    setScope(nextScope);
-  };
 
   const send = async (q: string) => {
     if (!q.trim() || busy) return;
@@ -229,8 +215,6 @@ export function ChatView({ clearKey }: ChatViewProps) {
           citations: [],
           refused: true,
           refusal_reason: `Request failed: ${msg}`,
-          raw_citations: [],
-          grounding_drops: [],
         },
         ts: Date.now(),
       };
@@ -275,7 +259,7 @@ export function ChatView({ clearKey }: ChatViewProps) {
                     {m.content}
                   </div>
                 ) : (
-                  m.answer && <AnswerBlock ans={m.answer} caveat={m.caveat} sourceLabel={sourceLabel} />
+                  m.answer && <AnswerBlock ans={m.answer} sourceLabel={sourceLabel} />
                 )}
               </div>
             ))
@@ -305,7 +289,7 @@ export function ChatView({ clearKey }: ChatViewProps) {
             <div className="composer-row">
               <span className="scope-pill">
                 <span style={{ color: 'var(--ink-3)' }}>Scope</span>
-                <select value={scope} onChange={e => setScopeOnly(e.target.value)}>
+                <select value={scope} onChange={e => setScope(e.target.value)}>
                   <option value="all">All reports</option>
                   {reports.map(r => <option key={r.source} value={r.source}>{r.label}</option>)}
                 </select>

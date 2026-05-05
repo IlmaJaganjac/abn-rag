@@ -5,22 +5,9 @@ import { DocumentsView } from './components/DocumentsView';
 import { DatapointsView } from './components/DatapointsView';
 import { Tour, TourStep } from './components/Tour';
 import { api } from './api/client';
-import type { DocStatus } from './types';
 
 type Stage = 'parsing' | 'embedding' | 'done';
 export interface Ingest { id: string; name: string; stage: Stage; pct: number; }
-
-function statusToStage(s: DocStatus): Stage {
-  if (s === 'parsing' || s === 'queued') return 'parsing';
-  if (s === 'ready') return 'done';
-  return 'embedding';
-}
-
-function stageToPct(stage: Stage): number {
-  if (stage === 'parsing') return 25;
-  if (stage === 'embedding') return 70;
-  return 100;
-}
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -126,16 +113,21 @@ export function App() {
   const [ingest, setIngest] = useState<Ingest[]>([]);
   const refreshDocsRef = useRef<(() => void) | null>(null);
 
-  const pollStatus = (jobId: string, docId: string) => {
+  const pollStatus = (jobId: string, docId: string, onReady?: () => void) => {
     const tick = setInterval(async () => {
       try {
         const s = await api.getDocumentStatus(docId);
-        const stage = statusToStage(s.status);
+        const stage: Stage =
+          s.status === 'parsing' || s.status === 'queued' ? 'parsing'
+          : s.status === 'ready' ? 'done'
+          : 'embedding';
+        const pct = stage === 'parsing' ? 25 : stage === 'embedding' ? 70 : 100;
         setIngest(arr =>
-          arr.map(j => (j.id === jobId ? { ...j, stage, pct: stageToPct(stage) } : j)),
+          arr.map(j => (j.id === jobId ? { ...j, stage, pct } : j)),
         );
         if (s.status === 'ready' || s.status === 'error') {
           clearInterval(tick);
+          if (s.status === 'ready') onReady?.();
           refreshDocsRef.current?.();
           setTimeout(() => {
             setIngest(arr => arr.filter(j => j.id !== jobId));

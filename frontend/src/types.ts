@@ -29,24 +29,10 @@ export interface Chunk {
   page: number;
   text: string;
   token_count: number;
-  parser: string | null;
-  chunk_kind: string | null;
-  section_path: string | null;
-  embedding_text: string | null;
 }
 
 export interface RetrievedChunk extends Chunk {
   score: number;
-}
-
-export interface GroundingDrop {
-  source: string;
-  page: number;
-  quote: string;
-  reason:
-    | 'source_page_not_in_retrieved_set'
-    | 'empty_quote'
-    | 'quote_not_found_verbatim';
 }
 
 export interface VerbatimAnswer {
@@ -56,13 +42,10 @@ export interface VerbatimAnswer {
   citations: Citation[];
   refused: boolean;
   refusal_reason: string | null;
-  raw_citations: Citation[];
-  grounding_drops: GroundingDrop[];
 }
 
 export interface RetrievalQuery {
   question: string;
-  top_k: number;
   company?: string | null;
   year?: number | null;
 }
@@ -123,7 +106,5 @@ export interface ChatMessage {
   /* assistant-only */
   answer?: VerbatimAnswer;
   phase?: ThinkingPhase;
-  phaseDetail?: string;
-  caveat?: string;
   ts: number;
 }

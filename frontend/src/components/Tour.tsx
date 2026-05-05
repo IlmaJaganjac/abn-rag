@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useReducer } from 'react';
 
 export interface TourStep {
   selector: string;     // CSS selector for the element to highlight
@@ -21,7 +21,7 @@ const CARD_W = 340;
 export function Tour({ steps, onClose, onViewChange }: Props) {
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const [, setTick] = useState(0);
+  const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const step = steps[i];
@@ -83,7 +83,7 @@ export function Tour({ steps, onClose, onViewChange }: Props) {
     const key = `${i}:${rect?.x ?? 'x'}:${rect?.y ?? 'y'}:${rect?.width ?? 'w'}:${rect?.height ?? 'h'}`;
     if (cardRef.current && lastMeasuredKey.current !== key) {
       lastMeasuredKey.current = key;
-      setTick(t => t + 1);
+      forceUpdate();
     }
   });
 

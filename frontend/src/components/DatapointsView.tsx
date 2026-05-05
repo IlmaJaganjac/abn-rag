@@ -1,14 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Datapoint, DatapointType, Document } from '../types';
 import { api } from '../api/client';
+import { reportLabel } from '../utils';
 
 function typeLabel(t: string): string {
   return t.replace(/_/g, ' ').toUpperCase();
-}
-
-function reportLabel(doc: { company: string | null; year: number | null; source: string }): string {
-  const parts = [doc.company, doc.year ? String(doc.year) : null].filter(Boolean);
-  return parts.length ? parts.join(' ') : doc.source;
 }
 
 export function DatapointsView() {
