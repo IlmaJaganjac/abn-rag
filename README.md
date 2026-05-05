@@ -110,7 +110,7 @@ This data is runtime state, not source code.
 
 RAGAS eval files live in `backend/evals/`.
 
-Example:
+Example context precision & context recall:
 
 ```bash
 .venv/bin/python -m backend.evals.ragas_eval \
@@ -118,6 +118,17 @@ Example:
   --company "ABN AMRO Bank" \
   --year 2025 \
   --metrics context \
+  --runs-dir backend/evals/results
+```
+
+Example for faithfulness & answer relevancy:
+
+```bash
+.venv/bin/python -m backend.evals.ragas_eval \
+  --questions backend/evals/abn-amro-2025.yaml \
+  --company "ABN AMRO Bank" \
+  --year 2025 \
+  --metrics faithfulness \
   --runs-dir backend/evals/results
 ```
 
