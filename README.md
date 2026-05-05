@@ -73,6 +73,8 @@ docker compose down
 
 The first startup can take a bit longer.
 
+The initial Docker build can also take a few minutes because some dependencies in this stack are fairly large, especially the ML-related libraries.
+
 This project currently downloads the BAAI reranker at runtime on first start. You may need to wait a little before the system becomes ready. We are doing this because GitHub Actions has issues at the moment, and downloading the model outside the image is faster for us than baking it into the image during every build ;)
 
 You may also see slower startup if the Hugging Face cache volume was removed and the reranker has to be downloaded again.

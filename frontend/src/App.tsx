@@ -127,12 +127,12 @@ function PreparingOverlay({ status }: { status: SystemStatus | null }) {
         </div>
         <div className="system-prep-step">Startup</div>
         <div className="system-prep-title">
-          {failed ? 'Voorbereiden mislukt' : 'Systeem voorbereiden'}
+          {failed ? 'Preparation failed' : 'Preparing system'}
         </div>
         <div className="system-prep-body">
           {failed
             ? 'De reranker kon niet worden geladen. Controleer de backend logs en Hugging Face toegang.'
-            : 'De reranker wordt bij deze eerste start gedownload en geladen. Annualyzer is zo klaar om geciteerde antwoorden te geven.'}
+            : 'The reranker is being downloaded and loaded on this first startup. Annualyzer will be ready to give cited answers shortly.'}
         </div>
         <div className="system-prep-meta">
           <span>{status?.reranker.model ?? 'BAAI/bge-reranker-v2-m3'}</span>
