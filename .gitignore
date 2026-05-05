@@ -21,3 +21,4 @@ backend/data/chroma/
 backend/data/processed/
 claude.md
 !**/.gitkeep
+backend/data/
