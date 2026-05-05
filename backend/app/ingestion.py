@@ -26,7 +26,6 @@ from backend.app.ingest.persistence import (
     persist_datapoints,
     persist_parsed_pages,
 )
-from backend.app.ingest.vision import enhance_pages_with_vision
 from backend.app.ingest.parsers import as_page_tuples, parse_pdf_pages
 
 logger = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ def ingest_pdf(
     reset: bool = False,
     source_name: str | None = None,
     validate_datapoints: bool = True,
-    skip_vision: bool = False,
+    skip_vision: bool = True,
     skip_parse: bool = False,
     status_callback: Callable[[str], None] | None = None,
 ) -> int:
@@ -74,17 +73,6 @@ def ingest_pdf(
             processed_dir=processed_dir,
         )
         logger.info("wrote parsed pages to %s", pages_path)
-    if not skip_vision:
-        pages = enhance_pages_with_vision(
-            pdf_path=pdf_path,
-            pages=pages,
-            source=source,
-            company=company,
-            year=year,
-            parser=parser_name,
-            processed_dir=processed_dir,
-        )
-        logger.info("applied automatic vision enhancement to difficult table pages")
     if status_callback:
         try:
             status_callback("embedding")
@@ -193,7 +181,7 @@ def cli(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-validate-datapoints", action="store_false", dest="validate_datapoints")
     parser.add_argument("--skip-vision", action="store_true", dest="skip_vision")
     parser.add_argument("--skip-parse", action="store_true", dest="skip_parse")
-    parser.set_defaults(validate_datapoints=True, skip_vision=False, skip_parse=False)
+    parser.set_defaults(validate_datapoints=True, skip_vision=True, skip_parse=False)
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")

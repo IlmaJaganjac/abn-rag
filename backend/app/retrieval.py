@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 import re
-from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
@@ -50,30 +48,6 @@ def rerank(query: str, chunks: list[RetrievedChunk], top_k: int) -> list[Retriev
     scores = reranker.predict(pairs)
     ranked = sorted(zip(scores, chunks), key=lambda x: x[0], reverse=True)
     return [c.model_copy(update={"score": float(s)}) for s, c in ranked[:top_k]]
-
-
-_FTE_TERMS = frozenset({"fte", "ftes", "employee", "employees", "headcount", "workforce", "staff", "personnel", "people"})
-_FTE_EXPANSION = "employees workforce headcount staff personnel FTE full-time equivalents payroll temporary internal external year-end average"
-
-_SUST_TERMS = frozenset({"sustainability", "sustainable", "climate", "emissions", "emission", "ghg", "co2", "co₂", "scope", "net zero", "target", "goal"})
-_SUST_EXPANSION = "sustainability climate targets goals ambition commitment GHG CO2 CO₂ CO2e CO₂e emissions scope 1 scope 2 scope 3 net zero renewable energy waste recycling carbon intensity"
-
-_FIN_TERMS = frozenset({"revenue", "sales", "margin", "profit", "income", "dividend", "cash", "flow", "interest", "nii", "fee", "commission"})
-_FIN_EXPANSION = "financial performance revenue net sales gross margin operating income net income net interest income NII fee commission dividend cash flow R&D research and development"
-
-
-def expand_query_for_retrieval(question: str) -> str:
-    """Expand a user question with domain terms and return the retrieval query text."""
-    q = question.casefold()
-    tokens = set(re.findall(r"[a-z0-9₂&]+", q))
-    parts = [question]
-    if tokens & _FTE_TERMS:
-        parts.append(_FTE_EXPANSION)
-    if tokens & _SUST_TERMS or "net zero" in q:
-        parts.append(_SUST_EXPANSION)
-    if tokens & _FIN_TERMS or "cash flow" in q or "r&d" in q or "research and development" in q:
-        parts.append(_FIN_EXPANSION)
-    return "\n".join(parts)
 
 
 def build_where(company: str | None, year: int | None) -> dict[str, Any] | None:
@@ -140,7 +114,7 @@ def chunk_search_text(record: dict[str, Any]) -> str:
     return "\n".join(str(part) for part in parts if part)
 
 
-_BM25_CACHE: dict[str, Any] = {"sig": None, "records": [], "tokens": []}
+_BM25_CACHE: dict[str, Any] = {"sig": None, "records": [], "tokens": [], "bm25": None}
 
 
 def chunks_dir_signature() -> tuple[tuple[str, float, int], ...]:
@@ -173,6 +147,7 @@ def iter_processed_chunk_records() -> list[dict[str, Any]]:
     _BM25_CACHE["sig"] = sig
     _BM25_CACHE["records"] = records
     _BM25_CACHE["tokens"] = [tokenize(chunk_search_text(r)) for r in records]
+    _BM25_CACHE["bm25"] = None
     return records
 
 
@@ -186,43 +161,23 @@ def passes_filters(record: dict[str, Any], query: RetrievalQuery) -> bool:
 
 
 def bm25_candidates(query: RetrievalQuery) -> list[RetrievedChunk]:
-    """Score persisted chunks with BM25-style ranking and return candidate chunks."""
+    """Score persisted chunks with BM25 and return candidate chunks."""
     all_records = iter_processed_chunk_records()
     all_tokens = _BM25_CACHE["tokens"]
-    pairs = [
-        (rec, toks)
-        for rec, toks in zip(all_records, all_tokens, strict=True)
-        if passes_filters(rec, query)
-    ]
     query_terms = tokenize(query.question)
-    if not pairs or not query_terms:
+    if not all_records or not query_terms:
         return []
 
-    records = [p[0] for p in pairs]
-    doc_tokens = [p[1] for p in pairs]
-    doc_freq: Counter[str] = Counter()
-    for tokens in doc_tokens:
-        doc_freq.update(set(tokens))
+    if _BM25_CACHE["bm25"] is None:
+        from rank_bm25 import BM25Okapi
+        _BM25_CACHE["bm25"] = BM25Okapi(all_tokens)
 
-    avg_len = sum(len(tokens) for tokens in doc_tokens) / len(doc_tokens)
-    k1 = 1.5
-    b = 0.75
-    scored: list[tuple[float, dict[str, Any]]] = []
-    for record, tokens in zip(records, doc_tokens, strict=True):
-        if not tokens:
-            continue
-        counts = Counter(tokens)
-        score = 0.0
-        for term in query_terms:
-            if term not in counts:
-                continue
-            idf = math.log(1 + (len(records) - doc_freq[term] + 0.5) / (doc_freq[term] + 0.5))
-            tf = counts[term]
-            denom = tf + k1 * (1 - b + b * len(tokens) / avg_len)
-            score += idf * (tf * (k1 + 1) / denom)
-        if score > 0:
-            scored.append((score, record))
-
+    scores = _BM25_CACHE["bm25"].get_scores(query_terms)
+    scored = [
+        (float(score), record)
+        for score, record in zip(scores, all_records, strict=True)
+        if score > 0 and passes_filters(record, query)
+    ]
     scored.sort(key=lambda item: item[0], reverse=True)
     chunks: list[RetrievedChunk] = []
     for score, record in scored[:BM25_TOP_N]:
@@ -264,17 +219,15 @@ def rrf_merge(
     return out
 
 
-def retrieve(query: RetrievalQuery, *, skip_rerank: bool = False) -> RetrievalResult:
+def retrieve(query: RetrievalQuery) -> RetrievalResult:
     """Run the retrieval pipeline and return ranked chunks plus the effective query."""
     collection = get_collection()
-    retrieval_text = expand_query_for_retrieval(query.question)
-    retrieval_query = query.model_copy(update={"question": retrieval_text}) if retrieval_text != query.question else query
 
     # BM25 has no dependency on the embedding — run it in parallel with embed+chroma.
     with ThreadPoolExecutor(max_workers=1) as ex:
-        bm25_future = ex.submit(bm25_candidates, retrieval_query)
+        bm25_future = ex.submit(bm25_candidates, query)
 
-        [embedding] = embed_texts([retrieval_text])
+        [embedding] = embed_texts([query.question])
 
         where = build_where(query.company, query.year)
         raw = collection.query(
@@ -301,10 +254,7 @@ def retrieve(query: RetrievalQuery, *, skip_rerank: bool = False) -> RetrievalRe
         bm25_chunks=bm25_chunks,
         top_k=settings.rerank_top_n,
     )
-    if settings.enable_rerank and not skip_rerank:
-        chunks = rerank(query.question, candidates, query.top_k)
-    else:
-        chunks = candidates[: query.top_k]
+    chunks = rerank(query.question, candidates, query.top_k)
 
     return RetrievalResult(query=query, chunks=chunks)
 
@@ -349,21 +299,20 @@ def merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[Re
 
 def retrieve_decomposed(query: RetrievalQuery, history: list[dict] | None = None) -> RetrievalResult:
     """Decompose the query (with optional history), retrieve for each sub-question, merge results."""
-    if history:
-        sub_questions = rewrite_and_decompose(query.question, history)
-        logger.info("decomposed into %d sub-questions", len(sub_questions))
-    else:
-        sub_questions = [query.question]
+    sub_questions = rewrite_and_decompose(query.question, history or [])
+    logger.info("decomposed into %d sub-questions", len(sub_questions))
     chunk_lists = [
-        retrieve(query.model_copy(update={"question": q}), skip_rerank=True).chunks
+        retrieve(query.model_copy(update={"question": q})).chunks
         for q in sub_questions
     ]
     candidates = merge_chunks(chunk_lists, settings.rerank_top_n)
-    if settings.enable_rerank:
-        chunks = rerank(query.question, candidates, query.top_k)
-    else:
-        chunks = candidates[: query.top_k]
+    chunks = rerank(query.question, candidates, query.top_k)
     return RetrievalResult(query=query, chunks=chunks)
 
 
-__all__ = ["retrieve", "retrieve_decomposed", "rewrite_and_decompose", "settings"]
+__all__ = [
+    "retrieve",
+    "retrieve_decomposed",
+    "rewrite_and_decompose",
+    "settings",
+]

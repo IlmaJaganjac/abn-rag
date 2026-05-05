@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
 from backend.app.config import settings
 from backend.app.ingest.tokens import count_tokens
@@ -20,11 +19,6 @@ def get_root(processed_dir: Path | None) -> Path:
 def processed_pages_path(source: str, processed_dir: Path | None = None) -> Path:
     """Return the JSONL path used to store parsed pages for one source."""
     return get_root(processed_dir) / "pages" / f"{Path(source).stem}.jsonl"
-
-
-def processed_pages_enhanced_path(source: str, processed_dir: Path | None = None) -> Path:
-    """Return the JSONL path used to store vision-enhanced pages for one source."""
-    return get_root(processed_dir) / "pages_enhanced" / f"{Path(source).stem}.jsonl"
 
 
 def processed_datapoints_path(source: str, processed_dir: Path | None = None) -> Path:
@@ -75,21 +69,6 @@ def persist_parsed_pages(
                 "char_count": len(text),
                 "token_count": count_tokens(text),
             }
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-    return out_path
-
-
-def persist_enhanced_pages(
-    records: list[dict[str, Any]],
-    *,
-    source: str,
-    processed_dir: Path | None = None,
-) -> Path:
-    """Write vision-enhanced page records to JSONL and return the output path."""
-    out_path = processed_pages_enhanced_path(source, processed_dir)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with out_path.open("w", encoding="utf-8") as f:
-        for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return out_path
 
@@ -149,4 +128,3 @@ def persist_chunks(
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return out_path
-

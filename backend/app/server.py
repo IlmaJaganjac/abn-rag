@@ -32,13 +32,12 @@ app = FastAPI(title="Annualyzer API")
 def startup() -> None:
     """Initialize the database and warm the reranker on application startup."""
     init_db()
-    if settings.enable_rerank:
-        from backend.app.retrieval import get_reranker, rerank
-        from backend.app.schemas import RetrievedChunk
-        get_reranker()
-        # Warm MPS kernels with one tiny forward pass so user request 1 is fast.
-        rerank("warmup", [RetrievedChunk(id="w", source="w", page=1, text="warmup", token_count=1, score=0.0)], 1)
-        log.info("reranker warmed")
+    from backend.app.retrieval import get_reranker, rerank
+    from backend.app.schemas import RetrievedChunk
+    get_reranker()
+    # Warm MPS kernels with one tiny forward pass so user request 1 is fast.
+    rerank("warmup", [RetrievedChunk(id="w", source="w", page=1, text="warmup", token_count=1, score=0.0)], 1)
+    log.info("reranker warmed")
 
 
 app.add_middleware(
@@ -340,16 +339,13 @@ def delete_document(doc_id: str) -> dict[str, str]:
     stem = Path(doc_id).stem
     removed: list[str] = []
 
-    for sub, suffix in (("pages", ".jsonl"), ("pages_enhanced", ".jsonl"),
-                       ("chunks", ".jsonl"), ("datapoints", ".json"),
-                       ("llamaparse", ".json"), ("markdown", ".md")):
+    for sub, suffix in (("pages", ".jsonl"), ("chunks", ".jsonl"),
+                       ("datapoints", ".json"), ("llamaparse", ".json"),
+                       ("markdown", ".md")):
         p = proc / sub / f"{stem}{suffix}"
         if p.exists():
             p.unlink()
             removed.append(str(p))
-    cache = proc / "pages" / f"{stem}.enhanced.cache"
-    if cache.exists():
-        shutil.rmtree(cache, ignore_errors=True)
 
     pdf = settings.reports_dir / doc_id
     if pdf.exists():

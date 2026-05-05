@@ -254,16 +254,12 @@ def test_ingest_pdf_can_store_stable_source_name(
         ),
     )
     monkeypatch.setattr(
-        "backend.app.ingestion.enhance_pages_with_vision",
-        lambda **kwargs: [(5, "Enhanced page text")],
-    )
-    monkeypatch.setattr(
         "backend.app.ingestion.embed_texts",
         lambda texts: embedded_texts.extend(texts) or [[0.1, 0.2] for _ in texts],
     )
     monkeypatch.setattr(
         "backend.app.ingestion.extract_categorized_datapoints",
-        lambda pages, source, company, year, validate=False: [
+        lambda pages, source, company, year, validate=False, page_sections=None: [
             NormalizedDatapoint(
                 source=source,
                 company=company,
@@ -293,6 +289,7 @@ def test_ingest_pdf_can_store_stable_source_name(
     embedded_texts: list[str] = []
     collection = FakeCollection()
     monkeypatch.setattr("backend.app.ingestion.get_collection", lambda reset=False: collection)
+    monkeypatch.setattr("backend.app.db.upsert_datapoints", lambda records: None)
 
     count = ingest_pdf(
         pdf_path,
@@ -307,7 +304,7 @@ def test_ingest_pdf_can_store_stable_source_name(
     }
     assert len(collection.upsert_calls) == 2
     assert collection.upsert_calls[0]["ids"] == ["asml.pdf:5:0"]
-    assert collection.upsert_calls[0]["documents"] == ["Enhanced page text"]
+    assert collection.upsert_calls[0]["documents"] == ["Total employees (FTEs): > 44,000"]
     assert collection.upsert_calls[0]["embeddings"] == [[0.1, 0.2]]
     assert collection.upsert_calls[1]["ids"] == ["asml.pdf:5:1"]
     assert collection.upsert_calls[1]["documents"] == [
@@ -317,7 +314,7 @@ def test_ingest_pdf_can_store_stable_source_name(
         "Quote: Total employees (FTEs): > 44,000"
     ]
     assert embedded_texts == [
-        "ASML\n2025\nEnhanced page text",
+        "ASML\n2025\nTotal employees (FTEs): > 44,000",
         "ASML\n2025\nllamaparse\ndatapoint\nfte\n"
         "Metric: Total employees (FTEs)\n"
         "Type: fte\n"
@@ -341,7 +338,8 @@ def test_ingest_pdf_can_store_stable_source_name(
     assert "Quote: Total employees (FTEs): > 44,000" in records[1]["text"]
 
 
-def test_persist_datapoints_writes_json(tmp_path) -> None:
+def test_persist_datapoints_writes_json(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr("backend.app.db.upsert_datapoints", lambda records: None)
     datapoints = [
         {
             "source": "asml.pdf",
@@ -360,7 +358,8 @@ def test_persist_datapoints_writes_json(tmp_path) -> None:
     assert json.loads(out_path.read_text(encoding="utf-8")) == datapoints
 
 
-def test_persist_datapoints_writes_model_dump_json(tmp_path) -> None:
+def test_persist_datapoints_writes_model_dump_json(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr("backend.app.db.upsert_datapoints", lambda records: None)
     datapoints = [
         NormalizedDatapoint(
             source="asml.pdf",

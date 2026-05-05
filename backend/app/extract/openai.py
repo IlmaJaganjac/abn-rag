@@ -157,7 +157,7 @@ def _format_pages_for_prompt(pages: list[dict[str, Any]], selected_pages: set[in
         page = int(record.get("page", 0))
         if selected_pages and page not in selected_pages:
             continue
-        text = str(record.get("enhanced_text") or record.get("text", "")).strip()
+        text = str(record.get("text", "")).strip()
         if not text:
             continue
         rendered.append(f"=== Page {page} ===\n{text}")

@@ -19,7 +19,6 @@ class Settings(BaseSettings):
     openai_answer_model: str = "gpt-5.4-mini"
     openai_extract_model: str = "gpt-5.4-mini"
     openai_validate_model: str = "gpt-5.4-mini"
-    openai_table_vision_model: str = "gpt-5.4-mini"
 
     chroma_persist_dir: Path = PROJECT_ROOT / "backend/data/chroma"
     chroma_collection: str = "annual_reports"
@@ -31,7 +30,6 @@ class Settings(BaseSettings):
     chunk_overlap_tokens: int = 120
     top_k: int = 12
     rerank_top_n: int = 20
-    enable_rerank: bool = True
     reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     embedding_batch_size: int = 64
 
