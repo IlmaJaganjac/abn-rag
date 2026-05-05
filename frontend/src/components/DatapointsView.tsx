@@ -7,7 +7,11 @@ function typeLabel(t: string): string {
   return t.replace(/_/g, ' ').toUpperCase();
 }
 
-export function DatapointsView() {
+interface DatapointsViewProps {
+  refreshKey: number;
+}
+
+export function DatapointsView({ refreshKey }: DatapointsViewProps) {
   const [type, setType] = useState<DatapointType | 'all'>('all');
   const [report, setReport] = useState<string>('all');
   const [allDatapoints, setAllDatapoints] = useState<Datapoint[]>([]);
@@ -22,7 +26,7 @@ export function DatapointsView() {
         setDocs(ds);
       } catch {}
     })();
-  }, []);
+  }, [refreshKey]);
 
   const docBySource = useMemo(() => {
     const m = new Map<string, Document>();
@@ -40,7 +44,7 @@ export function DatapointsView() {
         setRows(data);
       } catch {}
     })();
-  }, [type, report]);
+  }, [type, report, refreshKey]);
 
   const reports = useMemo(() => {
     const sources = new Set(allDatapoints.map(d => d.source));

@@ -19,7 +19,7 @@ from backend.app.config import settings
 from backend.app.db import init_db, query_datapoints
 from backend.app.ingest.embedding import get_collection
 from backend.app.ingestion import ingest_pdf
-from backend.app.retrieval import retrieve_decomposed
+from backend.app.retrieval import get_reranker_status, retrieve_decomposed, warmup_reranker
 from backend.app.schemas import RetrievalQuery, VerbatimAnswer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -30,8 +30,9 @@ app = FastAPI(title="Annualyzer API")
 
 @app.on_event("startup")
 def startup() -> None:
-    """Initialize the database on application startup."""
+    """Initialize runtime services on application startup."""
     init_db()
+    _executor.submit(warmup_reranker)
 
 
 app.add_middleware(
@@ -220,6 +221,16 @@ def enrich_with_datapoints(index: dict[str, dict[str, Any]]) -> None:
 
 
 # ---------- documents ----------
+
+@app.get("/api/system/status")
+def system_status() -> dict[str, Any]:
+    """Return startup preparation status for UI blocking states."""
+    reranker = get_reranker_status()
+    return {
+        "status": "ready" if reranker["status"] == "ready" else "preparing",
+        "reranker": reranker,
+    }
+
 
 @app.get("/api/documents")
 def list_documents() -> list[dict[str, Any]]:

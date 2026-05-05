@@ -190,14 +190,14 @@ def test_retrieve_always_calls_reranker(monkeypatch):
     assert captured["n_chunks"] >= 1
 
 
-def test_retrieve_decomposed_always_uses_rewrite(monkeypatch):
+def test_retrieve_decomposed_skips_rewrite_without_history(monkeypatch):
     called = []
 
     def fake_rewrite(question, history):
         called.append(True)
         return [question]
 
-    def fake_retrieve(query):
+    def fake_retrieve(query, *, rerank_results=True):
         return RetrievalResult(query=query, chunks=[_chunk("id:simple", query.question, 1)])
 
     monkeypatch.setattr("backend.app.retrieval.rewrite_and_decompose", fake_rewrite)
@@ -208,5 +208,30 @@ def test_retrieve_decomposed_always_uses_rewrite(monkeypatch):
         RetrievalQuery(question="What was ABN AMRO's CET1 ratio in 2025?", top_k=3)
     )
 
-    assert called == [True]
+    assert called == []
     assert result.chunks[0].id == "id:simple"
+
+
+def test_retrieve_decomposed_uses_rewrite_with_history(monkeypatch):
+    called = []
+
+    def fake_rewrite(question, history):
+        called.append((question, history))
+        return ["What was ABN AMRO's CET1 ratio in 2025?"]
+
+    def fake_retrieve(query, *, rerank_results=True):
+        return RetrievalResult(query=query, chunks=[_chunk("id:rewritten", query.question, 1)])
+
+    history = [{"question": "Tell me about ABN AMRO capital", "answer": "The CET1 ratio was discussed."}]
+
+    monkeypatch.setattr("backend.app.retrieval.rewrite_and_decompose", fake_rewrite)
+    monkeypatch.setattr("backend.app.retrieval.retrieve", fake_retrieve)
+    monkeypatch.setattr("backend.app.retrieval.rerank", lambda question, chunks, top_k: chunks[:top_k])
+
+    result = retrieve_decomposed(
+        RetrievalQuery(question="What was it in 2025?", top_k=3),
+        history=history,
+    )
+
+    assert called == [("What was it in 2025?", history)]
+    assert result.chunks[0].id == "id:rewritten"

@@ -90,6 +90,15 @@ export interface Datapoint {
   verbatim: string;
 }
 
+export interface SystemStatus {
+  status: 'preparing' | 'ready';
+  reranker: {
+    status: 'idle' | 'loading' | 'ready' | 'error';
+    model: string | null;
+    error: string | null;
+  };
+}
+
 export type ThinkingPhase =
   | 'queued'
   | 'embedding'

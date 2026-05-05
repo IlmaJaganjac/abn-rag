@@ -23,20 +23,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install .
 
-# 2) Optionally pre-download the reranker model for production images.
-#    Cached to a BuildKit cache mount so rebuilds skip the download,
-#    then copied into the image at /opt/hf-cache.
-ARG PREDOWNLOAD_RERANKER=false
-ARG RERANKER_MODEL=BAAI/bge-reranker-v2-m3
-ARG HF_TOKEN=
 ENV HF_HOME=/opt/hf-cache
-RUN --mount=type=cache,target=/root/.cache/huggingface \
-    if [ "$PREDOWNLOAD_RERANKER" = "true" ]; then \
-      HF_TOKEN="$HF_TOKEN" HF_HOME=/root/.cache/huggingface python -c "from huggingface_hub import snapshot_download; snapshot_download('$RERANKER_MODEL')" && \
-      mkdir -p /opt/hf-cache && cp -r /root/.cache/huggingface/. /opt/hf-cache/; \
-    fi
 
-# 3) Real source. Reinstall is cheap: deps already satisfied, only the project wheel rebuilds.
+# 2) Real source. Reinstall is cheap: deps already satisfied, only the project wheel rebuilds.
 COPY backend/ backend/
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-deps --force-reinstall .

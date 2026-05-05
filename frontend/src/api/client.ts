@@ -11,6 +11,7 @@ import type {
   VerbatimAnswer,
   ThinkingPhase,
   DocStatus,
+  SystemStatus,
 } from '../types';
 
 const BASE = '/api';
@@ -40,6 +41,10 @@ export interface DocumentStatusResponse {
 }
 
 export const api = {
+  async getSystemStatus(): Promise<SystemStatus> {
+    return jsonOrThrow(await fetch(`${BASE}/system/status`));
+  },
+
   async listDocuments(): Promise<Document[]> {
     return jsonOrThrow(await fetch(`${BASE}/documents`));
   },
@@ -88,7 +93,7 @@ export const api = {
 
   /**
    * Streamed chat — backend is expected to emit Server-Sent Events:
-   *   event: phase\ndata: {"phase":"searching","detail":"top_k=12"}
+   *   event: phase\ndata: {"phase":"searching","detail":"top_k=<backend setting>"}
    *   event: answer\ndata: <VerbatimAnswer JSON>
    *
    * The handler `onPhase` fires for in-flight thinking phases; the returned

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
@@ -26,14 +27,48 @@ DENSE_TOP_N = 40
 BM25_TOP_N = 40
 
 _reranker = None
+_reranker_lock = threading.Lock()
+_reranker_state: dict[str, str | None] = {
+    "status": "idle",
+    "model": settings.reranker_model,
+    "error": None,
+}
+
+
+def get_reranker_status() -> dict[str, str | None]:
+    """Return the current runtime load status of the cross-encoder reranker."""
+    return dict(_reranker_state)
+
+
+def warmup_reranker() -> None:
+    """Trigger the runtime model download/load path without changing retrieval behavior."""
+    try:
+        get_reranker()
+    except Exception:
+        logger.exception("reranker warmup failed")
 
 
 def get_reranker():
     """Load and cache the cross-encoder reranker model, returning the singleton."""
     global _reranker
-    if _reranker is None:
-        from sentence_transformers import CrossEncoder
-        _reranker = CrossEncoder(settings.reranker_model)
+    if _reranker is not None:
+        return _reranker
+
+    with _reranker_lock:
+        if _reranker is not None:
+            return _reranker
+        _reranker_state.update({
+            "status": "loading",
+            "model": settings.reranker_model,
+            "error": None,
+        })
+        try:
+            from sentence_transformers import CrossEncoder
+            _reranker = CrossEncoder(settings.reranker_model)
+            _reranker_state.update({"status": "ready", "error": None})
+        except Exception as exc:
+            _reranker_state.update({"status": "error", "error": str(exc)})
+            raise
     return _reranker
 
 
@@ -215,7 +250,7 @@ def rrf_merge(
     return out
 
 
-def retrieve(query: RetrievalQuery) -> RetrievalResult:
+def retrieve(query: RetrievalQuery, *, rerank_results: bool = True) -> RetrievalResult:
     """Run the retrieval pipeline and return ranked chunks plus the effective query."""
     collection = get_collection()
 
@@ -250,7 +285,7 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
         bm25_chunks=bm25_chunks,
         top_k=settings.rerank_top_n,
     )
-    chunks = rerank(query.question, candidates, query.top_k)
+    chunks = rerank(query.question, candidates, query.top_k) if rerank_results else candidates
 
     return RetrievalResult(query=query, chunks=chunks)
 
@@ -294,11 +329,12 @@ def merge_chunks(chunk_lists: list[list[RetrievedChunk]], top_k: int) -> list[Re
 
 
 def retrieve_decomposed(query: RetrievalQuery, history: list[dict] | None = None) -> RetrievalResult:
-    """Decompose the query (with optional history), retrieve for each sub-question, merge results."""
-    sub_questions = rewrite_and_decompose(query.question, history or [])
+    """Decompose questions with history, retrieve for each sub-question, merge results."""
+    history = history or []
+    sub_questions = rewrite_and_decompose(query.question, history) if history else [query.question]
     logger.info("decomposed into %d sub-questions", len(sub_questions))
     chunk_lists = [
-        retrieve(query.model_copy(update={"question": q})).chunks
+        retrieve(query.model_copy(update={"question": q}), rerank_results=False).chunks
         for q in sub_questions
     ]
     candidates = merge_chunks(chunk_lists, settings.rerank_top_n)

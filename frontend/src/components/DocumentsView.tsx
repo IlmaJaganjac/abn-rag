@@ -10,11 +10,12 @@ interface Toast { id: string; kind: ToastKind; filename?: string; }
 interface Props {
   ingest: Ingest[];
   setIngest: React.Dispatch<React.SetStateAction<Ingest[]>>;
-  pollStatus: (jobId: string, docId: string, onReady?: () => void) => void;
+  pollStatus: (jobId: string, docId: string, onReady?: (doc: Document | null) => void) => void;
   refreshDocsRef: React.MutableRefObject<(() => void) | null>;
+  onDataChanged: () => void;
 }
 
-export function DocumentsView({ ingest, setIngest, pollStatus, refreshDocsRef }: Props) {
+export function DocumentsView({ ingest, setIngest, pollStatus, refreshDocsRef, onDataChanged }: Props) {
   const [docs, setDocs] = useState<Document[]>([]);
   const [over, setOver] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -81,6 +82,7 @@ export function DocumentsView({ ingest, setIngest, pollStatus, refreshDocsRef }:
     try {
       await api.deleteDocument(id);
       setDocs(arr => arr.filter(d => d.id !== id));
+      onDataChanged();
     } catch (err) {
       console.error(err);
     }

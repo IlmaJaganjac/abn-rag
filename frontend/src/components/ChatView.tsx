@@ -15,6 +15,18 @@ const PHASE_LABELS: Record<ThinkingPhase, string> = {
 };
 
 const PHASE_ORDER: ThinkingPhase[] = ['embedding', 'searching', 'reading', 'drafting', 'citing'];
+const CHAT_STORAGE_KEY = 'annualyzer.chat.messages';
+
+function loadStoredMessages(): ChatMessage[] {
+  try {
+    const raw = window.localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 function ThinkingPanel({ phase, detail, retrievedCount }: { phase: ThinkingPhase; detail?: string; retrievedCount: number }) {
   const idx = PHASE_ORDER.indexOf(phase);
@@ -89,10 +101,22 @@ function AnswerBlock({ ans, sourceLabel }: { ans: VerbatimAnswer; sourceLabel: (
 
 interface ChatViewProps {
   clearKey: number;
+  firstReadyReport: Document | null;
 }
 
-export function ChatView({ clearKey }: ChatViewProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+function suggestedQuestions(report: Document): string[] {
+  const company = report.company ?? report.title;
+  const year = report.year ? ` in ${report.year}` : '';
+  return [
+    `How many FTE did ${company} have${year}?`,
+    `What was ${company}'s total net sales${year}?`,
+    `What was ${company}'s net income${year}?`,
+    `Who was ${company}'s CEO${year}?`,
+  ];
+}
+
+export function ChatView({ clearKey, firstReadyReport }: ChatViewProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadStoredMessages());
   const [input, setInput] = useState('');
   const [scope, setScope] = useState<string>('all');
   const [busy, setBusy] = useState(false);
@@ -109,13 +133,30 @@ export function ChatView({ clearKey }: ChatViewProps) {
   }, []);
 
   useEffect(() => {
+    if (!firstReadyReport) return;
+    setDocs(prev => prev.some(d => d.source === firstReadyReport.source) ? prev : [...prev, firstReadyReport]);
+    setScope(firstReadyReport.source);
+  }, [firstReadyReport]);
+
+  useEffect(() => {
     setMessages([]);
+    window.localStorage.removeItem(CHAT_STORAGE_KEY);
     setInput('');
     setScope('all');
     setBusy(false);
     setPhase('queued');
     setPhaseDetail('');
   }, [clearKey]);
+
+  useEffect(() => {
+    try {
+      if (messages.length === 0) {
+        window.localStorage.removeItem(CHAT_STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+      }
+    } catch {}
+  }, [messages]);
 
   const reports = useMemo(() =>
     docs
@@ -222,6 +263,20 @@ export function ChatView({ clearKey }: ChatViewProps) {
             <div className="chat-empty">
               <h2>Ask anything from indexed reports.</h2>
               <p>Every answer is grounded in a verbatim quote with page-level citations. Off-topic questions and hallucinations are refused.</p>
+              {firstReadyReport && (
+                <div className="suggested">
+                  <div className="suggested-head">
+                    <div className="suggested-label">Suggested for {reportLabel(firstReadyReport)}</div>
+                  </div>
+                  <div className="suggested-grid">
+                    {suggestedQuestions(firstReadyReport).map(q => (
+                      <button key={q} className="suggested-btn" onClick={() => send(q)}>
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             messages.map(m => (

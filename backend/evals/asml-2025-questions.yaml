@@ -32,7 +32,7 @@ questions:
     year: 2025
     eval_type: ragas_context
     user_input: "How many temporary employees were included in ASML's ESRS employee headcount table in 2025?"
-    reference: "ASML included 2,238 temporary employees in its ESRS employee headcount table for 2025."
+    reference: "ASML included 2,489 temporary employees in its ESRS employee headcount table for 2025."
 
   - id: asml_2025_sustainability_goal_value_chain_ghg_neutral
     company: ASML
@@ -111,33 +111,33 @@ questions:
     user_input: "What percentage of lithography systems sold in the past 30 years did ASML report were still active in the field?"
     reference: "ASML reported that 95% of the lithography systems it sold in the past 30 years were still active in the field."
 
-  - id: asml_2025_financial_total_net_sales
+  - id: asml_2025_financial_total_net_sales_us_gaap
     company: ASML
     year: 2025
     eval_type: ragas_context
-    user_input: "What total net sales did ASML report in 2025?"
-    reference: "ASML reported total net sales of €32.7 billion, or €32,667.3 million, in 2025."
+    user_input: "What US GAAP total net sales did ASML report in its 2025 overview?"
+    reference: "ASML reported US GAAP total net sales of €32.7 billion, or €32,667.3 million, in 2025."
 
-  - id: asml_2025_financial_gross_margin
+  - id: asml_2025_financial_gross_margin_us_gaap
     company: ASML
     year: 2025
     eval_type: ragas_context
-    user_input: "What gross margin did ASML report in 2025?"
-    reference: "ASML reported a gross margin of 52.8% in 2025."
+    user_input: "What US GAAP gross margin did ASML report in its 2025 overview?"
+    reference: "ASML reported a US GAAP gross margin of 52.8% in 2025."
 
-  - id: asml_2025_financial_net_income
+  - id: asml_2025_financial_net_income_us_gaap
     company: ASML
     year: 2025
     eval_type: ragas_context
-    user_input: "What net income did ASML report in 2025?"
-    reference: "ASML reported net income of €9.6 billion, or €9,609.4 million, in 2025."
+    user_input: "What US GAAP net income did ASML report in its 2025 overview?"
+    reference: "ASML reported US GAAP net income of €9.6 billion, or €9,609.4 million, in 2025."
 
-  - id: asml_2025_financial_rd_spend
+  - id: asml_2025_financial_rd_spend_us_gaap
     company: ASML
     year: 2025
     eval_type: ragas_context
-    user_input: "How much did ASML report for research and development in 2025?"
-    reference: "ASML reported research and development costs of €4.7 billion, or €4,698.8 million, in 2025."
+    user_input: "How much did ASML report for US GAAP research and development costs in 2025?"
+    reference: "ASML reported US GAAP research and development costs of €4.7 billion, or €4,698.8 million, in 2025."
 
   - id: asml_2025_business_system_sales_units
     company: ASML
@@ -174,12 +174,12 @@ questions:
     user_input: "How much did ASML return to shareholders through dividends and share buybacks in 2025?"
     reference: "ASML returned €8.5 billion to shareholders through dividends and share buybacks in 2025."
 
-  - id: asml_2025_shareholder_eps_basic
+  - id: asml_2025_shareholder_eps_basic_us_gaap
     company: ASML
     year: 2025
     eval_type: ragas_context
-    user_input: "What basic earnings per share did ASML report in 2025?"
-    reference: "ASML reported basic earnings per share of €24.73 in 2025."
+    user_input: "What US GAAP basic earnings per share did ASML report in its 2025 overview?"
+    reference: "ASML reported US GAAP basic earnings per share of €24.73 in 2025."
 
   - id: asml_2025_shareholder_buybacks_and_dividends
     company: ASML
@@ -200,7 +200,7 @@ questions:
     year: 2025
     eval_type: ragas_context
     user_input: "How does ASML group the risk categories in its 2025 annual report?"
-    reference: "ASML groups its risk universe into 31 risk categories under four risk types: strategic, operational, compliance and financial."
+    reference: "ASML groups its risk universe into 31 risk categories under four risk types: Strategic, Operations, Finance and reporting, and Compliance."
 
   - id: asml_2025_general_business_model
     company: ASML

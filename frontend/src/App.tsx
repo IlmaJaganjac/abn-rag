@@ -5,6 +5,8 @@ import { DocumentsView } from './components/DocumentsView';
 import { DatapointsView } from './components/DatapointsView';
 import { Tour, TourStep } from './components/Tour';
 import { api } from './api/client';
+import { IChat, IDoc, ITable, IUpload } from './components/Icons';
+import type { Document, SystemStatus } from './types';
 
 type Stage = 'parsing' | 'embedding' | 'done';
 export interface Ingest { id: string; name: string; stage: Stage; pct: number; }
@@ -102,18 +104,82 @@ function ensureFontLink(fontPair: string) {
   document.head.appendChild(link);
 }
 
+function PreparingOverlay({ status }: { status: SystemStatus | null }) {
+  const [iconIndex, setIconIndex] = useState(0);
+  const icons = [
+    <IDoc size={28} key="doc" />,
+    <ITable size={28} key="table" />,
+    <IChat size={28} key="chat" />,
+    <IUpload size={28} key="upload" />,
+  ];
+  const failed = status?.reranker.status === 'error';
+
+  useEffect(() => {
+    const id = setInterval(() => setIconIndex(i => (i + 1) % icons.length), 850);
+    return () => clearInterval(id);
+  }, [icons.length]);
+
+  return (
+    <div className="system-prep-root" role="dialog" aria-modal="true" aria-label="System preparation">
+      <div className="system-prep-card">
+        <div className="system-prep-icon" aria-hidden="true">
+          {icons[iconIndex]}
+        </div>
+        <div className="system-prep-step">Startup</div>
+        <div className="system-prep-title">
+          {failed ? 'Voorbereiden mislukt' : 'Systeem voorbereiden'}
+        </div>
+        <div className="system-prep-body">
+          {failed
+            ? 'De reranker kon niet worden geladen. Controleer de backend logs en Hugging Face toegang.'
+            : 'De reranker wordt bij deze eerste start gedownload en geladen. Annualyzer is zo klaar om geciteerde antwoorden te geven.'}
+        </div>
+        <div className="system-prep-meta">
+          <span>{status?.reranker.model ?? 'BAAI/bge-reranker-v2-m3'}</span>
+          <span>{status?.reranker.status ?? 'connecting'}</span>
+        </div>
+        {!failed && (
+          <div className="system-prep-loader" aria-hidden="true">
+            <span />
+          </div>
+        )}
+        {failed && status?.reranker.error && (
+          <div className="system-prep-error">{status.reranker.error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function App() {
   const [view, setView] = useState<ViewKey>('chat');
   const [tweaks, setTweaks] = useState<Tweaks>(TWEAK_DEFAULTS);
   const [tweaksOpen, setTweaksOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [firstReadyReport, setFirstReadyReport] = useState<Document | null>(null);
   const [chatClearKey, setChatClearKey] = useState(0);
   const [docCount, setDocCount] = useState(0);
   const [datapointCount, setDatapointCount] = useState(0);
+  const [dataRefreshKey, setDataRefreshKey] = useState(0);
   const [ingest, setIngest] = useState<Ingest[]>([]);
   const refreshDocsRef = useRef<(() => void) | null>(null);
 
-  const pollStatus = (jobId: string, docId: string, onReady?: () => void) => {
+  const refreshCounts = async () => {
+    const [docs, dps] = await Promise.all([
+      api.listDocuments(),
+      api.listDatapoints(),
+    ]);
+    setDocCount(docs.length);
+    setDatapointCount(dps.length);
+  };
+
+  const handleDataChanged = () => {
+    setDataRefreshKey(k => k + 1);
+    refreshCounts().catch(() => {});
+  };
+
+  const pollStatus = (jobId: string, docId: string, onReady?: (doc: Document | null) => void) => {
     const tick = setInterval(async () => {
       try {
         const s = await api.getDocumentStatus(docId);
@@ -127,7 +193,11 @@ export function App() {
         );
         if (s.status === 'ready' || s.status === 'error') {
           clearInterval(tick);
-          if (s.status === 'ready') onReady?.();
+          if (s.status === 'ready') {
+            setFirstReadyReport(prev => prev ?? s.document);
+            onReady?.(s.document);
+            handleDataChanged();
+          }
           refreshDocsRef.current?.();
           setTimeout(() => {
             setIngest(arr => arr.filter(j => j.id !== jobId));
@@ -139,21 +209,33 @@ export function App() {
 
   useEffect(() => {
     let cancelled = false;
+    let intervalId: number | null = null;
     const refresh = async () => {
       try {
-        const [docs, dps] = await Promise.all([
+        const [status, docs, dps] = await Promise.all([
+          api.getSystemStatus(),
           api.listDocuments(),
           api.listDatapoints(),
         ]);
         if (!cancelled) {
+          setSystemStatus(status);
           setDocCount(docs.length);
           setDatapointCount(dps.length);
+          if (status.status === 'ready' && intervalId !== null) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
         }
-      } catch {}
+      } catch {
+        if (!cancelled) setSystemStatus(null);
+      }
     };
     refresh();
-    const id = setInterval(refresh, 5000);
-    return () => { cancelled = true; clearInterval(id); };
+    intervalId = window.setInterval(refresh, 1500);
+    return () => {
+      cancelled = true;
+      if (intervalId !== null) clearInterval(intervalId);
+    };
   }, []);
 
   // Open the tour on every load so the instructions are immediately visible.
@@ -233,20 +315,25 @@ export function App() {
           )}
         </header>
 
-        {view === 'chat' && <ChatView clearKey={chatClearKey} />}
+        {view === 'chat' && <ChatView clearKey={chatClearKey} firstReadyReport={firstReadyReport} />}
         {view === 'docs' && (
           <DocumentsView
             ingest={ingest}
             setIngest={setIngest}
             pollStatus={pollStatus}
             refreshDocsRef={refreshDocsRef}
+            onDataChanged={handleDataChanged}
           />
         )}
-        {view === 'datapoints' && <DatapointsView />}
+        {view === 'datapoints' && <DatapointsView refreshKey={dataRefreshKey} />}
       </main>
 
       {tourOpen && (
         <Tour steps={TOUR_STEPS} onClose={closeTour} onViewChange={setView} />
+      )}
+
+      {systemStatus?.status !== 'ready' && (
+        <PreparingOverlay status={systemStatus} />
       )}
 
       {tweaksOpen && (

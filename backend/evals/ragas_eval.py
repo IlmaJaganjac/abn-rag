@@ -65,6 +65,7 @@ def run_ragas_eval(
     *,
     company: str | None,
     year: int | None,
+    retrieval_company: str | None,
     limit: int | None,
     runs_dir: Path | None,
     no_save: bool,
@@ -101,7 +102,7 @@ def run_ragas_eval(
                 RetrievalQuery(
                     question=_question_text(q),
                     top_k=settings.top_k,
-                    company=q.get("company"),
+                    company=retrieval_company or q.get("company"),
                     year=q.get("year"),
                 )
             )
@@ -165,6 +166,7 @@ def run_ragas_eval(
                 "metric_set": metric_set,
                 "questions_file": str(path),
                 "company": company,
+                "retrieval_company": retrieval_company,
                 "year": year,
                 "n_evaluated": len(records),
                 "n_skipped": skipped,
@@ -183,6 +185,11 @@ def _cli() -> None:
     parser = argparse.ArgumentParser(description="RAGAS evaluation against the live RAG pipeline.")
     parser.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS)
     parser.add_argument("--company", default=None)
+    parser.add_argument(
+        "--retrieval-company",
+        default=None,
+        help="Override the company metadata filter used for retrieval without changing question filtering.",
+    )
     parser.add_argument("--year", type=int, default=None)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--runs-dir", type=Path, default=DEFAULT_RUNS_DIR)
@@ -198,6 +205,7 @@ def _cli() -> None:
         args.questions,
         company=args.company,
         year=args.year,
+        retrieval_company=args.retrieval_company,
         limit=args.limit,
         runs_dir=args.runs_dir,
         no_save=args.no_save,

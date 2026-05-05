@@ -28,8 +28,8 @@ class Settings(BaseSettings):
 
     chunk_size_tokens: int = 800
     chunk_overlap_tokens: int = 120
-    top_k: int = 12
-    rerank_top_n: int = 20
+    top_k: int = 16
+    rerank_top_n: int = 30
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     embedding_batch_size: int = 64
 

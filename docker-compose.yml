@@ -3,10 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-      args:
-        PREDOWNLOAD_RERANKER: "true"
-        RERANKER_MODEL: BAAI/bge-reranker-v2-m3
-        HF_TOKEN: ${HF_TOKEN}
     env_file: .env
     ports:
       - "8000:8000"
@@ -14,12 +10,17 @@ services:
       - ./backend/data/chroma:/app/backend/data/chroma
       - ./backend/data/processed:/app/backend/data/processed
       - ./backend/data/reports:/app/backend/data/reports
+      - hf-cache:/opt/hf-cache
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
       - backend
+
+volumes:
+  hf-cache:
