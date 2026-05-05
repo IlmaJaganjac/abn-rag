@@ -28,7 +28,7 @@ jobs:
           context: .
           file: Dockerfile.backend
           push: true
-          tags: ghcr.io/ilmajaganjac/abn-rag-backend:latest
+          tags: ghcr.io/ilmajaganjac-tech/annual-report-rag-backend:latest
           build-args: |
             PREDOWNLOAD_RERANKER=true
             RERANKER_MODEL=BAAI/bge-reranker-v2-m3
