@@ -11,6 +11,8 @@ import type { Document, SystemStatus } from './types';
 type Stage = 'parsing' | 'embedding' | 'done';
 export interface Ingest { id: string; name: string; stage: Stage; pct: number; }
 
+const PREP_OVERLAY_SEEN_KEY = 'annualyzer-prep-overlay-seen';
+
 const TOUR_STEPS: TourStep[] = [
   {
     selector: '',
@@ -157,6 +159,7 @@ export function App() {
   const [tweaksOpen, setTweaksOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [showPreparingOverlay, setShowPreparingOverlay] = useState(false);
   const [firstReadyReport, setFirstReadyReport] = useState<Document | null>(null);
   const [chatClearKey, setChatClearKey] = useState(0);
   const [docCount, setDocCount] = useState(0);
@@ -221,6 +224,13 @@ export function App() {
           setSystemStatus(status);
           setDocCount(docs.length);
           setDatapointCount(dps.length);
+          if (status.status !== 'ready' && sessionStorage.getItem(PREP_OVERLAY_SEEN_KEY) !== '1') {
+            sessionStorage.setItem(PREP_OVERLAY_SEEN_KEY, '1');
+            setShowPreparingOverlay(true);
+          }
+          if (status.status === 'ready') {
+            setShowPreparingOverlay(false);
+          }
           if (status.status === 'ready' && intervalId !== null) {
             clearInterval(intervalId);
             intervalId = null;
@@ -332,7 +342,7 @@ export function App() {
         <Tour steps={TOUR_STEPS} onClose={closeTour} onViewChange={setView} />
       )}
 
-      {systemStatus?.status !== 'ready' && (
+      {showPreparingOverlay && systemStatus?.status !== 'ready' && (
         <PreparingOverlay status={systemStatus} />
       )}
 

@@ -29,6 +29,7 @@ You can upload annual reports, ask direct questions, ask multiple questions in s
 ## Requirements
 
 - Docker Desktop
+- Keys for HuggingFace, OpenAI & Llama Pasrse
 - A `.env` file with valid keys:
 
 ```env
