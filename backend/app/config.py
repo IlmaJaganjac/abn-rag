@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     chunk_overlap_tokens: int = 120
     top_k: int = 16
     rerank_top_n: int = 30
-    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_model: str = "BAAI/bge-reranker-base"
     embedding_batch_size: int = 64
 
     def get_chroma_path(self) -> Path:

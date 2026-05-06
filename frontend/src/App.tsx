@@ -137,7 +137,7 @@ function PreparingOverlay({ status }: { status: SystemStatus | null }) {
             : 'The reranker is being downloaded and loaded on this first startup. Annualyzer will be ready to give cited answers shortly.'}
         </div>
         <div className="system-prep-meta">
-          <span>{status?.reranker.model ?? 'BAAI/bge-reranker-v2-m3'}</span>
+          <span>{status?.reranker.model ?? 'BAAI/bge-reranker-base'}</span>
           <span>{status?.reranker.status ?? 'connecting'}</span>
         </div>
         {!failed && (
