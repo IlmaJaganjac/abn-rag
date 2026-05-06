@@ -109,8 +109,8 @@ function suggestedQuestions(report: Document): string[] {
   const year = report.year ? ` in ${report.year}` : '';
   return [
     `How many FTE did ${company} have${year}?`,
-    `What was ${company}'s total net sales${year}?`,
     `What was ${company}'s net income${year}?`,
+    `What were ${company}'s total assets${year}?`,
     `Who was ${company}'s CEO${year}?`,
   ];
 }
