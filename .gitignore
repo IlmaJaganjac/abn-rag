@@ -12,9 +12,15 @@ build/
 
 .env
 .DS_Store
+.~lock.*
+*.tmp
+annualyzer-presentation.pdf
+annualyzer-presentation.pptx
+slide-*.jpg
 
 AGENTS.md
 backend/evals/runs*/*.json
+backend/evals/results/
 frontend/*.tsbuildinfo
 backend/data/reports/
 backend/data/chroma/
