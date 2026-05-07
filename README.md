@@ -1,8 +1,32 @@
-# Annual Report Rag
+# Annual Report RAG
 
-Local RAG over annual reports with a small chat UI, document management, datapoint extraction, and eval tooling.
+Annual Report RAG is a local retrieval-augmented generation system for asking cited questions over annual report PDFs.
 
-You can upload annual reports, ask direct questions, ask multiple questions in sequence, and ask follow-up questions that depend on earlier answers. The backend rewrites follow-up questions when conversation history is present, then retrieves grounded context and answers with citations.
+It gives you a small web app where you can upload reports, index them, browse extracted datapoints, and ask questions in plain language. Answers are grounded in the indexed report text and include page citations so users can trace claims back to the original filing.
+
+The system is designed to stay multi-company-ready: each indexed chunk carries source, company, and year metadata, and questions can be scoped to a specific company/year when needed.
+
+## How it works
+
+1. A user uploads one or more annual report PDFs.
+2. The backend parses the PDFs, extracts page text, chunks the report, and stores metadata for each chunk.
+3. Chunk text is embedded and persisted in Chroma for semantic retrieval.
+4. The system also extracts structured datapoints for faster lookup of common annual-report facts.
+5. When a user asks a question, the backend retrieves relevant chunks, reranks them, and sends the grounded context to the answer model.
+6. The answer layer returns either a cited answer or a refusal when the corpus does not support the question.
+
+Conversation history is supported. If a user asks a follow-up such as `What about 2024?`, the backend rewrites that into a standalone question before retrieval.
+
+## Screenshots
+
+You can add pictures to the README. Put screenshots or product images in a tracked folder such as `docs/images/`, then reference them like this:
+
+```md
+![Chat view](docs/images/chat-view.png)
+![Document upload](docs/images/document-upload.png)
+```
+
+Avoid putting screenshots in `backend/data/`; that directory is runtime state and should stay out of git.
 
 ## What is in the codebase
 
@@ -29,7 +53,7 @@ You can upload annual reports, ask direct questions, ask multiple questions in s
 ## Requirements
 
 - Docker Desktop
-- Keys for HuggingFace, OpenAI & Llama Pasrse
+- Keys for Hugging Face, OpenAI, and Llama Parse
 - A `.env` file with valid keys:
 
 ```env
@@ -90,7 +114,7 @@ You may also see slower startup if the Hugging Face cache volume was removed and
 
 Examples:
 
-- `How many FTE did ABN AMRO have in 2025?`
+- `How many FTE did the company have in 2025?`
 - `What was ASML's net income in 2025?`
 - `Who was the CEO?`
 - `What about 2024?`
@@ -115,8 +139,8 @@ Example context precision & context recall:
 
 ```bash
 .venv/bin/python -m backend.evals.ragas_eval \
-  --questions backend/evals/abn-amro-2025.yaml \
-  --company "ABN AMRO Bank" \
+  --questions backend/evals/asml-2025-questions.yaml \
+  --company "ASML" \
   --year 2025 \
   --metrics context \
   --runs-dir backend/evals/results
@@ -126,8 +150,8 @@ Example for faithfulness & answer relevancy:
 
 ```bash
 .venv/bin/python -m backend.evals.ragas_eval \
-  --questions backend/evals/abn-amro-2025.yaml \
-  --company "ABN AMRO Bank" \
+  --questions backend/evals/asml-2025-questions.yaml \
+  --company "ASML" \
   --year 2025 \
   --metrics faithfulness \
   --runs-dir backend/evals/results

@@ -256,7 +256,7 @@ async def upload_document(
     if not re.search(r"20\d{2}", file.filename) or not company_from_filename(file.filename):
         log.warning(
             "uploaded file '%s' does not appear to include a company name and report year — "
-            "consider renaming it to something like 'abn-amro-2023.pdf' for reliable metadata",
+            "consider renaming it to something like 'company-annual-report-2023.pdf' for reliable metadata",
             file.filename,
         )
 

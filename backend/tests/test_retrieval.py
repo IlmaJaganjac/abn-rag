@@ -7,22 +7,22 @@ from backend.app.schemas import RetrievalQuery, RetrievalResult, RetrievedChunk
 class FakeHybridCollection:
     metric_docs = [
         (
-            "abn-amro-2025.pdf:metric:cet1",
+            "example-2025.pdf:metric:cet1",
             "Metric: Common Equity Tier 1 (CET1) ratio\nPeriod: 2025\nValue: 15.4%\nUnit: %",
             120,
         ),
         (
-            "abn-amro-2025.pdf:metric:fte",
+            "example-2025.pdf:metric:fte",
             "Metric: Number of internal employees\nPeriod: 2025\nValue: 23,126\nUnit: FTEs",
             220,
         ),
         (
-            "abn-amro-2025.pdf:metric:profit",
+            "example-2025.pdf:metric:profit",
             "Metric: Profit/(loss) for the period\nPeriod: 2025\nValue: 2,252\nUnit: EUR million",
             88,
         ),
         (
-            "abn-amro-2025.pdf:metric:kpi",
+            "example-2025.pdf:metric:kpi",
             "| €32.7bn | Total net sales |",
             5,
         ),
@@ -33,12 +33,12 @@ class FakeHybridCollection:
 
     def query(self, **kwargs):
         return {
-            "ids": [["abn-amro-2025.pdf:dense:generic"]],
+            "ids": [["example-2025.pdf:dense:generic"]],
             "documents": [["Generic annual report text"]],
             "metadatas": [[
                 {
-                    "source": "abn-amro-2025.pdf",
-                    "company": "ABN AMRO",
+                    "source": "example-2025.pdf",
+                    "company": "Example Corp",
                     "year": 2025,
                     "page": 10,
                     "token_count": 4,
@@ -52,8 +52,8 @@ class FakeHybridCollection:
 def _chunk(cid: str, text: str, page: int, kind: str = "section") -> RetrievedChunk:
     return RetrievedChunk(
         id=cid,
-        source="abn-amro-2025.pdf",
-        company="ABN AMRO",
+        source="example-2025.pdf",
+        company="Example Corp",
         year=2025,
         page=page,
         text=text,
@@ -70,7 +70,7 @@ def test_retrieve_uses_bm25_for_ceo_text_question(monkeypatch) -> None:
         "backend.app.retrieval.bm25_candidates",
         lambda query: [
             _chunk(
-                "abn-amro-2025.pdf:ceo",
+                "example-2025.pdf:ceo",
                 "Marguerite Bérard was appointed Chief Executive Officer.",
                 14,
             )
@@ -80,14 +80,14 @@ def test_retrieve_uses_bm25_for_ceo_text_question(monkeypatch) -> None:
 
     result = retrieve(
         RetrievalQuery(
-            question="Who was ABN AMRO's CEO in 2025?",
-            company="ABN AMRO",
+            question="Who was Example Corp's CEO in 2025?",
+            company="Example Corp",
             year=2025,
             top_k=12,
         )
     )
 
-    assert result.chunks[0].id == "abn-amro-2025.pdf:ceo"
+    assert result.chunks[0].id == "example-2025.pdf:ceo"
     assert "Chief Executive Officer" in result.chunks[0].text
 
 
@@ -99,27 +99,27 @@ def test_retrieve_does_not_inject_metric_candidates(monkeypatch) -> None:
 
     result = retrieve(
         RetrievalQuery(
-            question="What was ABN AMRO's CET1 ratio in 2025?",
-            company="ABN AMRO",
+            question="What was Example Corp's CET1 ratio in 2025?",
+            company="Example Corp",
             year=2025,
             top_k=12,
         )
     )
 
-    assert [chunk.id for chunk in result.chunks] == ["abn-amro-2025.pdf:dense:generic"]
-    assert all(not chunk.id.startswith("abn-amro-2025.pdf:metric:") for chunk in result.chunks)
+    assert [chunk.id for chunk in result.chunks] == ["example-2025.pdf:dense:generic"]
+    assert all(not chunk.id.startswith("example-2025.pdf:metric:") for chunk in result.chunks)
 
 
 def test_retrieve_keeps_dense_extracted_datapoint_chunks(monkeypatch) -> None:
     class FakeDatapointCollection(FakeHybridCollection):
         def query(self, **kwargs):
             return {
-                "ids": [["abn-amro-2025.pdf:datapoint:cet1"]],
+                "ids": [["example-2025.pdf:datapoint:cet1"]],
                 "documents": [["Metric: Common Equity Tier 1 (CET1) ratio\nPeriod: 2025\nValue: 15.4%\nUnit: %"]],
                 "metadatas": [[
                     {
-                        "source": "abn-amro-2025.pdf",
-                        "company": "ABN AMRO",
+                        "source": "example-2025.pdf",
+                        "company": "Example Corp",
                         "year": 2025,
                         "page": 120,
                         "token_count": 12,
@@ -136,14 +136,14 @@ def test_retrieve_keeps_dense_extracted_datapoint_chunks(monkeypatch) -> None:
 
     result = retrieve(
         RetrievalQuery(
-            question="What was ABN AMRO's CET1 ratio in 2025?",
-            company="ABN AMRO",
+            question="What was Example Corp's CET1 ratio in 2025?",
+            company="Example Corp",
             year=2025,
             top_k=12,
         )
     )
 
-    assert result.chunks[0].id == "abn-amro-2025.pdf:datapoint:cet1"
+    assert result.chunks[0].id == "example-2025.pdf:datapoint:cet1"
     assert result.chunks[0].chunk_kind == "extracted_datapoint"
     assert "Value: 15.4%" in result.chunks[0].text
 
@@ -186,7 +186,7 @@ def test_retrieve_always_calls_reranker(monkeypatch):
     monkeypatch.setattr("backend.app.retrieval.get_collection", lambda: FakeHybridCollection())
     monkeypatch.setattr("backend.app.retrieval.embed_texts", lambda texts: [[0.1, 0.2]])
     monkeypatch.setattr("backend.app.retrieval.bm25_candidates", lambda query: [])
-    retrieve(RetrievalQuery(question="How many FTEs?", company="ABN AMRO", year=2025, top_k=12))
+    retrieve(RetrievalQuery(question="How many FTEs?", company="Example Corp", year=2025, top_k=12))
     assert captured["n_chunks"] >= 1
 
 
@@ -205,7 +205,7 @@ def test_retrieve_decomposed_skips_rewrite_without_history(monkeypatch):
     monkeypatch.setattr("backend.app.retrieval.rerank", lambda question, chunks, top_k: chunks[:top_k])
 
     result = retrieve_decomposed(
-        RetrievalQuery(question="What was ABN AMRO's CET1 ratio in 2025?", top_k=3)
+        RetrievalQuery(question="What was Example Corp's CET1 ratio in 2025?", top_k=3)
     )
 
     assert called == []
@@ -217,12 +217,12 @@ def test_retrieve_decomposed_uses_rewrite_with_history(monkeypatch):
 
     def fake_rewrite(question, history):
         called.append((question, history))
-        return ["What was ABN AMRO's CET1 ratio in 2025?"]
+        return ["What was Example Corp's CET1 ratio in 2025?"]
 
     def fake_retrieve(query, *, rerank_results=True):
         return RetrievalResult(query=query, chunks=[_chunk("id:rewritten", query.question, 1)])
 
-    history = [{"question": "Tell me about ABN AMRO capital", "answer": "The CET1 ratio was discussed."}]
+    history = [{"question": "Tell me about Example Corp capital", "answer": "The CET1 ratio was discussed."}]
 
     monkeypatch.setattr("backend.app.retrieval.rewrite_and_decompose", fake_rewrite)
     monkeypatch.setattr("backend.app.retrieval.retrieve", fake_retrieve)

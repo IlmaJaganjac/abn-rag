@@ -485,8 +485,8 @@ def test_extract_categorized_datapoints_validates_and_deduplicates(monkeypatch) 
 
     datapoints = extract_categorized_datapoints(
         [(14, "Internal employees | 20,455 FTEs")],
-        source="abn-amro.pdf",
-        company="ABN AMRO",
+        source="example.pdf",
+        company="Example Corp",
         year=2025,
         validate=True,
     )

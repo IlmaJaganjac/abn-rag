@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "abn-rag"
+name = "annual-report-rag"
 version = "0.1.0"
 description = "Local RAG over annual reports (ASML 2025 baseline)."
 readme = "README.md"

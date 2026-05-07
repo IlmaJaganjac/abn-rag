@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr = Field(default=SecretStr(""))
     llama_cloud_api_key: SecretStr = Field(default=SecretStr(""))
     openai_embedding_model: str = "text-embedding-3-small"
-    openai_answer_model: str = "gpt-5.4-mini"
-    openai_extract_model: str = "gpt-5.4-mini"
-    openai_validate_model: str = "gpt-5.4-mini"
+    openai_answer_model: str = "gpt-5.4"
+    openai_extract_model: str = "gpt-5.4"
+    openai_validate_model: str = "gpt-5.4"
 
     chroma_persist_dir: Path = PROJECT_ROOT / "backend/data/chroma"
     chroma_collection: str = "annual_reports"
