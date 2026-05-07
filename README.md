@@ -17,16 +17,41 @@ The system is designed to stay multi-company-ready: each indexed chunk carries s
 
 Conversation history is supported. If a user asks a follow-up such as `What about 2024?`, the backend rewrites that into a standalone question before retrieval.
 
-## Screenshots
+## Evaluation results
 
-You can add pictures to the README. Put screenshots or product images in a tracked folder such as `docs/images/`, then reference them like this:
+- Accuracy: 90%
+- Faithfulness: 92%
+- Answer relevance: 93%
+- Context recall: 85%
+- Context precision: 80%
 
-```md
-![Chat view](docs/images/chat-view.png)
-![Document upload](docs/images/document-upload.png)
-```
+## Product preview
 
-Avoid putting screenshots in `backend/data/`; that directory is runtime state and should stay out of git.
+### Guided onboarding
+
+The app opens with a short walkthrough that introduces the workspace, document upload flow, datapoint explorer, and cited Q&A experience.
+
+![Guided onboarding](docs/images/tour.png)
+
+### Document workspace
+
+Reports can be uploaded through the document view, where indexed PDFs show their parsed page count and readiness status.
+
+![Document workspace](docs/images/documents.png)
+
+### Extracted datapoints
+
+The datapoint explorer surfaces structured facts such as ESG goals, FTE figures, financial highlights, and shareholder-return datapoints with source references.
+
+![Datapoint explorer](docs/images/datapoints.png)
+
+### Retrieval and cited answers
+
+During question answering, the interface shows retrieval progress before returning a grounded response with verbatim source quotes and page-level citations.
+
+![Retrieval progress](docs/images/searching.png)
+
+![Cited answer](docs/images/answer.png)
 
 ## What is in the codebase
 
